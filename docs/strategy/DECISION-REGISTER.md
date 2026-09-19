@@ -90,3 +90,14 @@ Recorded from a planning session. Detail and sequence: [platform roadmap](PLATFO
 5. Owner: book one hour with a lawyer for C4 and C5.
 6. Owner: decide whether Bixisoft pursues C6 and on what timeline.
 7. Reviewer: reflect B7 (correction model) in the AR/AP posting-service design before AR schemas are finalised.
+
+## H. Decisions taken by the owner, 19 September 2026 (evening, later session)
+
+Recorded from a planning session. Sequence: [platform roadmap](PLATFORM-ROADMAP.md), [roadmap](../ROADMAP.md), [module roadmap](../MODULE-ROADMAP.md).
+
+| # | Decision | Consequence |
+|---|---|---|
+| B20 | **1.2 is re-sequenced**: stock locations and trading-document extensions first, then core on-account receipts, the plugin runtime, the Users capability catalogue, Urdu/RTL and the container image. Table prefix, installation notice, cloud-database support and the remaining channels move to 1.3. | Roadmap, module roadmap and platform roadmap edited; the plugin runtime no longer depends on the table prefix. |
+| B21 | **Multiple stock locations, packs, line discounts, free-goods lines, document number series, sales-staff and area dimensions, cash on invoice and printable templates are bundled modules on the existing module contract; on-account and batch receipts are core AR behaviour.** None of these is a vertical plugin. | Module roadmap "separate plugins" and "current limits" lines amended; distribution operations remain a later directory plugin over these modules. |
+| B22 | **Queued entry gains a device sub-ledger with settlement posting** for trusted signed devices. | Architecture section extended; posting authority and review policy unchanged. |
+| B23 | **The owner's own company runs its books on PHP Ledger from 1 October 2026** as the first supervised pilot with a real month-end close; the accountant review is commissioned on that close. | Satisfies the open 1.0 pilot commitment in the roadmap; no change to release gates. |
