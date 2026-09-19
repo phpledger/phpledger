@@ -536,7 +536,7 @@
   },
   {
     "question": "Is there a stable release?",
-    "answer": "Yes. PHP Ledger 1.1.0, published 19 September 2026, is the current stable release. It follows 1.0.0, the first stable release of 18 September 2026, and adds installation from any web folder, MariaDB support, a chosen username, an optional logo and signed update metadata. Independent accounting review, independent security review and supervised pilots have not yet happened; they continue as post-release commitments, disclosed alongside the release rather than presented as satisfied.",
+    "answer": "Yes. PHP Ledger 1.1.0, published 19 September 2026, is the current stable release. It follows 1.0.0, the first stable release of 18 September 2026, and adds installation from any web folder, MariaDB support, a chosen username, an optional logo and signed update metadata. Independent accounting review, independent security review and supervised pilots have not yet happened; they continue as post-release commitments, disclosed alongside the release rather than presented as satisfied. The first supervised pilot, on the maintainer's own books, starts 1 October 2026 with a real month-end close.",
     "source": "https://phpledger.com/roadmap/"
   },
   {

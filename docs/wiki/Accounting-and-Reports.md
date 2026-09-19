@@ -1,6 +1,6 @@
-## Current package: 1.0.0
+## Current package: 1.1.0
 
-**1.0.0**, published 18 September 2026, is the first stable release. [Download 1.0.0](https://github.com/phpledger/phpledger/releases/tag/v1.0.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.0.0/phpledger-1.0.0-media-kit.zip). Automated test suites, fault-injection update/recovery tests, exact-artifact install/upgrade/recovery checks and developer-operated browser checks back this release. Independent accounting review, independent security review, supervised pilots with a real month-end close, unfamiliar-operator installation observation and restricted shared-host recovery certification have **not** happened; these continue as post-release commitments. See [[Release 1.0.0|Release-1.0.0]].
+**1.1.0**, published 19 September 2026, is the current stable release; **1.0.0**, published 18 September 2026, was the first. [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.1.0/phpledger-1.1.0-media-kit.zip); [[Release notes|Release-1.1.0]]. Automated test suites, fault-injection update/recovery tests, exact-artifact install/upgrade/recovery checks and developer-operated browser checks back these releases. Independent accounting review, independent security review, supervised pilots with a real month-end close, unfamiliar-operator installation observation and restricted shared-host recovery certification have **not** happened; these continue as post-release commitments. See [[Release 1.0.0|Release-1.0.0]].
 
 # From a transaction to an explainable balance
 
@@ -39,6 +39,6 @@ Core reports do not yet implement a complete country framework, statutory disclo
 
 ## What remains open
 
-Independent accounting review has not happened. Advanced stock (multiple locations, batches, serials, expiry, landed cost), automated rate providers, period-end FX revaluation and group consolidation are not part of 1.0.0. Country tax rules, withholding and statutory filing remain future work; see [[Module roadmap|Module-Roadmap]] for the sequence and acceptance gates.
+Independent accounting review has not happened. Advanced stock (multiple locations, batches, serials, expiry, landed cost), automated rate providers, period-end FX revaluation and group consolidation are not part of 1.1.0. Multiple stock locations and transfers are the first 1.2 module; batches, serials, expiry and landed cost come later. Country tax rules, withholding and statutory filing remain future work; see [[Module roadmap|Module-Roadmap]] for the sequence and acceptance gates.
 
 [[Countries and currencies|Countries-and-Currencies]] · [[Architecture]] · [[First package|First-Package]]
