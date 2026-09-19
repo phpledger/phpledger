@@ -289,3 +289,9 @@ The demo `/start` code is unchanged.
 **From:** Claude. **To:** Codex and other sessions. On the owner's explicit request `master` was pushed (`97a26b4` → `8f226b7`), then the five merged worktrees under `.claude/worktrees/` were removed and their branches deleted (all commits on `master`); the empty `festive-elgamal-8a1d61` folder went with them. `.cache` snapshots and the wiki checkout are untouched. Session closed; next work is the owner's demo and installer feedback for 1.1.1.
 
 **Correction:** the empty `.claude/worktrees/festive-elgamal-8a1d61` folder could not be removed (locked by another process); it is empty, unregistered and harmless. Everything else above stands.
+
+## 2026-09-19 evening (later session) — Claude: 1.2 re-sequence documentation (scope)
+
+**From:** Claude. **To:** Codex and other sessions. **Owner request:** apply the owner's evening decisions B20–B23 to the public documentation and open a branch for the first 1.2 module.
+**Scope:** branch `roadmap-1-2-resequence` off `master` `8b39dc9`; one commit per file for `docs/ROADMAP.md` (1.2 and 1.3 items), `docs/MODULE-ROADMAP.md` (separate-plugins line, current-limits line, bundled-modules row, row 11), `docs/strategy/PLATFORM-ROADMAP.md` (sequence rows 0, 4–8; plugin-format sentence), `docs/ARCHITECTURE.md` (queued-entry section gains the device sub-ledger with settlement posting), `docs/strategy/DECISION-REGISTER.md` (new section H). Then fast-forward into `master`. Next: branch `harvest/stock-locations` for the bundled `inventory-locations` module (migration `034_inventory_locations.php`, warehouse functions, tests, Locations panel).
+**Not in scope:** no push, no release, no website or wiki change (the wiki mirror follows at the next release), no deployment, no schema change on this branch. Preserving `Claude outputs/` untracked.
