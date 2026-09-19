@@ -1,6 +1,6 @@
-## Current package: 1.0.0
+## Current package: 1.1.0
 
-**1.0.0**, published 18 September 2026, is PHP Ledger's first stable release. [Download 1.0.0](https://github.com/phpledger/phpledger/releases/tag/v1.0.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.0.0/phpledger-1.0.0-media-kit.zip). It consolidates the interface rebuild with a workspace sidebar, compact server-side lists, posting/correction previews, atomic multi-item allocation and gross-profit presentation, a guided browser installer, and publisher-signed automatic updates with automatic matched backup and recovery. Compiled CSS is included; no Node is needed on the host. The PHP/MeekroDB architecture and central immutable posting model remain.
+**1.1.0**, published 19 September 2026, installs like WordPress: upload the `phpledger` folder into any web folder and open its address, and the installer starts by itself. It adds MariaDB 10.4+, a chosen username, an optional logo, and the first signed update metadata. [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.1.0/phpledger-1.1.0-media-kit.zip). [[Release notes|Release-1.1.0]]. **1.0.0**, published 18 September 2026, was the first stable release.
 
 **Assurance status:** automated test suites, fault-injection update/recovery tests, exact-artifact install/upgrade/recovery checks and developer-operated browser checks back this release. Independent accounting review, independent security review, supervised pilots with a real month-end close, unfamiliar-operator installation observation and restricted shared-host recovery certification have **not** happened; the owner published 1.0.0 with these limits disclosed, as post-release commitments. See [[Release 1.0.0|Release-1.0.0]] and [[Getting started|Getting-Started]].
 
@@ -8,11 +8,11 @@
 
 # PHP Ledger
 
-**PHP Ledger is open-source, self-hosted double-entry accounting software with a simple cash point of sale for small businesses, built on PHP 8.2+ (8.3 recommended) and MySQL 8.4. 1.0.0 is the first stable release.**
+**PHP Ledger is open-source, self-hosted double-entry accounting software with a simple cash point of sale for small businesses, built on PHP 8.2+ (8.3 recommended) with MySQL 8.4 or MariaDB 10.4+. 1.1.0 is the current release; 1.0.0 was the first stable release.**
 
 PHP Ledger serves small-business owners, accountants and bookkeepers who want a useful workspace on hosting they control, installable from a browser without a terminal. The direction is a complete accounting core, followed by optional business modules.
 
-Explore [phpledger.com](https://phpledger.com/) and [your temporary sample company](https://phpledger.com/demo/). The [1.0.0 package](https://github.com/phpledger/phpledger/releases/tag/v1.0.0) includes universal account statements, chart management and saved general journals alongside the accounting starter. Evaluate it with sample data; independent review and pilot use remain in progress.
+Explore [phpledger.com](https://phpledger.com/) and [your temporary sample company](https://phpledger.com/demo/). The [1.0.0 package](https://github.com/phpledger/phpledger/releases/tag/v1.0.0) includes universal account statements, chart management and saved general journals alongside the accounting starter. Evaluate it with synthetic data; independent review and pilot use remain in progress.
 
 Modern application source is in `www/phpledger`; the historical application remains only in Git history. See [[Getting started|Getting-Started]] for the package, installation requirements and demonstration limits.
 
@@ -37,7 +37,7 @@ Follow any authorized account from its opening balance through period debits, cr
 
 Save a general-journal draft, return to edit it, review its lines and post when debits equal credits. Corrections use linked reversals that preserve the original entry. Receipts, expenses, owner reports and the sample cash POS use the same accounting services.
 
-The public demo provides temporary visitor books: accounts are read-only, while general-journal drafts, posting and linked reversals are available within capacity limits. Its sample data resets hourly. The shop showcase remains a six-product cash example, without stock, tax or payment processing.
+The public demo provides temporary visitor books: accounts are read-only, while general-journal drafts, posting and linked reversals are available within capacity limits. Its synthetic data resets hourly. The shop showcase remains a six-product cash example, without stock, tax or payment processing.
 
 ## The direction
 
@@ -59,7 +59,7 @@ The current release uses AGPL-3.0-or-later with a commercial licence available. 
 
 ## Historical note: 0.1.5 accessibility update (15 September 2026)
 
-[Nagulanvelu contributed PR #65](https://github.com/phpledger/phpledger/pull/65), giving each fallback POS quantity its product name. A maintainer correction keeps the fields visible with JavaScript disabled. The package passed fresh installation, upgrade from 0.1.4, 29 sample checkout checks and desktop/tablet/mobile browser checks. See the [release](https://github.com/phpledger/phpledger/releases/tag/v0.1.5-preview), [privacy notice](https://phpledger.com/privacy/) and [demo-use terms](https://phpledger.com/terms/).
+[Nagulanvelu contributed PR #65](https://github.com/phpledger/phpledger/pull/65), giving each fallback POS quantity its product name. A maintainer correction keeps the fields visible with JavaScript disabled. The package passed fresh installation, upgrade from 0.1.4, 29 synthetic checkout checks and desktop/tablet/mobile browser checks. See the [release](https://github.com/phpledger/phpledger/releases/tag/v0.1.5-preview), [privacy notice](https://phpledger.com/privacy/) and [demo-use terms](https://phpledger.com/terms/).
 
 ## Connected reporting and richer samples
 

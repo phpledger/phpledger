@@ -1,14 +1,30 @@
-## Current package: 1.0.0
+## Current package: 1.1.0
 
-**1.0.0**, published 18 September 2026, is the first stable release, consolidating the 0.6.1 workflow-recovery closure, the 0.7 browser installer and the 0.8 signed update/automatic-backup/recovery work. [Download 1.0.0](https://github.com/phpledger/phpledger/releases/tag/v1.0.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.0.0/phpledger-1.0.0-media-kit.zip). Independent accounting review, independent security review, supervised pilots with a real month-end close and unfamiliar-operator installation observation have **not** happened; they continue as post-release commitments. See [[Release 1.0.0|Release-1.0.0]].
+**1.1.0**, published 19 September 2026, installs like WordPress: upload the `phpledger` folder into any web folder and open its address, and the installer starts by itself. It adds MariaDB 10.4+, a chosen username, an optional logo, and the first signed update metadata. [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.1.0/phpledger-1.1.0-media-kit.zip). [[Release notes|Release-1.1.0]]. **1.0.0**, published 18 September 2026, was the first stable release.
 
-# The path after 1.0.0
+# The path after 1.1.0
 
-With 1.0.0 published, next is **1.0.x** production fixes and compatibility improvements, **1.1** reviewed Urdu/RTL plus installer distribution channels (Softaculous/Installatron, published containers/packages), and **1.2** reviewed Arabic/RTL and demand-led reporting refinements. Independent accounting/security review and supervised pilots run in parallel as post-release commitments rather than as pre-publication gates. Later capability releases add reviewed regional connectors, stock/tax-integrated shop POS, e-commerce, controlled API/MCP writes and restaurant/distribution/specialist modules, each with its own independent acceptance. See [[Module roadmap|Module-Roadmap]] for current gates; older milestone snapshots below retain their historical scope.
+With 1.1.0 published (WordPress-style installation, MariaDB, username and logo, first signed update metadata), the release sequence the owner set on 19 September 2026 is:
+
+1. **1.1.1 (next patch):** the corrected demo-landing labels and sample-guide sentence, the owner's demo and installer feedback, and the first packaging step: the demo packs leave the release ZIP and the core reads sample packages from a package directory. Only the core-accounting sample stays bundled.
+2. **1.2 — stock locations, trading documents and plugins**, in this order:
+   1. multiple stock locations with transfer documents and per-location moving weighted-average cost, as a bundled module (work started on 19 September 2026 on its own branch; nothing ships until its tests pass on MySQL 8.4 and MariaDB);
+   2. trading-document extensions as a bundled module: product packs with pack-and-unit entry, line discounts and free-goods lines, per-type document number series, sales-staff and area dimensions, cash received on the invoice, and printable invoice, receipt and statement templates;
+   3. on-account receipts with oldest-first allocation, unapplied credit and batch receipts in core AR;
+   4. the plugin runtime: hooks, manifest, loader, activation and plugin migrations with their own receipt table, independent of the table prefix, with an official verified marketplace plus owner uploads of any plugin ZIP behind warnings;
+   5. the Users module capability catalogue and per-company roles;
+   6. reviewed Urdu with right-to-left layout and English fallback;
+   7. the container image on the release feed, opened once its upgrade path is documented.
+3. **1.3:** reviewed Arabic/RTL; the table prefix so several installations can share one database, with portable SQL and MeekroORM models; the installation notice; cloud-hosted database support; Packagist, app catalogues and Softaculous/Installatron; demand-led reporting refinements. PostgreSQL follows 1.3 and SQLite ships with the Windows bundle.
+4. **Later capability releases:** reviewed regional connectors, then a stock/tax-integrated shop POS, e-commerce, controlled API/MCP writes, and restaurant, pharmacy, exporter, freelancer, distribution and other specialists as directory plugins with paired sample packages. Each has its own acceptance gate.
+
+**First supervised pilot:** the maintainer's own company runs its books on PHP Ledger from 1 October 2026 and completes a real month-end close; the accountant review is commissioned on that close. Independent security review, further pilots and the release-candidate period stay open. Sources: [roadmap](https://github.com/phpledger/phpledger/blob/master/docs/ROADMAP.md#following-stable), [platform sequence](https://github.com/phpledger/phpledger/blob/master/docs/strategy/PLATFORM-ROADMAP.md#sequence) and [decisions B20–B23](https://github.com/phpledger/phpledger/blob/master/docs/strategy/DECISION-REGISTER.md#h-decisions-taken-by-the-owner-19-september-2026-evening-later-session).
+
+**Sample companies and plugins become separate packages (owner decision, 19 September 2026).** The core package will carry the accounting application and its bundled modules only. Sample companies and plugins are built, versioned and downloaded separately from a package directory on phpledger.com, the way WordPress serves themes and plugins, or uploaded by the owner. A sample package is data only and can declare the plugins it needs, so a restaurant, pharmacy, exporter or freelancer sample arrives together with the plugin that renders it. Only the small core-accounting sample stays bundled for first-run onboarding. Restaurant POS, pharmacy POS, exporter and freelancer invoicing are planned as the first directory plugins, each with a paired sample; core, AR, AP, Inventory and Purchasing stay bundled. Design, manifest and sequence: [package directory](https://github.com/phpledger/phpledger/blob/master/docs/strategy/PLATFORM-ROADMAP.md#package-directory-plugins-and-sample-companies) and [decisions B18 and B19](https://github.com/phpledger/phpledger/blob/master/docs/strategy/DECISION-REGISTER.md#g-decisions-taken-by-the-owner-19-september-2026). The rest of the platform work (table prefix, MeekroORM, a Users module) is in the same [platform roadmap](https://github.com/phpledger/phpledger/blob/master/docs/strategy/PLATFORM-ROADMAP.md).
 
 The direction confirmed on 15 September 2026 is **complete accounting core first, optional business modules next**, with a business API and MCP access over the same services. 1.0.0 completes the required core and read API/MCP access; it does not complete the independent-review, pilot or release-candidate gates described in [Validation](https://github.com/phpledger/phpledger/blob/master/docs/VALIDATION.md) and [Release 1.0.0](https://github.com/phpledger/phpledger/wiki/Release-1.0.0).
 
-1.0.0 completes the bounded core implementation, required AR/AP, optional Purchasing/Inventory and bundled module lifecycle technical checks, along with browser installation and signed automatic updates. API/MCP writes are the next implementation milestone. Qualified reviews and observed pilot use remain separate, open gates.
+1.0.0 completes the bounded core implementation, required AR/AP, optional Purchasing/Inventory and bundled module lifecycle technical checks, along with browser installation and signed automatic updates. Controlled API/MCP writes follow the 1.2 and 1.3 work above. Qualified reviews and observed pilot use remain separate, open gates.
 
 The [[module roadmap|Module-Roadmap]] gives the detailed delivery order. [[First package|First-Package]] points to the 1.0.0 scope and remaining acceptance work.
 
@@ -34,12 +50,12 @@ Financial reporting uses explicit, reviewed regional entity/period profiles over
 
 ## Optional business expansion
 
-- **Purchasing and Inventory (shipped, optional):** products, receiving/returns, one stock location, moving weighted-average valuation and reviewed adjustments.
+- **Purchasing and Inventory (shipped, optional):** products, receiving/returns, one stock location (further locations and transfers are the first 1.2 module), moving weighted-average valuation and reviewed adjustments.
 - **Tax (research only):** reviewed jurisdiction adapters, effective rules and immutable calculation snapshots; required before applicable production use. 1.0.0 ships only manually configured core tax codes and rates.
-- **Shop and restaurant POS:** shared checkout, shop entry or table/order/kitchen operations, returns and settlement controls. The bundled cash POS is an illustrative demonstration, not this production module.
-- **Distribution and specialists:** route/van stock and collections; pharmacy batch/expiry; jewelry pricing; membership dues; workshop jobs/parts/labour.
+- **Shop POS (bundled module):** shared checkout, shop entry, returns and settlement controls. The bundled cash POS is an illustrative demonstration, not this production module.
+- **Restaurant, distribution and specialists (directory plugins):** table/order/kitchen operations; route/van stock and collections; pharmacy batch/expiry; exporter documents; freelancer invoicing; jewelry pricing; membership dues; workshop jobs/parts/labour. Each ships from the package directory with a paired sample company rather than inside the core package.
 
-The bundled core/POS lifecycle and required AR/AP are implemented. Controlled API/MCP write access remains the next implementation milestone. Optional software does not make legal obligations optional.
+The bundled core/POS lifecycle and required AR/AP are implemented. Controlled API/MCP write access follows the 1.2 and 1.3 releases. Optional software does not make legal obligations optional.
 
 ## Later investigations
 
