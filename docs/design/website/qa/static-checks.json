@@ -4613,9 +4613,9 @@
       "images": 30,
       "lazyImages": 28,
       "bytes": {
-        "html": 62943,
-        "eager": 374373,
-        "total": 2510026
+        "html": 62966,
+        "eager": 374396,
+        "total": 2510049
       },
       "budgets": {
         "eager": 700000,
@@ -4648,7 +4648,7 @@
         },
         {
           "file": "product/index.html",
-          "bytes": 62943
+          "bytes": 62966
         }
       ],
       "lazyAssets": [
@@ -5293,13 +5293,13 @@
       "redirectStub": false,
       "indexable": true,
       "title": "Accounting development roadmap | PHP Ledger",
-      "descriptionLength": 151,
+      "descriptionLength": 156,
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28579,
-        "eager": 340009,
-        "total": 428714
+        "html": 31137,
+        "eager": 342567,
+        "total": 431272
       },
       "budgets": {
         "eager": 650000,
@@ -5332,7 +5332,7 @@
         },
         {
           "file": "roadmap/index.html",
-          "bytes": 28579
+          "bytes": 31137
         }
       ],
       "lazyAssets": [
