@@ -38,7 +38,7 @@ ALTER TABLE pl_inventory_movements
  ADD CONSTRAINT fk_stock_warehouse FOREIGN KEY (warehouse_id,company_id,book_id) REFERENCES pl_inventory_warehouses(id,company_id,book_id),
  ADD KEY ix_stock_warehouse_history (book_id,product_id,warehouse_id,movement_date,id),
  MODIFY kind ENUM('receipt','issue','customer_return','purchase_return','adjustment','value_adjustment','opening','transfer_out','transfer_in') NOT NULL,
- DROP CHECK ck_stock_journal,
+ DROP CONSTRAINT ck_stock_journal,
  ADD CONSTRAINT ck_stock_journal CHECK (kind IN ('opening','transfer_out','transfer_in') OR value_delta=0 OR journal_id IS NOT NULL),
  ADD CONSTRAINT ck_stock_transfer CHECK (
   kind NOT IN ('transfer_out','transfer_in') OR
