@@ -647,6 +647,10 @@
       "destination": "resources/modules/ar.json"
     },
     {
+      "source": "resources/modules/inventory-locations.json",
+      "destination": "resources/modules/inventory-locations.json"
+    },
+    {
       "source": "resources/modules/inventory.json",
       "destination": "resources/modules/inventory.json"
     },
@@ -1149,6 +1153,10 @@
     {
       "source": "www/phpledger/install/migrations/033_installation_logo.php",
       "destination": "www/phpledger/install/migrations/033_installation_logo.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/034_inventory_locations.php",
+      "destination": "www/phpledger/install/migrations/034_inventory_locations.php"
     }
   ]
 }

@@ -109,12 +109,90 @@ function pl_page_inventory_products(int $actorId,int $companyId,int $bookId,arra
     return ['rows'=>$rows,'total'=>$total,'page'=>$page,'pages'=>$pages];
 }
 
-function pl_inventory_balance(int $actorId, int $companyId, int $bookId, int $productId, ?string $asOf = null): array
+/** Warehouse identity and default assignment are permanent; edits change name or active status only. */
+function pl_get_inventory_warehouse(int $actorId, int $companyId, int $bookId, int $id): array
+{
+    pl_require_company_access($actorId, $companyId); pl_ledger_book($companyId, $bookId);
+    $row = DB::queryFirstRow('SELECT id,company_id,book_id,code,name,is_default,is_active,revision,created_by,created_at FROM pl_inventory_warehouses WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', $id, $companyId, $bookId);
+    if (!$row) { throw new DomainException('This warehouse is not available in the selected company and book.'); }
+    foreach (['id','company_id','book_id','revision','created_by'] as $field) { $row[$field] = (int) $row[$field]; }
+    $row['is_default'] = (bool) $row['is_default']; $row['is_active'] = (bool) $row['is_active'];
+    return $row;
+}
+
+/** Includes inactive warehouses so historical stock remains visible. Reads never require the locations module. */
+function pl_list_inventory_warehouses(int $actorId, int $companyId, int $bookId): array
+{
+    pl_require_company_access($actorId, $companyId); pl_ledger_book($companyId, $bookId);
+    return array_map(static fn (array $row): array => pl_get_inventory_warehouse($actorId, $companyId, $bookId, (int) $row['id']),
+        DB::query('SELECT id FROM pl_inventory_warehouses WHERE company_id=%i AND book_id=%i ORDER BY is_default DESC,code', $companyId, $bookId));
+}
+
+/** The default warehouse exists for every book (migration backfill or company creation); provision once under the book lock if missing. */
+function pl_inventory_default_warehouse(int $actorId, int $companyId, int $bookId): array
+{
+    return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId): array {
+        pl_require_company_access($actorId, $companyId); pl_ledger_book($companyId, $bookId, true);
+        $id = DB::queryFirstField('SELECT id FROM pl_inventory_warehouses WHERE company_id=%i AND book_id=%i AND is_default=1 FOR SHARE', $companyId, $bookId);
+        if (!$id) {
+            pl_require_company_access($actorId, $companyId, true);
+            pl_require_module($actorId, $companyId, $bookId, 'inventory');
+            DB::insert('pl_inventory_warehouses', ['company_id' => $companyId, 'book_id' => $bookId, 'code' => 'DEFAULT', 'name' => 'Default warehouse', 'is_default' => true, 'created_by' => $actorId]);
+            $id = (int) DB::insertId();
+            pl_core_audit($actorId, $companyId, $bookId, 'warehouse', $id, 'created', 'Default warehouse provisioned', null, pl_get_inventory_warehouse($actorId, $companyId, $bookId, $id));
+        }
+        return pl_get_inventory_warehouse($actorId, $companyId, $bookId, (int) $id);
+    });
+}
+
+/** Input: code, name, is_active (bool), reason, idempotency_key; edits require the current revision. Needs the locations module. */
+function pl_save_inventory_warehouse(int $actorId, int $companyId, int $bookId, array $input, ?int $id = null, ?int $revision = null): array
+{
+    pl_demo_require_setup_action();
+    $data = ['code' => pl_ledger_text($input['code'] ?? null, 'Warehouse code', 60), 'name' => pl_ledger_text($input['name'] ?? null, 'Warehouse name', 160), 'is_active' => $input['is_active'] ?? true];
+    if (!is_bool($data['is_active'])) { throw new DomainException('Choose a valid warehouse active status.'); }
+    $reason = pl_ledger_text($input['reason'] ?? null, 'Warehouse change reason', 500);
+    return pl_inventory_command($actorId, $companyId, $bookId, (string) ($input['idempotency_key'] ?? $input['creation_key'] ?? ''), ['warehouse', $id, $revision, $data, $reason],
+        function () use ($actorId, $companyId, $bookId, $id, $revision, $data, $reason): array {
+            pl_require_module($actorId, $companyId, $bookId, 'inventory-locations');
+            pl_inventory_default_warehouse($actorId, $companyId, $bookId);
+            $before = $id === null ? null : pl_get_inventory_warehouse($actorId, $companyId, $bookId, $id);
+            if ($before) {
+                if ($before['revision'] !== $revision) { throw new DomainException('The warehouse revision changed. Reload before saving.'); }
+                if ($before['code'] !== $data['code']) { throw new DomainException('Warehouse identity is fixed. Create a separate warehouse for a different code.'); }
+                if ($before['is_default'] && !$data['is_active']) { throw new DomainException('The default warehouse must remain active.'); }
+                DB::update('pl_inventory_warehouses', $data + ['revision' => $before['revision'] + 1], 'id=%i AND company_id=%i AND book_id=%i', $id, $companyId, $bookId);
+            } else {
+                if (DB::queryFirstField('SELECT id FROM pl_inventory_warehouses WHERE company_id=%i AND book_id=%i AND code=%s FOR SHARE', $companyId, $bookId, $data['code'])) { throw new DomainException('This warehouse code is already in use.'); }
+                DB::insert('pl_inventory_warehouses', $data + ['company_id' => $companyId, 'book_id' => $bookId, 'created_by' => $actorId]); $id = (int) DB::insertId();
+            }
+            $result = pl_get_inventory_warehouse($actorId, $companyId, $bookId, $id);
+            pl_core_audit($actorId, $companyId, $bookId, 'warehouse', $id, $before === null ? 'created' : 'updated', $reason, $before, $result);
+            return $result;
+        });
+}
+
+/** An omitted warehouse is the book default and never needs the locations module; any other warehouse does. */
+function pl_inventory_movement_warehouse(int $actorId, int $companyId, int $bookId, ?int $id): array
+{
+    $warehouse = $id === null ? pl_inventory_default_warehouse($actorId, $companyId, $bookId) : pl_get_inventory_warehouse($actorId, $companyId, $bookId, $id);
+    if (!$warehouse['is_default']) { pl_require_module($actorId, $companyId, $bookId, 'inventory-locations', false); }
+    if (!$warehouse['is_active']) { throw new DomainException('Stock movements require an active warehouse.'); }
+    return $warehouse;
+}
+
+/** A NULL warehouse filter means every warehouse. Legacy NULL rows belong to the permanent default. */
+function pl_inventory_balance(int $actorId, int $companyId, int $bookId, int $productId, ?string $asOf = null, ?int $warehouseId = null): array
 {
     pl_get_inventory_product($actorId, $companyId, $bookId, $productId);
     $asOf = pl_ledger_date($asOf ?? '9998-12-31');
+    $filter = ''; $args = [$companyId, $bookId, $productId, $asOf];
+    if ($warehouseId !== null) {
+        $warehouse = pl_get_inventory_warehouse($actorId, $companyId, $bookId, $warehouseId);
+        $filter = ' AND (warehouse_id=%i' . ($warehouse['is_default'] ? ' OR warehouse_id IS NULL' : '') . ')'; $args[] = $warehouseId;
+    }
     // Locking reads see the latest committed rows after acquiring the book lock, including racing requests.
-    $rows = DB::query('SELECT quantity_delta,value_delta,movement_date FROM pl_inventory_movements WHERE company_id=%i AND book_id=%i AND product_id=%i AND movement_date<=%s ORDER BY movement_date,id FOR SHARE', $companyId, $bookId, $productId, $asOf);
+    $rows = DB::query('SELECT quantity_delta,value_delta,movement_date FROM pl_inventory_movements WHERE company_id=%i AND book_id=%i AND product_id=%i AND movement_date<=%s' . $filter . ' ORDER BY movement_date,id FOR SHARE', ...$args);
     $quantity = '0.0000'; $value = '0.0000'; $latest = null;
     foreach ($rows as $row) { $quantity = bcadd($quantity, $row['quantity_delta'], 4); $value = bcadd($value, $row['value_delta'], 4); $latest = $row['movement_date']; }
     return ['quantity' => $quantity, 'value_base' => $value, 'average_cost' => bccomp($quantity, '0', 4) > 0 ? bcdiv($value, $quantity, 12) : '0.000000000000', 'latest_date' => $latest];
@@ -132,11 +210,16 @@ function pl_inventory_movement_input(array $input): array
         $data[$field] = $input[$field] ?? null;
         if ($data[$field] !== null && (!is_int($data[$field]) || $data[$field] < 1)) { throw new DomainException('Invalid inventory source identity.'); }
     }
+    // The key is absent when not supplied so command hashes recorded before stock locations still match on retry.
+    if (isset($input['warehouse_id'])) {
+        if (!is_int($input['warehouse_id']) || $input['warehouse_id'] < 1) { throw new DomainException('Choose a valid warehouse.'); }
+        $data['warehouse_id'] = $input['warehouse_id'];
+    }
     return $data;
 }
 
-/** Read-only movement plan, shared by preview and the single inventory writer. */
-function pl_inventory_movement_plan(int $actorId, int $companyId, int $bookId, array $data, string $quantity, string $value, ?array $previewBasis = null): array
+/** Read-only movement plan, shared by preview and the single inventory writer. Transfer legs pass their kind and the out leg. */
+function pl_inventory_movement_plan(int $actorId, int $companyId, int $bookId, array $data, string $quantity, string $value, ?array $previewBasis = null, ?string $kind = null, ?int $original = null): array
 {
     pl_require_module($actorId, $companyId, $bookId, 'inventory');
     $book = pl_ledger_book($companyId, $bookId, true); pl_require_book_ready($companyId);
@@ -150,16 +233,27 @@ function pl_inventory_movement_plan(int $actorId, int $companyId, int $bookId, a
         foreach (DB::query('SELECT debit,credit FROM pl_journal_lines WHERE company_id=%i AND book_id=%i AND account_id=%i FOR SHARE', $companyId, $bookId, $product['inventory_account_id']) as $line) { $existingValue = bcadd($existingValue, bcsub($line['debit'], $line['credit'], 4), 4); }
         if (bccomp($existingValue, '0', 4) !== 0) { throw new DomainException('Review and convert the existing inventory opening balance before recording new stock movements.'); }
     }
-    $state = $previewBasis ?? pl_inventory_balance($actorId, $companyId, $bookId, $product['id']);
-    if ($state['latest_date'] !== null && $data['date'] < $state['latest_date']) { throw new DomainException('Stock cannot be backdated before the latest movement for this product.'); }
+    $warehouse = pl_inventory_movement_warehouse($actorId, $companyId, $bookId, $data['warehouse_id'] ?? null);
+    $data['warehouse_id'] = $warehouse['id'];
+    $state = $previewBasis ?? pl_inventory_balance($actorId, $companyId, $bookId, $product['id'], null, $warehouse['id']);
+    if ($state['latest_date'] !== null && $data['date'] < $state['latest_date']) { throw new DomainException('Stock cannot be backdated before the latest movement for this product in this warehouse.'); }
     $quantityAfter = pl_inventory_signed(bcadd($state['quantity'], $quantity, 4)); $valueAfter = pl_inventory_signed(bcadd($state['value_base'], $value, 4));
     if (bccomp($quantityAfter, '0', 4) < 0 || bccomp($valueAfter, '0', 4) < 0 || (bccomp($quantityAfter, '0', 4) === 0 && bccomp($valueAfter, '0', 4) !== 0)) { throw new DomainException('This movement would leave negative stock or an unexplained stock value without quantity.'); }
     if (bccomp($quantity, '0', 4) === 0 && bccomp($value, '0', 4) === 0) { throw new DomainException('A stock movement must change quantity or value.'); }
     if (DB::queryFirstField('SELECT id FROM pl_inventory_movements WHERE book_id=%i AND source_type=%s AND source_reference=%s FOR SHARE', $bookId, $data['source_type'], $data['source_reference'])) { throw new DomainException('This stock source already has a movement. Reuse its original request key.'); }
     $period = DB::query('SELECT id,status FROM pl_periods WHERE company_id=%i AND book_id=%i AND start_date<=%s AND end_date>=%s FOR UPDATE', $companyId, $bookId, $data['date'], $data['date']);
     if (count($period) !== 1 || $period[0]['status'] !== 'open') { throw new DomainException('The movement date must fall within exactly one open accounting period.'); }
+    $transfer = in_array($kind, ['transfer_out','transfer_in'], true);
+    if ($transfer) {
+        if ($data['source_type'] !== 'inventory_' . $kind || $data['offset_account_id'] !== null) { throw new DomainException('Transfers require their paired carrying-value source.'); }
+        if ($kind === 'transfer_in') {
+            $out = DB::queryFirstRow("SELECT * FROM pl_inventory_movements WHERE id=%i AND company_id=%i AND book_id=%i AND kind='transfer_out' FOR SHARE", (int) $original, $companyId, $bookId);
+            if (!$out || (int) $out['warehouse_id'] === $warehouse['id'] || (int) $out['product_id'] !== $product['id'] || $out['movement_date'] !== $data['date'] || $out['source_reference'] !== $data['source_reference']
+                || bccomp(bcadd($out['quantity_delta'], $quantity, 4), '0', 4) !== 0 || bccomp(bcadd($out['value_delta'], $value, 4), '0', 4) !== 0) { throw new DomainException('Transfer legs must match product, date, source and exact carrying value.'); }
+        }
+    }
     $journalPayload = null;
-    if (bccomp($value, '0', 4) !== 0) {
+    if (!$transfer && bccomp($value, '0', 4) !== 0) {
         if ($data['offset_account_id'] === null || $data['offset_account_id'] === $product['inventory_account_id']) { throw new DomainException('Choose a distinct offset account for the stock value.'); }
         $offset = pl_get_account($actorId, $companyId, $bookId, $data['offset_account_id']);
         if (!$offset['is_active'] || in_array($offset['role'], ['receivables','payables'], true)) { throw new DomainException('Use the shared AR/AP services for customer and supplier balances.'); }
@@ -169,23 +263,23 @@ function pl_inventory_movement_plan(int $actorId, int $companyId, int $bookId, a
             'lines' => [['account_id' => $product['inventory_account_id'], 'debit' => $positive ? $amount : '0', 'credit' => $positive ? '0' : $amount],
                 ['account_id' => $data['offset_account_id'], 'debit' => $positive ? '0' : $amount, 'credit' => $positive ? $amount : '0']]];
     }
-    return ['product'=>$product,'recorded'=>$state,'quantity_after'=>$quantityAfter,'value_after'=>$valueAfter,'journal'=>$journalPayload];
+    return ['product'=>$product,'warehouse'=>$warehouse,'data'=>$data,'recorded'=>$state,'quantity_after'=>$quantityAfter,'value_after'=>$valueAfter,'journal'=>$journalPayload];
 }
 
 /** Internal movement writer. All callers hold the book lock and append through this single stock funnel. */
 function pl_inventory_record(int $actorId, int $companyId, int $bookId, array $data, string $kind, string $quantity, string $value, string $key, ?int $original = null): array
 {
-    $plan=pl_inventory_movement_plan($actorId,$companyId,$bookId,$data,$quantity,$value);
-    $product=$plan['product']; $journalId=null;
+    $plan=pl_inventory_movement_plan($actorId,$companyId,$bookId,$data,$quantity,$value,null,$kind,$original);
+    $product=$plan['product']; $data=$plan['data']; $journalId=null;
     if ($plan['journal']!==null) {
         $journal=pl_post_journal($actorId,$companyId,$bookId,$plan['journal']+['idempotency_key'=>'inventory:'.hash('sha256',$key)]);
         $journalId=(int)$journal['id'];
     }
-    DB::insert('pl_inventory_movements', ['company_id' => $companyId, 'book_id' => $bookId, 'product_id' => $product['id'], 'movement_date' => $data['date'], 'kind' => $kind,
+    DB::insert('pl_inventory_movements', ['company_id' => $companyId, 'book_id' => $bookId, 'product_id' => $product['id'], 'warehouse_id' => $data['warehouse_id'], 'movement_date' => $data['date'], 'kind' => $kind,
         'quantity_delta' => $quantity, 'value_delta' => $value, 'inventory_account_id' => $product['inventory_account_id'], 'offset_account_id' => $data['offset_account_id'], 'journal_id' => $journalId,
         'original_movement_id' => $original, 'source_type' => $data['source_type'], 'source_reference' => $data['source_reference'], 'source_document_id' => $data['source_document_id'], 'source_journal_id' => $data['source_journal_id'],
         'reason' => $data['reason'], 'created_by' => $actorId]);
-    return ['movement_id' => (int) DB::insertId(), 'journal_id' => $journalId, 'product_id' => $product['id'], 'quantity' => ltrim($quantity, '-'), 'value_base' => ltrim($value, '-'), 'quantity_delta' => $quantity, 'value_delta' => $value, 'inventory_account_id' => $product['inventory_account_id'], 'source_type' => $data['source_type'], 'source_reference' => $data['source_reference']];
+    return ['movement_id' => (int) DB::insertId(), 'journal_id' => $journalId, 'product_id' => $product['id'], 'warehouse_id' => $data['warehouse_id'], 'quantity' => ltrim($quantity, '-'), 'value_base' => ltrim($value, '-'), 'quantity_delta' => $quantity, 'value_delta' => $value, 'inventory_account_id' => $product['inventory_account_id'], 'source_type' => $data['source_type'], 'source_reference' => $data['source_reference']];
 }
 
 function pl_inventory_receive(int $actorId, int $companyId, int $bookId, array $input): array
@@ -211,11 +305,45 @@ function pl_inventory_issue_plan(int $actorId,int $companyId,int $bookId,array $
 {
     $product=pl_get_inventory_product($actorId,$companyId,$bookId,$data['product_id']);
     $data['offset_account_id']??=$product['cogs_account_id'];
-    $basis??=pl_inventory_balance($actorId,$companyId,$bookId,$product['id']);
+    if ($basis===null) {
+        $data['warehouse_id']=pl_inventory_movement_warehouse($actorId,$companyId,$bookId,$data['warehouse_id']??null)['id'];
+        $basis=pl_inventory_balance($actorId,$companyId,$bookId,$product['id'],null,$data['warehouse_id']);
+    }
     $cost=pl_inventory_cost($basis['value_base'],$basis['quantity'],$quantity);
     $quantityDelta=bcsub('0',$quantity,4); $valueDelta=bcsub('0',$cost,4);
     return ['data'=>$data,'basis'=>$basis,'quantity_delta'=>$quantityDelta,'value_delta'=>$valueDelta,
         'movement'=>pl_inventory_movement_plan($actorId,$companyId,$bookId,$data,$quantityDelta,$valueDelta,$basis)];
+}
+
+/**
+ * Atomic carrying-value transfer between two warehouses in the stock ledger; no GL recognition.
+ * Input: product_id, from_warehouse_id, to_warehouse_id, quantity, date, source_reference, reason, idempotency_key.
+ * Result: out and in movements, movement_ids, warehouse IDs, quantity, value_base, journal_created=false.
+ */
+function pl_inventory_transfer(int $actorId, int $companyId, int $bookId, array $input): array
+{
+    foreach (['from_warehouse_id','to_warehouse_id'] as $field) {
+        if (!is_int($input[$field] ?? null) || $input[$field] < 1) { throw new DomainException('Choose valid source and destination warehouses.'); }
+    }
+    if ($input['from_warehouse_id'] === $input['to_warehouse_id']) { throw new DomainException('A transfer needs two different warehouses.'); }
+    if (isset($input['offset_account_id']) || isset($input['amount_base'])) { throw new DomainException('Transfer value is calculated from the source carrying value without an offset account.'); }
+    $data = pl_inventory_movement_input(array_replace($input, ['warehouse_id' => $input['from_warehouse_id'], 'source_type' => 'inventory_transfer_out', 'offset_account_id' => null]));
+    $quantity = pl_amount(pl_ledger_text($input['quantity'] ?? null, 'Transfer quantity', 21));
+    if (bccomp($quantity, '0', 4) <= 0) { throw new DomainException('A transfer needs a positive quantity.'); }
+    $to = $input['to_warehouse_id'];
+    return pl_inventory_command($actorId, $companyId, $bookId, (string) ($input['idempotency_key'] ?? ''), ['transfer', $data, $to, $quantity],
+        function (string $key) use ($actorId, $companyId, $bookId, $data, $to, $quantity): array {
+            pl_require_module($actorId, $companyId, $bookId, 'inventory-locations');
+            pl_inventory_movement_warehouse($actorId, $companyId, $bookId, $data['warehouse_id']);
+            pl_inventory_movement_warehouse($actorId, $companyId, $bookId, $to);
+            $balance = pl_inventory_balance($actorId, $companyId, $bookId, $data['product_id'], null, $data['warehouse_id']);
+            $cost = pl_inventory_cost($balance['value_base'], $balance['quantity'], $quantity);
+            $out = pl_inventory_record($actorId, $companyId, $bookId, $data, 'transfer_out', bcsub('0', $quantity, 4), bcsub('0', $cost, 4), $key);
+            $inData = array_replace($data, ['warehouse_id' => $to, 'source_type' => 'inventory_transfer_in']);
+            $in = pl_inventory_record($actorId, $companyId, $bookId, $inData, 'transfer_in', $quantity, $cost, $key, $out['movement_id']);
+            return ['movement_ids' => [$out['movement_id'], $in['movement_id']], 'out' => $out, 'in' => $in, 'product_id' => $data['product_id'],
+                'from_warehouse_id' => $data['warehouse_id'], 'to_warehouse_id' => $to, 'quantity' => $quantity, 'value_base' => $cost, 'journal_created' => false];
+        });
 }
 
 /** Both return directions consume the original movement's exact unreturned carrying basis. */
@@ -227,6 +355,12 @@ function pl_inventory_return(int $actorId, int $companyId, int $bookId, array $i
     $original = DB::queryFirstRow('SELECT * FROM pl_inventory_movements WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', $originalId, $companyId, $bookId);
     if (!$original || !in_array($original['kind'], ['receipt','issue'], true)) { throw new DomainException('Returns must reference an original receipt or sale issue.'); }
     $input['product_id'] = (int) $original['product_id'];
+    if (isset($input['warehouse_id'])) {
+        if (!is_int($input['warehouse_id']) || $input['warehouse_id'] < 1) { throw new DomainException('Choose a valid warehouse.'); }
+        $warehouse = pl_get_inventory_warehouse($actorId, $companyId, $bookId, $input['warehouse_id']);
+        if ($original['warehouse_id'] === null ? !$warehouse['is_default'] : (int) $original['warehouse_id'] !== $warehouse['id']) { throw new DomainException('Returns must stay in the original warehouse.'); }
+    }
+    if ($original['warehouse_id'] !== null) { $input['warehouse_id'] = (int) $original['warehouse_id']; }
     $input['offset_account_id'] ??= $original['offset_account_id'] === null ? null : (int) $original['offset_account_id'];
     $data = pl_inventory_movement_input($input); $quantity = pl_amount(pl_ledger_text($input['quantity'] ?? null, 'Quantity', 21));
     if (bccomp($quantity, '0', 4) <= 0) { throw new DomainException('A return needs positive quantity.'); }
@@ -268,7 +402,8 @@ function pl_inventory_value_adjustment(int $actorId, int $companyId, int $bookId
     if (bccomp($value, '0', 4) === 0) { throw new DomainException('A value adjustment needs a nonzero amount.'); }
     return pl_inventory_command($actorId, $companyId, $bookId, (string) ($input['idempotency_key'] ?? ''), ['value_adjustment', $data, $value, $expectedQuantity, $expectedValue],
         function (string $key) use ($actorId, $companyId, $bookId, $data, $value, $expectedQuantity, $expectedValue): array {
-            $balance = pl_inventory_balance($actorId, $companyId, $bookId, $data['product_id']);
+            $data['warehouse_id'] = pl_inventory_movement_warehouse($actorId, $companyId, $bookId, $data['warehouse_id'] ?? null)['id'];
+            $balance = pl_inventory_balance($actorId, $companyId, $bookId, $data['product_id'], null, $data['warehouse_id']);
             if ($balance['quantity'] !== $expectedQuantity || $balance['value_base'] !== $expectedValue) { throw new DomainException('Stock quantity or carrying value changed since this adjustment was reviewed. Refresh and review again.'); }
             return pl_inventory_record($actorId, $companyId, $bookId, $data, 'value_adjustment', '0.0000', $value, $key);
         });
@@ -293,7 +428,8 @@ function pl_inventory_adjust_count(int $actorId, int $companyId, int $bookId, ar
     $data = pl_inventory_movement_input($input); $count = pl_amount(pl_ledger_text($input['counted_quantity'] ?? null, 'Counted quantity', 21));
     $expected = pl_amount(pl_ledger_text($input['expected_quantity'] ?? null, 'Expected quantity', 21)); $unitCost = isset($input['unit_cost']) ? pl_amount(pl_ledger_text($input['unit_cost'], 'Unit cost', 21)) : null;
     return pl_inventory_command($actorId, $companyId, $bookId, (string) ($input['idempotency_key'] ?? ''), ['count', $data, $count, $expected, $unitCost], function (string $key) use ($actorId, $companyId, $bookId, $data, $count, $expected, $unitCost): array {
-        $balance = pl_inventory_balance($actorId, $companyId, $bookId, $data['product_id']);
+        $data['warehouse_id'] = pl_inventory_movement_warehouse($actorId, $companyId, $bookId, $data['warehouse_id'] ?? null)['id'];
+        $balance = pl_inventory_balance($actorId, $companyId, $bookId, $data['product_id'], null, $data['warehouse_id']);
         $effect=pl_inventory_count_effect($balance,$count,$expected,$unitCost);
         return pl_inventory_record($actorId, $companyId, $bookId, $data, 'adjustment', $effect['quantity_delta'], $effect['value_delta'], $key);
     });
@@ -307,7 +443,8 @@ function pl_preview_inventory_count(int $actorId, int $companyId, int $bookId, a
     $unitCost=isset($input['unit_cost'])?pl_amount(pl_ledger_text($input['unit_cost'],'Unit cost',21)):null;
     return pl_ledger_transaction(function () use ($actorId,$companyId,$bookId,$data,$count,$expected,$unitCost): array {
         pl_require_company_access($actorId,$companyId,true); pl_ledger_book($companyId,$bookId,true);
-        $balance=pl_inventory_balance($actorId,$companyId,$bookId,$data['product_id']);
+        $data['warehouse_id']=pl_inventory_movement_warehouse($actorId,$companyId,$bookId,$data['warehouse_id']??null)['id'];
+        $balance=pl_inventory_balance($actorId,$companyId,$bookId,$data['product_id'],null,$data['warehouse_id']);
         $effect=pl_inventory_count_effect($balance,$count,$expected,$unitCost);
         $plan=pl_inventory_movement_plan($actorId,$companyId,$bookId,$data,$effect['quantity_delta'],$effect['value_delta']);
         return ['input'=>$data,'recorded'=>$balance,'counted_quantity'=>$count,'unit_cost'=>$unitCost,'effect'=>$effect,'journal'=>$plan['journal'],'product'=>$plan['product']];
@@ -328,31 +465,43 @@ function pl_confirm_inventory_count(int $actorId, int $companyId, int $bookId, a
     });
 }
 
-function pl_inventory_history(int $actorId, int $companyId, int $bookId, ?int $productId = null): array
+function pl_inventory_history(int $actorId, int $companyId, int $bookId, ?int $productId = null, ?int $warehouseId = null): array
 {
     pl_require_company_access($actorId, $companyId); pl_ledger_book($companyId, $bookId);
     if ($productId !== null) { pl_get_inventory_product($actorId, $companyId, $bookId, $productId); }
-    return DB::query('SELECT m.*,p.sku,p.name FROM pl_inventory_movements m JOIN pl_products p ON p.id=m.product_id WHERE m.company_id=%i AND m.book_id=%i' . ($productId === null ? '' : ' AND m.product_id=%i') . ' ORDER BY m.movement_date DESC,m.id DESC LIMIT 500', ...($productId === null ? [$companyId,$bookId] : [$companyId,$bookId,$productId]));
+    $where = ''; $args = [$companyId, $bookId];
+    if ($productId !== null) { $where .= ' AND m.product_id=%i'; $args[] = $productId; }
+    if ($warehouseId !== null) {
+        $warehouse = pl_get_inventory_warehouse($actorId, $companyId, $bookId, $warehouseId);
+        $where .= ' AND (m.warehouse_id=%i' . ($warehouse['is_default'] ? ' OR m.warehouse_id IS NULL' : '') . ')'; $args[] = $warehouseId;
+    }
+    return DB::query('SELECT m.*,p.sku,p.name,COALESCE(m.warehouse_id,d.id) AS warehouse_id,w.code AS warehouse_code,w.name AS warehouse_name FROM pl_inventory_movements m JOIN pl_products p ON p.id=m.product_id'
+        . ' LEFT JOIN pl_inventory_warehouses d ON d.company_id=m.company_id AND d.book_id=m.book_id AND d.is_default=1'
+        . ' LEFT JOIN pl_inventory_warehouses w ON w.id=COALESCE(m.warehouse_id,d.id) AND w.company_id=m.company_id AND w.book_id=m.book_id'
+        . ' WHERE m.company_id=%i AND m.book_id=%i' . $where . ' ORDER BY m.movement_date DESC,m.id DESC LIMIT 500', ...$args);
 }
 
-function pl_inventory_valuation(int $actorId, int $companyId, int $bookId, ?string $asOf = null): array
+/** Only the all-warehouse report reconciles to the inventory control accounts; a single warehouse reports stock values alone. */
+function pl_inventory_valuation(int $actorId, int $companyId, int $bookId, ?string $asOf = null, ?int $warehouseId = null): array
 {
     $asOf = pl_ledger_date($asOf ?? gmdate('Y-m-d')); $products = pl_list_inventory_products($actorId, $companyId, $bookId);
+    if ($warehouseId !== null) { pl_get_inventory_warehouse($actorId, $companyId, $bookId, $warehouseId); }
     $rows = []; $accounts = []; $total = '0.0000';
     foreach ($products as $product) {
         if ($product['kind'] !== 'stock') { continue; }
-        $balance = pl_inventory_balance($actorId, $companyId, $bookId, $product['id'], $asOf); $rows[] = $product + $balance;
+        $balance = pl_inventory_balance($actorId, $companyId, $bookId, $product['id'], $asOf, $warehouseId); $rows[] = $product + $balance;
         $total = bcadd($total, $balance['value_base'], 4);
         $accountId = $product['inventory_account_id']; $accounts[$accountId] ??= ['account_id' => $accountId, 'stock_value' => '0.0000'];
         $accounts[$accountId]['stock_value'] = bcadd($accounts[$accountId]['stock_value'], $balance['value_base'], 4);
     }
     foreach ($accounts as &$account) {
+        if ($warehouseId !== null) { $account['ledger_value'] = null; $account['difference'] = null; continue; }
         $ledger = '0.0000';
         foreach (DB::query('SELECT l.debit,l.credit FROM pl_journal_lines l JOIN pl_journals j ON j.id=l.journal_id WHERE l.company_id=%i AND l.book_id=%i AND l.account_id=%i AND j.journal_date<=%s FOR SHARE', $companyId, $bookId, $account['account_id'], $asOf) as $line) { $ledger = bcadd($ledger, bcsub($line['debit'], $line['credit'], 4), 4); }
         $account['ledger_value'] = $ledger; $account['difference'] = bcsub($ledger, $account['stock_value'], 4);
     }
     unset($account);
-    return ['as_of' => $asOf, 'products' => $rows, 'total_value_base' => $total, 'accounts' => array_values($accounts)];
+    return ['as_of' => $asOf, 'warehouse_id' => $warehouseId, 'gl_reconciliation_available' => $warehouseId === null, 'products' => $rows, 'total_value_base' => $total, 'accounts' => array_values($accounts)];
 }
 
 /** Generic journal reversals may not separate stock quantities from their financial value. */
@@ -379,6 +528,7 @@ function pl_inventory_issue_ar_document(int $actorId, int $companyId, int $bookI
         $product = pl_get_inventory_product($actorId, $companyId, $bookId, (int) $line['product_id']);
         if ($product['kind'] !== 'stock') { continue; }
         $results[] = pl_inventory_issue($actorId, $companyId, $bookId, ['product_id' => $product['id'], 'quantity' => $line['quantity'], 'date' => $document['document_date'] ?? $document['date'],
+            'warehouse_id' => $line['warehouse_id'] ?? $document['warehouse_id'] ?? null,
             'source_type' => 'ar_invoice', 'source_reference' => $journalId . ':' . $index, 'source_document_id' => (int) $document['id'], 'source_journal_id' => $journalId,
             'reason' => 'Stock issued for invoice ' . $document['id'], 'idempotency_key' => 'ar-issue:' . hash('sha256', $requestKey . ':' . $index)]);
     }
@@ -396,6 +546,7 @@ function pl_inventory_reverse_ar_document(int $actorId, int $companyId, int $boo
         foreach ($movements as $movement) {
             if ($isCredit) {
                 $data = pl_inventory_movement_input(['product_id' => (int) $movement['product_id'], 'date' => $date, 'offset_account_id' => (int) $movement['offset_account_id'],
+                    'warehouse_id' => $movement['warehouse_id'] === null ? null : (int) $movement['warehouse_id'],
                     'source_type' => 'ar_credit_reversal', 'source_reference' => (string) $movement['id'], 'source_document_id' => (int) $document['id'], 'reason' => $reason]);
                 $results[] = pl_inventory_command($actorId, $companyId, $bookId, 'ar-credit-reverse:' . hash('sha256', $key . ':' . $movement['id']), ['credit_stock_reversal', $movement['id'], $data], function (string $request) use ($actorId, $companyId, $bookId, $data, $movement): array {
                     if (DB::queryFirstField('SELECT id FROM pl_inventory_movements WHERE original_movement_id=%i LIMIT 1 FOR SHARE', (int) $movement['id'])) { throw new DomainException('This credit stock return was already reversed.'); }
@@ -480,7 +631,9 @@ function pl_inventory_ar_correction_basis(int $actorId,int $companyId,int $bookI
         $companyId,$bookId,$credit?'ar_credit':'ar_invoice',$document['id'],$document['journal_id']);
     foreach ($rows as $row) {
         $id=(int)$row['product_id'];
-        $balances[$id]??=pl_inventory_balance($actorId,$companyId,$bookId,$id);
+        $warehouseId=$row['warehouse_id']===null?pl_inventory_default_warehouse($actorId,$companyId,$bookId)['id']:(int)$row['warehouse_id'];
+        $key=$id.':'.$warehouseId;
+        $balances[$key]??=pl_inventory_balance($actorId,$companyId,$bookId,$id,null,$warehouseId);
         if ($credit) {
             if (DB::queryFirstField('SELECT id FROM pl_inventory_movements WHERE original_movement_id=%i LIMIT 1 FOR SHARE',$row['id'])) { throw new DomainException('This credit stock return was already reversed.'); }
             $originalId=(int)$row['original_movement_id'];
@@ -492,11 +645,11 @@ function pl_inventory_ar_correction_basis(int $actorId,int $companyId,int $bookI
             pl_inventory_return_effect($row,['date'=>$date],ltrim($row['quantity_delta'],'-'),$basis);
         }
         $quantity=bcsub('0',$row['quantity_delta'],4); $value=bcsub('0',$row['value_delta'],4);
-        $data=pl_inventory_movement_input(['product_id'=>$id,'date'=>$date,'offset_account_id'=>(int)$row['offset_account_id'],
+        $data=pl_inventory_movement_input(['product_id'=>$id,'date'=>$date,'offset_account_id'=>(int)$row['offset_account_id'],'warehouse_id'=>$warehouseId,
             'source_type'=>$credit?'ar_credit_reversal':'ar_invoice_reversal','source_reference'=>'correction-preview:'.$row['id'],'reason'=>'Correction stock reversal preview']);
-        $movement=pl_inventory_movement_plan($actorId,$companyId,$bookId,$data,$quantity,$value,$balances[$id]);
+        $movement=pl_inventory_movement_plan($actorId,$companyId,$bookId,$data,$quantity,$value,$balances[$key]);
         $plans[]=['product_name'=>$movement['product']['name'],'quantity_delta'=>$quantity,'value_delta'=>$value,'movement'=>$movement];
-        $balances[$id]['quantity']=$movement['quantity_after']; $balances[$id]['value_base']=$movement['value_after']; $balances[$id]['latest_date']=$date;
+        $balances[$key]['quantity']=$movement['quantity_after']; $balances[$key]['value_base']=$movement['value_after']; $balances[$key]['latest_date']=$date;
     }
     return ['balances'=>$balances,'restored'=>$restored,'plans'=>$plans];
 }
@@ -510,23 +663,27 @@ function pl_inventory_ar_preview(int $actorId,int $companyId,int $bookId,array $
             if (($line['product_id']??null)===null) { continue; }
             $product=pl_get_inventory_product($actorId,$companyId,$bookId,(int)$line['product_id']);
             if ($product['kind']!=='stock') { continue; }
-            $id=$product['id']; $balances[$id]??=pl_inventory_balance($actorId,$companyId,$bookId,$id);
-            $data=pl_inventory_movement_input(['product_id'=>$id,'date'=>$document['document_date'],'source_type'=>'ar_invoice','source_reference'=>'editor-preview:'.$index,'reason'=>'Invoice stock issue preview']);
-            $plan=pl_inventory_issue_plan($actorId,$companyId,$bookId,$data,$line['quantity'],$balances[$id]);
+            $id=$product['id'];
+            $warehouseId=pl_inventory_movement_warehouse($actorId,$companyId,$bookId,$line['warehouse_id']??$document['warehouse_id']??null)['id'];
+            $key=$id.':'.$warehouseId; $balances[$key]??=pl_inventory_balance($actorId,$companyId,$bookId,$id,null,$warehouseId);
+            $data=pl_inventory_movement_input(['product_id'=>$id,'date'=>$document['document_date'],'warehouse_id'=>$warehouseId,'source_type'=>'ar_invoice','source_reference'=>'editor-preview:'.$index,'reason'=>'Invoice stock issue preview']);
+            $plan=pl_inventory_issue_plan($actorId,$companyId,$bookId,$data,$line['quantity'],$balances[$key]);
             $plans[]=$plan+['line_number'=>$index+1,'product_name'=>$product['name']];
-            $balances[$id]['quantity']=bcadd($balances[$id]['quantity'],$plan['quantity_delta'],4);
-            $balances[$id]['value_base']=bcadd($balances[$id]['value_base'],$plan['value_delta'],4);
+            $balances[$key]['quantity']=bcadd($balances[$key]['quantity'],$plan['quantity_delta'],4);
+            $balances[$key]['value_base']=bcadd($balances[$key]['value_base'],$plan['value_delta'],4);
         }
     } elseif ($document['kind']==='customer_credit' && $original!==null) {
         foreach (pl_inventory_credit_allocations($actorId,$companyId,$bookId,$document,$original,$restored) as $allocation) {
             $source=$allocation['source']; $effect=$allocation['effect'];
-            $data=pl_inventory_movement_input(['product_id'=>(int)$source['product_id'],'date'=>$document['document_date'],'offset_account_id'=>(int)$source['offset_account_id'],
-                'source_type'=>'ar_credit','source_reference'=>'editor-preview:'.$allocation['index'].':'.$source['id'],'reason'=>'Credit stock return preview']);
             $productId=(int)$source['product_id'];
-            $balances[$productId]??=pl_inventory_balance($actorId,$companyId,$bookId,$productId);
-            $movement=pl_inventory_movement_plan($actorId,$companyId,$bookId,$data,$effect['quantity_delta'],$effect['value_delta'],$balances[$productId]);
-            $balances[$productId]['quantity']=$movement['quantity_after'];
-            $balances[$productId]['value_base']=$movement['value_after'];
+            $warehouseId=$source['warehouse_id']===null?pl_inventory_default_warehouse($actorId,$companyId,$bookId)['id']:(int)$source['warehouse_id'];
+            $data=pl_inventory_movement_input(['product_id'=>$productId,'date'=>$document['document_date'],'offset_account_id'=>(int)$source['offset_account_id'],'warehouse_id'=>$warehouseId,
+                'source_type'=>'ar_credit','source_reference'=>'editor-preview:'.$allocation['index'].':'.$source['id'],'reason'=>'Credit stock return preview']);
+            $key=$productId.':'.$warehouseId;
+            $balances[$key]??=pl_inventory_balance($actorId,$companyId,$bookId,$productId,null,$warehouseId);
+            $movement=pl_inventory_movement_plan($actorId,$companyId,$bookId,$data,$effect['quantity_delta'],$effect['value_delta'],$balances[$key]);
+            $balances[$key]['quantity']=$movement['quantity_after'];
+            $balances[$key]['value_base']=$movement['value_after'];
             $plans[]=['line_number'=>$allocation['index']+1,'product_name'=>$movement['product']['name'],'basis'=>$allocation['basis'],'quantity_delta'=>$effect['quantity_delta'],'value_delta'=>$effect['value_delta'],'movement'=>$movement];
         }
     }
@@ -546,11 +703,14 @@ function pl_inventory_opening_payload(int $actorId, int $companyId, int $bookId,
     foreach ($lines as $line) {
         if (!is_array($line) || !is_int($line['product_id'] ?? null)) { throw new DomainException('Choose each opening product explicitly.'); }
         $product = pl_get_inventory_product($actorId, $companyId, $bookId, $line['product_id']);
-        if ($product['kind'] !== 'stock' || !$product['is_active'] || isset($products[$product['id']])) { throw new DomainException('Choose each active stock product only once.'); }
+        if (isset($line['warehouse_id']) && (!is_int($line['warehouse_id']) || $line['warehouse_id'] < 1)) { throw new DomainException('Choose a valid warehouse for each opening line.'); }
+        $warehouseId = pl_inventory_movement_warehouse($actorId, $companyId, $bookId, $line['warehouse_id'] ?? null)['id'];
+        $key = $product['id'] . ':' . $warehouseId;
+        if ($product['kind'] !== 'stock' || !$product['is_active'] || isset($products[$key])) { throw new DomainException('Choose each active stock product only once per warehouse.'); }
         $quantity = pl_amount(pl_ledger_text($line['quantity'] ?? null, 'Opening quantity', 21)); $value = pl_amount(pl_ledger_text($line['amount_base'] ?? null, 'Opening stock value', 21));
         if (bccomp($quantity, '0', 4) <= 0 || bccomp($value, '0', 4) <= 0) { throw new DomainException('Opening quantity and base value must both be positive.'); }
         $account = $product['inventory_account_id']; $totals[$account] = bcadd($totals[$account] ?? '0.0000', $value, 4);
-        $products[$product['id']] = ['product_id' => $product['id'], 'quantity' => $quantity, 'amount_base' => $value, 'inventory_account_id' => $account];
+        $products[$key] = ['product_id' => $product['id'], 'warehouse_id' => $warehouseId, 'quantity' => $quantity, 'amount_base' => $value, 'inventory_account_id' => $account];
     }
     foreach ($totals as $account => $total) {
         $ledger = DB::query('SELECT l.id,l.debit,l.credit,j.source_type,j.journal_date,j.reversal_of_id FROM pl_journal_lines l JOIN pl_journals j ON j.id=l.journal_id WHERE l.company_id=%i AND l.book_id=%i AND l.account_id=%i ORDER BY l.id FOR SHARE', $companyId, $bookId, $account);
@@ -595,9 +755,9 @@ function pl_confirm_inventory_opening(int $actorId, int $companyId, int $bookId,
         if (!hash_equals($expectedHash, hash('sha256', json_encode($current, JSON_THROW_ON_ERROR)))) { throw new DomainException('Opening stock evidence changed. Create a new preview.'); }
         $ids = [];
         foreach ($payload['lines'] as $line) {
-            DB::insert('pl_inventory_movements', ['company_id' => $companyId, 'book_id' => $bookId, 'product_id' => $line['product_id'], 'movement_date' => $payload['date'], 'kind' => 'opening',
+            DB::insert('pl_inventory_movements', ['company_id' => $companyId, 'book_id' => $bookId, 'product_id' => $line['product_id'], 'warehouse_id' => $line['warehouse_id'] ?? null, 'movement_date' => $payload['date'], 'kind' => 'opening',
                 'quantity_delta' => $line['quantity'], 'value_delta' => $line['amount_base'], 'inventory_account_id' => $line['inventory_account_id'], 'opening_journal_line_id' => $line['opening_journal_line_id'],
-                'source_type' => 'opening_conversion', 'source_reference' => $previewId . ':' . $line['product_id'], 'reason' => $payload['reason'], 'created_by' => $actorId]);
+                'source_type' => 'opening_conversion', 'source_reference' => $previewId . ':' . $line['product_id'] . ':' . ($line['warehouse_id'] ?? 0), 'reason' => $payload['reason'], 'created_by' => $actorId]);
             $ids[] = (int) DB::insertId();
         }
         return ['preview_id' => $previewId, 'movement_ids' => $ids, 'journal_created' => false];

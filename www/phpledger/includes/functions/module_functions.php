@@ -5,7 +5,7 @@ declare(strict_types=1);
 function pl_module_registry(): array
 {
     $registry = [];
-    foreach (['core', 'ar', 'ap', 'inventory', 'purchasing', 'pos-showcase'] as $id) {
+    foreach (['core', 'ar', 'ap', 'inventory', 'inventory-locations', 'purchasing', 'pos-showcase'] as $id) {
         $path = PL_ROOT . '/resources/modules/' . $id . '.json';
         $source = is_file($path) ? file_get_contents($path) : false;
         if ($source === false) { throw new DomainException('A bundled module manifest is missing. Restore the reviewed package.'); }
