@@ -1,5 +1,11 @@
 # Shared Claude and Codex state
 
+## Latest checkpoint, 19 September 2026 late evening (Claude): 1.2 re-sequence documented; stock-locations module branch open
+
+- Local `master` commits (not pushed): `d0217a4`, `ea333d7`, `2afc3df`, `9816ad9`, `40959fb`, `0418730` and the coordination update. Owner decisions B20–B23 (section H of the decision register): 1.2 = stock locations and trading-document extensions as bundled modules, core on-account receipts, plugin runtime decoupled from the table prefix, Users capabilities, Urdu/RTL, container image; table prefix, installation notice, cloud database and remaining channels to 1.3; queued entry gains a device sub-ledger with settlement posting; the owner's own company is pilot #1 from 1 October 2026.
+- Work in progress: branch `harvest/stock-locations` (bundled module `inventory-locations`: migration `034_inventory_locations.php`, `pl_inventory_warehouses`, nullable `warehouse_id` on movements meaning the book default, transfers at carrying value, per-location cost, Locations panel, `tests/inventory_location_test.php`). Not merged until the full suite passes on MySQL 8.4 and one MariaDB image.
+- Deliberately not done: no push, no release, no website or wiki change, no deployment. Only `Claude outputs/` remains untracked.
+
 ## Latest checkpoint, 19 September 2026 evening (Claude): housekeeping, roadmap correction, wiki, issues and discussions
 
 - Local `master` commits (not pushed): `aa4a4bf` coordination files and `CLAUDE.md`; `f211476` Codex's two demo-landing wording lines (still not live, ships in 1.1.1); `c07ed46` the packaging decision in `docs/strategy/DECISION-REGISTER.md` (B18, B19), `docs/strategy/PLATFORM-ROADMAP.md` (new "Package directory: plugins and sample companies" section, sequence rows 5a and 5b), `docs/ROADMAP.md` (1.1.1 line, demonstration path), `docs/MODULE-ROADMAP.md` (directory packages row, items 10 and 12) and `docs/RELEASE-PROTOCOL.md` (principle 7). Only `Claude outputs/` remains untracked.
