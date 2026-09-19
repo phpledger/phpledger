@@ -1,5 +1,11 @@
 # PHP Ledger marketing website
 
+## Roadmap page update — 19 September 2026 (night)
+
+`/roadmap/` now lists the owner's release order of 19 September 2026: the 1.1.1 patch, 1.2 (stock locations, trading documents, on-account receipts, plugin runtime, Users capabilities, Urdu, container image), 1.3 (Arabic, table prefix, installation notice, cloud databases, remaining channels), the supervised pilot from 1 October 2026 and the later capability releases. `/product/` notes that stock locations are the first 1.2 module. No release, download or demo fact changed.
+
+Published as `website-1-1-0-roadmap-20260919-185525` from branch `docs/roadmap-surfaces` commit `6e7497b` through `.cache/publish-website-roadmap-20260919.py`, a copy of the 1.1.0 wrapper pointed at `.claude/worktrees/roadmap-surfaces` with the prefix `website-1-1-0-roadmap-`. The wrapper also asserts the live `/roadmap/` page carries the new 1.2 heading. Receipt: [roadmap-2026-09-19-publication.json](../../docs/design/website/qa/roadmap-2026-09-19-publication.json). To roll back, recreate that worktree at the same commit before running `--rollback`.
+
 ## Homepage SEOScore update — 19 September 2026
 
 The homepage now aligns its title and H1, includes a product fact list, question-led workflow answers, a clearly fictional worked report example, a public-demo versus self-hosted comparison and numbered start steps. Release-pinned evidence links sit beside product claims, and the seven FAQ answers match their generated schema. The shared footer names the contact destination; the header fits 320 px. No application capability or release version changed.
