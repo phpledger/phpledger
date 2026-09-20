@@ -232,6 +232,21 @@ Run the existing preflight/migrations before using new source. The original `010
 
 Run `python tests/module-http-smoke.py` for the existing local-only HTTP assertions with sample owner/viewer books. Run `composer check` through the test container for service, concurrency and rollback tests; `./tools/verify-demo.ps1` verifies isolated sample provisioning/reset in `db_test`. Existing read API/MCP remains available; the starter adds no public financial write endpoint or machine credential.
 
+## Definition of done for a bundled module
+
+Adopted for the 1.2 module set (M1, [release plan](strategy/RELEASE-PLAN-1.2.md)) and applied to every bundled module from Stock locations onward, written once here rather than restated per module. A module is not ready to ship until all of the following hold:
+
+1. **Suites green in `composer check` on MySQL 8.4 and one MariaDB image.** Run the full suite (or at minimum its own test file plus its dependency chain) against both; see [Verify changes](#verify-changes) for the `PL_TEST_DB_IMAGE` switch. A module that only passes on one engine is not done.
+2. **A browser fixture or HTTP-level test per new screen.** Every route or panel the module adds needs either a `tests/*-http-smoke.py`-style script or a browser fixture (see `tests/module-http-smoke.py`, `tests/redesign_browser_fixture.php`) exercising it at desktop and phone widths, not only its underlying PHP service test.
+3. **Fresh install from the exact built ZIP.** Build the package with `tools/build-package.py`, install it as `tools/verify-upgrade.php fresh` does — a clean database through the complete migration chain, a new company, and the module's own first operation — not a checkout running against a live-edited source tree.
+4. **Upgrade from a populated previous-release database.** Seed data shaped like the last stable release (see the `tools/verify-upgrade.php` baselines below) and apply the module's migration; historical records, balances and reconciliation must be byte-for-byte unchanged and the migration must be a no-op on replay.
+5. **Disable and re-enable with data present.** Through `pl_set_company_module`, prove that disabling with the module's data already recorded blocks new writes but keeps every historical read (balance, history, valuation, audit) intact, and that re-enabling restores write access without altering what was recorded while disabled. `tests/module_test.php`'s generic module-matrix test automates the enable/disable/re-enable half of this for every optional manifest; the module's own suite still needs the "operations with data present" half.
+6. **A manifest with exact `requires`.** Pin dependency versions exactly (`pl_validate_module_registry` rejects anything else); do not use ranges. Capabilities, migrations, routes, permissions, settings, reports and API/MCP operations must all be declared, unique and validated by `pl_validate_module_registry`.
+7. **A row in the compatibility matrix.** Add the module to the table in [Module roadmap](MODULE-ROADMAP.md#module-compatibility-matrix) with its `requires` and the combinations covered by the generic matrix test, before claiming it is interchangeable with core-only operation.
+8. **A test for the module-side checksum-mismatch branch.** `pl_module_installed()` refuses to treat a module as usable when its migration's stored checksum does not match the file on disk (a changed or reverted migration file). Exercise that branch explicitly — see the checksum assertions in `module_test.php`'s manifest-validation test for the pattern — rather than relying on the manifest-validation test alone.
+
+None of this is new application behaviour; it is the acceptance bar the M1 documentation, tests and `tools/verify-upgrade.php` baseline satisfy for the already-shipped Stock locations module, restated so the next 1.2 module (trading documents, M2) is held to the same bar from its first commit.
+
 ## Repository working boundaries
 
 ### Core CSV exports

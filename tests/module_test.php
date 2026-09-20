@@ -100,3 +100,47 @@ test('concurrent module retries create one audited decision and current reads ob
         assert_throws(fn() => pl_checkout_pos($f['actor_id'], $f['company_id'], $f['book_id'], pos_input()), DomainException::class, 'disabled');
     } finally { DB::rollback(); }
 });
+
+/** Enables every optional dependency of $id (deepest first), then $id itself, tracking revisions already granted in $state. */
+function module_matrix_enable(array $f, string $id, array $registry, array &$state): void
+{
+    $manifest = $registry[$id];
+    foreach (array_keys($manifest['requires']) as $dependency) {
+        if ($registry[$dependency]['optional']) { module_matrix_enable($f, $dependency, $registry, $state); }
+    }
+    if ($state[$id] ?? false) { return; }
+    pl_set_company_module($f['actor_id'], $f['company_id'], $id, true, 0, $registry[$id]['digest'], 'Sample module-matrix enable', bin2hex(random_bytes(16)));
+    $state[$id] = true;
+}
+
+/** Core-only proof that does not depend on any optional module: post, reverse, and reconcile a general journal. */
+function module_matrix_assert_core_works(array $f): void
+{
+    $today = gmdate('Y-m-d');
+    $draft = pl_save_general_draft($f['actor_id'], $f['company_id'], $f['book_id'], core_general_input($f));
+    $posted = pl_post_general_draft($f['actor_id'], $f['company_id'], $f['book_id'], $draft['id'], 1);
+    assert_same('posted', $posted['status']);
+    pl_reverse_general_draft($f['actor_id'], $f['company_id'], $f['book_id'], $draft['id'], $today, 'Sample core-only correction');
+    assert_same('0.0000', pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id'])['total_debit']);
+}
+
+test('every optional bundled module enables alone disables and re-enables while core-only operation keeps working', function (): void {
+    $registry = pl_module_registry();
+    foreach ($registry as $id => $manifest) {
+        if (!$manifest['optional']) { continue; }
+        $f = ledger_fixture();
+        module_matrix_assert_core_works($f);
+        $state = [];
+        module_matrix_enable($f, $id, $registry, $state);
+        assert_same(true, pl_module_available($f['actor_id'], $f['company_id'], $f['book_id'], $id));
+        module_matrix_assert_core_works($f);
+        $revision = pl_module_state($f['company_id'], $id)['revision'];
+        pl_set_company_module($f['actor_id'], $f['company_id'], $id, false, $revision, $manifest['digest'], 'Sample module-matrix disable', bin2hex(random_bytes(16)));
+        assert_same(false, pl_module_available($f['actor_id'], $f['company_id'], $f['book_id'], $id));
+        module_matrix_assert_core_works($f);
+        $revision = pl_module_state($f['company_id'], $id)['revision'];
+        pl_set_company_module($f['actor_id'], $f['company_id'], $id, true, $revision, $manifest['digest'], 'Sample module-matrix reenable', bin2hex(random_bytes(16)));
+        assert_same(true, pl_module_available($f['actor_id'], $f['company_id'], $f['book_id'], $id));
+        module_matrix_assert_core_works($f);
+    }
+});

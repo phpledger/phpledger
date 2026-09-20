@@ -105,6 +105,22 @@ Core opening imports must not mark an existing business ready with unexplained A
 
 Project-owned current core/POS code uses AGPL-3.0-or-later; published 0.1.0 through 0.1.5 previews retain MIT. [Licensing policy](LICENSING-POLICY.md) governs commercial licensing and future declared commercial modules, superseding the former no-paid-feature-tier statement. Dependency and legacy notices remain separate.
 
+## Module compatibility matrix
+
+Published 21 September 2026 (M1, [release plan](strategy/RELEASE-PLAN-1.2.md)), satisfying the "publish a compatibility matrix before claiming interchangeable modules" line above. `core`, `ar` and `ap` are required (`optional: false` in their manifests); every other row is an optional bundled module a company can enable independently, subject to its declared `requires`.
+
+| Module | `requires` | Covered by |
+|---|---|---|
+| `core` | — (required) | Every suite; every fixture starts from a core-only company (`ledger_fixture()`). |
+| `ar` | `core 1.0.0` | Bundled with the core; `ar_ap_test.php`, `ar_list_test.php`, `ar_preview_test.php`. |
+| `ap` | `core 1.0.0` | Bundled with the core; `ar_ap_test.php`. |
+| `inventory` | `core 1.0.0` | `inventory_test.php`; core-only-with-inventory-disabled coverage in `module_test.php`'s core-only test. |
+| `inventory-locations` | `core 1.0.0`, `inventory 1.0.0` | `inventory_location_test.php` (masters, transfers at carrying value, per-location balance/history/valuation/counts, returns pinned to the original warehouse, disabled-with-non-default-stock behaviour); `tools/verify-upgrade.php stable-1.1.1` for the upgrade proof. |
+| `purchasing` | `core 1.0.0`, `ap 1.0.0`, `inventory 1.0.0` | `purchasing_test.php`. |
+| `pos-showcase` | `core 1.0.0` | `pos_test.php`. |
+
+`tests/module_test.php`'s generic module-matrix test drives the combinations every row above needs at minimum: for each optional manifest above, a fresh company enables it alone together with its required dependencies (walking the `requires` chain — for example enabling `inventory` before `inventory-locations`, or `inventory` and `ap` before `purchasing`), disables it, re-enables it, and asserts core-only operation (posting and reversing a general journal, a reconciled trial balance) keeps working throughout. It does not by itself cover every optional module enabled *together* in one company, van-stock-present disablement, failure rollback under a mid-migration fault, or the MariaDB floor image; those remain `inventory_location_test.php`'s and the definition-of-done checklist's job per module (see [Definition of done for a bundled module](DEVELOPMENT.md#definition-of-done-for-a-bundled-module)).
+
 ## Shop and restaurant dependencies
 
 | Interface/capability | Required | Conditional |

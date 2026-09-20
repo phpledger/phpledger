@@ -10,8 +10,8 @@ if (PHP_SAPI !== 'cli' || getenv('PL_ENV') !== 'test' || getenv('PL_DB_HOST') !=
 require dirname(__DIR__) . '/www/phpledger/includes/bootstrap.php';
 require dirname(__DIR__) . '/www/phpledger/install/migrate.php';
 $baseline = $argv[1] ?? 'foundation';
-if (!in_array($baseline, ['foundation', 'core-0.1.2', 'opening-local', 'preview-0.2.1', 'preview-0.5.0', 'fresh'], true)) {
-    throw new DomainException('Choose foundation, core-0.1.2, opening-local, preview-0.2.1, preview-0.5.0 or fresh.');
+if (!in_array($baseline, ['foundation', 'core-0.1.2', 'opening-local', 'preview-0.2.1', 'preview-0.5.0', 'stable-1.1.1', 'fresh'], true)) {
+    throw new DomainException('Choose foundation, core-0.1.2, opening-local, preview-0.2.1, preview-0.5.0, stable-1.1.1 or fresh.');
 }
 $allFiles = glob(PL_APP . '/install/migrations/*.php') ?: [];
 sort($allFiles, SORT_STRING);
@@ -22,6 +22,7 @@ $baseVersions = match ($baseline) {
     'opening-local' => array_values(array_filter($allVersions, static fn(string $v): bool => $v <= '009_bank_draft_cancellation' && $v !== '006_core_accounts_journals')),
     'preview-0.2.1' => array_values(array_filter($allVersions, static fn(string $v): bool => $v <= '012_demo_history_periods')),
     'preview-0.5.0' => array_values(array_filter($allVersions, static fn(string $v): bool => $v <= '028_ar_ap_upgrade_completion')),
+    'stable-1.1.1' => array_values(array_filter($allVersions, static fn(string $v): bool => $v <= '034_inventory_locations')),
     'fresh' => [],
 };
 $upgradeDatabase = 'phpledger_upgrade_verify_' . bin2hex(random_bytes(12));
@@ -84,6 +85,50 @@ try {
             throw new RuntimeException('0.5 upgrade changed historical records, access, setup or repeatability.');
         }
         echo "Upgrade passed: 0.5 schema through 028, preserved posted journal/accounts/setup, existing full-read connection, balanced report and replay.\n";
+        return;
+    }
+    if ($baseline === 'stable-1.1.1') {
+        // 034_inventory_locations is the last migration v1.1.1 shipped; this baseline proves a real 1.1.1 install
+        // (schema already at 034, Stock locations enabled with a van and a transfer already recorded) upgrades cleanly.
+        $f = pl_create_company($actor, 'Sample 1.1.1 upgrade company', 'USD', '2026-01-01');
+        foreach (['inventory' => ['1300', 'asset'], 'grni' => ['2100', 'liability']] as $name => [$code, $type]) {
+            $account = pl_save_account($actor, $f['company_id'], $f['book_id'], ['code' => $code, 'name' => 'Sample ' . $name, 'type' => $type, 'role' => null,
+                'is_active' => true, 'reason' => 'Sample 1.1.1 upgrade chart', 'creation_key' => bin2hex(random_bytes(16))]);
+            $f[$name . '_account_id'] = $account['id'];
+        }
+        $inventoryManifest = pl_module_registry()['inventory'];
+        pl_set_company_module($actor, $f['company_id'], 'inventory', true, 0, $inventoryManifest['digest'], 'Sample 1.1.1 inventory module', 'sample-upgrade-1.1.1-inventory');
+        $locationsManifest = pl_module_registry()['inventory-locations'];
+        pl_set_company_module($actor, $f['company_id'], 'inventory-locations', true, 0, $locationsManifest['digest'], 'Sample 1.1.1 locations module', 'sample-upgrade-1.1.1-locations');
+        $product = pl_save_inventory_product($actor, $f['company_id'], $f['book_id'], ['sku' => 'SAMPLE-034', 'name' => 'Sample 1.1.1 product', 'kind' => 'stock', 'base_unit' => 'each', 'selling_price' => '25', 'is_active' => true,
+            'inventory_account_id' => $f['inventory_account_id'], 'cogs_account_id' => $f['accounts']['5000'], 'sales_account_id' => $f['accounts']['4000'], 'purchase_account_id' => $f['accounts']['5000'],
+            'reason' => 'Sample 1.1.1 upgrade product', 'idempotency_key' => bin2hex(random_bytes(16))]);
+        $default = pl_inventory_default_warehouse($actor, $f['company_id'], $f['book_id']);
+        pl_inventory_receive($actor, $f['company_id'], $f['book_id'], ['product_id' => $product['id'], 'quantity' => '10', 'amount_base' => '100', 'date' => '2026-01-05',
+            'offset_account_id' => $f['grni_account_id'], 'source_type' => 'sample_upgrade', 'source_reference' => 'sample-upgrade-1.1.1',
+            'reason' => 'Sample 1.1.1 upgrade receipt', 'idempotency_key' => 'sample-upgrade-1.1.1-receipt']);
+        $van = pl_save_inventory_warehouse($actor, $f['company_id'], $f['book_id'], ['code' => 'SAMPLE-VAN', 'name' => 'Sample upgrade van', 'is_active' => true,
+            'reason' => 'Sample 1.1.1 upgrade van', 'idempotency_key' => bin2hex(random_bytes(16))]);
+        $transfer = pl_inventory_transfer($actor, $f['company_id'], $f['book_id'], ['product_id' => $product['id'], 'from_warehouse_id' => $default['id'], 'to_warehouse_id' => $van['id'],
+            'quantity' => '4', 'date' => '2026-01-06', 'source_reference' => 'sample-upgrade-1.1.1-transfer', 'reason' => 'Sample 1.1.1 upgrade transfer', 'idempotency_key' => 'sample-upgrade-1.1.1-transfer']);
+        $beforeDefaultBalance = pl_inventory_balance($actor, $f['company_id'], $f['book_id'], $product['id'], null, $default['id']);
+        $beforeVanBalance = pl_inventory_balance($actor, $f['company_id'], $f['book_id'], $product['id'], null, $van['id']);
+        $beforeValuation = pl_inventory_valuation($actor, $f['company_id'], $f['book_id']);
+        $beforeWarehouses = pl_list_inventory_warehouses($actor, $f['company_id'], $f['book_id']);
+        $migration = pl_migrate();
+        if ($migration['applied'] !== array_values(array_diff($allVersions, $baseVersions))
+            || $beforeDefaultBalance !== pl_inventory_balance($actor, $f['company_id'], $f['book_id'], $product['id'], null, $default['id'])
+            || $beforeVanBalance !== pl_inventory_balance($actor, $f['company_id'], $f['book_id'], $product['id'], null, $van['id'])
+            || $beforeValuation !== pl_inventory_valuation($actor, $f['company_id'], $f['book_id'])
+            || $beforeWarehouses !== pl_list_inventory_warehouses($actor, $f['company_id'], $f['book_id'])
+            || count(array_filter($beforeWarehouses, static fn(array $w): bool => $w['is_default'])) !== 1
+            || !pl_module_state($f['company_id'], 'inventory-locations')['enabled']
+            || $transfer['journal_created'] !== false
+            || pl_trial_balance($actor, $f['company_id'], $f['book_id'])['total_debit'] !== '100.0000'
+            || pl_migrate()['applied'] !== []) {
+            throw new RuntimeException('1.1.1 upgrade changed historical stock, warehouses, module state or reconciliation.');
+        }
+        echo "Upgrade passed: 1.1.1 schema through 034, preserved warehouse balances/valuation, one default warehouse, enabled locations module, reconciled report and replay.\n";
         return;
     }
     DB::insert('pl_companies', ['name' => 'Prior foundation sample company', 'currency' => 'USD', 'start_date' => '2026-01-01', 'fiscal_year_end' => '12-31', 'created_by' => $actor]);

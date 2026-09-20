@@ -7,6 +7,7 @@
 **The product**
 
 - [[Accounting and reports|Accounting-and-Reports]]
+- [[Stock locations|Stock-Locations]]
 - [[POS showcase|POS-Showcase]]
 - [[Countries and currencies|Countries-and-Currencies]]
 - [[Tax research|Tax-Research]]
