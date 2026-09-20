@@ -34,6 +34,7 @@ $navGroups = [
         ['/opening-balances', 'Opening balances', 'book', ['opening-balances'], !pl_demo_enabled()],
         ['/opening-conversion', 'Opening documents', 'file-text', ['opening-conversion'], !pl_demo_enabled()],
         ['/periods', 'Periods', 'book', ['periods'], !pl_demo_enabled()],
+        ['/numbering', 'Document numbering', 'list', ['numbering'], !pl_demo_enabled()],
         ['/modules', 'Modules', 'adjustments-horizontal', ['modules'], !pl_demo_enabled()],
         ['/connections', 'Connections & API', 'external-link', ['connections'], true],
     ],

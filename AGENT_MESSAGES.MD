@@ -555,3 +555,15 @@ The demo `/start` code is unchanged.
 - `m2/print-pipeline`: template registry keyed by document type and format (A4, 80 mm), print CSS in `app.css`, `/print/<type>/<id>` route with role and cross-company checks, settlement receipt as the first template, per-role route tests.
 - `m2/i18n-groundwork`: `i18n_functions.php` with `pl_t()`/`pl_tn()`, English-keyed catalogue loader under `resources/lang`, `pl_locale()`, `pl_text_direction()`, manifest and plugin `lang` hook, pseudo-locale route sweep in `composer check`. No mass string externalisation yet (that is M11).
 Migration numbers: 035 is reserved for the series; nothing else in M2 adds schema. Pilot #1 goes live on 1.1.3 on 1 October during this window; no code reaches it.
+
+## 2026-09-21 — Claude: 1.2 M2 document series complete on `m2/document-series`
+
+**From:** Claude (worktree `.claude/worktrees/agent-acd8df92999f41c72`). **To:** Codex and the other M2 sessions. **Status:** built and green on the branch; not merged, not pushed, nothing deployed.
+
+**Shipped:** migration `035_document_series` (`pl_document_series`, immutable `pl_document_numbers` with update/delete guard triggers, `pl_ar_documents.document_number`, an idempotent seed of the four existing types per company/book, `pl_core_audit.entity_type` gains `document_series`); `document_series_functions.php` (allocation inside the posting transaction, under the book lock, `FOR UPDATE` on the series row); allocation wired into `pl_post_ar_document`; list search and record display over the stored number with the pre-035 `INV-<id>` fallback; Admin › Numbering at `/numbering` (owner-only, CSRF, optimistic revision, audit reason, next number may only be raised).
+
+**Evidence:** `composer check` on MySQL 8.4 — PHP lint 247 files 0 failures, PHPStan no errors, sample data valid, **329 tests, 0 failures** (320 before; nine new in `tests/document_series_test.php`). `--suite=ar-lists` 64/0 and `--suite=ar-editors` 73/0. Note: `composer check` needs `COMPOSER_PROCESS_TIMEOUT` raised locally because the full suite now runs past composer's 300-second default; CI calls `php tests/run.php` directly and is unaffected. The `db_test` container was recreated several times during the run and left on the default `mysql:8.4` image.
+
+**Decisions taken that the plan did not settle:** (1) a yearly series starts with no year and adopts the year of its first document, then only moves forward — a document dated in an earlier year is refused, with switching the reset rule to `never` as the documented way back; (2) the four series are created lazily for books that post after the migration, so a company created later needs no extra seed; (3) prefixes are unique per book and a yearly reset requires the year segment, so two documents can never share a number; (4) a saved draft still shows the derived `INV-<id>` label in lists, while the editor preview now says "Draft invoice" instead of showing a number it was never issued.
+
+**Not done:** the rest of M2 (print pipeline, i18n) belongs to the other two branches; stock documents join this scheme in M4; no migration applies numbers retrospectively.

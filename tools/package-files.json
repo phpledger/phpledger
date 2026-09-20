@@ -1161,6 +1161,22 @@
     {
       "source": "www/phpledger/install/migrations/034_inventory_locations.php",
       "destination": "www/phpledger/install/migrations/034_inventory_locations.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/035_document_series.php",
+      "destination": "www/phpledger/install/migrations/035_document_series.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/document_series_functions.php",
+      "destination": "www/phpledger/includes/functions/document_series_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/document_series_web_functions.php",
+      "destination": "www/phpledger/includes/functions/document_series_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/numbering.php",
+      "destination": "www/phpledger/templates/views/numbering.php"
     }
   ]
 }
