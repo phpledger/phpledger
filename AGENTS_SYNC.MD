@@ -130,6 +130,8 @@ Start fresh inspection with `python tools/hosting-status.py`. The product publis
 
 ## Handoff and remaining work
 
+- **Issue #90 fixed on a branch (Claude, 20 Sep 2026 20:35 UTC):** `fix/issue-90-updater-migrate` (`273de78` plus this record), not pushed or merged; VERSION 1.1.3 and the 1.1.3 release surfaces are on it. The in-app updater completes again: new `tests/update-migrate-test.php` and a 1.1.1 -> locally built 1.1.3 proof through `/maintenance.php` with a test key both reach `complete`. See the message of the same time. Owner items: review and merge, official signing, publication, README/wiki/website, receipt.
+
 - **1.1.0 is live (Claude, 19 Sep 2026 15:35 UTC):** release v1.1.0 (tag `af0f489`, signed metadata, key fingerprint `4e58a5f4…aa78e78`), demo `core-1.1.0-af0f4895f85a`, website `website-1-1-0-20260919-152351`, origin/master `97a26b4`. The sections above describing the 1.0.0 website and demo are now historical; see `docs/repository/PUBLICATION-2026-09-19-1.1.0.md` and the latest message. The main checkout is behind origin/master and still holds the SEO patch as uncommitted edits identical to the committed files.
 
 - **Distribution protocol and platform roadmap (Claude, 19 Sep 2026):** merged and released in 1.1.0; `docs/RELEASE-PROTOCOL.md` and `docs/strategy/PLATFORM-ROADMAP.md` are on `master`. The earlier note that master could not be packaged is obsolete.
