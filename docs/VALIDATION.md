@@ -1,5 +1,25 @@
 # Foundation validation
 
+## 1.1.3 publication — 20 September 2026
+
+Stable patch published 2026-09-20T20:40:01Z from tag `v1.1.3` (`521dbc3`, merge of `fix/issue-90-updater-migrate` into `master`). Fixes issue #90: `install_functions.php` and `update_database_functions.php` now keep whichever copy of the platform helpers is already loaded, with a documented one-release compatibility rule at the top of `database_platform_functions.php`; a new `tests/update-migrate-test.php` runs the real migrate and verify phases under the copied recovery runtime and is registered in CI. Later commits `319cf5f`, `00ce9ce` and `63bcb39` corrected upgrade-path wording across README, wiki and website. Machine-readable receipt: [STABLE-1.1.3-PUBLICATION.json](repository/STABLE-1.1.3-PUBLICATION.json); narrative: [PUBLICATION-2026-09-20-1.1.3.md](repository/PUBLICATION-2026-09-20-1.1.3.md).
+
+| Check | Result |
+|---|---|
+| `composer check` on MySQL 8.4 | **320 tests, 0 failures**; lint 242 files; PHPStan clean |
+| Update and installer tests | update-recovery, update-database, update-fullschema, update-http, browser_installer (54 checks) and the new update-migrate test all pass |
+| MariaDB 10.4.34 (same day) | the whole battery also passed at 319 tests, run before the update-migrate test was added |
+| Reproducible build | two local builds from the tag byte-identical (2,952,255 bytes); CI Release build succeeded on `521dbc3` and created the draft; the tested local archive was uploaded over the draft's asset before publication |
+| Signed metadata | `phpledger-1.1.3.update.json` (312,687 bytes, SHA-256 `c285f3aa…2002`) signed by the owner with the official key via `.cache/release-1.1.3/sign-1.1.3.py`; verified as an upgrade from 1.1.0, 1.1.1 and 1.1.2, rejected for 1.1.3; 1,503 files in the signed inventory |
+| Upgrade proof, 1.1.2 → 1.1.3 through the in-app updater | published archive and published signed metadata, disposable MySQL 8.4.9 schema: `backup > apply > migrate > verify > runtime > complete`; `public/maintenance.php` byte-identical before and after |
+| Upgrade proof, 1.1.1 → 1.1.3 through the in-app updater | same sequence, applying migration 034 on the way; `public/maintenance.php` byte-identical before and after |
+| Upgrade proof, 1.1.0 → 1.1.3 through the in-app updater | `backup > apply > migrate > recovering > restored` — restored to 1.1.0 with 34 receipts and nothing lost ([issue #91](https://github.com/phpledger/phpledger/issues/91)); `public/maintenance.php` byte-identical before and after; cause is `pl_update_database_connect()` keeping the installed release's `database_platform_functions.php` for the whole operation, and the 1.1.0 copy predates `pl_database_require_trigger_support()` (added in 1.1.1 for issue #83) which the 1.1.3 `pl_migrate()` calls; the #90 fix holds across one release step, not three |
+| Anonymous downloads | all three assets re-downloaded from GitHub after publication and hash-verified |
+| Website | `website-1-1-3-20260920-205507` published 2026-09-20T20:56:37Z from `63bcb39` through `.cache/publish-website-1.1.3.py`; document root only; feed offers stable 1.1.3 with `update_json`; `/download/`, `/news/1-1-3/` and `/roadmap/` carry the corrected upgrade wording; demo untouched. Two earlier attempts: `website-1-1-3-20260920-204637` extracted but never switched (publisher's "release directory already exists" guard); `website-1-1-3-20260920-204912` switched and then rolled itself back on a wrapper page-check bug, leaving 1.1.2 live until the corrected run above |
+| Wiki, About, issues | wiki pushed, latest clone commit `e822ef4`; About names 1.1.3; issue #90 closed with evidence; issue #91 open on milestone 1.2; the v1.1.2 release page carries a "Fixed in 1.1.3" note |
+
+These are technical checks. Independent accounting and security review, supervised pilots with a real month-end close (pilot #1 starts on this release on 1 October 2026), unfamiliar-operator observation and restricted shared-host recovery remain open. Issue #91 (in-app update from more than one release behind) remains open. The demo was **not refreshed** and still runs `core-1.1.0-af0f4895f85a`.
+
 ## 1.1.2 publication — 20 September 2026
 
 Patch release published 2026-09-20 18:43:56 UTC from tag `v1.1.2` (`3df5755`) on the owner's instruction "cut 1.1.2 now" (decisions B27–B30). It corrects the 1.1.1 record (1.1.1 shipped migration 034 and the optional Stock locations module while its notes said "no migration"; 1.1.1 also shipped without signed update metadata), fixes issue #88 (a point-of-sale cash tender must be a whole number of minor units) and restores publisher-signed update metadata. Machine-readable receipt: [STABLE-1.1.2-PUBLICATION.json](repository/STABLE-1.1.2-PUBLICATION.json); narrative: [PUBLICATION-2026-09-20-1.1.2.md](repository/PUBLICATION-2026-09-20-1.1.2.md). The 1.1.1 receipt, missing at its publication, was backfilled the same night with errata: [PUBLICATION-2026-09-20-1.1.1.md](repository/PUBLICATION-2026-09-20-1.1.1.md).
