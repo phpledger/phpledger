@@ -136,6 +136,12 @@ At the actual 18:00 UTC boundary the scheduler rebuilt only `phpledger_demo`. Em
 Public browser evidence is recorded in the [independent launch check](design/website/qa/live-20260914/README.md). These checks do not establish production throughput, monitored disaster recovery, regulatory/accounting approval, receipt-printer compatibility, accessibility conformance or observed usability targets. The project license/provenance decision still gates the first downloadable package. See the [hosted publication receipt](VALIDATION.md#hosted-website-and-restricted-demo-publication) for exact deployment scope and follow-up static changes.
 
 
+## Demo rebuild and a demo build tool (owner direction, 20 September 2026)
+
+Status: recorded direction, deliberately deferred. **Nothing in the demo was changed by this task** — the live demo, its hourly UTC reset, restricted database grants, containers and sample packs are untouched.
+
+The owner is not satisfied with the current demo and wants a tool that builds demos, rather than today's path of hand-assembled sample packs plus `tools/build-demo-packs.py` and `tools/demo-reset.php`. The tool's scope is not decided: what "build a demo" should produce beyond the present packs, how it relates to the teaching histories described below, and how it relates to the package directory that takes sample companies out of the release ZIP are all open. The owner named this a battle for another time, so it waits for its own session. Recorded as decision B26 in the [decision register](strategy/DECISION-REGISTER.md).
+
 ## Planned multi-year teaching histories (owner direction, 15 September 2026)
 
 Status: research and implementation plan; not loaded into the public demo. The owner explicitly wants variety of transaction types across multiple years, not high transaction volume. Plan four choices at demo entry: service agency, retail shop, seasonal business and distributor. Retain one private company per visitor initially and the existing scoped services and reset model.

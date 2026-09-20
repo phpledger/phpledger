@@ -23,17 +23,17 @@ Nothing here is implemented unless its status says so. Distribution channels are
 
 | Order | Work | Depends on | Status |
 |---|---|---|---|
-| 0 | Stock locations and trading-document extensions as bundled modules; on-account receipts in core AR | none | Planned for 1.2 (owner, 19 Sep 2026, evening) |
+| 0 | Stock locations and trading-document extensions as bundled modules; on-account receipts in core AR | none | Stock locations shipped unannounced inside 1.1.1 (migration 034; its release surfaces are due in 1.2); trading documents and on-account receipts planned for 1.2 (owner, 19 Sep 2026, evening). Sequence, gates and dates in the [1.2 release plan](RELEASE-PLAN-1.2.md) |
 | 1 | Release protocol and feed | Publisher key (owner) | Started 19 Sep 2026 |
-| 2 | Container image, Packagist, catalogue manifests | 1 | Planned |
-| 3 | Username and company logo (schema, login, installer fields) | Installer branch merge for the form | Planned |
+| 2 | Container image, Packagist, catalogue manifests | 1 | Container image planned for 1.2 (item g); Packagist and catalogue manifests 1.3 |
+| 3 | Username and company logo (schema, login, installer fields) | Installer branch merge for the form | Shipped in 1.1.0 |
 | 4 | Table prefix and portable SQL through MeekroDB, in one pass | Installer branch merge | Planned for 1.3 |
 | 5 | Installation notice and the phpledger.com endpoint | 1; endpoint deployment is a separate owner-requested action | Planned for 1.3 |
-| 5a | Unbundle the demo packs and add the package directory resolver | none; data-file change plus a path resolver | Planned for 1.1.1 |
-| 5b | Package manifest, directory feed and in-app package installer (samples first, plugins second) | 1, 5a | Planned |
+| 5a | Unbundle the demo packs and add the package directory resolver | none; data-file change plus a path resolver | Did not ship in 1.1.1 (the eleven packs are still in `tools/package-files.json`); first step of the 1.2 plugin-runtime milestone, issue #71 |
+| 5b | Package manifest, directory feed and in-app package installer (samples first, plugins second) | 1, 5a | Planned for 1.2 with the plugin runtime, issue #72 |
 | 6 | Plugin runtime: hooks, loader, activation, plugin receipt table | 1 (release feed for verified packages) | Planned for 1.2 |
 | 7 | Cloud-database support and guides | 4 | Planned for 1.3 |
-| 8 | Users module | 6 | Planned for 1.2 |
+| 8 | Users module | 6 | Capability catalogue and per-company roles planned for 1.2; the full module (profiles, invitations, sessions, audit) later |
 | 9 | PostgreSQL migration sets and CI | 4 | After 1.2 |
 | 10 | SQLite migration sets and locking overrides | 4 | With the Windows bundle |
 

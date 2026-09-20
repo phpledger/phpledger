@@ -1,14 +1,16 @@
-## Current package: 1.1.0
+## Current package: 1.1.1
+
+**1.1.1**, published 20 September 2026, rebuilds browser setup into six stages with green and red checks, accepts a local database account including `root` with no password and creates that database, and warns instead of refusing over plain HTTP. Correction of 20 September 2026: its notes say it carries no migration, but the package includes migration 034 and the optional Stock locations module; an installation upgraded from 1.1.0 by replacing files must run `install/migrate.php` once. It has no signed update metadata. [[Release notes|Release-1.1.1]].
 
 **1.1.0**, published 19 September 2026, installs like WordPress: upload the `phpledger` folder into any web folder and open its address, and the installer starts by itself. It adds MariaDB 10.4+, a chosen username, an optional logo, and the first signed update metadata. [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.1.0/phpledger-1.1.0-media-kit.zip). [[Release notes|Release-1.1.0]]. **1.0.0**, published 18 September 2026, was the first stable release.
 
-# The path after 1.1.0
+# The path after 1.1.1
 
-With 1.1.0 published (WordPress-style installation, MariaDB, username and logo, first signed update metadata), the release sequence the owner set on 19 September 2026 is:
+With 1.1.1 published, the release sequence the owner set on 19 September 2026 is (status and dates in the [1.2 release plan](https://github.com/phpledger/phpledger/blob/master/docs/strategy/RELEASE-PLAN-1.2.md)):
 
-1. **1.1.1 (next patch):** the corrected demo-landing labels and sample-guide sentence, the owner's demo and installer feedback, and the first packaging step: the demo packs leave the release ZIP and the core reads sample packages from a package directory. Only the core-accounting sample stays bundled.
+1. **1.1.1 (published 20 September 2026)** shipped the Workbench installer, the local-database and plain-HTTP handling, the trigger preflight with resumable migrations, the single database account and the corrected demo labels. The first packaging step, the demo packs leaving the release ZIP, did not ship and moves to 1.2 with the plugin runtime. A **1.1.2** patch is proposed to correct the 1.1.1 record (migration 034 shipped unannounced), fix the POS decimal defect and carry the first signed update metadata since 1.1.0, before the 1 October pilot.
 2. **1.2 — stock locations, trading documents and plugins**, in this order:
-   1. multiple stock locations with transfer documents and per-location moving weighted-average cost, as a bundled module (work started on 19 September 2026 on its own branch; nothing ships until its tests pass on MySQL 8.4 and MariaDB);
+   1. multiple stock locations with transfer documents and per-location moving weighted-average cost, as a bundled module (the code is on `master` and inside the 1.1.1 package; its release notes, wiki page, compatibility matrix and upgrade proof follow in 1.2);
    2. trading-document extensions as a bundled module: product packs with pack-and-unit entry, line discounts and free-goods lines, per-type document number series, sales-staff and area dimensions, cash received on the invoice, and printable invoice, receipt and statement templates;
    3. on-account receipts with oldest-first allocation, unapplied credit and batch receipts in core AR;
    4. the plugin runtime: hooks, manifest, loader, activation and plugin migrations with their own receipt table, independent of the table prefix, with an official verified marketplace plus owner uploads of any plugin ZIP behind warnings;
