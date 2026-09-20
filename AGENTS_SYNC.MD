@@ -2,9 +2,11 @@
 
 ## Latest checkpoint, 20 September 2026 (Claude): installer trigger preflight and resumable migrations
 
-- Branch `fix/installer-trigger-preflight` (`8807d90`, `a0beb62`) fixes GitHub issue #83: a binary-logged MySQL that does not trust the account to create triggers is now named at the database connection check, before any migration writes, and an interrupted migration resumes at the statement that stopped instead of needing the database recreated. `composer check` green on MySQL 8.4: 309 tests, 0 failures. Verified against a disposable stock `mysql:8.4` with `log_bin_trust_function_creators=0`, which is removed. **Not merged, not pushed.**
-- Work continues in the worktree `.claude/worktrees/installer-trigger-preflight`. Another session moved the main checkout to `fix/local-install-friendly` at `ab70045` during this task; that checkout is clean apart from the untracked `Claude outputs/`.
+- **Merged and on `origin/master` at `65b3437`** through pull request #85, which closes issue #83. A binary-logged MySQL that does not trust the account to create triggers is named at the database connection check before any migration writes, and an interrupted migration resumes at the statement that stopped instead of needing the database recreated. Issue #83 is closed with the reply and evidence.
+- CI green on the full matrix: MySQL 8.2, 8.3, 8.4 and MariaDB 10.6, 10.11, 11.4, including both browser installer fixtures. `composer check` is 309 tests, 0 failures (307 before). Verified against a disposable stock `mysql:8.4` with `log_bin_trust_function_creators=0`, which was removed afterwards.
 - Migration files and their checksums are unchanged; the new `pl_schema_migrations.statements_done` column is added by `pl_migrate()`, not by a migration.
+- **Note for whoever holds issue #84 (local-install friendliness):** that work was based on `ab70045`, before this merge, and touches `database_platform_functions.php` and `install_web_functions.php`, which this change also touches. Rebase onto `65b3437` first. A handover with the overlap and the design consequence is posted on issue #84. Pushing the fix branch also published the four previously unpushed stock-locations commits, and merging #85 brought them to `origin/master`; the owner accepted that.
+- The website self-hosting requirements page still omits the `log_bin_trust_function_creators` prerequisite and needs a publication to carry it. `resources/release/RELEASE-NOTES.md` has no 1.1.1 section yet.
 
 
 ## Latest checkpoint, 20 September 2026 early morning (Claude): stock-locations module green, awaiting merge
