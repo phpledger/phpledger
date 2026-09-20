@@ -32,7 +32,7 @@ Modern application source is in `www/phpledger`; the historical application rema
 | Review country and industry tax research | [[Tax research|Tax-Research]] |
 | Check currencies and regional plans | [[Countries and currencies|Countries-and-Currencies]] |
 | Check the package scope and remaining gates | [[First package|First-Package]] |
-| Explore the broader future path | [[Roadmap]] |
+| Explore the broader future path | [[Full roadmap|Roadmap]] |
 | Help build or review PHP Ledger | [[Contributing and support|Contributing-and-Support]] |
 
 ## What 1.0.0 demonstrates
