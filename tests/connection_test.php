@@ -137,12 +137,16 @@ test('machine reads match browser money and continue exact running balances acro
     $trial = pl_read_operation($f['connection']['id'], 'trial_balance', $scope + ['as_of' => '2026-09-15']);
     $browser = pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id'], '2026-09-15');
     assert_same($browser['accounts'], $trial['data']['accounts']['rows']);
+    assert_true(!array_key_exists('tree', $trial['data']));
     assert_same($browser['total_debit'], $trial['data']['total_debit']);
     foreach (['profit_loss','balance_sheet'] as $operation) {
         $args = $operation === 'profit_loss' ? ['from' => '2026-01-01', 'to' => '2026-09-15'] : ['as_of' => '2026-09-15'];
         $read = pl_read_operation($f['connection']['id'], $operation, $scope + $args)['data'];
         $expected = $operation === 'profit_loss' ? pl_profit_loss($f['actor_id'], $f['company_id'], $f['book_id'], $args['from'], $args['to']) : pl_balance_sheet($f['actor_id'], $f['company_id'], $f['book_id'], $args['as_of']);
-        foreach ($expected as $key => $value) { assert_same($value, is_array($value) ? $read[$key]['rows'] : $read[$key]); }
+        // The collapsible tree and the equity-movement summary are browser presentations of the
+        // same rows (issue #77); the machine read stays the flat, paginated report.
+        foreach (['tree', 'trees', 'equity_movements'] as $presentation) { assert_true(!array_key_exists($presentation, $read)); }
+        foreach (array_diff_key($expected, array_flip(['tree', 'trees', 'equity_movements'])) as $key => $value) { assert_same($value, is_array($value) ? $read[$key]['rows'] : $read[$key]); }
     }
     $statement = $scope + ['account_id' => $f['accounts']['1000'], 'from' => '2026-01-01', 'as_of' => '2026-09-15'];
     $first = pl_read_operation($f['connection']['id'], 'account_statement', $statement)['data'];

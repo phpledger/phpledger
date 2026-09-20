@@ -124,9 +124,18 @@ function pl_create_company(int $actorId, string $name, string $currency, string 
         $template = pl_starter_template();
         $mapping = [];
         foreach ($template['accounts'] as $definition) {
+            // The bundled chart is already numbered in the X-XXX-XXXXX-XX shape (B56); its
+            // `legacy_code` is the number the same account carried in the 1.0.0 chart, so a report,
+            // demo pack or import written against the old numbers still resolves. A new book was
+            // never converted, so it has no pl_account_code_map rows: that table records conversions.
+            $legacyCode = $definition['legacy_code'] ?? null;
             DB::insert('pl_accounts', ['company_id' => $companyId, 'book_id' => $bookId] + $definition + pl_currency_account_properties($definition));
-            $accounts[$definition['code']] = (int) DB::insertId();
-            $mapping[$definition['semantic_key']] = (int) DB::insertId();
+            $accountId = (int) DB::insertId();
+            $accounts[$definition['code']] = $accountId;
+            if (is_string($legacyCode) && $legacyCode !== '' && !isset($accounts[$legacyCode])) {
+                $accounts[$legacyCode] = $accountId;
+            }
+            $mapping[$definition['semantic_key']] = $accountId;
         }
         pl_install_template_snapshot($actorId, $companyId, $bookId, $template, $mapping);
         return ['company_id' => $companyId, 'book_id' => $bookId, 'period_id' => $periodId, 'accounts' => $accounts];
@@ -248,9 +257,15 @@ function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array
             throw new DomainException('The posting date must fall within exactly one open accounting period.');
         }
         foreach ($payload['lines'] as $lineIndex=>$line) {
-            $account = DB::queryFirstRow('SELECT id, currency FROM pl_accounts WHERE id = %i AND company_id = %i AND book_id = %i AND is_active = 1 FOR SHARE', $line['account_id'], $companyId, $bookId);
+            $account = DB::queryFirstRow('SELECT id, code, currency FROM pl_accounts WHERE id = %i AND company_id = %i AND book_id = %i AND is_active = 1 FOR SHARE', $line['account_id'], $companyId, $bookId);
             if (!$account) {
                 throw new DomainException('Every account must be active and belong to the selected company and book.');
+            }
+            // Structured codes make the chart a tree (B56): only a leaf receives postings, so a
+            // class or group heading and any account that has gained sub-accounts are refused here,
+            // in the one central funnel, rather than in each screen that builds a journal.
+            if (!pl_account_is_postable($companyId, $bookId, (string) $account['code'])) {
+                throw new DomainException('Postings belong on the lowest account in the chart. ' . $account['code'] . ' aggregates the accounts below it.');
             }
             pl_currency_validate_posting_line($actorId, $companyId, $bookId, $payload, $line, $account, $reversalOf !== null || $carryingAccount === $line['account_id'] || array_key_exists($lineIndex,$settlementAllocations ?? []));
         }
@@ -348,18 +363,20 @@ function pl_trial_balance(int $actorId, int $companyId, int $bookId, ?string $as
     if ($asOf !== null) {
         pl_ledger_date($asOf);
     }
-    $accounts = DB::query('SELECT a.id, a.code, a.name, a.type,
+    $accounts = DB::query('SELECT a.id, a.code, a.legacy_code, a.name, a.type, a.is_contra,
         COALESCE(SUM(CASE WHEN j.id IS NOT NULL THEN l.debit ELSE 0 END), 0) AS debit_movement,
         COALESCE(SUM(CASE WHEN j.id IS NOT NULL THEN l.credit ELSE 0 END), 0) AS credit_movement
         FROM pl_accounts a
         LEFT JOIN pl_journal_lines l ON l.account_id = a.id AND l.company_id = a.company_id AND l.book_id = a.book_id
         LEFT JOIN pl_journals j ON j.id = l.journal_id AND j.company_id = a.company_id AND j.book_id = a.book_id AND j.journal_date <= %s
         WHERE a.company_id = %i AND a.book_id = %i
-        GROUP BY a.id, a.code, a.name, a.type ORDER BY a.code', $asOf ?? '9999-12-31', $companyId, $bookId);
+        GROUP BY a.id, a.code, a.legacy_code, a.name, a.type, a.is_contra ORDER BY a.code', $asOf ?? '9999-12-31', $companyId, $bookId);
     $debits = '0.0000';
     $credits = '0.0000';
     foreach ($accounts as &$account) {
         $account['id'] = (int) $account['id'];
+        $account['is_contra'] = (bool) $account['is_contra'];
+        $account['level'] = pl_account_code_is_valid((string) $account['code']) ? pl_account_code_level((string) $account['code']) : 'account';
         $account['debit_movement'] = bcadd((string) $account['debit_movement'], '0', 4);
         $account['credit_movement'] = bcadd((string) $account['credit_movement'], '0', 4);
         $account['balance'] = bcsub($account['debit_movement'], $account['credit_movement'], 4);
@@ -369,5 +386,6 @@ function pl_trial_balance(int $actorId, int $companyId, int $bookId, ?string $as
         $credits = bcadd($credits, $account['credit'], 4);
     }
     unset($account);
-    return ['accounts' => $accounts, 'total_debit' => $debits, 'total_credit' => $credits, 'balanced' => bccomp($debits, $credits, 4) === 0];
+    return ['accounts' => $accounts, 'tree' => pl_report_tree($accounts, ['debit', 'credit', 'balance']),
+        'total_debit' => $debits, 'total_credit' => $credits, 'balanced' => bccomp($debits, $credits, 4) === 0];
 }

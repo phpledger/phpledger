@@ -593,7 +593,7 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
         ("1030", "Petty cash", "asset", "cash_bank"),
         ("1200", "Prepaid insurance", "asset", None),
         ("1300", "Equipment at cost", "asset", None),
-        ("1390", "Accumulated depreciation", "asset", None),
+        ("1390", "Accumulated depreciation", "asset", None, True),
         ("2100", "Accrued staff bonus", "liability", None),
         ("2200", "Term loan", "liability", None),
         ("5100", "Fictional staff salaries", "expense", "expense"),
@@ -606,9 +606,17 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
     if inventory:
         accounts += [("1400", "Stock - manual support schedule", "asset", None),
                      ("5700", "Cost of sales - manual schedule", "expense", "expense")]
-    definitions = [{"code": c, "name": n, "type": t, "role": r} for c, n, t, r in accounts]
+    definitions = [{"code": a[0], "name": a[1], "type": a[2], "role": a[3],
+                    **({"is_contra": True} if len(a) > 4 and a[4] else {})} for a in accounts]
+    # Starter-chart accounts keep the numbers they carried before the structured-code conversion
+    # (B56); the accounts added for contra presentation and owner transactions (B60, B61) never
+    # had an older number, so a checkpoint names them by their structured code.
+    OWNER_LOAN, DRAWINGS = "2-110-10001-00", "3-900-10001-00"
     types = {"1000": "asset", "1100": "asset", "2000": "liability", "3000": "equity",
-             "4000": "income", "5000": "expense", **{a[0]: a[2] for a in accounts}}
+             "4000": "income", "5000": "expense",
+             "1-900-10001-00": "asset", OWNER_LOAN: "liability", DRAWINGS: "equity",
+             "4-900-10001-00": "income", "5-900-10001-00": "expense",
+             **{a[0]: a[2] for a in accounts}}
     events = []
 
     def journal(key, date, description, entries, reverse=False):
@@ -618,7 +626,21 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
                        "reference": f"{slug}/{key}", "description": description,
                        "lines": rows, "reverse": reverse})
 
-    journal("capital", "2024-01-01", "Fictional owner introduces starting capital", [("1000", 25000), ("3000", -25000)])
+    def owner(key, date, owner_kind, description, amount, money_code="1000"):
+        """An owner movement recorded through the owner-transactions service (B61)."""
+        plan = {"capital_introduced": (money_code, "3000"), "owner_loan_received": (money_code, OWNER_LOAN),
+                "owner_loan_repaid": (OWNER_LOAN, money_code), "drawings": (DRAWINGS, money_code)}
+        debit_code, credit_code = plan[owner_kind]
+        owner_code = credit_code if debit_code == money_code else debit_code
+        events.append({"key": key, "kind": "owner_transaction", "owner_kind": owner_kind, "date": date,
+                       "reference": f"{slug}/{key}", "description": description, "amount": money(D(amount)),
+                       "money_code": money_code, "owner_code": owner_code,
+                       "lines": [line(debit_code, amount), line(credit_code, -D(amount))]})
+
+    owner("capital", "2024-01-01", "capital_introduced", "Fictional owner introduces starting capital", 25000)
+    owner("owner-loan", "2024-06-03", "owner_loan_received", "Fictional owner lends the business working capital, repayable", 3000)
+    owner("owner-loan-repayment", "2025-06-03", "owner_loan_repaid", "Repay part of the fictional owner's loan", 1000)
+    owner("drawings", "2025-11-25", "drawings", "Fictional owner withdraws cash for personal use", 800)
     journal("reserve-transfer", "2024-01-02", "Move funds between primary and reserve banks", [("1010", 12000), ("1000", -12000)])
     journal("cash-float", "2024-01-03", "Fund the cash till", [("1020", 600), ("1000", -600)])
     journal("petty-float", "2024-01-03", "Establish a separately counted petty cash float", [("1030", 500), ("1000", -500)])
@@ -697,7 +719,7 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
     drafts = [{"key": "practice-receipt", "kind": "receipt", "date": "2026-02-02", "amount": "225.0000", "counterparty": "Fictional new customer", "reference": "PRACTICE-RECEIPT", "memo": "Editable practice receipt. Review before posting."},
               {"key": "practice-expense", "kind": "expense", "date": "2026-02-03", "amount": "65.0000", "counterparty": "Harbor Office Supply", "reference": "PRACTICE-EXPENSE", "memo": "Editable practice expense. No effect on books until posted."},
               {"key": "practice-petty", "kind": "expense", "date": "2026-02-04", "amount": "12.5000", "money_code": "1030", "counterparty": "Fictional local stationery", "reference": "PRACTICE-PETTY", "memo": "Compare the petty cash statement before and after posting."}]
-    assert 50 <= len(events) + len(drafts) <= 80
+    assert len(events) + len(drafts) == 77
     authored = authored_material(slug)
     profile = industry_profile_for(slug)
     runtime_note = "The pinned ledger history below is reconciled through the current supported general-journal and cash-document services. On isolated sample creation, the operational contract is replayed through the existing AR/AP, Purchasing, Inventory and general-journal services; unsupported vertical operations remain explicitly staged."

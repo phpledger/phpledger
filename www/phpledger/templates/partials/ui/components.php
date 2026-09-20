@@ -182,3 +182,5 @@ function pl_ui_list_controls(array $filters): void
     foreach ([25,50,100] as $size) { echo '<option value="' . $size . '"' . ($size === $filters['per_page'] ? ' selected' : '') . '>' . $size . ' per page</option>'; }
     echo '</select></label><input type="hidden" name="sort" value="' . pl_e($filters['sort']) . '"><input type="hidden" name="dir" value="' . pl_e($filters['dir']) . '">';
 }
+
+require_once __DIR__ . '/report-tree.php';

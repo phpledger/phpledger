@@ -285,6 +285,77 @@ Running balances use debit-positive signed amounts in business-date, journal-ID 
 
 `pl_cash_forecast()` is an exact-decimal scenario function. The browser takes the selected date's authorized posted cash balance and explicitly entered weekly cash in/out over 1–52 weeks, then shows closing balances and the first negative point. It does not infer future revenue, outstanding invoices, bills, stock, or tax. It neither changes the ledger nor represents a cash-flow statement. Full receivables/payables/stock reports await their respective modules and cannot be derived honestly from this small receipt/expense ledger alone.
 
+### Structured account codes, contra accounts and owner transactions (1.2, migration 036)
+
+Accounts are numbered `X-XXX-XXXXX-XX` — one class digit, a three-digit group, a
+five-digit account and a two-digit sub-account (owner decision B56, issue #76).
+The code **is** the hierarchy: `1-000-00000-00` is the Assets class heading,
+`1-100-00000-00` a group heading, `1-100-10001-00` an account and
+`1-100-10001-01` a sub-account under it. No parent identifier is stored, so a
+heading and the accounts under it can never disagree. `account_code_functions.php`
+holds the parser, validator, formatter and hierarchy helpers as small typed
+functions with no database, request or HTML access.
+
+Only a leaf receives postings. A class or group heading never does, and an
+account stops being postable as soon as it has sub-accounts; the check lives in
+the single central posting funnel (`pl_post_journal_locked()`), not in each
+screen. Parents aggregate: every report totals each level from the accounts
+below it.
+
+Migration **036_structured_account_codes** converts an installed chart by its
+**current** groups — the first two characters of the old number are the group —
+allocating group numbers 100, 110, 120 … per class and account numbers from
+10001 within each group. Group numbers 900 and above are never allocated,
+because they are reserved for the contra groups. The old number is kept twice:
+as `pl_accounts.legacy_code` and as a row in the immutable `pl_account_code_map`
+(guard triggers refuse updates and deletes). Account identity, classification,
+role, currency, status and every posted journal line are untouched, so no
+balance and no report figure moves. The conversion is reversed, if it ever has
+to be, with `UPDATE pl_accounts a JOIN pl_account_code_map m ON m.account_id =
+a.id SET a.code = m.legacy_code`. A book created on 1.2 is born numbered and has
+no conversion rows; `pl_account_code_mapping()` resolves either number so demo
+packs, samples and imports written against the old chart keep working.
+
+`pl_accounts.is_contra` marks a contra account (owner decision B60). It is a
+presentation flag only: the account keeps its own type and its natural debit or
+credit balance, so the trial balance still balances, and reports show it as a
+deduction **inside** its own section rather than as a member of the opposite one.
+The reserved groups are accumulated depreciation and provisions against assets
+(`1-900`, `1-910`), drawings (`3-900`), sales returns and discounts allowed
+(`4-900`, `4-910`) and purchase returns and discounts received (`5-900`,
+`5-910`). A liability cannot be marked contra: an obligation is an ordinary
+liability.
+
+`pl_report_tree()` shapes the flat trial-balance, profit-and-loss and
+balance-sheet rows into that class → group → account → sub-account tree with
+every measure aggregated at each level (issue #77). `pl_report_tree_limit()` is
+the depth control and `pl_report_tree_rows()` flattens a tree for CSV and print.
+The screens render it with native `<details>`/`<summary>`, so it expands and
+collapses with the keyboard and on a phone without JavaScript, and the print
+view shows exactly what the reader has expanded. Assets and Expenses open by
+default (design frame decision 19). The machine-read API keeps the flat,
+paginated rows: the tree is the same figures re-shaped for a screen.
+
+`owner_functions.php` implements owner transactions (owner decisions B61 and A3)
+over the same central posting service: capital introduced (Dr cash, Cr owner
+capital), an owner loan to the business (Dr cash, Cr the owner's loan account, a
+liability), its repayment and drawings (Dr the contra-equity drawings account,
+Cr cash). Every one is an ordinary immutable journal with `source_type`
+`owner_transaction`, corrected only by a linked reversal.
+`pl_owner_equity_movements()` reads capital, drawings and the outstanding owner
+loan straight from posted journals for the balance sheet's equity section and
+the Owner and partners screen. `pl_owner_partners` records an AOP partner's
+capital, drawings and loan accounts and a profit-sharing ratio; the active
+ratios can never total more than 1. Allocating a period's profit between
+partners is **not** posted automatically — the appropriation order, interest on
+capital and drawings, and the treatment of losses are accounting decisions left
+for the accountant's review (owner decision B30). See the
+[owner-transaction worked examples](accounting/OWNER-TRANSACTIONS.md).
+
+The bundled chart is `resources/coa/core-starter-1.1.0.json`: structured codes,
+each pre-1.2 account's old number recorded, and the owner-capital, owner-loan,
+drawings and contra accounts present so every sample and demo shows them.
+
 ### Core accounts and general journals (0.1.2-preview)
 
 Migration **006_core_accounts_journals** appends account revisions and stable creation identities, `pl_general_drafts` and append-only `pl_core_audit`. It preserves migrations 001–005 and prior accounts, journals, documents and template mappings. A fully migrated installation has 17 tables, six receipts and thirteen guard triggers.

@@ -64,6 +64,7 @@ $routes = [
     '/pos' => ['GET'], '/pos/review' => ['GET', 'POST'], '/pos/edit' => ['POST'], '/pos/checkout' => ['POST'], '/pos/retry' => ['POST'], '/pos/receipt' => ['GET'],
     '/sample-guide' => ['GET'], '/help' => ['GET'], '/modules' => ['GET', 'POST'], '/connections' => ['GET','POST'], '/oauth/authorize' => ['GET','POST'], '/tables' => ['GET'],
     '/accounts' => ['GET'], '/accounts/save' => ['POST'], '/logo' => ['GET'],
+    '/owner' => ['GET'], '/owner/post' => ['POST'], '/owner/reverse' => ['POST'],
     '/general-journals' => ['GET'], '/general-journals/new' => ['GET'], '/general-journals/edit' => ['GET'],
     '/general-journals/detail' => ['GET'], '/general-journals/save' => ['POST'], '/general-journals/post' => ['POST'], '/general-journals/reverse' => ['POST'],
 ];
@@ -332,7 +333,7 @@ try {
             $sourceIds[$key] = (int) DB::queryFirstField('SELECT id FROM %b WHERE company_id = %i AND book_id = %i AND reference = %s', $table, $companyId, $bookId, $pack['id'] . '/' . $reference);
         }
         pl_render('sample-guide', ['title' => 'Explore ' . $pack['name'], 'user' => $user, 'company' => $company,
-            'pack' => $pack, 'sourceIds' => $sourceIds, 'accountIds' => array_column($company['accounts'], 'id', 'code')]);
+            'pack' => $pack, 'sourceIds' => $sourceIds, 'accountIds' => pl_account_code_mapping($company['accounts'])]);
     }
     if ($path === '/tables') {
         require_once dirname(__DIR__) . '/includes/functions/table_web_functions.php';
@@ -375,6 +376,41 @@ try {
         require_once dirname(__DIR__) . '/includes/functions/reconciliation_web_functions.php';
         pl_web_reconciliation($actorId, $companyId, $bookId, $user, $company, $method);
     }
+    if ($path === '/owner/post' || $path === '/owner/reverse') {
+        try {
+            pl_web_assert_scope($company, $_POST);
+            if ($path === '/owner/reverse') {
+                pl_reverse_owner_transaction($actorId, $companyId, $bookId, pl_web_id($_POST, 'journal_id'), null, pl_web_text($_POST, 'reason'));
+                pl_notice('Owner transaction reversed. The original journal is retained and linked to its reversal.');
+            } else {
+                $kind = pl_web_text($_POST, 'kind');
+                $side = ['capital_introduced' => 'capital', 'owner_loan_received' => 'loan', 'owner_loan_repaid' => 'loan', 'drawings' => 'drawings'][$kind] ?? 'capital';
+                pl_post_owner_transaction($actorId, $companyId, $bookId, [
+                    'kind' => $kind, 'date' => pl_web_text($_POST, 'date'), 'amount' => pl_web_text($_POST, 'amount'),
+                    'cash_account_id' => pl_web_id($_POST, 'cash_account_id') ?: null,
+                    'owner_account_id' => pl_web_id($_POST, 'owner_account_' . $side) ?: null,
+                    'partner_id' => pl_web_id($_POST, 'partner_id') ?: null,
+                    'description' => pl_web_text($_POST, 'description') ?: (pl_owner_transaction_kinds()[$kind]['label'] ?? 'Owner transaction'),
+                    'creation_key' => pl_web_text($_POST, 'creation_key'),
+                ]);
+                pl_notice('Owner transaction posted. Posted entries are immutable; use a linked reversal to correct one.');
+            }
+            pl_redirect(pl_url('/owner'));
+        } catch (DomainException $error) { pl_form_failure(pl_url('/owner'), $_POST, $error->getMessage()); }
+    }
+    if ($path === '/owner') {
+        $asOf = pl_web_text($_GET, 'as_of', gmdate('Y-m-d'));
+        pl_ledger_date($asOf);
+        $form = pl_form_state(pl_url('/owner'));
+        pl_render('owner', ['title' => 'Owner and partners', 'user' => $user, 'company' => $company, 'asOf' => $asOf,
+            'movements' => pl_owner_equity_movements($actorId, $companyId, $bookId, $asOf),
+            'accounts' => pl_owner_accounts($companyId, $bookId),
+            'transactions' => pl_list_owner_transactions($actorId, $companyId, $bookId),
+            'partners' => pl_list_owner_partners($actorId, $companyId, $bookId),
+            'positions' => pl_owner_partner_positions($actorId, $companyId, $bookId, $asOf),
+            'sharesComplete' => pl_owner_shares_complete($actorId, $companyId, $bookId),
+            'form' => $form, 'input' => $form['input'] ?: ['creation_key' => bin2hex(random_bytes(16)), 'date' => $asOf]]);
+    }
     if ($path === '/accounts/save') {
         $id = pl_web_id($_POST, 'id');
         $chartFilters=pl_return_list_filters($_POST,'accounts');
@@ -385,7 +421,8 @@ try {
                 'name' => pl_web_text($_POST, 'name'), 'code' => pl_web_text($_POST, 'code'),
                 'type' => pl_web_text($_POST, 'type'), 'role' => pl_web_text($_POST, 'role') ?: null,
                 'report_classification' => pl_web_text($_POST, 'report_classification') ?: null,
-                'is_active' => pl_web_text($_POST, 'is_active') === '1', 'reason' => pl_web_text($_POST, 'reason'),
+                'is_active' => pl_web_text($_POST, 'is_active') === '1', 'is_contra' => pl_web_text($_POST, 'is_contra') === '1',
+                'reason' => pl_web_text($_POST, 'reason'),
                 'creation_key' => pl_web_text($_POST, 'creation_key'),
             ], $id ?: null, $id ? pl_web_id($_POST, 'revision') : null);
             pl_notice('Account saved. Posted journal history is preserved.');
@@ -584,7 +621,9 @@ try {
     if ($path === '/reports/balance-sheet') {
         $asOf = pl_web_text($_GET, 'as_of', gmdate('Y-m-d'));
         $report = pl_balance_sheet($actorId, $companyId, $bookId, $asOf);
-        pl_render('balance-sheet', ['title' => 'Balance sheet', 'user' => $user, 'company' => $company, 'report' => $report, 'asOf' => $asOf]);
+        $depth = pl_report_depth($_GET);
+        pl_render('balance-sheet', ['title' => 'Balance sheet', 'user' => $user, 'company' => $company, 'report' => $report, 'asOf' => $asOf,
+            'depth' => $depth, 'trees' => array_map(static fn (array $tree): array => pl_report_tree_limit($tree, $depth), $report['trees'])]);
     }
     if ($path === '/reports/profit-loss') {
         $preset = pl_web_text($_GET, 'preset', 'custom');
@@ -592,7 +631,9 @@ try {
         $to = $period['to'] ?? pl_web_text($_GET, 'to', gmdate('Y-m-d'));
         $from = $period['from'] ?? pl_web_text($_GET, 'from', $company['start_date']);
         $report = pl_profit_loss($actorId, $companyId, $bookId, $from, $to);
-        pl_render('profit-loss', ['title' => 'Profit & loss', 'user' => $user, 'company' => $company, 'report' => $report, 'from' => $from, 'to' => $to, 'preset'=>$preset]);
+        $depth = pl_report_depth($_GET);
+        pl_render('profit-loss', ['title' => 'Profit & loss', 'user' => $user, 'company' => $company, 'report' => $report, 'from' => $from, 'to' => $to, 'preset'=>$preset,
+            'depth' => $depth, 'trees' => array_map(static fn (array $tree): array => pl_report_tree_limit($tree, $depth), $report['trees'])]);
     }
     if ($path === '/reports/cash-forecast') {
         $asOf = gmdate('Y-m-d');
@@ -703,7 +744,9 @@ try {
     if ($path === '/reports/trial-balance') {
         $asOf = pl_web_text($_GET, 'as_of', gmdate('Y-m-d'));
         $report = pl_trial_balance($actorId, $companyId, $bookId, $asOf);
-        pl_render('trial-balance', ['title' => 'Trial balance', 'user' => $user, 'company' => $company, 'report' => $report, 'asOf' => $asOf]);
+        $depth = pl_report_depth($_GET);
+        pl_render('trial-balance', ['title' => 'Trial balance', 'user' => $user, 'company' => $company, 'report' => $report, 'asOf' => $asOf,
+            'depth' => $depth, 'tree' => pl_report_tree_limit($report['tree'], $depth)]);
     }
     if ($path === '/reports/account') {
         $asOf = pl_web_text($_GET, 'as_of', gmdate('Y-m-d'));

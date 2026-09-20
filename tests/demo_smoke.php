@@ -138,7 +138,7 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
     demo_check(count(pl_list_periods($actor, $cid, $bid)) === 14, 'Rejected period action left a partial period.');
     if ($priorPack !== null) { demo_denied(static fn () => pl_company_demo_pack($actor, $priorPack['company_id'], $priorPack['book_id'])); }
     demo_check(pl_demo_document_limit() - pl_demo_document_count($cid, $bid) >= 100, 'The default sample capacity leaves fewer than 100 practice records for ' . $packId . '.');
-    $context = pl_company_context($actor, $cid); $codes = array_column($context['accounts'], 'id', 'code');
+    $context = pl_company_context($actor, $cid); $codes = pl_account_code_mapping($context['accounts']);
     $capacityInput = ['kind' => 'expense', 'date' => '2026-02-05', 'amount' => '1.0000', 'money_account_id' => $codes['1000'],
         'category_account_id' => $codes['5000'], 'counterparty' => 'Sample visitor practice', 'reference' => '', 'memo' => 'Capacity verification'];
     for ($i = 0; $i < 20; $i++) {

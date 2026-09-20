@@ -1201,6 +1201,30 @@
     {
       "source": "resources/lang/README.md",
       "destination": "resources/lang/README.md"
+    },
+    {
+      "source": "www/phpledger/includes/functions/account_code_functions.php",
+      "destination": "www/phpledger/includes/functions/account_code_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/owner_functions.php",
+      "destination": "www/phpledger/includes/functions/owner_functions.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/036_structured_account_codes.php",
+      "destination": "www/phpledger/install/migrations/036_structured_account_codes.php"
+    },
+    {
+      "source": "www/phpledger/templates/partials/ui/report-tree.php",
+      "destination": "www/phpledger/templates/partials/ui/report-tree.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/owner.php",
+      "destination": "www/phpledger/templates/views/owner.php"
+    },
+    {
+      "source": "resources/coa/core-starter-1.1.0.json",
+      "destination": "resources/coa/core-starter-1.1.0.json"
     }
   ]
 }
