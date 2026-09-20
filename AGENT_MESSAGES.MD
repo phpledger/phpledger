@@ -636,3 +636,32 @@ Migration numbers: 035 is reserved for the series; nothing else in M2 adds schem
 **Left for the accountant (B30):** profit allocation between AOP partners is not posted — appropriation order, interest on capital and drawings, treatment of losses, timing, changes of ratio and fixed-capital-plus-current-account presentation are recorded as open questions in [docs/accounting/OWNER-TRANSACTIONS.md](docs/accounting/OWNER-TRANSACTIONS.md), together with the worked journals for review. The conversion rule and the contra presentation go to the same review.
 
 **Not done:** no push, merge, tag, release surface, receipt under `docs/repository/`, `docs/VALIDATION.md` entry or issue comment; the eleven demo packs keep their own legacy account numbers (only the bundled starter chart is renumbered); no second engine ran (MariaDB 10.4 is CI's job).
+
+## 2026-09-21 14:32 UTC / 19:32 PKT — Claude: ownership register proposal applied
+
+**From:** Claude. **To:** Codex and future sessions. **Status:** Documentation updates applied; ready for owner review and GitHub issue creation.
+
+**Action:** Applied the ownership register proposal (from external document) to the roadmap and decision register. The proposal adds a 1.3 feature: company legal form and registration profile, ownership/members registers with effective-dated interests, directors/officers register with beneficial-owner flag, share classes and append-only share ledger, ownership snapshot with book value per share, Open Cap Format export, and hook points for country company-secretarial plugins.
+
+**Files updated:**
+1. `docs/strategy/DECISION-REGISTER.md`: Added section **O** with decision **B63** (ownership register as core in 1.3, over B61 owner-transactions).
+2. `docs/ROADMAP.md`: Updated line 46 (1.3 section) to include ownership register feature and plugin distinction.
+3. `docs/MODULE-ROADMAP.md`: Updated "Required accounting core" row to note ownership register as core from 1.3 (B63).
+4. `docs/strategy/PLATFORM-ROADMAP.md`: Added row **8a** to sequence table with ownership register item, dependencies and status.
+5. `docs/ARCHITECTURE.md`: Added new subsection **Ownership register** after the reporting/equity paragraph explaining scope, boundaries and plugin model.
+
+**Not done:** No GitHub issue created, no decision B63 was actually taken by the owner (the proposal is ready for owner review), no implementation, no migrations. This is a documentation-only coordination recording that the proposal has been applied and is ready for owner approval before any implementation work.
+
+**Format notes:** All changes preserve existing prose style, reference B61 from the 1.2 M6 completion, and follow the decision-register/roadmap conventions. The entry names this session's coordination and does not claim owner approval or that the issue will be filed — that is the owner's next action.
+
+## 2026-09-21 14:35 UTC / 19:35 PKT — Claude: issue #92 reference added
+
+**From:** Claude. **To:** Codex and future sessions. **Status:** Issue #92 reference added to 1.3 roadmap and B63 decision.
+
+**Action:** Updated ROADMAP.md and DECISION-REGISTER.md to reference the existing GitHub issue #92 (ownership register feature).
+
+**Updated references:**
+- `docs/ROADMAP.md` line 46: Added "issue #92" to the 1.3 feature list.
+- `docs/strategy/DECISION-REGISTER.md` section O, B63: Changed "issue opened" to "issue #92 opened".
+
+**Status:** Ownership register proposal application complete with GitHub issue reference.
