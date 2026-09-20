@@ -267,6 +267,63 @@ Adopted for the 1.2 module set (M1, [release plan](strategy/RELEASE-PLAN-1.2.md)
 
 None of this is new application behaviour; it is the acceptance bar the M1 documentation, tests and `tools/verify-upgrade.php` baseline satisfy for the already-shipped Stock locations module, restated so the next 1.2 module (trading documents, M2) is held to the same bar from its first commit.
 
+## How to add a translatable string
+
+The translation helpers landed with M2 of the [1.2 release plan](strategy/RELEASE-PLAN-1.2.md)
+(decision B3: Urdu first, then Arabic, English as the fallback catalogue). The interface strings
+themselves are still hard-coded English: externalising them is M11, so most screens today have no
+`pl_t()` call at all. Any new string should use the helpers.
+
+**Write the call.** `www/phpledger/includes/functions/i18n_functions.php` is loaded by the
+bootstrap and by `web_functions.php`, so `pl_t()` is available wherever a screen is rendered.
+
+```php
+<p><?= pl_e(pl_t('Nothing was posted. Your books are unchanged.')) ?></p>
+<p><?= pl_e(pl_t('Posted {count} lines for {party}.', ['count' => $lines, 'party' => $party])) ?></p>
+<p><?= pl_e(pl_tn('{count} open item', '{count} open items', $open, ['count' => $open])) ?></p>
+```
+
+The rules the helper enforces, and the reasons:
+
+- **The English string is the key.** There is no message-id table to keep in step, and a string
+  with no catalogue entry renders as itself. A screen never shows a key or an empty label.
+- **Escaping stays with the caller.** `pl_t()` and `pl_tn()` return plain text and escape nothing,
+  because the values they interpolate are usually user data and because the same string is also
+  written to the CLI, to JSON and to mail. Write `pl_e(pl_t('…'))` in HTML, exactly as you already
+  write `pl_e()` around any other text.
+- **Placeholders are named, `{like_this}`.** Positional `%s` is not supported: translators reorder
+  clauses, and a reviewer cannot tell what `%s` was meant to be. Pass `count` yourself in
+  `pl_tn()` — the helper never fills it in, so a string may count one thing and name another.
+- **Never build a sentence by concatenation.** `pl_t('Saved {name}.', …)` is translatable;
+  `pl_t('Saved ') . $name` is not, and it breaks outright in a right-to-left locale.
+- **Keep accounting values out of the sentence structure.** Format the amount with `pl_money()`
+  and the date with `pl_date_label()`, then pass the formatted string in as a placeholder value.
+
+**Add a catalogue entry.** Catalogues are English-keyed PHP arrays in `resources/lang/<locale>.php`
+— see [resources/lang/README.md](../resources/lang/README.md) for the file shape, the plural-form
+arrays, the `ur-PK` on top of `ur` inheritance, and the manifest `lang` directory a bundled module
+or plugin uses to ship its own catalogue. English has no file: it is the source language. A locale
+whose plural rules are not yet in `pl_i18n_plural_table()` needs a row there first; English and
+Urdu use `one`/`other`, and Arabic's six CLDR forms are already in the table.
+
+**Check it.** `php tests/run.php --suite=i18n` in the test container runs `tests/i18n_test.php`:
+the helper tests, and a sweep that renders the routes under the `qps` pseudo-locale, which brackets
+and lengthens every string that went through `pl_t()`. The sweep asserts that each page still
+renders and that its `<html lang>`/`dir` follow the locale, and it **counts** the visible text runs
+that are still hard-coded English and prints them:
+
+```
+i18n sweep: 27 of 29 routes rendered under the pseudo-locale; 2188 untranslated visible text runs (ceiling 2400), 0 already translated.
+```
+
+That count is the M11 backlog. The ceiling in the test may be lowered as strings are externalised;
+raising it to make a change pass is not an acceptable fix.
+
+**Setting the locale.** `pl_set_locale()` selects the locale for the rest of the process, and
+`pl_locale()` reports it, defaulting to the `PL_LOCALE` environment value and then to English.
+Nothing in the application calls `pl_set_locale()` yet: resolving a user's or company's stored
+preference, and the screen to choose one, are M11.
+
 ## Repository working boundaries
 
 ### Core CSV exports

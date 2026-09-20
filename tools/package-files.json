@@ -1193,6 +1193,14 @@
     {
       "source": "www/phpledger/templates/print/settlement-80mm.php",
       "destination": "www/phpledger/templates/print/settlement-80mm.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/i18n_functions.php",
+      "destination": "www/phpledger/includes/functions/i18n_functions.php"
+    },
+    {
+      "source": "resources/lang/README.md",
+      "destination": "resources/lang/README.md"
     }
   ]
 }

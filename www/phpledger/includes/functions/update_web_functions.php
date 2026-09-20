@@ -75,7 +75,12 @@ function pl_update_web(string $root): never
     // A terminal checkpoint can precede marker removal if the worker is interrupted.
     // Keep Continue available until the durable marker is actually finalized.
     $active = $authorized && $state !== null && isset($directory) && is_file($directory . '/updates/active.json');
-    echo '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PHP Ledger installation maintenance</title>';
+    // The recovery runtime is a fixed, copied set of update files and does not carry
+    // i18n_functions.php; the maintenance page therefore asks for the locale only when the
+    // application's own helpers happen to be loaded, and otherwise stays the English source.
+    $locale = function_exists('pl_locale') ? pl_locale() : 'en';
+    $direction = function_exists('pl_text_direction') ? pl_text_direction() : 'ltr';
+    echo '<!doctype html><html lang="' . $escape($locale) . '" dir="' . $escape($direction) . '"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PHP Ledger installation maintenance</title>';
     echo '<style nonce="' . $nonce . '">body{font:1rem system-ui;line-height:1.6;margin:2rem auto;padding:0 1rem;max-width:46rem;color:#172336}label{display:block;margin-top:1rem}input,select,button{font:inherit;max-width:100%;padding:.55rem}button{margin:1rem 0}input[type=password]{width:95%}[role=alert]{background:#fff1ed;padding:1rem}fieldset{margin:1rem 0}</style><body><main><h1>Installation maintenance</h1>';
     echo '<p>This operation affects every business. Use the private host installation operator key and the publisher-signed release files.</p>';
     if ($error !== '') { echo '<p role="alert">' . $escape($error) . '</p>'; }
