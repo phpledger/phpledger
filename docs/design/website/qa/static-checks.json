@@ -930,14 +930,14 @@
       "path": "/download/",
       "redirectStub": false,
       "indexable": true,
-      "title": "Download PHP Ledger 1.1.1 (PHP 8.2+, MySQL or MariaDB)",
+      "title": "Download PHP Ledger 1.1.2 (PHP 8.2+, MySQL or MariaDB)",
       "descriptionLength": 142,
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 37500,
-        "eager": 348930,
-        "total": 598567
+        "html": 37679,
+        "eager": 349109,
+        "total": 598746
       },
       "budgets": {
         "eager": 700000,
@@ -970,7 +970,7 @@
         },
         {
           "file": "download/index.html",
-          "bytes": 37500
+          "bytes": 37679
         }
       ],
       "lazyAssets": [
@@ -4273,9 +4273,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22223,
-        "eager": 333653,
-        "total": 422358
+        "html": 22860,
+        "eager": 334290,
+        "total": 422995
       },
       "budgets": {
         "eager": null,
@@ -4308,7 +4308,89 @@
         },
         {
           "file": "news/1-1-1/index.html",
-          "bytes": 22223
+          "bytes": 22860
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "news/1-1-2/index.html": {
+      "path": "/news/1-1-2/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "PHP Ledger 1.1.2: the 1.1.1 record corrected",
+      "descriptionLength": 144,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 22285,
+        "eager": 333715,
+        "total": 422420
+      },
+      "budgets": {
+        "eager": null,
+        "total": null
+      },
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "news/1-1-2/index.html",
+          "bytes": 22285
         }
       ],
       "lazyAssets": [
@@ -4351,13 +4433,13 @@
       "redirectStub": false,
       "indexable": true,
       "title": "Release news and project updates | PHP Ledger",
-      "descriptionLength": 130,
+      "descriptionLength": 154,
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 26819,
-        "eager": 338249,
-        "total": 426954
+        "html": 27444,
+        "eager": 338874,
+        "total": 427579
       },
       "budgets": {
         "eager": 650000,
@@ -4390,7 +4472,7 @@
         },
         {
           "file": "news/index.html",
-          "bytes": 26819
+          "bytes": 27444
         }
       ],
       "lazyAssets": [
@@ -5379,9 +5461,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31137,
-        "eager": 342567,
-        "total": 431272
+        "html": 35081,
+        "eager": 346511,
+        "total": 435216
       },
       "budgets": {
         "eager": 650000,
@@ -5414,7 +5496,7 @@
         },
         {
           "file": "roadmap/index.html",
-          "bytes": 31137
+          "bytes": 35081
         }
       ],
       "lazyAssets": [
@@ -5789,9 +5871,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29292,
-        "eager": 340722,
-        "total": 429427
+        "html": 29686,
+        "eager": 341116,
+        "total": 429821
       },
       "budgets": {
         "eager": null,
@@ -5824,7 +5906,7 @@
         },
         {
           "file": "self-hosting/requirements/index.html",
-          "bytes": 29292
+          "bytes": 29686
         }
       ],
       "lazyAssets": [
@@ -5953,9 +6035,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 34001,
-        "eager": 345431,
-        "total": 434136
+        "html": 34013,
+        "eager": 345443,
+        "total": 434148
       },
       "budgets": {
         "eager": null,
@@ -5988,7 +6070,7 @@
         },
         {
           "file": "self-hosting/vps-install/index.html",
-          "bytes": 34001
+          "bytes": 34013
         }
       ],
       "lazyAssets": [
@@ -6134,7 +6216,7 @@
   "errors": [],
   "warnings": [],
   "summary": {
-    "pages": 72,
+    "pages": 73,
     "redirectStubs": 2,
     "errors": 0,
     "warnings": 0

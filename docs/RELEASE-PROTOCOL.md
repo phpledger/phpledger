@@ -4,7 +4,7 @@ Owner request, 19 September 2026: every release follows one distribution protoco
 
 Related: [release signing](RELEASE-SIGNING.md), [installer](INSTALLER.md), [distribution plan](strategy/DISTRIBUTION-PLAN.md), [platform roadmap](strategy/PLATFORM-ROADMAP.md).
 
-## Status on 21 September 2026
+## Status on 20 September 2026
 
 Updated at the 1.1.2 patch. The rows record what is live now; the 19 September wording is kept where nothing changed.
 

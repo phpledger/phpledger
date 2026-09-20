@@ -6,7 +6,7 @@ PHP Ledger 1.0.0 was the first supported stable release of the restarted applica
 
 ## 1.1.2: the 1.1.1 record corrected, and signed updates again
 
-Published 21 September 2026. A patch release: no migration of its own, no schema change, and one fix at the point of sale.
+Published 20 September 2026. A patch release: no migration of its own, no schema change, and one fix at the point of sale.
 
 - **The 1.1.1 record is corrected.** 1.1.1 was announced as carrying no migration. It does: its package includes migration `034_inventory_locations` and the optional Stock locations module (warehouses and vans, transfers at carrying value, per-location stock), which is off by default and changes nothing until a company enables it under Modules. A fresh 1.1.1 installation applied the migration during setup. An installation upgraded from 1.1.0 by replacing files has it pending: run `php www/phpledger/install/migrate.php` once, or install 1.1.2 from `/maintenance.php`, which applies it. The module's documentation, compatibility matrix and upgrade proof are 1.2 work; treat it as an early copy of the first 1.2 module. The 1.1.1 notes below are amended.
 - **Cash at the point of sale is counted in notes and coins** ([issue #88](https://github.com/phpledger/phpledger/issues/88)). The showcase accepted a tender such as `1262.2555` against a sale total of `1,262.25` and recorded change of `0.0055`. Cash received must now be a whole number of the currency's minor units, so tender, total and change share one precision on the receipt; the sample catalogue is checked to price goods no more finely. The ledger keeps four decimal places; only the tender is held to two.
@@ -19,7 +19,7 @@ This release ships without a media kit: minor and patch releases do not carry on
 
 ## 1.1.1: setup you can watch, and a database on your own computer
 
-Published 20 September 2026. A patch release with no change to any accounting behaviour. **Correction (21 September 2026, in 1.1.2):** this release was announced with "no schema change, no migration". That was wrong: its package carries migration `034_inventory_locations` and the optional Stock locations module. See the 1.1.2 notes above for what to do on an installation upgraded from 1.1.0 by replacing files.
+Published 20 September 2026. A patch release with no change to any accounting behaviour. **Correction (20 September 2026, in 1.1.2):** this release was announced with "no schema change, no migration". That was wrong: its package carries migration `034_inventory_locations` and the optional Stock locations module. See the 1.1.2 notes above for what to do on an installation upgraded from 1.1.0 by replacing files.
 
 - **Setup runs in six stages you can see.** Start, Database, Build, Checks, Account and Ready, each sized for a laptop screen. The Build stage shows a progress bar naming the step it is on, such as "Building the chart of accounts and journals, step 6 of 35", instead of a button that looks like it is waiting for you.
 - **A failed requirement is something to clear, not an error page.** A missing PHP extension now takes over the screen with the places it is actually fixed: the `php.ini` line on XAMPP or Laragon, the package name on Debian, the PHP Selector screen on shared hosting, and a Check again button.

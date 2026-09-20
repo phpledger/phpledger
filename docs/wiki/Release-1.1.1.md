@@ -2,6 +2,8 @@
 
 Published 20 September 2026. A patch release: no schema change, no migration, and no change to any accounting behaviour. Everything in it is browser setup, which an existing installation has already completed.
 
+**Correction (20 September 2026, in [[1.1.2|Release-1.1.2]]):** this page said "no schema change, no migration". That was wrong. The 1.1.1 package carries migration `034_inventory_locations` and the optional Stock locations module, which stays off until a company enables it. A fresh 1.1.1 installation applied the migration during setup; an installation upgraded from 1.1.0 by replacing files has it pending and must run `php www/phpledger/install/migrate.php` once, or install 1.1.2 from `/maintenance.php`, which applies it. 1.1.1 also shipped without signed update metadata, so it could not be installed from `/maintenance.php`; signed updates are restored in 1.1.2.
+
 - **Six stages you can see.** Start, Database, Build, Checks, Account and Ready, each sized for a laptop screen. The Build stage shows a progress bar naming the step it is on, such as "Building the chart of accounts and journals, step 6 of 35", instead of a button that looks like it is waiting for you.
 - **A failed requirement is something to clear, not an error page.** A missing PHP extension takes over the screen with the places it is actually fixed: the `php.ini` line on XAMPP or Laragon, the package name on Debian, the PHP Selector screen on shared hosting, and a Check again button.
 - **Setup proves what it built.** Fourteen checks on your server before you type anything, and six against the finished database afterwards, including the count of protective database rules that keep posted entries immutable. The last screen itemises what exists, read back from the database.
@@ -13,7 +15,7 @@ Published 20 September 2026. A patch release: no schema change, no migration, an
 - **One database account, not two.** Browser setup no longer offers an optional second runtime account ([issue #87](https://github.com/phpledger/phpledger/issues/87)). Restricting the account after installation is documented in INSTALL.md and turns off the automatic update path.
 - **Fixes.** An empty key folder that an operator created in advance, or pointed `PL_OAUTH_KEY_DIRECTORY` at, was treated as an interrupted installation and blocked setup; only a folder holding some of the keys is refused now. The two demo landing labels corrected on 19 September ship here.
 
-Upgrading from 1.1.0 replaces files only. See [UPGRADE.md](https://github.com/phpledger/phpledger/blob/master/resources/release/UPGRADE.md#from-110-to-111).
+Upgrading from 1.1.0 replaces files and then needs `php www/phpledger/install/migrate.php` once, for migration 034 (corrected in 1.1.2; the original note said there was no migration). See [UPGRADE.md](https://github.com/phpledger/phpledger/blob/master/resources/release/UPGRADE.md#from-110-to-111).
 
 This release ships **without a media kit**, by the owner's decision of 20 September 2026: minor and patch releases do not carry one. The assurance limits recorded for 1.1.0 and 1.0.0 still apply, and a real shared host and an unfamiliar operator have still not been observed.
 

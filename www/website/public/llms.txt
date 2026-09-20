@@ -1,8 +1,8 @@
 # PHP Ledger
 
-> PHP Ledger is open-source, self-hosted double-entry accounting software with core invoices, bills and payments, optional purchasing and inventory, and a manually configured tax engine. Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+, 1.1.0 is the current release: unzip it into any web folder, open it, and the browser installer starts; updates are publisher-signed. 1.0.0 was the first stable release; independent accounting and security review remain post-release commitments.
+> PHP Ledger is open-source, self-hosted double-entry accounting software with core invoices, bills and payments, optional purchasing and inventory, and a manually configured tax engine. Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+, 1.1.2 is the current release: unzip it into any web folder, open it, and the browser installer starts; updates are publisher-signed. 1.0.0 was the first stable release; independent accounting and security review remain post-release commitments.
 
-Current stable release: 1.1.1. PHP 8.2+ (8.3 recommended), MySQL 8.4 or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
+Current stable release: 1.1.2. PHP 8.2+ (8.3 recommended), MySQL 8.4 or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
 
 New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-adoption 0.1.0 through 0.1.5 previews retain MIT; dependencies and archived code keep their own terms.
 
@@ -37,7 +37,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 
 ## Documentation and pages
 
-- [PHP Ledger: self-hosted double-entry accounting software](https://phpledger.com/): Open-source double-entry accounting with invoices, bills, stock and bank reconciliation, self-hosted on PHP 8.2+ with MySQL or MariaDB. Current release: 1.1.1.
+- [PHP Ledger: self-hosted double-entry accounting software](https://phpledger.com/): Open-source double-entry accounting with invoices, bills, stock and bank reconciliation, self-hosted on PHP 8.2+ with MySQL or MariaDB. Current release: 1.1.2.
 - [About](https://phpledger.com/about/): Meet the project behind PHP Ledger: open-source, self-hosted accounting, its BixiSoft PHP architecture, contributors and development-preview boundaries.
 - [Community](https://phpledger.com/community/): Join the PHP Ledger community: GitHub Discussions and issues, accounting and security review, pilot businesses, and the project's social channels.
 - [Compare](https://phpledger.com/compare/): Compare accounting, invoicing and ERP software by licence, hosting, daily workflows and recovery, with fair alternatives and explicit PHP Ledger limits.
@@ -48,7 +48,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [FrontAccounting alternative](https://phpledger.com/compare/frontaccounting-alternative/): Compare FrontAccounting with PHP Ledger on PHP hosting, sales and purchases, accounting controls and migration, with clear development-preview limits.
 - [Open-source accounting software](https://phpledger.com/compare/open-source-accounting-software/): Choose open-source accounting software by licence, ledger scope, invoicing, ERP needs, self-hosting and recovery, using a practical five-family shortlist.
 - [Credits](https://phpledger.com/credits/): Photography, typeface, icon and company-logo credits for the PHP Ledger website, with the licence and source of each locally served asset.
-- [Download](https://phpledger.com/download/): Get the 1.1.1 package and checksum, check the requirements, then upload one phpledger folder to your website and install it from your browser.
+- [Download](https://phpledger.com/download/): Get the 1.1.2 package and checksum, check the requirements, then upload one phpledger folder to your website and install it from your browser.
 - [PHP Ledger guidance by role](https://phpledger.com/for/): Choose practical PHP Ledger evaluation guidance for accountants, software houses and small-business owners, with current preview limits.
 - [PHP Ledger for accountants: what to inspect before adopting it](https://phpledger.com/for/accountants/): An accountant’s evaluation of PHP Ledger: source trails, period controls, opening reconciliation, exact amounts and unfinished module boundaries.
 - [PHP Ledger for small businesses: decide what you need first](https://phpledger.com/for/small-businesses/): A plain-language guide for business owners considering PHP Ledger, with a safe demo path, practical questions and honest reasons to wait.
@@ -74,7 +74,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [How do opening balances and cutover work?](https://phpledger.com/learn/opening-balances-and-cutover/): Plan a reconciled move to a new ledger with opening balances, unpaid-document schedules, a clear cutoff and no duplicate recognition.
 - [Profit and loss versus balance sheet: what is the difference?](https://phpledger.com/learn/profit-and-loss-vs-balance-sheet/): Compare a period’s profit with financial position at a date, using original cash, borrowing and owner-funding examples.
 - [What does a trial balance prove?](https://phpledger.com/learn/trial-balance/): Read a trial balance, check a fictional 1,000.00 example, and distinguish balanced arithmetic from complete and correctly classified books.
-- [News](https://phpledger.com/news/): Read PHP Ledger release updates, including 1.1.1 with setup you can watch, 1.1.0 with installation from any web folder, and 1.0.0.
+- [News](https://phpledger.com/news/): Read PHP Ledger release updates, including 1.1.2 (the 1.1.1 record corrected), 1.1.1 (setup you can watch), 1.1.0 (install from any web folder) and 1.0.0.
 - [0.1.0-preview](https://phpledger.com/news/0-1-0-preview/): The first PHP Ledger evaluation package includes company setup, receipts, expenses, balanced journals, reports and a sample cash point of sale.
 - [0.1.3-preview](https://phpledger.com/news/0-1-3-preview/): Evaluate visible running balances, reviewed opening cutover, bank reconciliation, CSV exports and owner-controlled POS modules in PHP Ledger 0.1.3-preview.
 - [0.1.4-preview](https://phpledger.com/news/0-1-4-preview/): Profit & Loss and Balance Sheet panels fit without horizontal scrolling. Account ledgers keep running balances and filters visible on tablets.
@@ -88,6 +88,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [1.0.0](https://phpledger.com/news/1-0-0/): PHP Ledger 1.0.0 consolidates workflow recovery, a browser installer and signed automatic updates with backup/recovery into the first supported stable release.
 - [1.1.0](https://phpledger.com/news/1-1-0/): PHP Ledger 1.1.0 installs like WordPress from any web folder, supports MariaDB 10.4+, lets the first account choose a username and adds an optional logo.
 - [1.1.1](https://phpledger.com/news/1-1-1/): PHP Ledger 1.1.1 rebuilds browser setup into six stages with green and red checks, and accepts a local database account with no password.
+- [1.1.2](https://phpledger.com/news/1-1-2/): PHP Ledger 1.1.2 corrects the 1.1.1 record (it carried migration 034), counts POS cash in whole minor units and restores signed update metadata.
 - [Point of sale](https://phpledger.com/point-of-sale/): An optional cash POS for small counters: cart, cash and change, printable receipt and one balanced journal. No stock, tax or card payments at the counter yet.
 - [Pricing and licence](https://phpledger.com/pricing/): PHP Ledger is free under AGPL-3.0-or-later. A commercial licence and paid installation, training and pilot services are available on request; no hidden prices.
 - [Privacy](https://phpledger.com/privacy/): How PHP Ledger's website and temporary demo use sessions, sample records, country hints and operational logs, and how to contact the maintainer.
@@ -97,7 +98,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [Accounting software landscape](https://phpledger.com/research/open-source-accounting-landscape/): A primary-source survey of accounting, ERP, invoice and personal-ledger projects, examining licence changes, deployment evidence and unresolved quality claims.
 - [Pakistan SME bookkeeping](https://phpledger.com/research/pakistan-sme-bookkeeping/): A dated study of Pakistan bookkeeping apps, download bands and historical engagement, separating verified listings from unproven market and pricing claims.
 - [PHP hosting availability](https://phpledger.com/research/php-hosting-availability-2026/): A dated four-source study of PHP hosting availability, separating panel support, provider defaults, individual plans and complete application compatibility.
-- [Roadmap](https://phpledger.com/roadmap/): PHP Ledger's release sequence: the 1.1.1 patch, 1.2 stock locations, trading documents and plugins, 1.3 Arabic and platform work, and the open review gates.
+- [Roadmap](https://phpledger.com/roadmap/): PHP Ledger's releases: 1.1.1 and 1.1.2 shipped, 1.2 stock locations, trading documents and plugins, 1.3 Arabic and platform work, and the open review gates.
 - [Self-host accounting software with a recovery plan](https://phpledger.com/self-hosting/): Understand the hosting, maintenance and recovery work behind self-hosted accounting, then choose a realistic PHP Ledger installation route.
 - [Back up and restore PHP Ledger](https://phpledger.com/self-hosting/backup-and-restore/): Build a matched PHP Ledger recovery set, rehearse restoration and preserve migration guards and database view access during populated upgrades.
 - [Use PHP Ledger locally with Docker](https://phpledger.com/self-hosting/docker/): Run the repository’s local Docker Compose environment, install its schema and use the isolated test profile without treating it as a production appliance.

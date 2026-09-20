@@ -1,0 +1,191 @@
+{
+  "version": "1.1.1",
+  "channel": "stable",
+  "published_at": "2026-09-20T16:43:25Z",
+  "tag": "v1.1.1",
+  "tag_object": "442f43304ae621d06b0aa7fc02b60718f50d6bf4",
+  "tag_created_at": "2026-09-20T16:42:55Z",
+  "package_source_commit": "63658bcabd6a92c84ca3745099d150c19eb22705",
+  "package_source_parents": [
+    "c731ced8645ce885fa03fcb6217007f1ed50d9b5",
+    "196c02a86faaba24bea1bb6149afc621cfcfb909"
+  ],
+  "release_url": "https://github.com/phpledger/phpledger/releases/tag/v1.1.1",
+  "assets": {
+    "phpledger-1.1.1.zip": {
+      "bytes": 2950729,
+      "files": 1502,
+      "sha256": "8c7f8b3236661ff5f3bdacac3cc2db45ca688eccbcc31dcbf07b877f3432aee8"
+    }
+  },
+  "asset_checksum_file": {
+    "name": "phpledger-1.1.1.zip.sha256",
+    "bytes": 86,
+    "sha256": "9e06340bb31f5b09bdaa7825e0ef4f41bddfe5fa37bdde6114f2b3b14134a028"
+  },
+  "published_download_matches_local_build": true,
+  "github_asset_digest_matches_local_build": true,
+  "signed_update_metadata": false,
+  "media_kit": false,
+  "media_kit_waived_by_owner": "2026-09-20, for minor and patch releases",
+  "publisher_key": {
+    "algorithm": "RSA-4096",
+    "spki_der_sha256": "4e58a5f46b0538c9b37aaadbfced9a2d8ad2f7d413bc168a67b1b94feaa78e78",
+    "pem_sha256": "85ad4ac665961fbf290067edf0d010145310e8c07d05097626e285a4cba4a257",
+    "used_for_this_release": false,
+    "cloud_backup_recorded": true,
+    "offline_backup_recorded": false
+  },
+  "reproducible_build": {
+    "local_builds_identical": true,
+    "local_build_receipts": [
+      "build/release-1.1.1/receipt.json (2026-09-20T16:41:49Z)",
+      "build/release-1.1.1-check/receipt.json (2026-09-20T16:42:41Z)"
+    ],
+    "ci_builds_identical": true,
+    "ci_matches_local_bytes": false,
+    "ci_matches_local_contents": null,
+    "ci_contents_comparison_note": "CI artifact not downloaded for this receipt; member contents not compared",
+    "ci_archive_bytes": 2945768,
+    "ci_archive_sha256": "dc1ad1d0733e8ff819fd0f2547fd4061d39e5947ebad400dad778dd4a407fa26",
+    "ci_run_id": 35523584101,
+    "vendor_composer_lock_sha256_difference": "line endings only: LF blob 1fbf19c7 (CI) vs CRLF checkout 3866a53b (local, core.autocrlf=true)"
+  },
+  "tag_history": {
+    "first_pushed_at_commit": "c731ced8645ce885fa03fcb6217007f1ed50d9b5",
+    "first_push_at": "2026-09-20T16:33Z",
+    "first_push_local_build": {
+      "bytes": 2948511,
+      "sha256": "7c24f5ce3b03515c62e52d3d0d379552e5aa094c9257db89fd9ecd56fd535d70",
+      "committed_under": "build/ in 63658bc"
+    },
+    "first_push_ci_foundation": "5 of 6 jobs success; php-mysql 8.3 failed: tag ref deleted before checkout",
+    "first_push_ci_release": "archive built; draft step aborted: tag v1.1.1 doesn't exist (--verify-tag)",
+    "moved_to": "63658bcabd6a92c84ca3745099d150c19eb22705"
+  },
+  "tests": {
+    "main_suite": "316 tests, 0 failures",
+    "main_suite_database": "mysql:8.4",
+    "browser_installer": 54,
+    "keyless_installer": 83,
+    "mariadb_10_11_earlier_pass": "310 tests, 0 failures on MySQL 8.4 and MariaDB 10.11 at 8c786aa, before the Workbench rebuild and the merge; keyless installer 158 checks",
+    "mariadb_10_4": "not run",
+    "release_signing": null,
+    "update_channel": null,
+    "release_feed": null,
+    "web_adapter_on_archive": null,
+    "ci_foundation_on_tag": "success",
+    "ci_foundation_on_tag_run_id": 35523584079,
+    "ci_release_build_on_tag": "build, byte-identical rebuild and receipt steps success; 'Create the draft release' step failed: release already existed",
+    "ci_release_build_on_tag_run_id": 35523584101,
+    "evidence_source": "AGENT_MESSAGES.MD, '2026-09-20 — Claude: 1.1.1 published (result)'; test counts not re-run for this receipt"
+  },
+  "repository_hygiene": {
+    "build_output_committed_in_merge": true,
+    "build_output_files": 6,
+    "build_output_bytes": 5898633,
+    "ignored_from": "9a25d63f2241f069adde51f7a5fe8a11618991f7",
+    "artifact_affected": false
+  },
+  "demo": {
+    "refreshed": false,
+    "reason": "owner's choice",
+    "release": "core-1.1.0-af0f4895f85a",
+    "source_commit": "af0f4895f85a9c9c8b2107b5b919428c9919d551",
+    "version": "1.1.0",
+    "checked_at": "2026-09-20T18:19:28Z",
+    "health_http_status": 200,
+    "content_overlay": false,
+    "issue_88_visible": true
+  },
+  "website": {
+    "published": false,
+    "source_updated_in": "9a25d63f2241f069adde51f7a5fe8a11618991f7",
+    "source_committed_at": "2026-09-20T16:48:24Z",
+    "source_pages": 72,
+    "source_build": "0 errors, 0 warnings",
+    "source_feed_update_json": null,
+    "live_release": "website-1-1-0-roadmap-20260919-185525",
+    "live_feed_stable_version": "1.1.0",
+    "live_download_page_mentions_1_1_1": false,
+    "live_news_1_1_1_http_status": 404,
+    "release_feed": "https://phpledger.com/releases/index.json"
+  },
+  "wiki_commit": "0772a10",
+  "wiki_pushed": true,
+  "wiki_roadmap_page_corrected": false,
+  "repository_about_updated": false,
+  "issues_closed": [
+    "#84"
+  ],
+  "errata": [
+    {
+      "id": 1,
+      "claim": "no schema change, no migration",
+      "surfaces": [
+        "resources/release/RELEASE-NOTES.md at v1.1.1 (lines 9 and 22)",
+        "resources/release/UPGRADE.md at v1.1.1 (line 33)",
+        "README.md at 9a25d63 (line 39)",
+        "docs/wiki/Release-1.1.1.md and the live wiki page",
+        "www/website/src/pages/news-1-1-1.html (unpublished)",
+        "GitHub release body"
+      ],
+      "fact": "v1.1.1 ships www/phpledger/install/migrations/034_inventory_locations.php (50 lines), resources/modules/inventory-locations.json and templates/partials/ui/inventory-locations.php; none exist at v1.1.0",
+      "verified_by": "git diff --stat v1.1.0 v1.1.1 -- www/phpledger/install/migrations/; git ls-tree v1.1.0 and v1.1.1",
+      "consequence": "an installation upgraded from 1.1.0 by replacing files leaves migration 034 pending",
+      "corrected_in": "1.1.2 (planned); roadmap, README and docs/wiki/Roadmap.md corrected in 54fb89e"
+    },
+    {
+      "id": 2,
+      "claim": "1.1.1 includes the demo-pack unbundling (issue #71)",
+      "surfaces": [
+        "docs/ROADMAP.md at 9a25d63 (line 42)",
+        "README.md at 9a25d63 (line 163)",
+        "docs/wiki/Roadmap.md and the live wiki Roadmap page",
+        "www/website/public/roadmap/index.html at 9a25d63 (unpublished)"
+      ],
+      "fact": "tools/package-files.json at v1.1.1 still lists resources/demo-packs/catalog.json and all eleven demo-pack files for the archive",
+      "verified_by": "git show v1.1.1:tools/package-files.json",
+      "corrected_in": "1.1.2 (planned); issue #71 moves to 1.2; roadmap, README and docs/wiki/Roadmap.md corrected in 54fb89e"
+    },
+    {
+      "id": 3,
+      "claim": "use /maintenance.php if you pinned the publisher key at 1.1.0",
+      "surfaces": [
+        "resources/release/UPGRADE.md at v1.1.1 (line 33)"
+      ],
+      "fact": "no phpledger-1.1.1.update.json was produced or attached, so a 1.1.0 installation cannot install 1.1.1 in-app",
+      "verified_by": "gh release view v1.1.1 --json assets",
+      "corrected_in": "1.1.2 (planned): signed metadata serving both 1.1.0 and 1.1.1; 1.1.1 not signed retroactively"
+    }
+  ],
+  "errata_correction_commit": "54fb89e76abb77961ba6e6e9006eee042bb26ced",
+  "errata_correction_commit_location": "release commit 3df5755 (tag v1.1.2) on master",
+  "next_release_at_time_of_writing": {
+    "version": "1.1.2",
+    "commit": "3df5755cb777a6e60e545d644ece6cb93f56fd7f",
+    "local_tag": "v1.1.2",
+    "on_origin": false,
+    "github_release": false,
+    "checked_at": "2026-09-20T18:30Z"
+  },
+  "receipt": {
+    "retrospective": true,
+    "written_on": "2026-09-20",
+    "protocol_step_skipped_at_publication": 12
+  },
+  "open_gates": [
+    "independent accounting review",
+    "independent security review",
+    "supervised pilots with a real month-end close",
+    "real shared-host observation and restricted shared-host recovery",
+    "unfamiliar-operator installation",
+    "offline backup of the publisher key",
+    "cross-platform reproducible compression",
+    "MariaDB 10.4 evidence, including migration 034",
+    "website republication for 1.1.1",
+    "signed update metadata (restored in 1.1.2)",
+    "errata on every 1.1.1 surface (1.1.2)",
+    "publication receipt written retrospectively on 20 September 2026 evening"
+  ]
+}

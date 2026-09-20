@@ -1,6 +1,8 @@
-## Current package: 1.1.1
+## Current package: 1.1.2
 
-**1.1.1**, published 20 September 2026, rebuilds browser setup into six stages with green and red checks, accepts the database account XAMPP and Laragon install on your own computer including `root` with no password, creates that database itself, and warns instead of refusing over plain HTTP. It carries no migration. See the [[1.1.1 release notes|Release-1.1.1]].
+**1.1.2**, published 20 September 2026, corrects the 1.1.1 record (its package carries migration 034 and the optional Stock locations module, off by default), counts cash at the point of sale in whole minor units ([issue #88](https://github.com/phpledger/phpledger/issues/88)), and restores signed update metadata, so an installation on 1.1.0 or 1.1.1 with the publisher key pinned installs it from `/maintenance.php`. [Download 1.1.2](https://github.com/phpledger/phpledger/releases/tag/v1.1.2) and see the [[1.1.2 release notes|Release-1.1.2]]. The public demo still runs 1.1.0.
+
+**1.1.1**, published 20 September 2026, rebuilds browser setup into six stages with green and red checks, accepts the database account XAMPP and Laragon install on your own computer including `root` with no password, creates that database itself, and warns instead of refusing over plain HTTP. It was announced as carrying no migration, but its package includes migration 034 and the optional Stock locations module; an installation upgraded from 1.1.0 by replacing files must run `php www/phpledger/install/migrate.php` once or install 1.1.2 from `/maintenance.php`. It shipped without signed update metadata. See the [[1.1.1 release notes|Release-1.1.1]].
 
 **1.1.0**, published 19 September 2026, installs like WordPress: upload the `phpledger` folder into any web folder and open its address, and the installer starts by itself. It adds MariaDB 10.4+, a chosen username, an optional logo, and the first signed update metadata. [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.1.0/phpledger-1.1.0-media-kit.zip). [[Release notes|Release-1.1.0]]. **1.0.0**, published 18 September 2026, was the first stable release.
 
@@ -10,7 +12,7 @@
 
 # PHP Ledger
 
-**PHP Ledger is open-source, self-hosted double-entry accounting software with a simple cash point of sale for small businesses, built on PHP 8.2+ (8.3 recommended) with MySQL 8.4 or MariaDB 10.4+. 1.1.0 is the current release; 1.0.0 was the first stable release.**
+**PHP Ledger is open-source, self-hosted double-entry accounting software with a simple cash point of sale for small businesses, built on PHP 8.2+ (8.3 recommended) with MySQL 8.4 or MariaDB 10.4+. 1.1.2 is the current release; 1.0.0 was the first stable release.**
 
 PHP Ledger serves small-business owners, accountants and bookkeepers who want a useful workspace on hosting they control, installable from a browser without a terminal. The direction is a complete accounting core, followed by optional business modules.
 

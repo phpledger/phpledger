@@ -40,7 +40,7 @@ Keep the installed chain through 033 unchanged. This upgrade applies migration 0
 
 ## From 1.1.0 to 1.1.1
 
-**Correction (21 September 2026):** the paragraph below was wrong when 1.1.1 was published. This release **does** add migration `034_inventory_locations` (stock-locations tables and the optional Stock locations module); the chain ends at 034 only after it is applied. An installation that replaced files without running `php www/phpledger/install/migrate.php` has it pending. Because 1.1.1 shipped no signed metadata, `/maintenance.php` could not install it from 1.1.0; 1.1.2 restores that path.
+**Correction (20 September 2026):** the paragraph below was wrong when 1.1.1 was published. This release **does** add migration `034_inventory_locations` (stock-locations tables and the optional Stock locations module); the chain ends at 034 only after it is applied. An installation that replaced files without running `php www/phpledger/install/migrate.php` has it pending. Because 1.1.1 shipped no signed metadata, `/maintenance.php` could not install it from 1.1.0; 1.1.2 restores that path.
 
 Original text: A files-only upgrade. There is no migration in this release: the schema chain still ends at 034, no receipt changes, and no accounting behaviour changes. Replace the files with the manual procedure below, or use `/maintenance.php` if you pinned the publisher key at 1.1.0.
 

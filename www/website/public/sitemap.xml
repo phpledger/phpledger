@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://phpledger.com/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
   <url>
     <loc>https://phpledger.com/about/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
   <url>
     <loc>https://phpledger.com/community/</loc>
@@ -46,7 +46,7 @@
   </url>
   <url>
     <loc>https://phpledger.com/download/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
   <url>
     <loc>https://phpledger.com/for/</loc>
@@ -205,6 +205,10 @@
     <lastmod>2026-09-20</lastmod>
   </url>
   <url>
+    <loc>https://phpledger.com/news/1-1-2/</loc>
+    <lastmod>2026-09-20</lastmod>
+  </url>
+  <url>
     <loc>https://phpledger.com/point-of-sale/</loc>
     <lastmod>2026-09-18</lastmod>
   </url>
@@ -242,7 +246,7 @@
   </url>
   <url>
     <loc>https://phpledger.com/roadmap/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
   <url>
     <loc>https://phpledger.com/self-hosting/</loc>
@@ -262,7 +266,7 @@
   </url>
   <url>
     <loc>https://phpledger.com/self-hosting/requirements/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
   <url>
     <loc>https://phpledger.com/self-hosting/shared-hosting-cpanel/</loc>
@@ -270,7 +274,7 @@
   </url>
   <url>
     <loc>https://phpledger.com/self-hosting/vps-install/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
   <url>
     <loc>https://phpledger.com/terms/</loc>
