@@ -1,6 +1,6 @@
 ## Current package: 1.1.3
 
-**1.1.3**, published 20 September 2026, fixes issue [#90](https://github.com/phpledger/phpledger/issues/90): the in-app updater now completes its migrate phase without error, so an installation on 1.1.0, 1.1.1 or 1.1.2 with the key pinned installs 1.1.3 from `/maintenance.php`. [Download 1.1.3](https://github.com/phpledger/phpledger/releases/tag/v1.1.3) and see the [[1.1.3 release notes|Release-1.1.3]].
+**1.1.3**, published 20 September 2026, fixes issue [#90](https://github.com/phpledger/phpledger/issues/90): the in-app updater now completes its migrate phase without error. An installation on **1.1.2** with the key pinned installs 1.1.3 from `/maintenance.php`, proven end to end; an installation on **1.1.0** uses the manual procedure instead ([issue #91](https://github.com/phpledger/phpledger/issues/91)).php`. [Download 1.1.3](https://github.com/phpledger/phpledger/releases/tag/v1.1.3) and see the [[1.1.3 release notes|Release-1.1.3]].
 
 **1.1.2**, published 20 September 2026, corrects the 1.1.1 record (its package carries migration 034 and the optional Stock locations module, off by default), counts cash at the point of sale in whole minor units ([issue #88](https://github.com/phpledger/phpledger/issues/88)), and restores signed update metadata. The known-issue block that previously noted issue #90 is fixed in 1.1.3. See the [[1.1.2 release notes|Release-1.1.2]].
 

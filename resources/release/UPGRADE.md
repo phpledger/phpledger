@@ -34,7 +34,9 @@ A files-only upgrade: no migration, no receipt change, no accounting change. It 
 
 ## From 1.1.0 or 1.1.1 to 1.1.3
 
-Keep the installed chain through 033 unchanged. From 1.1.0 this upgrade applies migration 034 (the stock-locations tables and the optional module, which stays off); a 1.1.1 installed over 1.1.0 by replacing files without running `install/migrate.php` has 034 pending too, and a 1.1.1 installed by setup already has it. Install it from `/maintenance.php` with the 1.1.3 signed metadata, which runs any pending migration inside its backup-and-verify sequence (the in-app path works from any 1.1.x with the publisher key pinned once 1.1.3 metadata is signed), or replace the files with the manual procedure below and run `php www/phpledger/install/migrate.php` once.
+**Use the manual procedure below, not `/maintenance.php`.** Replace the files and run `php www/phpledger/install/migrate.php` once; from 1.1.0 that also applies migration 034 (the stock-locations tables and the optional module, which stays off).
+
+An in-app update from 1.1.0 stops in its migrate step and restores the installation to 1.1.0 by itself, losing nothing: the installed release's copy of the database helpers is loaded for the whole operation, and the 1.1.0 copy lacks a function the 1.1.3 migrations call ([issue #91](https://github.com/phpledger/phpledger/issues/91)). The same limit applies to any installation more than one release behind. From 1.1.1 the in-app path is not yet proven and is documented here once it is.
 
 ## From 1.1.1 to 1.1.2
 
