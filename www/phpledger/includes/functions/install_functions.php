@@ -3,7 +3,16 @@ declare(strict_types=1);
 
 // Internal services shared by the separately guarded CLI and browser installers.
 require_once __DIR__ . '/runtime_functions.php';
-require_once __DIR__ . '/database_platform_functions.php';
+// The in-app updater loads this file (the NEW release's copy) inside a request that already
+// holds the INSTALLED release's database_platform_functions.php, saved as the recovery runtime
+// under the private installation directory. Loading this tree's copy as well redeclares every
+// function and kills the migrate phase (issue #90), so the copy already in memory is kept.
+// That copy is one release behind during an update: database_platform_functions.php must stay
+// backward compatible across one release step, and this file may only call functions that the
+// previous release's copy already defined. See the note at the top of that file.
+if (!function_exists('pl_database_platform')) {
+    require_once __DIR__ . '/database_platform_functions.php';
+}
 
 /** Report prerequisites before loading configuration or attempting a database connection. */
 function pl_install_runtime_issues(int $version, array $extensions, bool $autoloadExists): array

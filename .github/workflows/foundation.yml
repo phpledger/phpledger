@@ -52,6 +52,8 @@ jobs:
         run: docker compose --profile test run --rm test php tests/update-fullschema-test.php
       - name: Verify maintenance authorization and replacement runtime recovery
         run: docker compose --profile test run --rm test php tests/update-http-test.php
+      - name: Verify the real migrate and verify phases under the copied recovery runtime
+        run: docker compose --profile test run --rm test php tests/update-migrate-test.php
       - name: Verify a backup in an isolated restore database
         shell: pwsh
         run: ./tools/verify-backup-restore.ps1
@@ -88,6 +90,8 @@ jobs:
         run: docker compose --profile test run --rm test php tests/update-fullschema-test.php
       - name: Maintenance recovery on ${{ matrix.database }}
         run: docker compose --profile test run --rm test php tests/update-http-test.php
+      - name: Real migrate phase under the copied recovery runtime on ${{ matrix.database }}
+        run: docker compose --profile test run --rm test php tests/update-migrate-test.php
       - name: Stop disposable CI services
         if: always()
         run: docker compose --profile test down --volumes --remove-orphans

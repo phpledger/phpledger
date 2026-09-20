@@ -10,6 +10,16 @@ declare(strict_types=1);
  *   - MySQL 8's utf8mb4_0900_ai_ci becomes the closest NO PAD Unicode collation on
  *     MariaDB releases that do not know that name (11.4.5 and later do).
  * Migration files and their recorded checksums never change.
+ *
+ * Compatibility rule (issue #90). pl_update_begin() copies this file into the private
+ * recovery runtime before any application file is replaced, and the whole update, including
+ * the next release's migrate and verify phases, runs with that copy in memory: the new
+ * release's install_functions.php keeps whichever copy loaded first instead of redeclaring
+ * these functions. So during an update the installed release's copy serves the next release's
+ * migrations. Keep this file backward compatible across one release step: a release must not
+ * make install_functions.php or a migration depend on a helper that this file first adds or
+ * changes in that same release. Add the helper one release ahead, or guard the call with
+ * function_exists() and a fallback.
  */
 
 const PL_MARIADB_MINIMUM = '10.4.0';
