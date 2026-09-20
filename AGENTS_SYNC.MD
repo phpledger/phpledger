@@ -1,5 +1,12 @@
 # Shared Claude and Codex state
 
+## Latest checkpoint, 20 September 2026 (Claude): installer trigger preflight and resumable migrations
+
+- Branch `fix/installer-trigger-preflight` (`8807d90`, `a0beb62`) fixes GitHub issue #83: a binary-logged MySQL that does not trust the account to create triggers is now named at the database connection check, before any migration writes, and an interrupted migration resumes at the statement that stopped instead of needing the database recreated. `composer check` green on MySQL 8.4: 309 tests, 0 failures. Verified against a disposable stock `mysql:8.4` with `log_bin_trust_function_creators=0`, which is removed. **Not merged, not pushed.**
+- Work continues in the worktree `.claude/worktrees/installer-trigger-preflight`. Another session moved the main checkout to `fix/local-install-friendly` at `ab70045` during this task; that checkout is clean apart from the untracked `Claude outputs/`.
+- Migration files and their checksums are unchanged; the new `pl_schema_migrations.statements_done` column is added by `pl_migrate()`, not by a migration.
+
+
 ## Latest checkpoint, 20 September 2026 early morning (Claude): stock-locations module green, awaiting merge
 
 - Branch `harvest/stock-locations` (`1bfcf37`, `85359e9`) holds the bundled `inventory-locations` module: migration `034_inventory_locations.php`, warehouse masters and transfers at carrying value, warehouse-scoped balance, history, valuation, counts, returns, AR previews and opening allocations, a Locations panel and filters on the inventory and stock-count screens, `tests/inventory_location_test.php`, packaging entries and doc wording. `composer check` passes on MySQL 8.4 and MariaDB 10.11 (307 tests, 0 failures each). Browser-checked on a throwaway server; the dev container was not migrated.
