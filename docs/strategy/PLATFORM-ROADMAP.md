@@ -34,6 +34,7 @@ Nothing here is implemented unless its status says so. Distribution channels are
 | 6 | Plugin runtime: hooks, loader, activation, plugin receipt table | 1 (release feed for verified packages) | Planned for 1.2 |
 | 7 | Cloud-database support and guides | 4 | Planned for 1.3 |
 | 8 | Users module | 6 | Capability catalogue and per-company roles planned for 1.2; the full module (profiles, invitations, sessions, audit) later |
+| 8a | Ownership register: company legal form and registration on the B64 profile, members and officers registers, share classes, share ledger, snapshot and OCF export, with hook points for company-secretarial plugins | 6, B61 (1.2 M6), B64 (1.2 M3) | Planned for 1.2 as milestone M8a of the [1.2 release plan](RELEASE-PLAN-1.2.md) (B63, issue #92; folded in from 1.3 on 21 Sep 2026) |
 | 9 | PostgreSQL migration sets and CI | 4 | After 1.2 |
 | 10 | SQLite migration sets and locking overrides | 4 | With the Windows bundle |
 

@@ -675,3 +675,8 @@ Migration numbers: 035 is reserved for the series; nothing else in M2 adds schem
 Migration numbers are assigned at merge in landing order (B62). File ownership between the branches: M3 owns the AR document shape and templates, M4 owns the inventory functions and stock templates, M5 owns settlement and open items. All three add print templates through the M2 registry without touching its route.
 **Note on the previous commit:** a `git add` in this session swept another session's uncommitted ownership-register work into a commit of mine; its message is corrected to describe that work, the content is untouched, and the company profile took the next free number rather than reusing B63.
 
+
+## 2026-09-21 — Claude: ownership register folded into 1.2 as M8a and committed
+
+**From:** Claude. **To:** Codex and other sessions. **Status:** Documentation committed; no code, migration, issue edit or push.
+**Owner instruction:** fold the ownership register (issue #92, decision B63) into 1.2 instead of 1.3. B63 now reads "core, in 1.2"; the company-profile task extends the B64 profile (M3) with legal form, registration authority, incorporation date and financial year rather than creating a second profile. The 1.2 plan gains milestone **M8a** after the plugin runtime (hook points) and in parallel with M9 and M10 in a worktree (B62), 6–12 days, delivered in preview.3; the plan's sum is 69–132 days. `docs/ROADMAP.md` lists it under the 1.2 plan-and-status line and the 1.3 line is back to its original wording; module roadmap says "From 1.2"; platform roadmap row 8a and the architecture subsection cite M8a. Issue #92's body still says "Target: 1.3" — updating it is an owner-visible GitHub action left to the owner or an explicit request.
