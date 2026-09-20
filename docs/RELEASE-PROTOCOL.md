@@ -16,7 +16,7 @@ Updated at the 1.1.2 patch. The rows record what is live now; the 19 September w
 | Version source of truth (`www/phpledger/VERSION`) | Added; `pl_app_version()` reads it |
 | Update-mode detection (managed, container, composer, panel) and feed reader | Added as a tested library (`update_channel_functions.php`). `pl_update_mode()` still has no caller in the application: the maintenance page offers the file-replacing updater in every mode until the container image work in 1.2 wires it. |
 | Tracked release builder and tag workflow | Added (`tools/build-release.py`, `.github/workflows/release.yml`). Two local builds of the same snapshot were byte-identical on 19 September 2026. The workflow creates a **draft** GitHub Release only. |
-| Packaging from `master` | Unblocked since 1.1.0; every release since has been built twice from its tag and compared byte for byte. |
+| Packaging from `master` | Unblocked since 1.1.0; every release since has been built twice from its tag and compared. 1.1.0 through 1.1.2 were byte-identical; `--compare` (from 1.2 M1, B32) also accepts a member-identical archive (same members, same per-member SHA-256, different compression) and records which kind in the receipt's `reproduction` field. |
 | Container image, Packagist, catalogues, hosting panels | Planned; see the channel table below |
 
 ## Principles
@@ -52,7 +52,7 @@ Run in order. Each step names who does it and what evidence it leaves. The relea
 1. **Freeze and version.** Engineering sets `www/phpledger/VERSION`, updates `resources/release/RELEASE-NOTES.md` and `UPGRADE.md`, and runs the full check. The lint check refuses a malformed version; `tools/build-release.py` refuses to package when `--version` or the tag differs from `VERSION`.
 2. **Tag.** The owner (or engineering with owner approval) pushes the signed tag `v<version>` from the reviewed commit. Tagging is publication-adjacent and needs owner approval.
 3. **Build in CI.** The `release.yml` workflow builds production dependencies, runs `tools/build-release.py`, verifies the ZIP against a second local build, and creates a **draft** GitHub Release with the ZIP and its SHA-256. It publishes nothing else.
-4. **Reproduce locally.** Engineering runs `python tools/build-release.py --commit v<version> --out <empty folder> --compare <the draft's ZIP>`. It fails unless the archives are byte-identical. A mismatch stops the release.
+4. **Reproduce locally.** Engineering runs `python tools/build-release.py --commit v<version> --out <empty folder> --compare <the draft's ZIP>`. It passes when the archives are byte-identical, or when their member set and per-member SHA-256 match (compression differs); the receipt's `reproduction` field records "bytes" or "members". It fails only when the archive members themselves differ. A failure stops the release.
 5. **Sign offline.** The owner runs `tools/sign-update.php` against the draft's ZIP on the offline signing machine and produces `phpledger-<version>.update.json`. See [release signing](RELEASE-SIGNING.md).
 6. **Media kit** (major releases only). For an `x.y.0` release, build `phpledger-<version>-media-kit.zip` and its SHA-256; a major release is incomplete without it. Minor, patch and preview releases skip this step and say so in their notes (owner decision B29, 20 September 2026).
 7. **Publish the release.** The owner attaches the metadata and media kit and publishes the draft. Record the asset hashes.

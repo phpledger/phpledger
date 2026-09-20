@@ -14,7 +14,10 @@ and compares the result with ``--compare``.
 4. Runs ``tools/build-package.py`` to produce the ZIP and its ``.sha256``.
 5. Re-extracts the ZIP and re-verifies every ``PACKAGE-MANIFEST.json`` entry,
    then writes ``receipt.json``.
-6. With ``--compare OTHER.zip``, fails unless both archives are byte-identical.
+6. With ``--compare OTHER.zip``, accepts either a byte-identical archive or one
+   whose member set and per-member SHA-256 match (compression can differ); the
+   receipt's ``reproduction`` field records which ("bytes" or "members"). Fails
+   only when the archive members themselves differ.
 
 It never publishes, uploads, tags or signs anything.
 
@@ -199,6 +202,15 @@ def verify_archive(archive: Path, version: str) -> dict:
     }
 
 
+def member_digests(archive: Path) -> dict[str, str]:
+    """Map each ZIP member's name to the SHA-256 of its decompressed bytes."""
+    digests = {}
+    with zipfile.ZipFile(archive) as package:
+        for name in package.namelist():
+            digests[name] = hashlib.sha256(package.read(name)).hexdigest()
+    return digests
+
+
 def checksum(archive: Path) -> str:
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     checksum_path = archive.with_name(archive.name + ".sha256")
@@ -214,7 +226,7 @@ def main() -> int:
     parser.add_argument("--commit", required=True, help="Git commit-ish to package, usually the release tag")
     parser.add_argument("--version", help="Optional; must equal www/phpledger/VERSION in that commit")
     parser.add_argument("--out", required=True, type=Path, help="Empty output directory for the ZIP, checksum and receipt")
-    parser.add_argument("--compare", type=Path, help="Fail unless the built ZIP is byte-identical to this archive")
+    parser.add_argument("--compare", type=Path, help="Fail unless the built ZIP matches this archive (byte-identical, or member-identical with different compression)")
     parser.add_argument("--subnet", default=COMPOSE_SUBNET, help="Docker network subnet for the isolated compose project")
     args = parser.parse_args()
 
@@ -239,10 +251,20 @@ def main() -> int:
         verification = verify_archive(archive, version)
         digest = checksum(archive)
         reproduced = None
+        reproduction = None
         if args.compare is not None:
             other = hashlib.sha256(args.compare.read_bytes()).hexdigest()
-            if other != digest:
-                raise BuildError(f"Not reproducible: {archive.name} is {digest}, {args.compare} is {other}")
+            if other == digest:
+                reproduction = "bytes"
+                print(f"Reproducible: byte-identical to {args.compare}")
+            else:
+                ours = member_digests(archive)
+                theirs = member_digests(args.compare)
+                if ours == theirs:
+                    reproduction = "members"
+                    print(f"Reproducible: member-identical (compression differs) with {args.compare}")
+                else:
+                    raise BuildError(f"Not reproducible: {archive.name} is {digest}, {args.compare} is {other}, and archive members differ")
             reproduced = str(args.compare)
         receipt = {
             "built_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -255,6 +277,7 @@ def main() -> int:
             "archive_sha256": digest,
             "vendor_composer_lock_sha256": lock_hash,
             "reproduced_against": reproduced,
+            "reproduction": reproduction,
             "published": False,
             **verification,
         }
