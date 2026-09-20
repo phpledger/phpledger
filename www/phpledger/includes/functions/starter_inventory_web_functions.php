@@ -18,8 +18,15 @@ function pl_web_starter_inventory(int $actorId,int $companyId,int $bookId,array 
                     'reason'=>pl_web_text($_POST,'reason'),'idempotency_key'=>$key];
                 foreach (['inventory_account_id','cogs_account_id','sales_account_id','purchase_account_id'] as $field) { $input[$field]=pl_web_id($_POST,$field)?:null; }
                 $result=pl_save_inventory_product($actorId,$companyId,$bookId,$input,$id?:null,$id?pl_web_id($_POST,'revision'):null); $id=(int)$result['id'];
+            } elseif ($action==='warehouse') {
+                $input=['code'=>pl_web_text($_POST,'code'),'name'=>pl_web_text($_POST,'name'),'is_active'=>isset($_POST['is_active']),'reason'=>pl_web_text($_POST,'reason'),'idempotency_key'=>$key];
+                $warehouseId=pl_web_id($_POST,'warehouse_id');
+                pl_save_inventory_warehouse($actorId,$companyId,$bookId,$input,$warehouseId?:null,$warehouseId?pl_web_id($_POST,'revision'):null);
+            } elseif ($action==='transfer') {
+                pl_inventory_transfer($actorId,$companyId,$bookId,['product_id'=>pl_web_id($_POST,'product_id'),'from_warehouse_id'=>pl_web_id($_POST,'from_warehouse_id'),'to_warehouse_id'=>pl_web_id($_POST,'to_warehouse_id'),
+                    'quantity'=>pl_web_text($_POST,'quantity'),'date'=>pl_web_text($_POST,'date'),'source_reference'=>pl_web_text($_POST,'reference'),'reason'=>pl_web_text($_POST,'reason'),'idempotency_key'=>$key]);
             } elseif (in_array($action,['receive','issue','count','value'],true)) {
-                $input=['product_id'=>$id,'date'=>pl_web_text($_POST,'date'),'quantity'=>pl_web_text($_POST,'quantity'),
+                $input=['product_id'=>$id,'date'=>pl_web_text($_POST,'date'),'quantity'=>pl_web_text($_POST,'quantity'),'warehouse_id'=>pl_web_id($_POST,'warehouse_id')?:null,
                     'offset_account_id'=>pl_web_id($_POST,'offset_account_id'),'source_type'=>'manual_stock','source_reference'=>pl_web_text($_POST,'reference'),
                     'reason'=>pl_web_text($_POST,'reason'),'idempotency_key'=>$key];
                 if ($action==='receive') { $input['amount_base']=pl_web_text($_POST,'amount_base'); pl_inventory_receive($actorId,$companyId,$bookId,$input); }
@@ -60,18 +67,22 @@ function pl_web_starter_inventory(int $actorId,int $companyId,int $bookId,array 
     $selectionId=pl_web_id($_GET,'select'); $selection=$selectionId?pl_get_inventory_product($actorId,$companyId,$bookId,$selectionId):null;
     $preview=$_SESSION['starter_inventory_preview']??null;
     if ($preview && ($preview['company_id']!==$companyId||$preview['book_id']!==$bookId)) { $preview=null; }
+    $locations=pl_module_available($actorId,$companyId,$bookId,'inventory-locations');
+    $warehouseFilter=$locations?(pl_web_id($_GET,'warehouse')?:null):null;
     pl_render('inventory',['title'=>'Products and stock','user'=>$user,'company'=>$company,'product'=>$product,'selection'=>$selection,'filters'=>$filters,
         'list'=>!$product && !isset($_GET['new'])?pl_list_query($actorId,$companyId,$bookId,'inventory',$filters):null,
         'form'=>pl_form_state(pl_url($path,$id?['id'=>$id,'return_filters'=>$filters]:(isset($_GET['new'])?['new'=>'1','return_filters'=>$filters]:$filters))),
         'enabled'=>pl_module_available($actorId,$companyId,$bookId,'inventory'),'accounts'=>pl_starter_accounts($actorId,$companyId,$bookId),
-        'products'=>pl_list_inventory_products($actorId,$companyId,$bookId),'valuation'=>pl_inventory_valuation($actorId,$companyId,$bookId,$filters['as_of']),
-        'movements'=>pl_inventory_history($actorId,$companyId,$bookId,$id?:($selectionId?:null)),'preview'=>$preview,
-        'balance'=>$product?pl_inventory_balance($actorId,$companyId,$bookId,$id):null]);
+        'locations'=>$locations,'warehouses'=>$locations?pl_list_inventory_warehouses($actorId,$companyId,$bookId):[],'warehouse_filter'=>$warehouseFilter,
+        'products'=>pl_list_inventory_products($actorId,$companyId,$bookId),'valuation'=>pl_inventory_valuation($actorId,$companyId,$bookId,$filters['as_of'],$warehouseFilter),
+        'movements'=>pl_inventory_history($actorId,$companyId,$bookId,$id?:($selectionId?:null),$warehouseFilter),'preview'=>$preview,
+        'balance'=>$product?pl_inventory_balance($actorId,$companyId,$bookId,$id,null,$warehouseFilter):null]);
 }
 
 function pl_web_stock_count_input(array $input): array
 {
     return ['product_id'=>pl_web_id($input,'id'),'date'=>pl_web_text($input,'date'),'counted_quantity'=>pl_web_text($input,'counted_quantity'),
+        'warehouse_id'=>pl_web_id($input,'warehouse_id')?:null,
         'expected_quantity'=>pl_web_text($input,'expected_quantity'),'unit_cost'=>pl_web_text($input,'unit_cost')?:null,
         'offset_account_id'=>pl_web_id($input,'offset_account_id'),'source_type'=>'manual_stock','source_reference'=>pl_web_text($input,'reference'),
         'reason'=>pl_web_text($input,'reason'),'idempotency_key'=>pl_web_text($input,'request_key')];
@@ -100,12 +111,15 @@ function pl_web_stock_count(int $actorId,int $companyId,int $bookId,array $user,
     }
     $product=pl_get_inventory_product($actorId,$companyId,$bookId,$id);
     if ($product['kind']!=='stock') { throw new DomainException('Choose a stock product to record a physical count.'); }
-    $balance=pl_inventory_balance($actorId,$companyId,$bookId,$id); $form=pl_form_state($return); $preview=null;
-    $input=$form['input']?:['id'=>$id,'expected_quantity'=>$balance['quantity'],'date'=>gmdate('Y-m-d')];
+    $locations=pl_module_available($actorId,$companyId,$bookId,'inventory-locations');
+    $form=pl_form_state($return); $preview=null;
+    $warehouseId=$locations?(pl_web_id($form['input']?:$_GET,'warehouse_id')?:null):null;
+    $balance=pl_inventory_balance($actorId,$companyId,$bookId,$id,null,$warehouseId);
+    $input=$form['input']?:['id'=>$id,'expected_quantity'=>$balance['quantity'],'date'=>gmdate('Y-m-d'),'warehouse_id'=>$warehouseId];
     if ($form['input']) {
         try { $preview=pl_preview_inventory_count($actorId,$companyId,$bookId,pl_web_stock_count_input($input)); }
         catch (DomainException $error) { if ($form['message']==='') { $form['message']=$error->getMessage(); } }
     }
     pl_render('stock-count',['title'=>'Record stock count','user'=>$user,'company'=>$company,'product'=>$product,'balance'=>$balance,'form'=>$form,'input'=>$input,'preview'=>$preview,'filters'=>$filters,
-        'accounts'=>pl_starter_accounts($actorId,$companyId,$bookId)]);
+        'accounts'=>pl_starter_accounts($actorId,$companyId,$bookId),'locations'=>$locations,'warehouses'=>$locations?pl_list_inventory_warehouses($actorId,$companyId,$bookId):[]]);
 }

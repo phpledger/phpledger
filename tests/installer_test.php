@@ -40,13 +40,88 @@ test('installer schema inspection distinguishes fresh, pending and unsafe receip
     $hash = str_repeat('a', 64);
     $known = ['001_fixture' => $hash, '002_fixture' => $hash];
     $receipt = ['version' => '001_fixture', 'checksum' => $hash, 'status' => 'applied'];
-    assert_same(['status' => 'empty', 'applied' => 0, 'pending' => 2], pl_install_schema_state(null, $known, 0));
+    assert_same(['status' => 'empty', 'applied' => 0, 'pending' => 2, 'resuming' => null], pl_install_schema_state(null, $known, 0));
     assert_same('pending', pl_install_schema_state([$receipt], $known, 1)['status']);
     assert_same('current', pl_install_schema_state([$receipt], ['001_fixture' => $hash], 1)['status']);
+    assert_same(null, pl_install_schema_state([$receipt], $known, 1)['resuming']);
     assert_throws(fn () => pl_install_schema_state(null, $known, 1), DomainException::class, 'separate empty database');
     assert_throws(fn () => pl_install_schema_state([$receipt], [], 1), DomainException::class, 'unknown migration');
     assert_throws(fn () => pl_install_schema_state([array_replace($receipt, ['status' => 'applying'])], $known, 1), DomainException::class, 'incomplete');
     assert_throws(fn () => pl_install_schema_state([array_replace($receipt, ['checksum' => str_repeat('b', 64)])], $known, 1), DomainException::class, 'checksum');
+    // A migration that recorded where it stopped is pending and named; one that recorded nothing is refused.
+    $stopped = [array_replace($receipt, ['status' => 'applying', 'statements_done' => 3])];
+    assert_same('pending', pl_install_schema_state($stopped, $known, 1)['status']);
+    assert_same('001_fixture', pl_install_schema_state($stopped, $known, 1)['resuming']);
+    assert_same(0, pl_install_schema_state($stopped, $known, 1)['applied']);
+    assert_same(2, pl_install_schema_state($stopped, $known, 1)['pending']);
+    assert_throws(fn () => pl_install_schema_state([array_replace($receipt, ['status' => 'applying', 'statements_done' => null])], $known, 1), DomainException::class, 'recorded no progress');
+});
+
+test('binary-logged servers that refuse triggers are named before any migration runs', function (): void {
+    foreach (['1', 'ON', 'on', ' YES ', 'TRUE'] as $enabled) {
+        assert_true(pl_database_variable_enabled($enabled));
+    }
+    foreach (['0', 'OFF', '', 'off', 'NO'] as $disabled) {
+        assert_true(!pl_database_variable_enabled($disabled));
+    }
+    // Only a global grant carries the privileges that bypass the binary-log restriction.
+    assert_true(pl_database_trigger_creator_trusted(['GRANT ALL PRIVILEGES ON *.* TO `root`@`localhost` WITH GRANT OPTION']));
+    assert_true(pl_database_trigger_creator_trusted(['GRANT SELECT, SUPER ON *.* TO `phpledger`@`%`']));
+    assert_true(pl_database_trigger_creator_trusted(['GRANT SET_USER_ID ON *.* TO `phpledger`@`%`']));
+    assert_true(!pl_database_trigger_creator_trusted(['GRANT ALL PRIVILEGES ON `phpledger`.* TO `phpledger`@`%`']));
+    assert_true(!pl_database_trigger_creator_trusted(['GRANT USAGE ON *.* TO `phpledger`@`%`', 'GRANT SELECT, INSERT, TRIGGER ON `phpledger`.* TO `phpledger`@`%`']));
+    assert_true(!pl_database_trigger_creator_trusted([]));
+    // The reported combination: binary logging on, creators untrusted, an ordinary application account.
+    $issue = pl_database_trigger_support_issue(true, false, false);
+    assert_true(is_string($issue) && str_contains($issue, 'log_bin_trust_function_creators = 1'));
+    assert_true(is_string($issue) && str_contains($issue, 'this check changed nothing'));
+    assert_same(null, pl_database_trigger_support_issue(false, false, false));
+    assert_same(null, pl_database_trigger_support_issue(true, true, false));
+    assert_same(null, pl_database_trigger_support_issue(true, false, true));
+    // The live server this suite runs against does create triggers, so it reports no issue.
+    assert_same(null, pl_database_trigger_support());
+});
+
+test('an interrupted migration resumes at the statement that stopped it', function (): void {
+    $version = '001_foundation';
+    $statements = require dirname(__DIR__) . '/www/phpledger/install/migrations/' . $version . '.php';
+    $guards = ['pl_journals_no_update', 'pl_journals_no_delete', 'pl_lines_no_update', 'pl_lines_no_delete'];
+    $tail = array_slice($statements, -count($guards));
+    $before = DB::queryFirstRow('SELECT * FROM pl_schema_migrations WHERE version = %s', $version);
+    assert_same('applied', $before['status']);
+    $present = fn (): int => (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_schema = DATABASE() AND trigger_name IN %ls', $guards);
+    assert_same(count($guards), $present());
+    try {
+        // Reproduce issue #83: the tables exist, the trailing guard triggers do not, the receipt is stuck.
+        foreach ($guards as $guard) {
+            DB::query('DROP TRIGGER IF EXISTS %b', $guard);
+        }
+        DB::update('pl_schema_migrations', ['status' => 'applying', 'statements_done' => count($statements) - count($guards), 'applied_at' => null], 'version = %s', $version);
+        assert_same(0, $present());
+        $state = pl_install_database_check();
+        assert_same('pending', $state['status']);
+        assert_same($version, $state['resuming']);
+        $resumed = pl_migrate();
+        assert_true(in_array($version, $resumed['applied'], true), 'The interrupted migration was not resumed.');
+        assert_same(count($guards), $present(), 'The remaining guard triggers were not created.');
+        assert_same('current', pl_install_database_check()['status']);
+        assert_same('applied', (string) DB::queryFirstField('SELECT status FROM pl_schema_migrations WHERE version = %s', $version));
+        assert_same(count($statements), (int) DB::queryFirstField('SELECT statements_done FROM pl_schema_migrations WHERE version = %s', $version));
+        // A receipt written before progress was recorded stays a matter for the operator.
+        DB::update('pl_schema_migrations', ['status' => 'applying', 'statements_done' => null], 'version = %s', $version);
+        assert_throws(fn () => pl_install_database_check(), DomainException::class, 'recorded no progress');
+    } finally {
+        foreach ($tail as $statement) {
+            if ($present() < count($guards)) {
+                try {
+                    DB::query($statement);
+                } catch (Throwable $error) {
+                    // Already present; the resume under test created it.
+                }
+            }
+        }
+        DB::update('pl_schema_migrations', ['status' => $before['status'], 'statements_done' => $before['statements_done'], 'applied_at' => $before['applied_at']], 'version = %s', $version);
+    }
 });
 
 test('preflight and migration replay preserve receipts and existing data', function (): void {

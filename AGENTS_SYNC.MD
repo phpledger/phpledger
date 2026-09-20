@@ -1,5 +1,19 @@
 # Shared Claude and Codex state
 
+## Latest checkpoint, 20 September 2026 (Claude): installer trigger preflight and resumable migrations
+
+- Branch `fix/installer-trigger-preflight` (`8807d90`, `a0beb62`) fixes GitHub issue #83: a binary-logged MySQL that does not trust the account to create triggers is now named at the database connection check, before any migration writes, and an interrupted migration resumes at the statement that stopped instead of needing the database recreated. `composer check` green on MySQL 8.4: 309 tests, 0 failures. Verified against a disposable stock `mysql:8.4` with `log_bin_trust_function_creators=0`, which is removed. **Not merged, not pushed.**
+- Work continues in the worktree `.claude/worktrees/installer-trigger-preflight`. Another session moved the main checkout to `fix/local-install-friendly` at `ab70045` during this task; that checkout is clean apart from the untracked `Claude outputs/`.
+- Migration files and their checksums are unchanged; the new `pl_schema_migrations.statements_done` column is added by `pl_migrate()`, not by a migration.
+
+
+## Latest checkpoint, 20 September 2026 early morning (Claude): stock-locations module green, awaiting merge
+
+- Branch `harvest/stock-locations` (`1bfcf37`, `85359e9`) holds the bundled `inventory-locations` module: migration `034_inventory_locations.php`, warehouse masters and transfers at carrying value, warehouse-scoped balance, history, valuation, counts, returns, AR previews and opening allocations, a Locations panel and filters on the inventory and stock-count screens, `tests/inventory_location_test.php`, packaging entries and doc wording. `composer check` passes on MySQL 8.4 and MariaDB 10.11 (307 tests, 0 failures each). Browser-checked on a throwaway server; the dev container was not migrated.
+- `master` is unchanged since `993279c` (the 1.2 re-sequence documentation). The owner decides the merge; on merge the dev database (at 031) takes the ordinary upgrade path.
+- Local test database container `db_test` was recreated during the MariaDB pass and restored to the default MySQL 8.4 image afterwards.
+- Deliberately not done: no push, release, wiki, website, demo or deployment.
+
 ## Latest checkpoint, 19 September 2026 night (Claude): roadmap published on the wiki and website
 
 - **Website is live at `website-1-1-0-roadmap-20260919-185525`** (published 2026-09-19 18:57:03 UTC) from branch `docs/roadmap-surfaces` commit `6e7497b`, through `.cache/publish-website-roadmap-20260919.py` over the reviewed 1.1.0 lane. Only the static root changed in the vhost; the `/support` redirects, demo proxy, headers and demo containers (`core-1.1.0-af0f4895f85a`) are unchanged. 298 files hash-verified; backup `/var/www/phpledger/data/backups/website-1-1-0-roadmap-20260919-185525`; receipt [roadmap-2026-09-19-publication.json](docs/design/website/qa/roadmap-2026-09-19-publication.json). `tools/hosting-status.py` reports the new root and no problems. Rollback: recreate the worktree (`git worktree add .claude/worktrees/roadmap-surfaces 6e7497b`) and run the wrapper with `--rollback website-1-1-0-roadmap-20260919-185525`.

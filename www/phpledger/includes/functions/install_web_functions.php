@@ -188,6 +188,11 @@ function pl_install_check_target(array $config, array $state): array
         && !isset($state['owner_email'])) {
         throw new DomainException('This database already has users. Browser installation cannot claim an existing application.');
     }
+    if ($schema['status'] !== 'current') {
+        // Server configuration that would stop the schema part-way is reported here, at the
+        // connection check, rather than after the first migration has already written tables.
+        pl_database_require_trigger_support();
+    }
     return $schema;
 }
 

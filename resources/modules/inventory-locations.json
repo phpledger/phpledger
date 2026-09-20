@@ -1,0 +1,30 @@
+{
+  "id": "inventory-locations",
+  "name": "Stock locations",
+  "version": "1.0.0",
+  "contract": 1,
+  "optional": true,
+  "requires": {
+    "core": "1.0.0",
+    "inventory": "1.0.0"
+  },
+  "capabilities": [
+    "inventory.locations",
+    "inventory.transfers"
+  ],
+  "migrations": [
+    "034_inventory_locations"
+  ],
+  "routes": [],
+  "permissions": [
+    "owner",
+    "accountant"
+  ],
+  "settings": [],
+  "reports": [
+    "stock-by-location"
+  ],
+  "api_operations": [],
+  "mcp_operations": [],
+  "history": "Every book has a permanent default warehouse; movements recorded before this module carry it implicitly. Additional warehouses and vans, per-location carrying values and transfers at carrying value require the enabled module. Historical movements stay readable when it is disabled."
+}

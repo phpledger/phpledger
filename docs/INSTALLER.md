@@ -35,14 +35,16 @@ The owner asked for the WordPress experience after installing 1.0.0 on XAMPP pro
    - `utf8mb4_0900_ai_ci` becomes `utf8mb4_uca1400_nopad_ai_ci` or `utf8mb4_unicode_520_nopad_ci` where the server lacks it. Both are NO PAD, like MySQL's collation.
 
    Migration files and checksums never change. On MariaDB, `pl_migrate()` also sets the database default collation, so trigger variables compare cleanly.
-7. **Owner account.** The owner chooses a username, an email address and a password, typed twice. They can sign in with either name.
+7. **Binary logging.** PHP Ledger keeps posted entries immutable with database triggers, and MySQL and MariaDB refuse `CREATE TRIGGER` on a server that writes a binary log unless the account is trusted (server error 1419). MySQL 8 enables the binary log by default and leaves `log_bin_trust_function_creators` off, so a dedicated application account without `SUPER` meets this on a stock server. `pl_database_trigger_support()` reads `@@GLOBAL.log_bin`, `@@GLOBAL.log_bin_trust_function_creators` and `SHOW GRANTS FOR CURRENT_USER()`, and names the parameter to set. The browser installer reports it at the database connection check and `install/preflight.php` on the command line, both before any migration runs. A server that will not answer those reads is not blocked, because the migration still reports its own failure. The project's own `compose.yaml` database services pass `--log-bin-trust-function-creators=1`, so development never meets this by itself (issue #83).
+8. **Interrupted migrations.** `pl_schema_migrations.statements_done` records how many statements of a migration have run, updated after each one. A migration interrupted part-way is reported as pending, named in the schema state's `resuming` field, and the next run continues at the statement that stopped rather than repeating schema changes MySQL cannot roll back. The operator fixes the cause and runs the same step again; the database does not have to be recreated. The column is nullable and added by `pl_migrate()` itself, so it is not a migration; a receipt left by a version that recorded no progress keeps NULL and is still refused for operator review.
+9. **Owner account.** The owner chooses a username, an email address and a password, typed twice. They can sign in with either name.
    - Usernames are 3–60 lowercase letters, digits, dots, dashes or underscores (migration `032_user_names`).
    - Both names count against one attempt limit.
    - `create-admin.php --username=` offers the same choice on the command line.
-8. **Optional logo.** A PNG, JPEG or WebP image of at most 1 MB and at most six times wider than tall. Its type is checked from the bytes, and SVG is refused.
+10. **Optional logo.** A PNG, JPEG or WebP image of at most 1 MB and at most six times wider than tall. Its type is checked from the bytes, and SVG is refused.
    - It is stored in the database (migration `033_installation_logo`) and served by `/logo` without a session.
    - It is shown in the menu and on the sign-in page instead of the PHP Ledger logo.
-9. **XAMPP fixes.** When the host's OpenSSL configuration file is missing, key generation retries with the bundled `install/openssl.cnf`. Private files fall back to exclusive creation where `link()` is disabled.
+11. **XAMPP fixes.** When the host's OpenSSL configuration file is missing, key generation retries with the bundled `install/openssl.cnf`. Private files fall back to exclusive creation where `link()` is disabled.
 
 The package keeps runtime files, legal notices and recovery tools only. Guides moved online, and the ZIP carries a one-page `README.txt`. See `tools/package-files.json`, `tools/build-package.py` and [Validation](VALIDATION.md) for the tests and what remains unverified.
 
