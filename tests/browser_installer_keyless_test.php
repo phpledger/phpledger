@@ -120,9 +120,14 @@ function keyless_install(bool $localDatabase, bool $localAccount = false): void
         // A fresh copy sends visitors to the installer, which opens without a key over local HTTP.
         $home = keyless_http($origin . '/', null, $cookie);
         keyless_assert($home['status'] === 303 && str_contains($home['headers'], 'Location: /install'), 'An unconfigured copy did not open the installer.');
+        // Setup opens on the start screen: what it will do, and the checks on this server.
         $response = keyless_http($url, null, $cookie);
-        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Connect your database') && !str_contains($response['body'], 'Private setup key'), 'Keyless setup did not open at the database step.');
-        keyless_assert(str_contains($response['body'], 'Local test on this computer'), 'Local HTTP setup was not labelled.');
+        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'This installs PHP Ledger on this server') && !str_contains($response['body'], 'Private setup key'), 'Keyless setup did not open at the start screen.');
+        keyless_assert(str_contains($response['body'], 'Checking this server') && str_contains($response['body'], 'PHP bcmath'), 'The server checks were not shown before anything was asked for.');
+        keyless_assert(str_contains($response['body'], 'this address is plain HTTP'), 'Plain HTTP was not reported as a check.');
+        keyless_assert(!str_contains($response['body'], 'style="'), 'An inline style would be blocked by the page Content-Security-Policy.');
+        $response = keyless_http($url, ['action' => 'start', 'csrf_token' => keyless_token($response)], $cookie);
+        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Connect your database'), 'Start setup did not reach the database step.');
         $database = ['host' => 'db_test', 'port' => '3306', 'database' => $fixture, 'user' => $fixture, 'password' => $password,
             'public_url' => $origin, 'action' => 'database', 'csrf_token' => keyless_token($response)];
         if (!$localDatabase) {
@@ -135,9 +140,9 @@ function keyless_install(bool $localDatabase, bool $localAccount = false): void
             $database['setup_code'] = $code;
         }
         $response = keyless_http($url, $database, $cookie);
-        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Review your installation'), 'The owner could not connect the empty database.');
+        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Database connected.'), 'The owner could not connect the empty database.');
         if ($localAccount) {
-            keyless_assert(str_contains($response['body'], 'created the empty database'), 'Setup did not create the missing database on this server.');
+            keyless_assert(str_contains($response['body'], 'Created just now'), 'Setup did not create the missing database on this server.');
             keyless_assert(str_contains($response['body'], 'with no password'), 'Setup did not name the database account without a password.');
         }
         $csrf = keyless_token($response);
@@ -155,7 +160,7 @@ function keyless_install(bool $localDatabase, bool $localAccount = false): void
         }
         keyless_assert(str_contains($response['body'], 'Save private configuration'), 'The migration chain did not finish.');
         $response = keyless_http($url, ['action' => 'save_config', 'csrf_token' => $csrf, 'public_url' => $origin], $cookie);
-        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Create your owner account'), 'Configuration could not be saved.');
+        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Create your sign-in account'), 'Configuration could not be saved.');
         $owner = ['action' => 'finish', 'csrf_token' => $csrf, 'name' => 'Keyless Owner', 'username' => 'keyless-owner',
             'email' => 'keyless-owner@example.invalid', 'password' => $ownerPassword, 'password_confirm' => $ownerPassword];
         // A disguised script is refused before any account exists; a real PNG becomes the logo.
@@ -165,7 +170,10 @@ function keyless_install(bool $localDatabase, bool $localAccount = false): void
         $png = (string) base64_decode('iVBORw0KGgoAAAANSUhEUgAAADAAAAAQCAYAAABQrvyxAAAAGUlEQVR42u3BAQEAAACCIP+vbkhAAQAArwYMEAAB9jm1kQAAAABJRU5ErkJggg==', true);
         file_put_contents($temporary . '/logo.png', $png);
         $response = keyless_http($url, $owner + ['logo' => new CURLFile($temporary . '/logo.png', 'image/png', 'logo.png')], $cookie);
-        keyless_assert($response['status'] === 303 && str_contains($response['headers'], 'Location: /onboarding'), 'The owner account did not finish setup.');
+        // The last screen itemises what was built, read back from the database.
+        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Your installation is complete.'), 'The owner account did not finish setup.');
+        keyless_assert(str_contains($response['body'], 'protective database rules active') && str_contains($response['body'], 'Signed in as keyless-owner')
+            && str_contains($response['body'], 'Every check passed'), 'The completion screen did not itemise the installation.');
         $image = keyless_http($origin . '/logo', null, $visitor);
         keyless_assert($image['status'] === 200 && str_contains($image['headers'], 'Content-Type: image/png') && $image['body'] === $png
             && str_contains($image['headers'], 'nosniff') && !str_contains($image['headers'], 'Set-Cookie'), 'The installation logo is not served as the same PNG.');

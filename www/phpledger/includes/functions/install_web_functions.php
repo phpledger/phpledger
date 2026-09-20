@@ -389,7 +389,10 @@ function pl_install_http(): never
     header('Cache-Control: no-store, private');
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: no-referrer');
-    header("Content-Security-Policy: default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+    // The progress bar's width is the one value that cannot be a class. It is served in a
+    // <style> element carrying this nonce, so inline style attributes stay forbidden.
+    $styleNonce = rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
+    header("Content-Security-Policy: default-src 'none'; style-src 'self' 'nonce-" . $styleNonce . "'; img-src 'self'; font-src 'self'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
     header('Content-Type: text/html; charset=utf-8');
     $error = '';
     $view = 'locked';
@@ -403,6 +406,10 @@ function pl_install_http(): never
     $remoteProof = false;
     $setupCodePath = '';
     $createdDatabase = '';
+    $requirements = [];
+    $databasePorts = [];
+    $completion = [];
+    $completed = false;
     try {
         if (!in_array($_SERVER['REQUEST_METHOD'] ?? '', ['GET', 'POST'], true)) {
             http_response_code(405);
@@ -448,6 +455,17 @@ function pl_install_http(): never
                 }
             }
             if ($authorized) {
+                // A requirement this server does not meet becomes its own screen, with the
+                // places it is actually fixed, instead of a failure page late in the flow.
+                $requirements = pl_install_requirement_checks($_SERVER, $exposure);
+                foreach ($requirements as $requirement) {
+                    if ($requirement['status'] === PL_CHECK_FAIL) {
+                        $view = 'challenge';
+                        break;
+                    }
+                }
+            }
+            if ($authorized && $view !== 'challenge') {
                 $view = 'database';
                 pl_install_require_runtime();
                 pl_install_refuse_existing_application($state);
@@ -457,6 +475,10 @@ function pl_install_http(): never
                     $view = match ($state['phase'] ?? '') {
                         'review' => 'review', 'migrating' => 'migrating', 'configuration' => 'configuration', 'account' => 'account', default => 'database',
                     };
+                } elseif (empty($_SESSION['install_started'])) {
+                    // The first screen says what this will do and shows the checks; nothing is
+                    // asked for until the owner chooses to begin.
+                    $view = 'start';
                 }
                 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     $action = pl_web_text($_POST, 'action');
@@ -521,9 +543,10 @@ function pl_install_http(): never
                             }
                             $state['phase'] = 'migrating';
                             pl_install_save_state($state);
-                            // One request applies as much of the chain as it safely can; the
-                            // whole chain is about two seconds of work on a normal server.
-                            pl_migrate(null, pl_install_migration_budget((string) ini_get('max_execution_time')));
+                            // A handful of batches, so the progress bar is seen; the budget still
+                            // hands control back early on a host with a short execution limit.
+                            pl_migrate(pl_install_migration_batch(count(pl_install_migration_versions())),
+                                pl_install_migration_budget((string) ini_get('max_execution_time')));
                             $schema = pl_install_database_check();
                             if ($schema['status'] === 'current') {
                                 $state['phase'] = 'configuration';
@@ -556,18 +579,28 @@ function pl_install_http(): never
                             require_once __DIR__ . '/branding_functions.php';
                             $logo = pl_logo_from_upload($_FILES['logo'] ?? null);
                             $user = pl_install_finish($sessionConfig, $runtimeConfig, pl_web_text($_POST, 'email'), pl_web_text($_POST, 'name'), $password, $state, pl_web_text($_POST, 'username'), $logo);
+                            // Itemise what was built before the setup session is cleared.
+                            $completion = pl_install_completion_lines(pl_web_text($_POST, 'username'), pl_install_database_check());
                             pl_login_session($user); // Clears temporary schema/runtime credentials and setup proof.
-                            header('Location: ' . pl_url('/onboarding'), true, 303);
-                            exit;
+                            $view = 'ready';
+                            $completed = true;
                         }
-                    } elseif ($action !== 'unlock') {
+                    } elseif ($action === 'start') {
+                        $_SESSION['install_started'] = true;
+                        $view = 'database';
+                    } elseif (!in_array($action, ['unlock', 'recheck'], true)) {
+                        // 'recheck' re-renders: the checks are read fresh on every request.
                         throw new DomainException('Choose an action from the installation form.');
                     }
                 }
-                if (is_array($sessionConfig) && is_array($runtimeConfig)) {
+                if (!$completed && is_array($sessionConfig) && is_array($runtimeConfig)) {
                     $schema = pl_install_check_target($sessionConfig, $state);
                     $view = $schema['status'] === 'current' ? (is_file(pl_install_config_path()) ? 'account' : 'configuration')
                         : (($state['phase'] ?? '') === 'review' ? 'review' : 'migrating');
+                }
+                if ($view === 'database') {
+                    // Only this screen needs it, and each probe is a bounded loopback connect.
+                    $databasePorts = pl_install_local_database_ports();
                 }
             }
         }

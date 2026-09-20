@@ -696,97 +696,255 @@ a {
   .strip-dismiss:hover { background: rgb(0 0 0 / .08); opacity: 1; }
   [data-dismissible][hidden] { display: none; }
 
-  /* Setup is a desktop task, so it is laid out across the screen rather than down
-     it: one wider card, the form beside what setup found, and no step that needs
-     scrolling on a laptop. */
-  .install-card { max-width: 60rem; gap: 1rem; }
-  .install-panel { padding: 1.5rem 1.75rem; }
-  .install-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .375rem 1.5rem; }
-  .install-head h1 { margin: 0; }
-  .install-steps { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem .5rem; margin: 0; padding: 0; list-style: none; font-size: .75rem; color: var(--ink-muted); }
-  .install-steps li { display: flex; align-items: center; gap: .5rem; }
-  .install-steps li + li::before { content: ""; inline-size: 1rem; block-size: 1px; background: var(--border); }
-  .install-step-mark {
-    inline-size: 1.25rem;
-    block-size: 1.25rem;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .6875rem;
-    font-variant-numeric: tabular-nums;
-  }
-  .install-steps [aria-current="step"] { color: var(--ink); font-weight: 600; }
-  .install-steps [aria-current="step"] .install-step-mark { background: var(--brand-navy); border-color: var(--brand-navy); color: #fff; }
-  .install-step-done .install-step-mark { background: var(--success-bg); border-color: var(--success); color: var(--success); }
-  .install-columns { display: grid; gap: 1.25rem 1.75rem; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; }
-  .install-aside {
+  /* Setup: the Workbench layout (owner decision, 20 September 2026, direction B).
+     Installing reads as a bench where parts are fitted and lit, one task per screen,
+     each screen sized for a laptop viewport without scrolling. Everything here is
+     scoped to .install-frame so none of it reaches the application's own forms. */
+  .install-frame {
+    min-block-size: 100dvh;
+    background: var(--canvas);
     display: flex;
     flex-direction: column;
-    gap: .625rem;
-    padding: .875rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-control);
-    background: var(--surface-subtle);
-    font-size: .8125rem;
+    padding: 1.75rem 2rem;
+    gap: 1rem;
   }
-  .install-aside > details, .install-aside > p { margin: 0; }
-  .install-panel .alert { font-size: .75rem; padding: .5rem .75rem; }
-  .field-grid { display: grid; gap: .625rem .75rem; grid-template-columns: minmax(0, 1fr); }
-  .field-grid-pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .field-grid-host { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
-  @media (max-width: 52rem) {
-    .install-columns, .field-grid-pair, .field-grid-host { grid-template-columns: minmax(0, 1fr); }
-    .install-panel { padding: 1.25rem; }
+  .bench-chrome { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .bench-logo { height: 22px; width: auto; display: block; }
+  .bench-tray { display: flex; gap: 6px; align-items: center; position: relative; margin: 0; padding: 0; list-style: none; }
+  .bench-tray::before { content: ""; position: absolute; inset-inline: 10px; inset-block-start: 50%; block-size: 1px; background: var(--border); z-index: 0; }
+  .tray-slot {
+    inline-size: 44px;
+    block-size: 21px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
   }
+  .tray-slot .icon { width: 11px; height: 11px; color: #fff; }
+  .tray-slot.is-done { background: var(--brand-navy); border-color: var(--brand-navy); }
+  .tray-slot.is-current { border-color: var(--brand-blue); background: var(--brand-selected); }
+  .tray-slot.is-current::after { content: ""; position: absolute; inset: -4px; border-radius: 8px; border: 1.5px solid var(--brand-blue); opacity: .35; }
+  .tray-slot.is-pending { opacity: .5; }
 
-  /* Setup: the progress bar for the schema steps, and the green and red lights. */
-  .install-progress { display: flex; flex-direction: column; gap: .5rem; }
-  .install-progress-track {
-    height: .625rem;
-    border-radius: 999px;
-    background: var(--surface-subtle);
+  .bench-head { flex: 0 0 auto; }
+  .bench-heading { margin: 0 0 .3rem; color: var(--ink); font-weight: 650; letter-spacing: -.01em; font-size: 20px; line-height: 26px; }
+  .bench-heading.size-lg { font-size: 27px; line-height: 33px; }
+  .bench-sub { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-muted); max-inline-size: 74ch; }
+  .bench-body { flex: 1 1 auto; min-block-size: 0; display: flex; flex-direction: column; }
+  .bench-actions { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .bench-actions .fine-print { font-size: 11.5px; color: var(--ink-faint); }
+  .bench-actions form { margin: 0; }
+
+  .install-frame .field { display: flex; flex-direction: column; gap: 6px; }
+  .install-frame .field-label { display: flex; align-items: center; gap: 6px; margin: 0; }
+  .install-frame .field-label::before { content: ""; inline-size: 6px; block-size: 6px; border-radius: 1.5px; background: var(--brand-blue); flex: none; }
+  .install-frame .field-hint { margin: 0; line-height: 1.45; }
+  .field-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .75rem; }
+  .field-pair.uneven { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+  .snip { font-family: var(--font-mono); font-size: 11px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+  /* Start: what gets built, beside the checks on this server. */
+  .bench-split { display: flex; gap: 1.875rem; align-items: stretch; flex: 1; min-block-size: 0; }
+  .bench-split > * { min-inline-size: 0; display: flex; flex-direction: column; justify-content: center; }
+  .bench-stats { inline-size: 300px; flex: none; }
+  .stat-row { display: flex; align-items: baseline; gap: .625rem; padding: .7rem 0; border-block-end: 1px solid var(--border); }
+  .stat-row:first-child { padding-block-start: 0; }
+  .stat-row:last-of-type { border-block-end: 0; }
+  .stat-num { font-size: 21px; font-weight: 700; color: var(--brand-navy); font-variant-numeric: tabular-nums; flex: none; min-inline-size: 34px; }
+  .stat-label { font-size: 12.5px; color: var(--ink-muted); }
+  .checks-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-block-end: .625rem; }
+  .checks-head h2 { font-size: 12.5px; font-weight: 600; color: var(--ink); margin: 0; }
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--ink-muted); }
+  .status-pill::before { content: ""; inline-size: 6px; block-size: 6px; border-radius: 999px; background: var(--success); }
+  .status-pill.has-issue { color: var(--danger); }
+  .status-pill.has-issue::before { background: var(--danger); }
+  .tile-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .625rem; }
+  .tile {
+    background: var(--surface);
     border: 1px solid var(--border);
-    overflow: hidden;
+    border-block-start: 3px solid var(--border-strong);
+    border-radius: 8px;
+    padding: .625rem .75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-block-size: 62px;
+    position: relative;
   }
+  .tile .led { position: absolute; inset-block-start: 9px; inset-inline-end: 10px; inline-size: 8px; block-size: 8px; border-radius: 999px; background: var(--border-strong); }
+  .tile.is-pass { border-block-start-color: var(--success); }
+  .tile.is-pass .led { background: var(--success); }
+  .tile.is-warn { border-block-start-color: var(--warning); }
+  .tile.is-warn .led { background: var(--warning); }
+  .tile.is-fail { border-block-start-color: var(--danger); }
+  .tile.is-fail .led { background: var(--danger); }
+  .tile-name { font-size: 12px; font-weight: 600; color: var(--ink); padding-inline-end: 14px; }
+  .tile-detail { font-size: 10.5px; color: var(--ink-muted); line-height: 1.35; }
+  .tile.is-fail .tile-detail { color: var(--danger); }
+
+  /* A failed check becomes the screen; the rest of the bench stays lit at the left. */
+  .bench-challenge { flex: 1; display: grid; grid-template-columns: 242px minmax(0, 1fr); gap: 1.625rem; min-block-size: 0; }
+  .rail { display: flex; flex-direction: column; gap: .625rem; min-block-size: 0; }
+  .rail-list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; overflow: auto; }
+  .rail-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 11.5px; }
+  .rail-row .led { inline-size: 7px; block-size: 7px; border-radius: 999px; background: var(--success); flex: none; }
+  .rail-row.is-warn .led { background: var(--warning); }
+  .rail-row.is-fail { background: var(--danger-bg); }
+  .rail-row.is-fail .led { background: var(--danger); }
+  .rail-row.is-fail .rail-name { color: var(--danger); font-weight: 600; }
+  .rail-name { color: var(--ink); font-weight: 500; }
+  .challenge-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-inline-start: 4px solid var(--danger);
+    border-radius: 10px;
+    padding: 1.375rem 1.625rem;
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+    min-block-size: 0;
+    overflow: auto;
+  }
+  .challenge-title { font-size: 19px; font-weight: 650; color: var(--ink); margin: 0; }
+  .challenge-detail { font-size: 13px; color: var(--ink-muted); line-height: 1.55; margin: 0; }
+  .fix-head { font-size: 12.5px; font-weight: 650; color: var(--ink); margin: .125rem 0 0; }
+  .fix-list { display: flex; flex-direction: column; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+  .fix-item { display: flex; gap: .625rem; padding: .625rem .75rem; background: var(--surface-subtle); border-radius: 8px; font-size: 12px; line-height: 1.55; color: var(--ink); }
+  .fix-num {
+    flex: none;
+    inline-size: 18px;
+    block-size: 18px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-muted);
+  }
+  .recheck-row { display: flex; align-items: center; gap: .625rem; margin-block-start: auto; padding-block-start: .25rem; }
+  .recheck-note { font-size: 11.5px; color: var(--ink-faint); }
+
+  /* Database: the form beside the one tip that applies here. */
+  .tip-module { background: var(--brand-selected); border: 1px solid color-mix(in oklab, var(--brand-blue) 25%, transparent); border-radius: 10px; padding: 1rem 1.125rem; display: flex; flex-direction: column; gap: .5rem; }
+  .tip-module h2 { margin: 0; font-size: 13px; color: var(--brand-navy); }
+  .tip-module p { margin: 0; font-size: 12px; color: var(--brand-navy); line-height: 1.55; }
+  .detect-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--brand-navy); background: var(--brand-selected); padding: 3px 8px; border-radius: 999px; inline-size: fit-content; grid-column: 1 / -1; }
+  .recap-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; color: var(--success); background: var(--success-bg); padding: 6px 12px; border-radius: 999px; inline-size: fit-content; }
+  .recap-pill .icon { width: 12px; height: 12px; }
+
+  /* Reward: one specific fact, not a badge. */
+  .reward-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.625rem; }
+  .reward-card { inline-size: min(640px, 100%); background: var(--surface); border: 1px solid var(--border); border-block-start: 4px solid var(--success); border-radius: 12px; padding: 1.5rem 1.875rem; }
+  .reward-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--success-bg); color: var(--success); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-block-end: .75rem; }
+  .reward-title { font-size: 25px; font-weight: 650; color: var(--ink); margin: 0 0 .5rem; letter-spacing: -.01em; }
+  .reward-detail { font-size: 13.5px; color: var(--ink-muted); font-variant-numeric: tabular-nums; margin: 0 0 .375rem; }
+  .reward-note { font-size: 12px; color: var(--ink-faint); margin: 0; }
+  .next-row { display: flex; gap: .625rem; flex-wrap: wrap; justify-content: center; margin: 0; padding: 0; list-style: none; }
+  .next-chip { border: 1.5px dashed var(--border-strong); border-radius: 999px; padding: 7px 16px; font-size: 11.5px; color: var(--ink-muted); background: var(--canvas); }
+
+  /* Build: the progress bar, the pins placed so far, and what just went in. */
+  .progress-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 1.625rem; max-inline-size: 760px; }
+  .install-progress-status { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin: 0 0 .5rem; }
+  .install-progress-step { font-size: 19px; font-weight: 650; color: var(--ink); }
+  .install-progress-count { font-size: 13px; color: var(--ink-muted); font-variant-numeric: tabular-nums; flex: none; }
+  .install-progress-track { block-size: 10px; border-radius: 999px; background: var(--surface-subtle); border: 1px solid var(--border); overflow: hidden; }
   .install-progress-bar {
-    height: 100%;
+    block-size: 100%;
     border-radius: 999px;
     background: var(--brand-navy);
     background-image: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / .35) 50%, transparent 80%);
     background-size: 240% 100%;
+    animation: install-sheen 1.6s linear infinite;
     transition: width .45s ease;
-    animation: install-progress-sheen 1.6s linear infinite;
   }
-  @keyframes install-progress-sheen { from { background-position: 140% 0; } to { background-position: -140% 0; } }
-  .install-progress-status { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 0; font-size: .875rem; }
-  .install-progress-step { font-weight: 600; }
-  .install-progress-count { color: var(--ink-muted); font-variant-numeric: tabular-nums; flex: none; }
-  @media (prefers-reduced-motion: reduce) {
-    .install-progress-bar { animation: none; transition: none; background-image: none; }
-  }
+  @keyframes install-sheen { from { background-position: 140% 0; } to { background-position: -140% 0; } }
+  @keyframes install-pin-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+  @keyframes install-settle { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .pin-strip { display: flex; gap: .7rem; flex-wrap: wrap; margin: 0; padding: 0; list-style: none; }
+  .pin-cluster { display: flex; gap: 3px; }
+  .pin { inline-size: 8px; block-size: 22px; border-radius: 2px; background: var(--surface-subtle); border: 1px solid var(--border); }
+  .pin.is-done { background: var(--brand-navy); border-color: var(--brand-navy); }
+  .pin.is-current { background: var(--brand-blue); border-color: var(--brand-blue); animation: install-pin-pulse 1s ease-in-out infinite; }
+  .placed-row { display: flex; gap: .5rem; flex-wrap: wrap; margin: .375rem 0 0; padding: 0; list-style: none; }
+  .placed-chip { font-size: 11px; color: var(--ink-muted); background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 5px 11px; display: flex; align-items: center; gap: 5px; }
+  .placed-chip .icon { width: 10px; height: 10px; color: var(--success); }
 
-  .check-list { display: flex; flex-direction: column; gap: .125rem; margin: 0; padding: 0; list-style: none; }
-  .check-row { display: flex; gap: .625rem; align-items: baseline; padding: .375rem 0; border-block-end: 1px solid var(--border); font-size: .8125rem; }
-  .check-row:last-child { border-block-end: 0; }
-  .check-light { width: .5rem; height: .5rem; border-radius: 999px; flex: none; translate: 0 -.125rem; }
-  .check-pass .check-light { background: var(--success); }
-  .check-warn .check-light { background: var(--warning); }
-  .check-fail .check-light { background: var(--danger); }
-  .check-name { font-weight: 600; flex: none; min-width: 11rem; }
-  .check-detail { color: var(--ink-muted); min-width: 0; }
-  .check-fail .check-detail { color: var(--danger); }
-  .check-summary { cursor: pointer; font-weight: 600; display: flex; gap: .5rem; align-items: center; }
-  .check-summary .check-light { translate: 0; }
-  .env-list { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .25rem .75rem; margin: 0; font-size: .8125rem; }
-  .env-list dt { font-weight: 600; }
-  .env-list dd { margin: 0; color: var(--ink-muted); overflow-wrap: anywhere; }
-  @media (max-width: 30rem) {
-    .check-row { flex-wrap: wrap; }
-    .check-name { min-width: 0; }
-    .env-list { grid-template-columns: minmax(0, 1fr); }
-    .env-list dd { margin-block-end: .25rem; }
+  /* Checks: what setup proved on this server, one gauge each. */
+  .gauge-grid { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .875rem; align-content: center; }
+  .gauge-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .9rem 1.0625rem; display: flex; flex-direction: column; gap: .4rem; justify-content: center; }
+  .gauge-top { display: flex; align-items: center; gap: .5rem; }
+  .gauge-led { inline-size: 10px; block-size: 10px; border-radius: 999px; background: var(--success); flex: none; box-shadow: 0 0 0 3px var(--success-bg); }
+  .gauge-tile.is-warn .gauge-led { background: var(--warning); box-shadow: 0 0 0 3px var(--warning-bg); }
+  .gauge-tile.is-fail .gauge-led { background: var(--danger); box-shadow: 0 0 0 3px var(--danger-bg); }
+  .gauge-name { font-size: 13px; font-weight: 650; color: var(--ink); }
+  .gauge-detail { font-size: 11.5px; color: var(--ink-muted); line-height: 1.5; margin: 0; }
+
+  /* Account: the form beside the nameplate it produces. */
+  .nameplate { background: var(--brand-navy); border-radius: 10px; padding: 1.125rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+  .nameplate-avatar { inline-size: 40px; block-size: 40px; border-radius: 999px; background: rgb(255 255 255 / .14); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex: none; }
+  .nameplate-name { color: #fff; font-weight: 650; font-size: 14.5px; display: block; }
+  .nameplate-meta { color: rgb(255 255 255 / .68); font-size: 11.5px; }
+  .bench-aside { background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 10px; padding: .9375rem 1.0625rem; display: flex; flex-direction: column; gap: .5625rem; font-size: 12px; color: var(--ink-muted); line-height: 1.55; }
+  .bench-aside strong { color: var(--ink); }
+  .bench-aside p { margin: 0; }
+
+  /* Ready: what was actually built, itemised. */
+  .done-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.375rem; text-align: center; }
+  .manifest-card { inline-size: min(520px, 100%); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.75rem; text-align: start; margin: 0; }
+  .manifest-row { display: flex; align-items: center; gap: .625rem; padding: .5rem 0; border-block-end: 1px solid var(--border); font-size: 12.5px; color: var(--ink); }
+  .manifest-row:last-child { border-block-end: 0; }
+  .manifest-row .icon { width: 13px; height: 13px; color: var(--success); flex: none; }
+
+  /* Column shares, centred actions and staggered reveals live here rather than in
+     style attributes: the setup page's Content-Security-Policy forbids those. */
+  .bench-main { flex: 1.3 1 0; }
+  .bench-side { flex: 1 1 0; gap: .875rem; }
+  .bench-main-wide { flex: 1.2 1 0; }
+  .bench-side-narrow { flex: .85 1 0; gap: .875rem; }
+  .bench-actions.is-centred { justify-content: center; }
+  .bench-sub.is-small { font-size: 12.5px; }
+  .done-body .bench-sub { margin-inline: auto; }
+
+  .js .reveal { opacity: 0; animation: install-settle .5s ease-out forwards; }
+  .js .reveal:nth-child(2) { animation-delay: 70ms; }
+  .js .reveal:nth-child(3) { animation-delay: 140ms; }
+  .js .reveal:nth-child(4) { animation-delay: 210ms; }
+  .js .reveal:nth-child(5) { animation-delay: 280ms; }
+  .js .reveal:nth-child(6) { animation-delay: 350ms; }
+  .js .reveal:nth-child(7) { animation-delay: 420ms; }
+  .js .reveal:nth-child(8) { animation-delay: 490ms; }
+  .js .reveal:nth-child(9) { animation-delay: 560ms; }
+  .js .reveal:nth-child(10) { animation-delay: 630ms; }
+  .js .reveal:nth-child(11) { animation-delay: 700ms; }
+  .js .reveal:nth-child(12) { animation-delay: 770ms; }
+  .js .reveal:nth-child(13) { animation-delay: 840ms; }
+  .js .reveal:nth-child(14) { animation-delay: 910ms; }
+  .js .reveal:nth-child(15) { animation-delay: 980ms; }
+  .js .reveal:nth-child(16) { animation-delay: 1050ms; }
+  .js .reveal:nth-child(17) { animation-delay: 1120ms; }
+  .js .reveal:nth-child(18) { animation-delay: 1190ms; }
+  .js .reveal:nth-child(19) { animation-delay: 1260ms; }
+  .js .reveal:nth-child(20) { animation-delay: 1330ms; }
+  @media (prefers-reduced-motion: reduce) {
+    .install-progress-bar, .pin.is-current { animation: none; }
+    .install-progress-bar { background-image: none; transition: none; }
+    .js .reveal { opacity: 1; animation: none; }
+  }
+  @media (max-width: 60rem) {
+    .install-frame { padding: 1.25rem; }
+    .bench-split, .bench-challenge { display: flex; flex-direction: column; }
+    .bench-stats { inline-size: auto; }
+    .tile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .gauge-grid { grid-template-columns: minmax(0, 1fr); }
+    .field-pair, .field-pair.uneven { grid-template-columns: minmax(0, 1fr); }
   }
 
   .alert {

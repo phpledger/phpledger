@@ -111,8 +111,10 @@ body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-fo
 }
 
 /* ---------- screen 1: tiles + stats ---------- */
-#screen-1 .bench-body{justify-content:center;}
-.s1-body{display:grid;grid-template-columns:300px 1fr;gap:30px;}
+.s1-body{display:flex;gap:30px;align-items:stretch;}
+.s1-col{display:flex;flex-direction:column;justify-content:center;}
+.s1-col.s1-stats{width:300px;flex:none;}
+.s1-col.s1-checks{flex:1;min-width:0;}
 .stat-row{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);}
 .stat-row:first-child{padding-top:0;}
 .stat-row:last-child{border-bottom:none;}
@@ -164,9 +166,10 @@ body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-fo
 .recheck-note{font-size:11.5px;color:var(--ink-faint);}
 
 /* ---------- screen 3: database ---------- */
-#screen-3 .bench-body{justify-content:center;}
-.s3-body{display:grid;grid-template-columns:1.3fr 1fr;gap:30px;}
-.db-form{display:flex;flex-direction:column;gap:13px;}
+.s3-body{display:flex;gap:30px;align-items:stretch;}
+.s3-body>*{min-width:0;display:flex;flex-direction:column;justify-content:center;}
+.db-form{flex:1.3;gap:13px;}
+.s3-tip{flex:1;gap:14px;}
 .detect-chip{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--brand-navy);background:var(--brand-selected);padding:3px 8px;border-radius:999px;width:fit-content;grid-column:1/-1;}
 .tip-module{background:var(--brand-selected);border:1px solid #c7cdf7;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;}
 .tip-module h3{margin:0;font-size:13px;color:var(--brand-navy);}
@@ -210,10 +213,9 @@ body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-fo
 .gauge-detail{font-size:11.5px;color:var(--ink-muted);line-height:1.5;}
 
 /* ---------- screen 7: account ---------- */
-#screen-7 .bench-body{justify-content:center;}
-.account-body{display:grid;grid-template-columns:1.2fr .85fr;gap:32px;}
-.account-form{display:flex;flex-direction:column;gap:12px;}
-.nameplate-wrap{display:flex;flex-direction:column;gap:14px;}
+.account-body{display:flex;gap:32px;align-items:stretch;}
+.account-form{flex:1.2;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:12px;}
+.nameplate-wrap{flex:.85;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:14px;}
 .nameplate{background:var(--brand-navy);border-radius:10px;padding:18px 20px;display:flex;align-items:center;gap:12px;}
 .nameplate-avatar{width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none;}
 .nameplate-name{color:#fff;font-weight:650;font-size:14.5px;}
@@ -261,13 +263,13 @@ body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-fo
       </div>
       <div class="bench-body">
         <div class="s1-body">
-          <div>
+          <div class="s1-col s1-stats">
             <div class="stat-row"><span class="stat-num">35</span><span class="stat-label">tables and views built</span></div>
             <div class="stat-row"><span class="stat-num">108</span><span class="stat-label">protective database rules</span></div>
             <div class="stat-row"><span class="stat-num">1</span><span class="stat-label">sign-in account you create</span></div>
             <p class="stat-intro">Each one is checked on your own server before it counts &mdash; not assumed.</p>
           </div>
-          <div>
+          <div class="s1-col s1-checks">
             <div class="checks-head">
               <h2>Checking this server</h2>
               <span class="status-pill has-issue">1 need attention, 9 passed</span>
@@ -383,7 +385,7 @@ body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-fo
             </div>
             <p class="field-hint">Leave the password empty only on this computer, where XAMPP and Laragon install root without one. A database on another server always needs one.</p>
           </div>
-          <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="s3-tip">
             <div class="tip-module">
               <h3>Setting up locally?</h3>
               <p>XAMPP and Laragon already create a root account with no password. Leave the password field empty and setup does the rest &mdash; including creating the database itself.</p>

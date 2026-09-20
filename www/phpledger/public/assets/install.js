@@ -11,5 +11,5 @@ if (installationForm instanceof HTMLFormElement) {
   if (automatic instanceof HTMLButtonElement) {
     automatic.hidden = true;
   }
-  window.setTimeout(() => installationForm.requestSubmit(), 250);
+  window.setTimeout(() => installationForm.requestSubmit(), 120);
 }

@@ -159,7 +159,7 @@ try {
     $denied = installer_http($url, ['csrf_token' => $csrf, 'action' => 'unlock', 'setup_key' => 'wrong-key'], $cookie);
     installer_assert($denied['status'] === 400 && str_contains($denied['body'], 'not accepted'), 'Wrong setup proof was accepted.');
     $response = installer_http($url, ['csrf_token' => $csrf, 'action' => 'unlock', 'setup_key' => $setupKey], $cookie);
-    installer_assert($response['status'] === 200 && str_contains($response['body'], 'Connect your database'), 'Correct host proof did not unlock setup.');
+    installer_assert($response['status'] === 200 && str_contains($response['body'], 'This installs PHP Ledger on this server'), 'Correct host proof did not unlock setup.');
     $csrf = installer_token($response);
     $lock = pl_install_operation_lock();
     $denied = installer_http($url, null, $cookie);
@@ -174,7 +174,7 @@ try {
     installer_assert((int) DB::queryFirstField("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'unrelated_fixture'") === 1, 'Existing table was changed.');
     DB::query('DROP TABLE unrelated_fixture');
     $response = installer_http($url, $input, $cookie);
-    installer_assert($response['status'] === 200 && str_contains($response['body'], 'Review your installation'), 'Empty target was not accepted for review.');
+    installer_assert($response['status'] === 200 && str_contains($response['body'], 'Database connected.'), 'Empty target was not accepted for review.');
     $state = pl_install_read_state();
     installer_assert(!str_contains(json_encode($state), $databasePassword), 'Database password was saved in durable setup state.');
     $bad = $input;
@@ -233,7 +233,7 @@ try {
     $denied = installer_http($url, array_replace($owner, ['username' => 'no spaces allowed']), $cookie);
     installer_assert($denied['status'] === 400 && str_contains($denied['body'], 'username') && (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_users') === 0, 'Invalid username created a user.');
     $response = installer_http($url, $owner, $cookie);
-    installer_assert($response['status'] === 303 && str_contains($response['headers'], 'Location: /onboarding'), 'Valid account did not finish setup and continue to onboarding.');
+    installer_assert($response['status'] === 200 && str_contains($response['body'], 'Your installation is complete.'), 'Valid account did not finish setup.');
     installer_assert(DB::queryFirstField('SELECT username FROM pl_users') === 'installer.owner', 'The chosen username was not saved in lowercase.');
     installer_assert(pl_authenticate('installer.owner', $ownerPassword, 'installer-fixture')['email'] === 'installer@example.invalid'
         && pl_authenticate('INSTALLER@example.invalid', $ownerPassword, 'installer-fixture')['email'] === 'installer@example.invalid', 'The owner cannot sign in with both the username and the email.');

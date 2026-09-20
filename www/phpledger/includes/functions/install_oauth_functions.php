@@ -34,11 +34,24 @@ function pl_install_public_url(string $input): string
 function pl_install_oauth_keys(string $directory): bool
 {
     $directory = pl_install_private_path($directory);
-    if (file_exists($directory)) {
-        if (!is_dir($directory) || is_link($directory)) {
+    $names = ['private.key', 'public.key', 'encryption.key'];
+    // An operator who pre-created an empty key folder, or pointed PL_OAUTH_KEY_DIRECTORY
+    // at one, has given setup a destination rather than an interrupted installation. Only
+    // a folder holding some of the keys is refused, because that is the state worth keeping.
+    $destination = is_dir($directory) && !is_link($directory);
+    $present = [];
+    if ($destination) {
+        foreach ($names as $name) {
+            if (file_exists($directory . '/' . $name)) {
+                $present[] = $name;
+            }
+        }
+    }
+    if (file_exists($directory) && ($present !== [] || !$destination)) {
+        if (!$destination) {
             throw new DomainException('The OAuth key directory needs operator review. Existing state was preserved.');
         }
-        foreach (['private.key', 'public.key', 'encryption.key'] as $name) {
+        foreach ($names as $name) {
             $path = $directory . '/' . $name;
             if (!is_file($path) || is_link($path) || !is_readable($path)) {
                 throw new DomainException('OAuth key creation was interrupted or the key directory is incomplete. Preserve it and restore the matching keys before continuing.');
@@ -90,7 +103,13 @@ function pl_install_oauth_keys(string $directory): bool
         foreach (['private.key' => $private, 'public.key' => $details['key'], 'encryption.key' => bin2hex(random_bytes(32))] as $name => $contents) {
             pl_install_write_private($staging . '/' . $name, $contents, false);
         }
-        if (file_exists($directory) || !rename($staging, $directory)) {
+        if ($destination) {
+            foreach ($names as $name) {
+                if (file_exists($directory . '/' . $name) || !rename($staging . '/' . $name, $directory . '/' . $name)) {
+                    throw new DomainException('The OAuth key destination changed. Existing keys were preserved.');
+                }
+            }
+        } elseif (file_exists($directory) || !rename($staging, $directory)) {
             throw new DomainException('The OAuth key destination changed. Existing keys were preserved.');
         }
         return true;

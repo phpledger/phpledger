@@ -296,11 +296,32 @@ test('the setup lights summarise what the server can and cannot do', function ()
     assert_true(count($checks) >= 13, 'every requirement gets its own light');
     $byName = [];
     foreach ($checks as $check) {
-        assert_same(['name', 'status', 'detail'], array_keys($check));
+        assert_same(['name', 'status', 'detail', 'fixes'], array_keys($check));
         assert_true(in_array($check['status'], [PL_CHECK_PASS, PL_CHECK_WARN, PL_CHECK_FAIL], true), $check['name']);
         assert_true($check['detail'] !== '', $check['name'] . ' explains itself');
+        // A light that has cleared carries no advice; one that has not must say what to do.
+        assert_same($check['status'] === PL_CHECK_PASS, $check['fixes'] === [], $check['name'] . ' advice matches its light');
         $byName[$check['name']] = $check;
     }
+    // The release ships no storage folder, so a fresh upload asks about a path that does
+    // not exist yet. Blocking that would refuse every first installation.
+    $base = sys_get_temp_dir() . '/pl_probe_' . bin2hex(random_bytes(6));
+    assert_true(mkdir($base, 0700), 'fixture directory');
+    try {
+        assert_true(pl_install_path_writable($base . '/storage/installation'), 'a missing folder under a writable parent');
+        assert_true(pl_install_path_writable($base . '/not/created/yet/at/all'), 'a deeply missing path under a writable parent');
+        assert_true(pl_install_path_writable($base), 'the folder itself');
+    } finally {
+        rmdir($base);
+    }
+    // A path whose nearest existing ancestor is a file, not a folder, can never be created.
+    assert_true(!pl_install_path_writable(__FILE__ . '/storage/installation'), 'a path blocked by a file');
+    // Every failure the owner can act on names the places it is actually fixed.
+    $missing = pl_install_check_row('PHP bcmath', PL_CHECK_FAIL, 'missing', pl_install_extension_fixes('bcmath', '8.3.14'));
+    assert_same(3, count($missing['fixes']));
+    assert_true(str_contains($missing['fixes'][0], 'extension=bcmath'));
+    assert_true(str_contains($missing['fixes'][1], 'php8.3-bcmath'));
+    assert_same([], pl_install_check_row('PHP bcmath', PL_CHECK_PASS, 'available', pl_install_extension_fixes('bcmath', '8.3.14'))['fixes']);
     // Whatever the host, what the application itself brings must pass here.
     foreach (['PHP version', 'PHP bcmath', 'PHP pdo_mysql', 'PHP openssl', 'Bundled dependencies'] as $required) {
         assert_same(PL_CHECK_PASS, $byName[$required]['status'], $required);

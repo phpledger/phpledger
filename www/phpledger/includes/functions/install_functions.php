@@ -121,6 +121,17 @@ function pl_install_migration_budget(string $maximumExecutionTime): float
     return $limit <= 0 ? 15.0 : max(3.0, min(15.0, $limit * 0.6));
 }
 
+/**
+ * How many steps one request applies. One request for the whole chain finishes so
+ * fast that the progress bar never renders, which loses the only sign the owner
+ * has that anything is happening; a handful of batches keeps it visible and still
+ * costs under a second of round trips. The time budget remains the safety net.
+ */
+function pl_install_migration_batch(int $total): int
+{
+    return max(1, (int) ceil($total / 6));
+}
+
 function pl_install_migration_versions(): array
 {
     $files = glob(dirname(__DIR__, 2) . '/install/migrations/[0-9]*.php') ?: [];

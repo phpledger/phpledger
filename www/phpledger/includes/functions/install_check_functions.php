@@ -22,10 +22,28 @@ const PL_CHECK_PASS = 'pass';
 const PL_CHECK_WARN = 'warn';
 const PL_CHECK_FAIL = 'fail';
 
-/** @return array{name: string, status: string, detail: string} */
-function pl_install_check_row(string $name, string $status, string $detail): array
+/**
+ * A check carries its own way out. A red light that only says "missing" leaves the
+ * owner stuck; the same light with the three places this is actually fixed lets
+ * them clear it and come back, which is what the setup screens are built around.
+ *
+ * @param list<string> $fixes
+ * @return array{name: string, status: string, detail: string, fixes: list<string>}
+ */
+function pl_install_check_row(string $name, string $status, string $detail, array $fixes = []): array
 {
-    return ['name' => $name, 'status' => $status, 'detail' => $detail];
+    return ['name' => $name, 'status' => $status, 'detail' => $detail, 'fixes' => $status === PL_CHECK_PASS ? [] : $fixes];
+}
+
+/** The places a PHP extension is actually turned on, named for the stack in front of the owner. */
+function pl_install_extension_fixes(string $extension, string $phpVersion): array
+{
+    $series = preg_match('/^(\d+\.\d+)/', $phpVersion, $match) === 1 ? $match[1] : '8.3';
+    return [
+        'On XAMPP, Laragon or MAMP: open php.ini, remove the semicolon before extension=' . $extension . ', and restart Apache.',
+        'On your own Ubuntu or Debian server: run sudo apt install php' . $series . '-' . $extension . ', then restart PHP-FPM.',
+        'On shared hosting: open PHP Selector, MultiPHP INI Editor or "Select PHP Version" in your control panel and tick ' . $extension . '.',
+    ];
 }
 
 /** The worst light in a list, so one summary line can stand for the whole table. */
@@ -62,7 +80,11 @@ function pl_install_check_counts(array $checks): array
 function pl_install_php_version_check(int $version, string $display): array
 {
     return pl_install_check_row('PHP version', $version >= 80200 ? PL_CHECK_PASS : PL_CHECK_FAIL,
-        $version >= 80200 ? $display : $display . ', but PHP Ledger needs 8.2 or newer. Choose a newer version in your hosting panel.');
+        $version >= 80200 ? $display : $display . ', and PHP Ledger needs 8.2 or newer', [
+            'In cPanel or Plesk: open "Select PHP Version" or "PHP Settings" and choose 8.2 or newer for this domain.',
+            'On XAMPP or Laragon: switch the bundled PHP version, or install a newer release beside it.',
+            'On your own server: install a newer PHP and point the web server at it, then reload this page.',
+        ]);
 }
 
 /**
@@ -81,23 +103,39 @@ function pl_install_requirement_checks(array $server = [], ?string $exposure = n
         'session' => 'signing in', 'json' => 'stored settings'] as $extension => $purpose) {
         $loaded = extension_loaded($extension);
         $checks[] = pl_install_check_row('PHP ' . $extension, $loaded ? PL_CHECK_PASS : PL_CHECK_FAIL,
-            $loaded ? 'available' : 'missing, and it is needed for ' . $purpose);
+            $loaded ? 'available' : 'missing, and it is needed for ' . $purpose,
+            pl_install_extension_fixes($extension, PHP_VERSION));
     }
     $autoload = is_file(dirname(__DIR__, 4) . '/vendor/autoload.php');
     $checks[] = pl_install_check_row('Bundled dependencies', $autoload ? PL_CHECK_PASS : PL_CHECK_FAIL,
-        $autoload ? 'the vendor folder is in place' : 'the vendor folder is missing. Upload the complete release package.');
+        $autoload ? 'the vendor folder is in place' : 'the vendor folder did not arrive with this upload', [
+            'Upload the complete release ZIP again. Some file managers skip the vendor folder when a transfer is interrupted.',
+            'Unzip the package on your computer first, then upload the whole phpledger folder in one go.',
+            'From a terminal in the package root: run composer install --no-dev.',
+        ]);
     $session = pl_install_session_check((string) ini_get('session.save_handler'), (string) ini_get('session.save_path'));
     $checks[] = pl_install_check_row('Session storage',
         match ($session['status']) { 'ok' => PL_CHECK_PASS, 'warning' => PL_CHECK_WARN, default => PL_CHECK_FAIL },
-        $session['status'] === 'ok' ? 'writable' : $session['message']);
+        $session['status'] === 'ok' ? 'writable' : $session['message'], [
+            'In your hosting panel, set session.save_path to a private folder your account can write to.',
+            'Make sure that folder is writable by the user PHP runs as, not only by your FTP account.',
+            'If the panel has no such setting, ask your host to enable PHP sessions for this account.',
+        ]);
     try {
         $directory = pl_install_directory();
-        $writable = is_dir($directory) ? is_writable($directory) : is_writable(dirname($directory));
+        $writable = pl_install_path_writable($directory);
         $checks[] = pl_install_check_row('Private storage', $writable ? PL_CHECK_PASS : PL_CHECK_FAIL,
-            $writable ? 'writable' : 'not writable. Allow PHP to write to it in your hosting file manager.');
+            $writable ? 'writable' : 'PHP cannot write to www/phpledger/storage', [
+                'In your hosting file manager, set the permissions of www/phpledger/storage to 755, or 775 where PHP runs as another user.',
+                'Check that the folder belongs to your hosting account rather than to root.',
+                'Or set PL_INSTALL_DIRECTORY to a private folder outside the website that PHP can write to.',
+            ]);
         $configuration = dirname(pl_install_config_path());
-        $checks[] = pl_install_check_row('Private configuration', is_writable($configuration) ? PL_CHECK_PASS : PL_CHECK_WARN,
-            is_writable($configuration) ? 'writable' : 'not writable, so setup will offer the file for download and you upload it yourself.');
+        $checks[] = pl_install_check_row('Private configuration', pl_install_path_writable($configuration) ? PL_CHECK_PASS : PL_CHECK_WARN,
+            pl_install_path_writable($configuration) ? 'writable' : 'PHP cannot write www/phpledger/includes, so setup will hand you the file instead', [
+                'Nothing needs fixing: setup offers the configuration as a download, and you upload it with your hosting file manager.',
+                'Or make www/phpledger/includes writable by PHP if you would rather setup saved it for you.',
+            ]);
     } catch (Throwable $error) {
         $checks[] = pl_install_check_row('Private storage', PL_CHECK_FAIL, 'the private folder could not be resolved and needs operator review.');
     }
@@ -106,16 +144,37 @@ function pl_install_requirement_checks(array $server = [], ?string $exposure = n
             match ($exposure) { 'protected' => PL_CHECK_PASS, 'unknown' => PL_CHECK_WARN, default => PL_CHECK_FAIL },
             match ($exposure) {
                 'protected' => 'visitors cannot download them',
-                'unknown' => 'this could not be confirmed automatically. Use the check link above.',
-                default => 'visitors can download them. Point the document root at www/phpledger/public.',
-            });
+                'unknown' => 'this could not be confirmed automatically',
+                default => 'visitors can download them',
+            }, [
+                "Point the website's document root at the www/phpledger/public folder. That is the most secure layout.",
+                'Or ask your host to honour .htaccess rules for this site. Nginx ignores them by default.',
+            ]);
     }
     $secure = (!empty($server['HTTPS']) && strtolower((string) $server['HTTPS']) !== 'off') || (int) ($server['SERVER_PORT'] ?? 0) === 443;
     if ($server !== []) {
         $checks[] = pl_install_check_row('HTTPS', $secure ? PL_CHECK_PASS : PL_CHECK_WARN,
-            $secure ? 'this address uses a certificate' : 'this address is plain HTTP. Setup continues, and Connections stay unavailable until a certificate is in place.');
+            $secure ? 'this address uses a certificate' : 'this address is plain HTTP, so Connections stay unavailable', [
+                "Turn on SSL in your hosting panel. AutoSSL and Let's Encrypt are free and included by most hosts.",
+                'Then open this site again with https:// and install from there.',
+                'On your own computer this is expected, and setup continues either way.',
+            ]);
     }
     return $checks;
+}
+
+/**
+ * Can PHP create this path? The release does not ship the storage folder, so on a
+ * fresh upload neither it nor its parent exists yet; the question is whether the
+ * nearest folder that does exist can be written to.
+ */
+function pl_install_path_writable(string $path): bool
+{
+    $probe = $path;
+    while ($probe !== '' && !file_exists($probe) && dirname($probe) !== $probe) {
+        $probe = dirname($probe);
+    }
+    return $probe !== '' && is_dir($probe) && is_writable($probe);
 }
 
 /**
@@ -261,6 +320,31 @@ function pl_install_progress(array $schema): array
         'percent' => $done >= $total ? 100 : max(2, (int) floor($done * 100 / $total)),
         'label' => $done >= $total ? 'Finishing up' : ($current === null ? 'Preparing your database' : pl_install_step_label($current)),
     ];
+}
+
+/**
+ * What the owner ends up with, itemised from the database rather than from the
+ * installer's own expectations, for the last screen.
+ *
+ * @return list<string>
+ */
+function pl_install_completion_lines(string $username, array $schema): array
+{
+    $lines = [];
+    try {
+        $objects = (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()');
+        $triggers = (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_schema = DATABASE()');
+        $lines[] = $objects . ' tables and views built';
+        $lines[] = $triggers . ' protective database rules active';
+    } catch (Throwable $error) {
+        // This list summarises; it is not a gate, so a server that will not answer is simply omitted.
+    }
+    if ($username !== '') {
+        $lines[] = 'Signed in as ' . $username;
+    }
+    $lines[] = pl_install_check_summary(pl_install_self_checks($schema)) === PL_CHECK_PASS
+        ? 'Every check passed' : 'Checks recorded for review';
+    return $lines;
 }
 
 /**
