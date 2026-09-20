@@ -2,9 +2,9 @@
 
 ## Current sequence: stable 1.0, approved 18 September 2026
 
-The [current release checklist](ROADMAP.md#current-delivery-contract-first-stable-10) supersedes the historical sequences below: **0.6.1 workflow completion → 0.7 browser installer → 0.8 automatic backup/update/recovery → 0.9 supervised beta → 1.0 release candidates → 1.0 stable**. AR/AP are already core, and basic Purchasing/Inventory are already bundled optional modules. English is the stable launch language; Urdu/RTL follows in 1.1, Arabic/RTL in 1.2. Required production evidence includes independent accounting/security review, a 30-day pilot with month-end close, verified recovery and a 14-day release-candidate period. Current local implementation is not publication or sign-off.
+The [current release checklist](ROADMAP.md#current-delivery-contract-first-stable-10) supersedes the historical sequences below: **0.6.1 workflow completion → 0.7 browser installer → 0.8 automatic backup/update/recovery → 0.9 supervised beta → 1.0 release candidates → 1.0 stable**. AR/AP are already core, and basic Purchasing/Inventory are already bundled optional modules. English is the stable launch language; Urdu/RTL follows in 1.2 and Arabic/RTL in 1.3 (owner decision B20, 19 September 2026). Required production evidence includes independent accounting/security review, a 30-day pilot with month-end close, verified recovery and a 14-day release-candidate period. Current local implementation is not publication or sign-off.
 
-Distribution-channel publication follows in 1.1. Regional connectors, production shop POS, e-commerce, controlled writes and specialists retain their later capability gates. The illustrative cash POS is not a stable retail promise.
+Distribution channels open under the [release protocol](RELEASE-PROTOCOL.md): the container image in 1.2, Packagist, catalogues and hosting panels in 1.3. Regional connectors, production shop POS, e-commerce, controlled writes and specialists retain their later capability gates. The illustrative cash POS is not a stable retail promise.
 
 ## Historical delivery: one usable accounting starter (16 September 2026)
 

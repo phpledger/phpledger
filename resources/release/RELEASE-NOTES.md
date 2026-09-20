@@ -4,9 +4,22 @@ Each release's exact source revision is recorded in its `PACKAGE-MANIFEST.json` 
 
 PHP Ledger 1.0.0 was the first supported stable release of the restarted application. It preserves the lightweight BixiSoft PHP/MeekroDB structure while separating accounting functions, server permissions, templates and the public front controller. Read "Supported scope and limits" and "Assurance status" below before deployment; the dated preview sections further down record the historical, superseded scope of each earlier development release.
 
+## 1.1.2: the 1.1.1 record corrected, and signed updates again
+
+Published 21 September 2026. A patch release: no migration of its own, no schema change, and one fix at the point of sale.
+
+- **The 1.1.1 record is corrected.** 1.1.1 was announced as carrying no migration. It does: its package includes migration `034_inventory_locations` and the optional Stock locations module (warehouses and vans, transfers at carrying value, per-location stock), which is off by default and changes nothing until a company enables it under Modules. A fresh 1.1.1 installation applied the migration during setup. An installation upgraded from 1.1.0 by replacing files has it pending: run `php www/phpledger/install/migrate.php` once, or install 1.1.2 from `/maintenance.php`, which applies it. The module's documentation, compatibility matrix and upgrade proof are 1.2 work; treat it as an early copy of the first 1.2 module. The 1.1.1 notes below are amended.
+- **Cash at the point of sale is counted in notes and coins** ([issue #88](https://github.com/phpledger/phpledger/issues/88)). The showcase accepted a tender such as `1262.2555` against a sale total of `1,262.25` and recorded change of `0.0055`. Cash received must now be a whole number of the currency's minor units, so tender, total and change share one precision on the receipt; the sample catalogue is checked to price goods no more finely. The ledger keeps four decimal places; only the tender is held to two.
+- **Signed update metadata is back.** 1.1.1 was published without `phpledger-1.1.1.update.json`, so an installation on 1.1.0 could not reach it through `/maintenance.php` although its upgrade guide said so. 1.1.2 carries signed metadata: an installation on 1.1.0 or 1.1.1 with the publisher key pinned installs it from `/maintenance.php`, and from 1.1.0 that run also applies migration 034. 1.1.1 itself is not signed retroactively.
+- **Documentation and release metadata corrected.** The README, wiki, download page and roadmap surfaces that still called 1.1.0 the current release, called 1.1.1 the first signed release, or said the demo packs had left the package (they have not; that work moves to 1.2 with the plugin runtime) are fixed. The website requirements page names `log_bin_trust_function_creators = 1` for binary-logged MySQL, which setup already reports. The rule that only a major release (`x.y.0`) carries a media kit is written into the project's release rules.
+
+Upgrading from 1.1.1 replaces files only. Upgrading from 1.1.0 also applies migration 034. See [UPGRADE.md](UPGRADE.md).
+
+This release ships without a media kit: minor and patch releases do not carry one, by the owner's decision of 20 September 2026. The assurance limits recorded for 1.1.1, 1.1.0 and 1.0.0 below still apply; the first supervised pilot, on the maintainer's own books, starts on this release on 1 October 2026.
+
 ## 1.1.1: setup you can watch, and a database on your own computer
 
-Published 20 September 2026. A patch release: no schema change, no migration, and no change to any accounting behaviour.
+Published 20 September 2026. A patch release with no change to any accounting behaviour. **Correction (21 September 2026, in 1.1.2):** this release was announced with "no schema change, no migration". That was wrong: its package carries migration `034_inventory_locations` and the optional Stock locations module. See the 1.1.2 notes above for what to do on an installation upgraded from 1.1.0 by replacing files.
 
 - **Setup runs in six stages you can see.** Start, Database, Build, Checks, Account and Ready, each sized for a laptop screen. The Build stage shows a progress bar naming the step it is on, such as "Building the chart of accounts and journals, step 6 of 35", instead of a button that looks like it is waiting for you.
 - **A failed requirement is something to clear, not an error page.** A missing PHP extension now takes over the screen with the places it is actually fixed: the `php.ini` line on XAMPP or Laragon, the package name on Debian, the PHP Selector screen on shared hosting, and a Check again button.
@@ -19,7 +32,7 @@ Published 20 September 2026. A patch release: no schema change, no migration, an
 - **A server that would refuse the schema says so first** ([issue #83](https://github.com/phpledger/phpledger/issues/83)). MySQL 8 writes a binary log by default and refuses `CREATE TRIGGER` unless the account is trusted, which used to stop the schema part-way through migration `001`. Setup now reads that setting at the connection check and names `log_bin_trust_function_creators = 1` before anything is written, and a migration interrupted anyway records how far it got and resumes at its first unapplied statement.
 - **Fixes.** An empty key folder that an operator created in advance, or pointed `PL_OAUTH_KEY_DIRECTORY` at, was treated as an interrupted installation and blocked setup; only a folder holding some of the keys is refused now. The two demo landing labels corrected on 19 September ship here.
 
-Upgrading from 1.1.0 replaces files only. There is no migration in this release.
+Upgrading from 1.1.0 replaces files and then needs `php www/phpledger/install/migrate.php` once, for migration 034 (corrected in 1.1.2; the original note said there was no migration).
 
 This release ships without a media kit, at the owner's decision on 20 September 2026: minor and patch releases do not carry one. The assurance limits recorded for 1.1.0 and 1.0.0 below still apply, and a real shared host and an unfamiliar operator have still not been observed.
 

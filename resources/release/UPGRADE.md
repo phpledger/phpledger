@@ -28,9 +28,21 @@ Keep the installed chain through 031 unchanged; 1.0.0 adds no new migration. Thi
 
 Use the backup/maintenance procedure below and run migrations before reopening traffic, exactly as for the 0.5.0-preview to 0.6.0-preview upgrade. Restore both matching code and database if rollback is needed; copying old PHP over an upgraded database is not a tested rollback.
 
+## From 1.1.1 to 1.1.2
+
+A files-only upgrade: no migration, no receipt change, and one point-of-sale validation change (cash received must be a whole number of minor units). Replace the files with the manual procedure below, or install it from `/maintenance.php` with `phpledger-1.1.2.update.json`: 1.1.2 is the first release since 1.1.0 with signed metadata, so the pinned publisher key applies.
+
+If your 1.1.1 was installed over 1.1.0 by replacing files and you never ran `install/migrate.php`, migration 034 is still pending (see the correction below). The maintenance page reports it; `/maintenance.php` applies it as part of this update, or run `php www/phpledger/install/migrate.php` once after replacing files.
+
+## From 1.1.0 to 1.1.2
+
+Keep the installed chain through 033 unchanged. This upgrade applies migration 034 (the stock-locations tables and the optional module, which stays off). Install it from `/maintenance.php` with the 1.1.2 signed metadata, which runs the migration inside its backup-and-verify sequence, or replace the files with the manual procedure below and run `php www/phpledger/install/migrate.php` once.
+
 ## From 1.1.0 to 1.1.1
 
-A files-only upgrade. **There is no migration in this release**: the schema chain still ends at 034, no receipt changes, and no accounting behaviour changes. Replace the files with the manual procedure below, or use `/maintenance.php` if you pinned the publisher key at 1.1.0.
+**Correction (21 September 2026):** the paragraph below was wrong when 1.1.1 was published. This release **does** add migration `034_inventory_locations` (stock-locations tables and the optional Stock locations module); the chain ends at 034 only after it is applied. An installation that replaced files without running `php www/phpledger/install/migrate.php` has it pending. Because 1.1.1 shipped no signed metadata, `/maintenance.php` could not install it from 1.1.0; 1.1.2 restores that path.
+
+Original text: A files-only upgrade. There is no migration in this release: the schema chain still ends at 034, no receipt changes, and no accounting behaviour changes. Replace the files with the manual procedure below, or use `/maintenance.php` if you pinned the publisher key at 1.1.0.
 
 Everything new is in browser setup, which an existing installation has already completed and which stays closed. Two changes are worth knowing about anyway:
 - A copy whose recorded public URL begins with `http://` now shows a warning on every screen and cannot mark its session cookie `Secure`. That is a statement of what was already true, not a new restriction. Connections still require an HTTPS address.

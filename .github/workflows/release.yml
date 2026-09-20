@@ -70,5 +70,5 @@ jobs:
           case "$VERSION" in *-*) prerelease="--prerelease" ;; esac
           gh release create "v$VERSION" --draft $prerelease --verify-tag \
             --title "PHP Ledger $VERSION" \
-            --notes "Draft created by the release workflow from $GITHUB_SHA. Before publishing: reproduce the SHA-256 locally, sign the archive offline, attach phpledger-$VERSION.update.json and the media kit. See docs/RELEASE-PROTOCOL.md." \
+            --notes "Draft created by the release workflow from $GITHUB_SHA. Before publishing: reproduce the SHA-256 locally, sign the archive offline, attach phpledger-$VERSION.update.json and, for a major x.y.0 release, the media kit. See docs/RELEASE-PROTOCOL.md." \
             "build/release/phpledger-$VERSION.zip" "build/release/phpledger-$VERSION.zip.sha256"

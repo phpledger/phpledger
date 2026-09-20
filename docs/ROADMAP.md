@@ -26,7 +26,7 @@ Owner approved on 18 September 2026. This section supersedes older forward seque
 - [ ] Fresh installation, every declared upgrade path, restricted database privileges, full restoration and representative sustained workload validated; measured limits published.
 - [ ] Two or three supervised pilots complete at least 30 consecutive days and an actual month-end close; material defects and discrepancies resolved.
 - [ ] Exact release candidate completes its 14-day acceptance period without release blockers.
-- [ ] ZIP, SHA-256, matching versioned media kit, README, Wiki, About, website/demo, support guidance and stable version/channel metadata agree and are verified after authorized publication.
+- [ ] ZIP, SHA-256, signed update metadata, the matching versioned media kit (major releases only, B29), README, Wiki, About, website/demo, support guidance and stable version/channel metadata agree and are verified after authorized publication.
 
 No reviewer, interview, pilot, host certification or time gate becomes complete from automated tests. The owner arranges reviewers and pilot businesses; engineering supplies the evidence and remediation. Live publication and external contact still require explicit authorization.
 

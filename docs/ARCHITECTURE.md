@@ -2,7 +2,7 @@
 
 ## Stable delivery boundary adopted 18 September 2026
 
-The [1.0 release checklist](ROADMAP.md#current-delivery-contract-first-stable-10) controls current sequencing. English-first core accounting, required AR/AP, manual tax and optional basic Purchasing/Inventory form the supported target. Browser installation and operator-initiated updates with automatic matched backups/recovery are required before stable. Urdu/RTL is 1.1 and Arabic/RTL is 1.2; regional connectors and production retail retain independent later gates.
+The [1.0 release checklist](ROADMAP.md#current-delivery-contract-first-stable-10) controls current sequencing. English-first core accounting, required AR/AP, manual tax and optional basic Purchasing/Inventory form the supported target. Browser installation and operator-initiated updates with automatic matched backups/recovery are required before stable. Urdu/RTL is 1.2 and Arabic/RTL is 1.3 (owner decision B20); regional connectors and production retail retain independent later gates.
 
 Installation authority belongs to a host-controlled operator, not an owner of one company. Setup and update entry points use private state, ownership proof, CSRF and locking before accessing the normal application. Existing CLI entry points retain CLI guards and share internal migration/preflight services. Signed update metadata uses RSA-SHA256 over exact payload bytes and a separately configured trusted publisher public key; package-provided keys cannot establish trust. Stable versus preview channel is bound to the semantic version. Publisher private keys never enter packages.
 

@@ -218,3 +218,9 @@ phpledger-<version>-media-kit.zip.sha256
 `phpledger-1.1.0.update.json`, signed with the key above. 1.0.0 shipped without it, so an installation
 on 1.0.0 upgrades to 1.1.0 manually (see `resources/release/UPGRADE.md`) and can use `/maintenance.php`
 for later releases after pinning the key.
+
+1.1.1 (20 September 2026) was published without signed metadata, an omission corrected by 1.1.2
+(21 September 2026), which is signed with the same key; its envelope verifies as an upgrade from both
+1.1.0 and 1.1.1 because the verifier requires only a newer version. 1.1.1 is not signed retroactively.
+Media kits accompany major releases only (owner decision B29); signed metadata accompanies every release,
+including previews.

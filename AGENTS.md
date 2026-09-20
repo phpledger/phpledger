@@ -33,7 +33,7 @@ Read `README.md`, `docs/ARCHITECTURE.md`, and `docs/ROADMAP.md`, then the releva
 
 ## Every release includes a media kit
 
-- Every release, including previews and patch releases, must ship a matching versioned media kit alongside the application archive and checksum. A release is incomplete without it.
+- Every major release (`x.y.0`) must ship a matching versioned media kit alongside the application archive and checksum, and is incomplete without it. Minor, patch and preview releases carry no media kit (owner decision B29, 20 September 2026); their release notes say so.
 - Attach the kit to the GitHub release and include its download link in the release notes and owner handoff. Include factual announcement/press copy, social and email drafts, a guided demo, FAQs and verified screenshots from that release with captions and alt text. Use sample data and distinguish shipped capabilities from limitations or planned work.
 - Verify the public media-kit download and record its checksum in the publication receipt. Preparing or attaching the kit does not itself authorize sending campaigns to external recipients.
 
