@@ -18,6 +18,12 @@ Modern source is in `www/phpledger`; historical code remains only in Git history
 
 Unzip the release to get one folder named `phpledger`, upload it anywhere inside your website (for example `public_html/accounts`, or XAMPP's `htdocs`), and open that folder's address. The installer starts by itself: with the database on the same server it needs no setup key; a remote database host needs a one-time code written to private storage. It checks the host and database, applies the migration chain, and creates the first account with a username, email, password and optional logo. Pointing an HTTPS hostname's document root at `www/phpledger/public` still works and remains the most secure layout. Upgrading from 1.0.0 is manual; see UPGRADE.md.
 
+Setup runs in six stages you can follow: Start, Database, Build, Checks, Account and Ready. It begins by checking this server and shows each requirement as its own light; anything missing becomes a screen of its own naming the places it is actually fixed, and nothing is saved until it is cleared.
+
+On your own computer there is nothing to prepare before you start. With the database on `localhost`, `127.0.0.1` or `::1`, setup accepts the account XAMPP, Laragon and MAMP install, including `root` with no password, and creates the database itself if it does not exist. A database on another server still needs a dedicated account with a password, and setup never creates one there.
+
+A site without an HTTPS certificate can be installed and used. Setup warns on every step and the installed copy repeats the warning, because sign-in details travel unencrypted and Connections (the API, MCP and app integrations) need an HTTPS address. Turn on SSL in your hosting panel before keeping real books.
+
 ## Keep it updated
 
 Signed automatic updates are available from the independent `/maintenance.php` operator interface: verify the publisher signature, take a matched code/configuration/key/database backup, apply the release and run migrations, with automatic restoration of the matched backup if anything fails. This requires the PHP zip extension. See `UPGRADE.md` and [[Release 1.0.0|Release-1.0.0]] for the manual backup/restore procedure and current qualification boundaries.

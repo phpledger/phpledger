@@ -150,7 +150,7 @@
   </url>
   <url>
     <loc>https://phpledger.com/news/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-09-20</lastmod>
   </url>
   <url>
     <loc>https://phpledger.com/news/0-1-0-preview/</loc>
@@ -199,6 +199,10 @@
   <url>
     <loc>https://phpledger.com/news/1-1-0/</loc>
     <lastmod>2026-09-19</lastmod>
+  </url>
+  <url>
+    <loc>https://phpledger.com/news/1-1-1/</loc>
+    <lastmod>2026-09-20</lastmod>
   </url>
   <url>
     <loc>https://phpledger.com/point-of-sale/</loc>

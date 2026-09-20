@@ -26,7 +26,7 @@
   },
   {
     "question": "Is it ready for real books?",
-    "answer": "Version 1.1.0 is the current stable release. The first stable release, 1.0.0, has published technical validation for automated tests, update recovery and package installation. Independent accounting review, independent security review and supervised pilots remain open commitments. Complete your own reviewed acceptance with fictional records before using real books.",
+    "answer": "Version 1.1.1 is the current stable release. The first stable release, 1.0.0, has published technical validation for automated tests, update recovery and package installation. Independent accounting review, independent security review and supervised pilots remain open commitments. Complete your own reviewed acceptance with fictional records before using real books.",
     "source": "https://phpledger.com/"
   },
   {
@@ -146,7 +146,7 @@
   },
   {
     "question": "Can I use it for real books today?",
-    "answer": "Yes, with the published limits in mind. Version 1.1.0 is the current stable release, and the accounting core covers invoices, bills, stock, bank reconciliation and the standard reports. Independent accounting and security reviews, and supervised pilots, are still open commitments on the roadmap. Keep backups, and read the roadmap before you commit a live business to it.",
+    "answer": "Yes, with the published limits in mind. Version 1.1.1 is the current stable release, and the accounting core covers invoices, bills, stock, bank reconciliation and the standard reports. Independent accounting and security reviews, and supervised pilots, are still open commitments on the roadmap. Keep backups, and read the roadmap before you commit a live business to it.",
     "source": "https://phpledger.com/download/"
   },
   {
@@ -161,7 +161,7 @@
   },
   {
     "question": "Does it work with MariaDB?",
-    "answer": "Yes. Since version 1.1.0, MariaDB 10.4 or newer is supported alongside MySQL 8.4, both with InnoDB. The full test battery of 294 tests passed on MariaDB 10.4, 10.6, 10.11 and 11.4 and on MySQL 8.4. MySQL 8.0 is not supported yet.",
+    "answer": "Yes. Since version 1.1.1, MariaDB 10.4 or newer is supported alongside MySQL 8.4, both with InnoDB. The full test battery of 294 tests passed on MariaDB 10.4, 10.6, 10.11 and 11.4 and on MySQL 8.4. MySQL 8.0 is not supported yet.",
     "source": "https://phpledger.com/download/"
   },
   {
@@ -176,7 +176,7 @@
   },
   {
     "question": "Where is the source?",
-    "answer": "The full source is on GitHub at github.com/phpledger/phpledger. The release tag v1.1.0 holds the package, the checksum file and the release notes, and the repository carries the development history.",
+    "answer": "The full source is on GitHub at github.com/phpledger/phpledger. The release tag v1.1.1 holds the package, the checksum file and the release notes, and the repository carries the development history.",
     "source": "https://phpledger.com/download/"
   },
   {

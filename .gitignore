@@ -66,3 +66,6 @@ nppbackup
 /www/phpledger/includes/config.local.php
 __pycache__/
 *.pyc
+
+# Release build output (tools/build-release.py). The artifacts belong on the GitHub release.
+build/

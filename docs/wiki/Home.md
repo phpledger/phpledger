@@ -1,4 +1,6 @@
-## Current package: 1.1.0
+## Current package: 1.1.1
+
+**1.1.1**, published 20 September 2026, rebuilds browser setup into six stages with green and red checks, accepts the database account XAMPP and Laragon install on your own computer including `root` with no password, creates that database itself, and warns instead of refusing over plain HTTP. It carries no migration. See the [[1.1.1 release notes|Release-1.1.1]].
 
 **1.1.0**, published 19 September 2026, installs like WordPress: upload the `phpledger` folder into any web folder and open its address, and the installer starts by itself. It adds MariaDB 10.4+, a chosen username, an optional logo, and the first signed update metadata. [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.1.0/phpledger-1.1.0-media-kit.zip). [[Release notes|Release-1.1.0]]. **1.0.0**, published 18 September 2026, was the first stable release.
 

@@ -930,7 +930,7 @@
       "path": "/download/",
       "redirectStub": false,
       "indexable": true,
-      "title": "Download PHP Ledger 1.1.0 (PHP 8.2+, MySQL or MariaDB)",
+      "title": "Download PHP Ledger 1.1.1 (PHP 8.2+, MySQL or MariaDB)",
       "descriptionLength": 142,
       "images": 8,
       "lazyImages": 6,
@@ -3995,9 +3995,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 22630,
-        "eager": 334060,
-        "total": 612357
+        "html": 22646,
+        "eager": 334076,
+        "total": 612373
       },
       "budgets": {
         "eager": null,
@@ -4030,7 +4030,7 @@
         },
         {
           "file": "news/0-6-0-preview/index.html",
-          "bytes": 22630
+          "bytes": 22646
         }
       ],
       "lazyAssets": [
@@ -4264,18 +4264,100 @@
         }
       ]
     },
+    "news/1-1-1/index.html": {
+      "path": "/news/1-1-1/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "PHP Ledger 1.1.1: setup you can watch",
+      "descriptionLength": 137,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 22223,
+        "eager": 333653,
+        "total": 422358
+      },
+      "budgets": {
+        "eager": null,
+        "total": null
+      },
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "news/1-1-1/index.html",
+          "bytes": 22223
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
     "news/index.html": {
       "path": "/news/",
       "redirectStub": false,
       "indexable": true,
       "title": "Release news and project updates | PHP Ledger",
-      "descriptionLength": 136,
+      "descriptionLength": 130,
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 26332,
-        "eager": 337762,
-        "total": 426467
+        "html": 26819,
+        "eager": 338249,
+        "total": 426954
       },
       "budgets": {
         "eager": 650000,
@@ -4308,7 +4390,7 @@
         },
         {
           "file": "news/index.html",
-          "bytes": 26332
+          "bytes": 26819
         }
       ],
       "lazyAssets": [
@@ -6052,7 +6134,7 @@
   "errors": [],
   "warnings": [],
   "summary": {
-    "pages": 71,
+    "pages": 72,
     "redirectStubs": 2,
     "errors": 0,
     "warnings": 0

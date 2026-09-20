@@ -7,11 +7,11 @@
 <h1 align="center">Open-source, self-hosted accounting and cash POS for small businesses</h1>
 
 <p align="center">
-  Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+. New code is AGPL-3.0-or-later licensed; a commercial licence is available. Current release: 1.1.0.
+  Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+. New code is AGPL-3.0-or-later licensed; a commercial licence is available. Current release: 1.1.1.
 </p>
 
 <p align="center">
-  <img src="docs/repository/assets/release-1-1-0.svg" width="190" height="26" alt="Release: 1.1.0 stable">
+  <img src="docs/repository/assets/release-1-1-1.svg" width="190" height="26" alt="Release: 1.1.1 stable">
 </p>
 
 <p align="center">
@@ -36,7 +36,7 @@ It records receipts and expenses as balanced double-entry journals, keeps posted
 
 The accounting starter adds customer invoices, supplier bills, partial payments, credits and ageing to the base accounting core. Purchasing and shared Inventory are bundled optional modules. A manually configurable core tax engine supports inclusive or exclusive entered prices. All financial activity uses the same posting and reporting services.
 
-**Release status:** **1.1.0**, published 19 September 2026, makes installation work like WordPress (unzip into any web folder and open it), adds MariaDB 10.4+, a chosen username and an optional logo, and is the first release with signed update metadata. See the [release notes](resources/release/RELEASE-NOTES.md). **1.0.0**, published 18 September 2026, was the first stable release. The owner consolidated the locally implemented 0.6.1 workflow-recovery closure, the 0.7 browser installer and the 0.8 signed update/automatic-backup/recovery work into this single release and published it as the supported production scope. Automated test suites, fault-injection update/recovery tests, exact-artifact install/upgrade/recovery checks against the built package, and developer-operated browser checks back this release. Independent accounting review, independent security review, supervised pilots with a real month-end close, unfamiliar-operator installation observation, and restricted shared-host recovery certification have **not** happened; the owner published with these limits disclosed as post-release commitments, not as claims of completed review. See [Validation](docs/VALIDATION.md#100-publication--18-september-2026) and [Roadmap](docs/ROADMAP.md#current-delivery-contract-first-stable-10) for the exact evidence and open gates.
+**Release status:** **1.1.1**, published 20 September 2026, rebuilds browser setup into six stages with green and red checks, accepts a local database account with no password and creates the database on your own computer, and warns instead of refusing over plain HTTP. It carries no migration. 1.1.0, published 19 September 2026, makes installation work like WordPress (unzip into any web folder and open it), adds MariaDB 10.4+, a chosen username and an optional logo, and is the first release with signed update metadata. See the [release notes](resources/release/RELEASE-NOTES.md). **1.0.0**, published 18 September 2026, was the first stable release. The owner consolidated the locally implemented 0.6.1 workflow-recovery closure, the 0.7 browser installer and the 0.8 signed update/automatic-backup/recovery work into this single release and published it as the supported production scope. Automated test suites, fault-injection update/recovery tests, exact-artifact install/upgrade/recovery checks against the built package, and developer-operated browser checks back this release. Independent accounting review, independent security review, supervised pilots with a real month-end close, unfamiliar-operator installation observation, and restricted shared-host recovery certification have **not** happened; the owner published with these limits disclosed as post-release commitments, not as claims of completed review. See [Validation](docs/VALIDATION.md#100-publication--18-september-2026) and [Roadmap](docs/ROADMAP.md#current-delivery-contract-first-stable-10) for the exact evidence and open gates.
 
 **Release signing:** the updater verifies publisher-signed release metadata against a key the operator pins out of band. 1.1.0 is the first release signed with the official RSA-4096 publisher key, published in [docs/RELEASE-SIGNING.md](docs/RELEASE-SIGNING.md#official-publisher-key) and [resources/release/publisher-public.pem](resources/release/publisher-public.pem) with SHA-256 fingerprint `4e58a5f46b0538c9b37aaadbfced9a2d8ad2f7d413bc168a67b1b94feaa78e78`. 1.0.0 carries a checksum only, so upgrading from 1.0.0 to 1.1.0 is manual.
 
@@ -44,7 +44,7 @@ Every release, including previews and patch releases, must publish the applicati
 
 Every release also reviews and updates the GitHub Wiki, repository About description, website URL and topics, README, release notes, version/package manifests, and affected website download and social/share metadata. Verify the public results and record each surface as updated or reviewed unchanged in the publication receipt and owner handoff. All surfaces must agree on shipped capabilities, version, download links and preview limitations.
 
-## Current release: 1.1.0
+## Current release: 1.1.1
 
 The accounting starter, eleven-pack chooser, responsive shell, catalogue-led setup, browser installation, and signed automatic updates with backup and recovery shipped in 1.0.0. 1.1.0 adds WordPress-style installation from any web folder, MariaDB 10.4+, a username the owner can sign in with as well as the email, and an optional logo. In local Docker, sign in, open **Your businesses**, and use **Try a sample company** to provision only the selected sample book. See the [installer contract](docs/INSTALLER.md) and [validation](docs/VALIDATION.md).
 
@@ -98,7 +98,7 @@ The application requires **PHP 8.2 or newer**; **PHP 8.3 is the recommended depl
 *Actual development capture with fictional books. The sample records 1,000 in receipts and 125 in expenses, leaving 875 in the bank. Reports and POS remain development previews.*
 
 > [!NOTE]
-> **Evaluate the accounting core.** [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) with production dependencies. Unzip it into a web folder and open its address, or follow the CLI steps. Follow opening, running and closing account balances; manage accounts; save, review, post and reverse general journals. Modern source lives in `www/phpledger`; historical code is retained only in Git history. Independent regional package validation and pilot usability review remain open post-release commitments.
+> **Evaluate the accounting core.** [Download 1.1.1](https://github.com/phpledger/phpledger/releases/tag/v1.1.1) with production dependencies. Unzip it into a web folder and open its address, or follow the CLI steps. Follow opening, running and closing account balances; manage accounts; save, review, post and reverse general journals. Modern source lives in `www/phpledger`; historical code is retained only in Git history. Independent regional package validation and pilot usability review remain open post-release commitments.
 
 ## Explore the working preview
 
