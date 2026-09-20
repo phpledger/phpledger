@@ -31,7 +31,12 @@ function pl_page_accounts(int $actorId,int $companyId,int $bookId,array $filters
         $args=[$companyId,$bookId,$type,'all',$type,$status,'all',$status==='active'?1:0,$q,'',$q,$q];
         $total=(int)DB::queryFirstField('SELECT COUNT(*) FROM pl_accounts WHERE '.$where,...$args);
         $pages=max(1,(int)ceil($total/$size)); $page=min($pages,max(1,(int)($filters['page']??1)));
-        $rows=DB::query('SELECT id,code,name,type,role,is_active FROM pl_accounts WHERE '.$where." ORDER BY FIELD(type,'asset','liability','equity','income','expense'), ".$order.' LIMIT %i OFFSET %i',...array_merge($args,[$size,($page-1)*$size]));
+        $rows=DB::query('SELECT id,code,legacy_code,name,type,role,is_active,is_contra FROM pl_accounts WHERE '.$where." ORDER BY FIELD(type,'asset','liability','equity','income','expense'), ".$order.' LIMIT %i OFFSET %i',...array_merge($args,[$size,($page-1)*$size]));
+        foreach ($rows as &$row) {
+            $row['id']=(int)$row['id']; $row['is_active']=(bool)$row['is_active']; $row['is_contra']=(bool)$row['is_contra'];
+            $row['level']=pl_account_code_is_valid((string)$row['code'])?pl_account_code_level((string)$row['code']):'account';
+        }
+        unset($row);
         return ['rows'=>$rows,'total'=>$total,'page'=>$page,'pages'=>$pages];
     });
 }
@@ -40,12 +45,15 @@ function pl_get_account(int $actorId, int $companyId, int $bookId, int $id): arr
 {
     pl_require_company_access($actorId, $companyId);
     pl_ledger_book($companyId, $bookId);
-    $row = DB::queryFirstRow('SELECT id, code, name, type, role, report_classification, semantic_key, is_active, revision, currency, is_monetary, revaluation_account_id, group_account_id FROM pl_accounts WHERE id = %i AND company_id = %i AND book_id = %i FOR SHARE', $id, $companyId, $bookId);
+    $row = DB::queryFirstRow('SELECT id, code, legacy_code, name, type, role, report_classification, semantic_key, is_active, is_contra, revision, currency, is_monetary, revaluation_account_id, group_account_id FROM pl_accounts WHERE id = %i AND company_id = %i AND book_id = %i FOR SHARE', $id, $companyId, $bookId);
     if (!$row) { throw new DomainException('This account is not available in the selected company and book.'); }
     $row['id'] = (int) $row['id'];
     $row['revision'] = (int) $row['revision'];
     $row['is_active'] = (bool) $row['is_active'];
+    $row['is_contra'] = (bool) $row['is_contra'];
     $row['is_monetary'] = $row['is_monetary'] === null ? null : (bool) $row['is_monetary'];
+    $row['level'] = pl_account_code_is_valid((string) $row['code']) ? pl_account_code_level((string) $row['code']) : 'account';
+    $row['is_postable'] = pl_account_is_postable($companyId, $bookId, (string) $row['code']);
     foreach (['revaluation_account_id', 'group_account_id'] as $field) { $row[$field] = $row[$field] === null ? null : (int) $row[$field]; }
     return $row;
 }
@@ -62,17 +70,34 @@ function pl_save_account(int $actorId, int $companyId, int $bookId, array $input
     if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,19}$/D', $code)) { throw new DomainException('Use letters, digits, dots, dashes or underscores for the account code.'); }
     $type = $input['type'] ?? '';
     if (!in_array($type, ['asset', 'liability', 'equity', 'income', 'expense'], true)) { throw new DomainException('Choose an account classification.'); }
+    // Structured codes (B56) are the shape new charts use; a legacy number is still accepted so a
+    // book converted from an older release can keep adding accounts the way it always did.
+    $structured = pl_account_code_is_valid($code);
+    if ($structured && !pl_account_code_matches_type($code, $type)) {
+        throw new DomainException('The first digit of a structured account code must match its classification: 1 asset, 2 liability, 3 equity, 4 income, 5 expense.');
+    }
+    $heading = $structured && pl_account_code_is_heading($code);
     $role = $input['role'] ?? null;
     $roleTypes = ['cash_bank' => 'asset', 'receivables' => 'asset', 'payables' => 'liability', 'owner_equity' => 'equity', 'income' => 'income', 'expense' => 'expense'];
     if ($role !== null && (!is_string($role) || !isset($roleTypes[$role]) || $roleTypes[$role] !== $type)) {
         throw new DomainException('The account purpose must match its classification.');
     }
+    if ($heading && $role !== null) {
+        throw new DomainException('A class or group heading aggregates its accounts and cannot carry an operational purpose.');
+    }
+    $contra = $input['is_contra'] ?? false;
+    if (!is_bool($contra)) { throw new DomainException('Choose whether this is a contra account.'); }
+    if ($contra && $type === 'liability') {
+        throw new DomainException('A liability is not presented as a deduction. Record a provision against an asset as a contra asset, and an obligation as an ordinary liability.');
+    }
+    if ($contra && $heading) { throw new DomainException('Mark the contra accounts themselves, not the heading they sit under.'); }
     $data = ['code' => $code, 'name' => $name, 'type' => $type, 'role' => $role, 'is_active' => $active];
     $reportClassification = $input['report_classification'] ?? null;
     if ($reportClassification !== null && ($reportClassification !== 'cost_of_sales' || $type !== 'expense')) {
         throw new DomainException('Cost of sales is available only for expense accounts.');
     }
     $legacyHash = hash('sha256', json_encode($data, JSON_THROW_ON_ERROR));
+    $data['is_contra'] = $contra;
     $currencyInput = $input;
     if ($id === null) { $data += pl_currency_account_properties($input); }
     if ($reportClassification !== null) { $data['report_classification'] = $reportClassification; }
@@ -91,6 +116,7 @@ function pl_save_account(int $actorId, int $companyId, int $bookId, array $input
             if (DB::queryFirstField('SELECT id FROM pl_accounts WHERE book_id = %i AND code = %s FOR SHARE', $bookId, $data['code'])) {
                 throw new DomainException('This account code is already in use. Choose a different code.');
             }
+            pl_account_require_parent($companyId, $bookId, (string) $data['code'], (string) $data['type']);
             DB::insert('pl_accounts', $data + ['company_id' => $companyId, 'book_id' => $bookId, 'creation_key' => $key, 'creation_hash' => $hash]);
             $id = (int) DB::insertId();
             $before = null;
@@ -106,7 +132,7 @@ function pl_save_account(int $actorId, int $companyId, int $bookId, array $input
                 && DB::queryFirstField('SELECT journal_id FROM pl_journal_lines WHERE account_id=%i AND company_id=%i AND book_id=%i LIMIT 1 FOR SHARE', $id, $companyId, $bookId)) {
                 throw new DomainException('Currency and monetary classification are fixed once this account has postings.');
             }
-            DB::update('pl_accounts', $properties + ['name' => $data['name'], 'is_active' => $data['is_active'], 'report_classification'=>array_key_exists('report_classification',$currencyInput) ? $currencyInput['report_classification'] : $before['report_classification'], 'revision' => $before['revision'] + 1], 'id = %i AND company_id = %i AND book_id = %i', $id, $companyId, $bookId);
+            DB::update('pl_accounts', $properties + ['name' => $data['name'], 'is_active' => $data['is_active'], 'is_contra' => $data['is_contra'], 'report_classification'=>array_key_exists('report_classification',$currencyInput) ? $currencyInput['report_classification'] : $before['report_classification'], 'revision' => $before['revision'] + 1], 'id = %i AND company_id = %i AND book_id = %i', $id, $companyId, $bookId);
         }
         $account = pl_get_account($actorId, $companyId, $bookId, $id);
         pl_core_audit($actorId, $companyId, $bookId, 'account', $id, $before === null ? 'created' : 'updated', $reason, $before, $account);
@@ -198,6 +224,7 @@ function pl_save_general_draft(int $actorId, int $companyId, int $bookId, array 
         foreach ($data['lines'] as $line) {
             $account = pl_get_account($actorId, $companyId, $bookId, $line['account_id']);
             if (!$account['is_active']) { throw new DomainException('Choose active accounts. Inactive accounts retain history but cannot receive new entries.'); }
+            if (!$account['is_postable']) { throw new DomainException('Postings belong on the lowest account in the chart. ' . $account['code'] . ' aggregates the accounts below it.'); }
         }
         $storage = $data;
         $storage['lines'] = json_encode($data['lines'], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
@@ -292,4 +319,28 @@ function pl_list_general_drafts(int $actorId, int $companyId, int $bookId, int $
     $order = pl_table_order($options, 'general-journals');
     $rows = DB::query('SELECT d.*, r.id AS reversal_journal_id' . $where . ' ORDER BY ' . $order . ' LIMIT %i OFFSET %i', ...array_merge($args, [$size, ($page - 1) * $size]));
     return ['rows' => array_map('pl_general_draft_view', $rows), 'total' => $filtered, 'records_total' => $total, 'page' => $page, 'pages' => $pages];
+}
+
+/**
+ * Only a leaf receives postings: a class or group heading never does, and an
+ * account stops being postable once it has sub-accounts under it (B56).
+ */
+function pl_account_is_postable(int $companyId, int $bookId, string $code): bool
+{
+    if (!pl_account_code_is_valid($code)) { return true; }
+    if (pl_account_code_is_heading($code)) { return false; }
+    if (pl_account_code_level($code) === 'sub_account') { return true; }
+    $parts = pl_account_code_parse($code);
+    $prefix = $parts['class'] . '-' . str_pad((string) $parts['group'], 3, '0', STR_PAD_LEFT) . '-' . str_pad((string) $parts['account'], 5, '0', STR_PAD_LEFT) . '-';
+    return DB::queryFirstField('SELECT id FROM pl_accounts WHERE company_id = %i AND book_id = %i AND code LIKE %s AND code <> %s LIMIT 1', $companyId, $bookId, $prefix . '%', $code) === null;
+}
+
+/** A sub-account may only be created under an account that already exists. */
+function pl_account_require_parent(int $companyId, int $bookId, string $code, string $type): void
+{
+    if (!pl_account_code_is_valid($code) || pl_account_code_level($code) !== 'sub_account') { return; }
+    $parent = pl_account_code_parent($code);
+    $row = DB::queryFirstRow('SELECT id, type FROM pl_accounts WHERE company_id = %i AND book_id = %i AND code = %s FOR SHARE', $companyId, $bookId, $parent);
+    if (!$row) { throw new DomainException('Create the parent account ' . $parent . ' before adding a sub-account under it.'); }
+    if ($row['type'] !== $type) { throw new DomainException('A sub-account keeps the classification of the account above it.'); }
 }

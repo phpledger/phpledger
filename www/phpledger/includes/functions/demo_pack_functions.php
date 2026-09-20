@@ -32,7 +32,7 @@ function pl_demo_pack(string $id): array
     if (!hash_equals($entry['sha256'], hash('sha256', $raw))) { throw new RuntimeException('The selected sample changed; restore its pinned fixture.'); }
     $pack = json_decode($raw, true, 64, JSON_THROW_ON_ERROR);
     if ($pack['id'] !== $id || $pack['version'] !== $entry['version'] || $pack['demo_only'] !== true || !in_array($pack['status'], ['released_demo_only', 'preview_only'], true)
-        || $pack['start_date'] !== '2024-01-01' || count($pack['events']) + count($pack['drafts']) !== 74
+        || $pack['start_date'] !== '2024-01-01' || count($pack['events']) + count($pack['drafts']) !== 77
         || count($pack['checkpoints']) !== 36) { throw new RuntimeException('The selected sample has an invalid contract.'); }
     $pack['digest'] = $entry['sha256'];
     return $pack;
@@ -96,7 +96,7 @@ function pl_seed_demo_starter_playground(int $actorId, int $companyId, int $book
             || DB::queryFirstField('SELECT user_id FROM pl_demo_visitors WHERE company_id=%i LIMIT 1', $companyId)) {
             throw new DomainException('The starter playground requires a new empty unassigned sample. Existing books cannot be replaced.');
         }
-        $mapping = array_column($company['accounts'], 'id', 'code');
+        $mapping = pl_account_code_mapping($company['accounts']);
         $reason = 'Sample zero-balance starter playground, prepared before visitor assignment.';
         foreach ($pack['accounts'] as $definition) {
             $account = pl_save_account($actorId, $companyId, $bookId, $definition + [
@@ -159,7 +159,10 @@ function pl_demo_pack_reconcile(int $actorId, int $companyId, int $bookId, array
 {
     foreach ($pack['checkpoints'] as $checkpoint) {
         $trial = pl_trial_balance($actorId, $companyId, $bookId, $checkpoint['to']);
-        $actual = array_column($trial['accounts'], 'balance', 'code');
+        $actual = [];
+        foreach ($trial['accounts'] as $row) {
+            $actual[(string) (($row['legacy_code'] ?? '') !== '' ? $row['legacy_code'] : $row['code'])] = $row['balance'];
+        }
         $expected = $checkpoint['balances'];
         ksort($actual); ksort($expected);
         $profit = pl_profit_loss($actorId, $companyId, $bookId, $checkpoint['from'], $checkpoint['to']);
@@ -605,7 +608,7 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
             throw new PlDemoUnavailable('The sample needs room for its history and at least twenty practice records. Ask the demo operator to check its capacity setting.');
         }
         $prefix = 'sample:' . $pack['id'] . ':' . $pack['version'] . ':';
-        $mapping = array_column($company['accounts'], 'id', 'code');
+        $mapping = pl_account_code_mapping($company['accounts']);
         foreach ($pack['accounts'] as $definition) {
             $account = pl_save_account($actorId, $companyId, $bookId, $definition + [
                 'is_active' => true, 'reason' => 'Original sample chart and manual support schedules.',
@@ -622,7 +625,15 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
         pl_create_period($actorId, $companyId, $bookId, ['start_date' => '2026-01-01', 'end_date' => '2026-12-31',
             'reason' => 'Open practice year for sample visitor actions.', 'request_key' => $prefix . 'practice']);
         foreach ($pack['events'] as $event) {
-            if ($event['kind'] === 'receipt') {
+            if ($event['kind'] === 'owner_transaction') {
+                // Capital introduced, the owner's loan, its repayment and drawings go through the
+                // owner-transactions service so every sample shows them where the owner looks (B61).
+                pl_post_owner_transaction($actorId, $companyId, $bookId, [
+                    'kind' => $event['owner_kind'], 'date' => $event['date'], 'amount' => $event['amount'],
+                    'cash_account_id' => $mapping[$event['money_code']], 'owner_account_id' => $mapping[$event['owner_code']],
+                    'description' => $event['description'], 'creation_key' => $prefix . $event['key'],
+                ]);
+            } elseif ($event['kind'] === 'receipt') {
                 $source = pl_save_document($actorId, $companyId, $bookId, [
                     'kind' => 'receipt', 'date' => $event['date'], 'amount' => $event['amount'],
                     'money_account_id' => $mapping[$event['money_code']], 'category_account_id' => $mapping[$event['category_code']],

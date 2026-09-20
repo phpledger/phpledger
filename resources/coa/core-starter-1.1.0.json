@@ -1,0 +1,101 @@
+{
+  "id": "core-starter",
+  "version": "1.1.0",
+  "name": "Neutral starter chart",
+  "status": "prerelease-foundation",
+  "notice": "A small country-neutral chart for the accounting preview, numbered with structured account codes (X-XXX-XXXXX-XX). It carries the owner's capital, owner loan and drawings accounts and the reserved contra groups. Package validation, country tax rules and industry modules remain pending.",
+  "accounts": [
+    {
+      "code": "1-100-10001-00",
+      "legacy_code": "1000",
+      "name": "Cash and bank",
+      "type": "asset",
+      "semantic_key": "core.cash_bank",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1-110-10001-00",
+      "legacy_code": "1100",
+      "name": "Accounts receivable",
+      "type": "asset",
+      "semantic_key": "core.receivables.trade",
+      "role": "receivables"
+    },
+    {
+      "code": "1-900-10001-00",
+      "name": "Accumulated depreciation",
+      "type": "asset",
+      "semantic_key": "core.asset.accumulated_depreciation",
+      "role": null,
+      "is_contra": true,
+      "is_monetary": false
+    },
+    {
+      "code": "2-100-10001-00",
+      "legacy_code": "2000",
+      "name": "Accounts payable",
+      "type": "liability",
+      "semantic_key": "core.payables.trade",
+      "role": "payables"
+    },
+    {
+      "code": "2-110-10001-00",
+      "name": "Owner's loan account",
+      "type": "liability",
+      "semantic_key": "core.liability.owner_loan",
+      "role": null,
+      "is_monetary": true
+    },
+    {
+      "code": "3-100-10001-00",
+      "legacy_code": "3000",
+      "name": "Owner equity",
+      "type": "equity",
+      "semantic_key": "core.equity.owner",
+      "role": "owner_equity"
+    },
+    {
+      "code": "3-900-10001-00",
+      "name": "Owner drawings",
+      "type": "equity",
+      "semantic_key": "core.equity.drawings",
+      "role": null,
+      "is_contra": true,
+      "is_monetary": false
+    },
+    {
+      "code": "4-100-10001-00",
+      "legacy_code": "4000",
+      "name": "Sales and service income",
+      "type": "income",
+      "semantic_key": "core.income.sales",
+      "role": "income"
+    },
+    {
+      "code": "4-900-10001-00",
+      "name": "Sales returns and discounts allowed",
+      "type": "income",
+      "semantic_key": "core.income.sales_returns",
+      "role": null,
+      "is_contra": true,
+      "is_monetary": false
+    },
+    {
+      "code": "5-100-10001-00",
+      "legacy_code": "5000",
+      "name": "General expenses",
+      "type": "expense",
+      "semantic_key": "core.expense.general",
+      "role": "expense"
+    },
+    {
+      "code": "5-900-10001-00",
+      "name": "Purchase returns and discounts received",
+      "type": "expense",
+      "semantic_key": "core.expense.purchase_returns",
+      "role": null,
+      "is_contra": true,
+      "is_monetary": false
+    }
+  ]
+}

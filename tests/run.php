@@ -56,6 +56,9 @@ $suites[] = 'settlement_test.php';
 $suites[] = 'stock_preview_test.php';
 $suites[] = 'ar_preview_test.php';
 $suites[] = 'ar_list_test.php';
+$suites[] = 'account_code_test.php';
+$suites[] = 'report_tree_test.php';
+$suites[] = 'owner_test.php';
 if (($argv[1] ?? '') === '--suite=ar-lists') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','ar_list_test.php','reconciliation_test.php','list_test.php'];
 }
@@ -75,7 +78,7 @@ if (($argv[1] ?? '') === '--suite=pos') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'pos_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=reports') {
-    $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'report_test.php'];
+    $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'report_test.php', 'account_code_test.php', 'report_tree_test.php', 'owner_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=home') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'reconciliation_test.php', 'home_test.php'];
@@ -84,7 +87,7 @@ if (($argv[1] ?? '') === '--suite=starter') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','inventory_test.php','purchasing_test.php','opening_test.php','opening_conversion_test.php','tax_test.php','starter_module_test.php','starter_demo_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=foundations') {
-    $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'core_test.php', 'currency_test.php', 'party_test.php', 'outbound_test.php', 'open_item_test.php', 'correction_test.php'];
+    $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'core_test.php', 'currency_test.php', 'party_test.php', 'outbound_test.php', 'open_item_test.php', 'correction_test.php', 'account_code_test.php', 'owner_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=installer') {
     $suites = ['installer_test.php'];

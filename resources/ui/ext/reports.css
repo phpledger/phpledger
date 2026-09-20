@@ -20,3 +20,58 @@
   .view-bank-reconciliation section[aria-label="Statement lines"] > .table-wrap { max-block-size: 20rem; overflow: auto; }
   .view-bank-reconciliation #match-review { scroll-margin-block-start: 4rem; }
 }
+
+/* Collapsible class -> group -> account report body (issue #77).
+   Native <details>/<summary>: keyboard and touch work without JavaScript, and a
+   collapsed branch is absent from the printed page as well as the screen. */
+@layer components {
+  .report-tree {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-panel, .5rem);
+    overflow: hidden;
+    font-variant-numeric: tabular-nums;
+  }
+  .report-tree-head,
+  .report-tree-row,
+  .report-tree-branch > summary {
+    display: grid;
+    grid-template-columns: minmax(6rem, 14%) minmax(0, 1fr) repeat(var(--report-tree-columns, 2), minmax(5rem, 13%));
+    gap: .5rem;
+    align-items: center;
+    padding: .4rem .625rem;
+  }
+  .report-tree-head {
+    background: var(--color-surface-subtle);
+    border-block-end: 1px solid var(--color-border);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--color-ink-muted);
+  }
+  .report-tree-branch { border-block-start: 1px solid var(--color-border); }
+  .report-tree-branch > summary { cursor: pointer; list-style: none; font-weight: 600; }
+  .report-tree-branch > summary::-webkit-details-marker { display: none; }
+  .report-tree-branch > summary:focus-visible { outline: 2px solid var(--color-focus, currentColor); outline-offset: -2px; }
+  .report-tree-class > summary { background: var(--color-surface-strong, var(--color-surface-subtle)); font-size: .8125rem; }
+  .report-tree-group > summary { background: var(--color-surface-subtle); font-size: .8125rem; font-weight: 550; }
+  .report-tree-chevron { display: inline-block; inline-size: .75rem; transition: transform .1s ease; }
+  .report-tree-branch[open] > summary .report-tree-chevron { transform: rotate(90deg); }
+  .report-tree-code { color: var(--color-ink-muted); font-size: .75rem; }
+  .report-tree-row { font-size: .8125rem; padding-inline-start: 2rem; }
+  .report-tree-row-empty { color: var(--color-ink-muted); }
+  .report-tree-contra-tag { color: var(--color-ink-muted); font-style: italic; }
+  .report-tree .num { text-align: end; }
+  /* A phone reads the codes under the names rather than scrolling sideways. */
+  @media (max-width: 40rem) {
+    .report-tree-head { display: none; }
+    .report-tree-row,
+    .report-tree-branch > summary {
+      grid-template-columns: minmax(0, 1fr) minmax(4.5rem, auto);
+      row-gap: .125rem;
+    }
+    .report-tree-code { grid-column: 1; order: 2; }
+    .report-tree-name { grid-column: 1; order: 1; }
+    .report-tree .num { grid-column: 2; order: 3; }
+    .report-tree-row { padding-inline-start: 1rem; }
+  }
+}

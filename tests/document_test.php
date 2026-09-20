@@ -22,7 +22,7 @@ test('setup pins one chart and rejects stale previews and changed requests', fun
     assert_same(false, $company['is_sample']);
     assert_same('core-starter', $company['template']['id']);
     assert_same(pl_starter_template()['digest'], $company['template']['digest']);
-    assert_same(6, count($company['accounts']));
+    assert_same(11, count($company['accounts']));
     assert_same($company['id'], pl_setup_company($f['actor_id'], $input, $key)['id']);
     $changed = $input;
     $changed['name'] .= ' changed';
@@ -39,7 +39,7 @@ test('opening readiness blocks documents and direct ledger posts without bypass 
     $f = ledger_fixture();
     $company = pl_setup_company($f['actor_id'], setup_input('existing'), bin2hex(random_bytes(16)));
     assert_same('opening_required', $company['setup_status']);
-    $f = ['actor_id' => $f['actor_id'], 'company_id' => $company['id'], 'book_id' => $company['book_id'], 'accounts' => array_column($company['accounts'], 'id', 'code')];
+    $f = ['actor_id' => $f['actor_id'], 'company_id' => $company['id'], 'book_id' => $company['book_id'], 'accounts' => pl_account_code_mapping($company['accounts'])];
     assert_throws(fn () => pl_save_document($f['actor_id'], $f['company_id'], $f['book_id'], document_input($f)), DomainException::class, 'Opening balances');
     assert_throws(fn () => pl_post_journal($f['actor_id'], $f['company_id'], $f['book_id'], ledger_payload($f)), DomainException::class, 'Opening balances');
     assert_throws(fn () => pl_confirm_existing_setup($f['actor_id'], $f['company_id'], $f['book_id'], [], true), DomainException::class, 'cannot be skipped');
@@ -163,7 +163,7 @@ test('core sample isolates two supported postings and four drafts and never repl
     assert_same('465.0000', $drafts['total_amount']);
     assert_same('125.0000', $drafts['documents'][0]['amount']);
     assert_same(2, pl_list_documents($f['actor_id'], $sample['id'], $sample['book_id'], ['status' => 'posted'])['total']);
-    $accounts = array_column($sample['accounts'], 'id', 'code');
+    $accounts = pl_account_code_mapping($sample['accounts']);
     assert_same('875.0000', pl_account_activity($f['actor_id'], $sample['id'], $sample['book_id'], $accounts['1000'])['balance']);
     assert_throws(fn () => pl_seed_core_sample($f['actor_id'], $f['company_id'], $f['book_id']), DomainException::class, 'isolated sample');
     assert_throws(fn () => pl_seed_core_sample($f['actor_id'], $sample['id'], $sample['book_id']), DomainException::class, 'new empty company');

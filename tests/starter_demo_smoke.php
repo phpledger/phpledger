@@ -30,7 +30,7 @@ try {
     $visit = pl_demo_begin_visit(pl_csrf_token(), 'USD', 'accounting-starter');
     $actor = (int) $visit['user']['id']; $company = (int) $visit['company_id']; $book = (int) $visit['book_id'];
     $context = pl_company_context($actor, $company);
-    $accounts = array_column($context['accounts'], 'id', 'code');
+    $accounts = pl_account_code_mapping($context['accounts']);
     $party = (int) DB::queryFirstField('SELECT id FROM pl_parties WHERE company_id=%i AND legal_name=%s', $company, 'Sample customer and supplier');
     $product = (int) DB::queryFirstField('SELECT id FROM pl_products WHERE company_id=%i AND book_id=%i AND sku=%s', $company, $book, 'SAMPLE-GOODS');
     $date = gmdate('Y') . '-01-05';

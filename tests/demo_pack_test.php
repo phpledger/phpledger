@@ -1,6 +1,16 @@
 <?php
 declare(strict_types=1);
 
+/** Balances keyed the way each pack authors them: the pre-conversion number where there is one. */
+function pack_balances(array $trial): array
+{
+    $balances = [];
+    foreach ($trial['accounts'] as $row) {
+        $balances[(string) (($row['legacy_code'] ?? '') !== '' ? $row['legacy_code'] : $row['code'])] = $row['balance'];
+    }
+    return $balances;
+}
+
 function demo_pack_fixture(string $id): array
 {
     $actor = pl_create_user('pack-' . bin2hex(random_bytes(8)) . '@example.invalid', 'Sample pack owner', 'Sample fixture password 123!');
@@ -38,13 +48,28 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
             $quarterTotal = bcadd($quarterTotal, pl_profit_loss($actor, $id, $book, '2025-' . $start, '2025-' . $end)['net_profit'], 4);
         }
         assert_same($year['net_profit'], $quarterTotal);
-        $at2024 = array_column(pl_trial_balance($actor, $id, $book, '2024-12-31')['accounts'], 'balance', 'code');
-        $at2025 = array_column(pl_trial_balance($actor, $id, $book, '2025-12-31')['accounts'], 'balance', 'code');
-        $at2026 = array_column(pl_trial_balance($actor, $id, $book, '2026-01-31')['accounts'], 'balance', 'code');
+        $at2024 = pack_balances(pl_trial_balance($actor, $id, $book, '2024-12-31'));
+        $at2025 = pack_balances(pl_trial_balance($actor, $id, $book, '2025-12-31'));
+        $at2026 = pack_balances(pl_trial_balance($actor, $id, $book, '2026-01-31'));
         assert_same('800.0000', $at2024['1100']); assert_same('-420.0000', $at2024['2100']);
         assert_same('0.0000', $at2025['1100']); assert_same('0.0000', $at2025['2100']);
         assert_same('-550.0000', $at2025['2000']); assert_same('0.0000', $at2026['2000']);
         assert_same('-3600.0000', $at2025['2200']); assert_same('-920.0000', $at2025['1390']);
+        // Owner history (B61): capital introduced, the owner's loan, a repayment and drawings.
+        assert_same('-25000.0000', $at2024['3000']);
+        assert_same('-3000.0000', $at2024['2-110-10001-00']);
+        assert_same('-2000.0000', $at2025['2-110-10001-00']);
+        assert_same('0.0000', $at2024['3-900-10001-00']);
+        assert_same('800.0000', $at2025['3-900-10001-00']);
+        $owner = pl_list_owner_transactions($actor, $id, $book);
+        assert_same(4, count($owner));
+        assert_same(['capital_introduced', 'drawings', 'owner_loan_received', 'owner_loan_repaid'],
+            (static function (array $rows): array { $kinds = array_map(static fn (array $row): string => $row['kind'], $rows); sort($kinds); return $kinds; })($owner));
+        $movements = pl_owner_equity_movements($actor, $id, $book, '2025-12-31');
+        assert_same('25000.0000', $movements['total_capital']);
+        assert_same('800.0000', $movements['total_drawings']);
+        assert_same('2000.0000', $movements['total_owner_loans']);
+        assert_same('24200.0000', $movements['net_owner_equity']);
         if ($packId === 'retail-shop') { assert_same('1200.0000', $at2025['1400']); }
         if ($packId === 'distributor') { assert_same('2400.0000', $at2025['1400']); }
         $drafts = pl_list_documents($actor, $id, $book, ['status' => 'draft']);
@@ -59,7 +84,7 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
         $input['date'] = '2026-02-04'; $input['amount'] = '13.5000';
         $edit = pl_save_document($actor, $id, $book, $input, $edit['id'], $edit['revision']);
         assert_same('posted', pl_post_document($actor, $id, $book, $edit['id'], $edit['revision'])['status']);
-        assert_same($at2025, array_column(pl_trial_balance($actor, $id, $book, '2025-12-31')['accounts'], 'balance', 'code'));
+        assert_same($at2025, pack_balances(pl_trial_balance($actor, $id, $book, '2025-12-31')));
         assert_throws(fn () => pl_seed_demo_pack($actor, $id, $book, $packId), DomainException::class, 'empty');
         assert_throws(fn () => pl_setup_company($actor, array_replace($f['input'], ['sample_pack' => $packId === 'distributor' ? 'service-agency' : 'distributor']), $f['key']), DomainException::class, 'different');
     });

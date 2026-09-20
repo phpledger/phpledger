@@ -78,10 +78,16 @@ function pl_opening_normalize(int $actorId, int $companyId, int $bookId, array $
         || !is_array($documents) || !array_is_list($documents) || count($documents) > 500) {
         throw new DomainException('Supply at most 500 balance rows and 500 unpaid documents.');
     }
-    $accounts = DB::query('SELECT id, code, type, role, is_active FROM pl_accounts WHERE company_id = %i AND book_id = %i ORDER BY code FOR SHARE', $companyId, $bookId);
+    $accounts = DB::query('SELECT id, code, legacy_code, type, role, is_active FROM pl_accounts WHERE company_id = %i AND book_id = %i ORDER BY code FOR SHARE', $companyId, $bookId);
     $byCode = [];
     foreach ($accounts as $account) {
         $byCode[(string) $account['code']] = $account;
+    }
+    // An import prepared against the numbers this chart used before the structured-code
+    // conversion (B56) still resolves; the account itself may still appear only once.
+    foreach ($accounts as $account) {
+        $legacy = (string) ($account['legacy_code'] ?? '');
+        if ($legacy !== '' && !isset($byCode[$legacy])) { $byCode[$legacy] = $account; }
     }
     $lines = [];
     $canonicalBalances = [];
@@ -95,10 +101,10 @@ function pl_opening_normalize(int $actorId, int $companyId, int $bookId, array $
         }
         $code = pl_ledger_text($row['account_code'] ?? null, 'Account code', 20);
         $account = $byCode[$code] ?? null;
-        if (!$account || !(bool) $account['is_active'] || isset($seenAccounts[$code])) {
+        if (!$account || !(bool) $account['is_active'] || isset($seenAccounts[(string) $account['code']])) {
             throw new DomainException('Use each active account code from this book only once: ' . $code);
         }
-        $seenAccounts[$code] = true;
+        $seenAccounts[(string) $account['code']] = true;
         $debit = pl_amount(pl_ledger_text($row['debit'] ?? '0', 'Debit', 21));
         $credit = pl_amount(pl_ledger_text($row['credit'] ?? '0', 'Credit', 21));
         if (bccomp($debit, '0', 4) > 0 && bccomp($credit, '0', 4) > 0) {
@@ -109,7 +115,9 @@ function pl_opening_normalize(int $actorId, int $companyId, int $bookId, array $
             if (bccomp($balance, '0', 4) < 0) {
                 throw new DomainException('Credit notes and advance balances need a separately reviewed import; this cutover supports positive unpaid invoices and bills.');
             }
-            $controlBalances[$code] = $balance;
+            // Key the control reconciliation by the account's own code, whichever number the
+            // import used to name it (B56), so the totals below always meet the same account.
+            $controlBalances[(string) $account['code']] = $balance;
         }
         if (bccomp($debit, '0', 4) === 0 && bccomp($credit, '0', 4) === 0) {
             continue;
@@ -153,7 +161,7 @@ function pl_opening_normalize(int $actorId, int $companyId, int $bookId, array $
             throw new DomainException('Duplicate unpaid document: ' . $reference);
         }
         $seenDocuments[$identity] = true;
-        $documentTotals[$code] = bcadd($documentTotals[$code] ?? '0', $amount, 4);
+        $documentTotals[(string) $account['code']] = bcadd($documentTotals[(string) $account['code']] ?? '0', $amount, 4);
         $canonicalDocuments[] = ['kind' => $kind, 'account_code' => $code, 'account_id' => (int) $account['id'], 'party' => $party,
             'reference' => $reference, 'document_date' => $documentDate, 'due_date' => $dueDate, 'outstanding' => $amount, 'identity_hash' => $identity];
     }

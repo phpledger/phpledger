@@ -14,7 +14,7 @@ $company=DB::queryFirstRow('SELECT c.id,b.id AS book_id,c.created_by FROM pl_com
 if ($measureOnly && !$company) { throw new RuntimeException('Seed the sample fixture before measuring.'); }
 if ($company) {
     $actor=(int)$company['created_by']; $companyId=(int)$company['id']; $bookId=(int)$company['book_id'];
-    $accounts=array_map('intval',array_column(DB::query('SELECT code,id FROM pl_accounts WHERE company_id=%i AND book_id=%i',$companyId,$bookId),'id','code'));
+    $accounts=pl_account_code_mapping(DB::query('SELECT id,code,legacy_code FROM pl_accounts WHERE company_id=%i AND book_id=%i',$companyId,$bookId));
 } else {
     $suffix=bin2hex(random_bytes(8));
     $actor=pl_create_user('list-capacity-'.$suffix.'@example.test','Sample list capacity tester','Sample-only-'.$suffix);

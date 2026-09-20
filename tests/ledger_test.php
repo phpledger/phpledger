@@ -53,7 +53,11 @@ test('company setup creates one book, an owner, an annual period and scoped temp
     $period = DB::queryFirstRow('SELECT start_date, end_date FROM pl_periods WHERE id = %i', $fixture['period_id']);
     assert_same('2026-09-14', $period['start_date']);
     assert_same('2027-06-30', $period['end_date']);
-    assert_same(6, count($fixture['accounts']));
+    // The starter chart is numbered X-XXX-XXXXX-XX and each account is also reachable by the
+    // number it carried before the conversion (B56), so the fixture map holds both keys.
+    assert_same(11, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_accounts WHERE company_id = %i', $fixture['company_id']));
+    assert_same(17, count($fixture['accounts']));
+    assert_same($fixture['accounts']['1000'], $fixture['accounts']['1-100-10001-00']);
     assert_same('owner', pl_require_company_access($fixture['actor_id'], $fixture['company_id'], true)['role']);
     assert_same(1, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_books WHERE company_id = %i', $fixture['company_id']));
     assert_throws(fn() => pl_create_company($fixture['actor_id'], 'Bad currency', 'ABC', '2026-01-01'), DomainException::class);

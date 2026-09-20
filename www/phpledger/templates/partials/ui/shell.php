@@ -30,6 +30,7 @@ $navGroups = [
     ],
     'Setup' => [
         ['/accounts', 'Chart of accounts', 'list', ['accounts'], true],
+        ['/owner', 'Owner and partners', 'building', ['owner'], true],
         ['/tax', 'Tax codes', 'receipt', ['tax'], true],
         ['/opening-balances', 'Opening balances', 'book', ['opening-balances'], !pl_demo_enabled()],
         ['/opening-conversion', 'Opening documents', 'file-text', ['opening-conversion'], !pl_demo_enabled()],

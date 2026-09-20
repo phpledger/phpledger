@@ -204,6 +204,8 @@ function pl_read_operation(string $connectionId, string $operation, array $input
         };
         foreach (match ($operation) { 'trial_balance' => ['accounts'], 'profit_loss' => ['income','cost_of_sales','expenses'], 'balance_sheet' => ['assets','liabilities','equity'], default => [] } as $field) {
             $data[$field] = pl_read_page($data[$field], $page, $size);
+            // The collapsible class/group tree (issue #77) is a presentation of these same rows.
+            $data = array_diff_key($data, array_flip(['tree', 'trees', 'equity_movements']));
         }
         if (in_array($operation, ['transactions','general_journals','account_statement'], true)) {
             $key = match ($operation) { 'transactions' => 'documents', 'general_journals' => 'rows', default => 'movements' };

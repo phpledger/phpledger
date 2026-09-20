@@ -1,18 +1,33 @@
-<?php declare(strict_types=1); ?>
-<div class="flex flex-col gap-4 py-5">
+<?php declare(strict_types=1);
+$columns = [['key' => 'amount', 'label' => $company['currency']]];
+$movements = $report['equity_movements'];
+?>
+<div class="flex flex-col gap-4 py-5" style="--report-tree-columns:1">
 <?php pl_ui_page_header('Balance sheet',$company['name'].' · As of '.pl_date_label($asOf).' · Posted entries only',static function () use ($asOf): void { ?>
 <a class="btn btn-secondary" href="<?= pl_e(pl_url('/reports/export',['report'=>'balance-sheet','to'=>$asOf])) ?>"><?= pl_icon('download') ?> Export CSV</a>
 <?php }); ?>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden rounded-panel border border-border bg-border">
 <?php foreach (['total_assets'=>'Total assets','total_liabilities'=>'Total liabilities','total_equity'=>'Equity including earned profit'] as $key=>$label): ?><div class="bg-surface px-4 py-3"><p class="text-xs text-ink-muted"><?= pl_e($label) ?></p><p class="amount-lg mt-1"><?= pl_e(pl_money($report[$key])) ?></p></div><?php endforeach; ?>
 <div class="flex flex-col justify-center gap-1 bg-surface px-4 py-3"><strong class="<?= $report['balanced']?'balanced-label':'text-danger' ?>"><?= $report['balanced']?'Assets = liabilities + equity':'This statement needs review' ?></strong><span class="text-xs tabular-nums text-ink-muted"><?= pl_e(pl_money($report['total_assets'])) ?> <?= $report['balanced']?'=':'≠' ?> <?= pl_e(pl_money($report['total_liabilities_equity']).' '.$company['currency']) ?></span></div></div>
-<form method="get" action="<?= pl_e(pl_url('/reports/balance-sheet')) ?>" class="filter-bar"><label class="field">As of date<input class="input" type="date" name="as_of" value="<?= pl_e($asOf) ?>" required></label><button class="btn btn-secondary">Update</button><a class="btn btn-ghost" href="<?= pl_e(pl_url('/reports')) ?>">All reports</a></form>
-<div class="table-wrap p-2 max-w-[60rem]" tabindex="0" role="region" aria-label="Balance sheet accounts"><table class="stmt-table"><thead><tr><th scope="col">Account</th><th scope="col" class="num"><?= pl_e($company['currency']) ?></th></tr></thead><tbody>
+<form method="get" action="<?= pl_e(pl_url('/reports/balance-sheet')) ?>" class="filter-bar"><label class="field">As of date<input class="input" type="date" name="as_of" value="<?= pl_e($asOf) ?>" required></label>
+<div class="field"><label for="bs-depth">Depth shown</label><select id="bs-depth" class="select" name="depth"><?php foreach (pl_report_depth_options() as $value=>$label): ?><option value="<?= (int)$value ?>" <?= $depth===$value?'selected':'' ?>><?= pl_e($label) ?></option><?php endforeach; ?></select></div>
+<button class="btn btn-secondary">Update</button><a class="btn btn-ghost" href="<?= pl_e(pl_url('/reports')) ?>">All reports</a></form>
+<div class="flex flex-col gap-3 max-w-[60rem]">
 <?php foreach (['assets'=>'Assets','liabilities'=>'Liabilities','equity'=>'Equity'] as $key=>$label): ?>
-<tr class="stmt-row"><th scope="rowgroup" class="stmt-group-label"><?= pl_e($label) ?></th><td></td></tr>
-<?php foreach ($report[$key] as $row): ?><tr class="stmt-row stmt-indent-1"><th scope="row"><span class="me-1 text-xs text-ink-muted"><?= pl_e($row['code']) ?></span><a class="link" href="<?= pl_e(pl_url('/reports/account',['id'=>$row['id'],'as_of'=>$asOf,'return_report'=>'balance-sheet'])) ?>"><?= pl_e($row['name']) ?></a></th><td class="num"><?= pl_e(pl_money($row['amount'])) ?></td></tr><?php endforeach; ?>
-<?php if ($key==='equity'): ?><tr class="stmt-row stmt-indent-1"><th scope="row">Earned profit to date<span class="block text-xs font-normal text-ink-muted">Unclosed income less expenses</span></th><td class="num"><?= pl_e(pl_money($report['earned_profit'])) ?></td></tr><?php endif; ?>
+<section class="flex flex-col gap-2" aria-labelledby="bs-<?= pl_e($key) ?>"><h2 class="section-title" id="bs-<?= pl_e($key) ?>"><?= pl_e($label) ?></h2>
+<?php pl_ui_report_tree($trees[$key], $columns, ['caption' => $label . ' in ' . $company['currency'],
+    'link' => static fn (int $id): string => pl_url('/reports/account', ['id'=>$id,'as_of'=>$asOf,'return_report'=>'balance-sheet']),
+    'empty' => 'No ' . strtolower($label) . ' accounts carry a balance at this date.']); ?>
+<table class="stmt-table"><caption class="sr-only">Total <?= pl_e(strtolower($label)) ?></caption><tbody>
+<?php if ($key==='equity'): ?>
+<tr class="stmt-row stmt-indent-1"><th scope="row">Capital introduced to date</th><td class="num"><?= pl_e(pl_money($movements['total_capital'])) ?></td></tr>
+<tr class="stmt-row stmt-indent-1"><th scope="row">Less: drawings to date</th><td class="num"><?= pl_e(pl_money($movements['total_drawings'])) ?></td></tr>
+<tr class="stmt-row stmt-indent-1"><th scope="row">Owner loans outstanding<span class="block text-xs font-normal text-ink-muted">A liability of the business, shown here for the owner's own view</span></th><td class="num"><?= pl_e(pl_money($movements['total_owner_loans'])) ?></td></tr>
+<tr class="stmt-row stmt-indent-1"><th scope="row">Earned profit to date<span class="block text-xs font-normal text-ink-muted">Unclosed income less expenses</span></th><td class="num"><?= pl_e(pl_money($report['earned_profit'])) ?></td></tr>
+<?php endif; ?>
 <tr class="stmt-row <?= $key==='equity'?'stmt-total':'stmt-subtotal' ?>"><th scope="row">Total <?= pl_e(strtolower($label)) ?></th><td class="num"><?= pl_e(pl_money($report['total_'.$key])) ?></td></tr>
-<?php endforeach; ?></tbody></table></div>
-<p class="text-xs text-ink-muted">Amounts in <?= pl_e($company['currency']) ?> · Posted entries only. Earned profit is shown separately from recorded equity. Account classification and completeness still need review; balanced totals alone do not establish correct books.</p>
+</tbody></table></section>
+<?php endforeach; ?>
+</div>
+<p class="text-xs text-ink-muted">Amounts in <?= pl_e($company['currency']) ?> · Posted entries only. Capital introduced, drawings and the owner's loan come from the posted owner transactions; drawings are a deduction inside equity, and an owner's loan stays a liability because the business owes it back. Earned profit is shown separately from recorded equity. Account classification and completeness still need review; balanced totals alone do not establish correct books.</p>
 </div>

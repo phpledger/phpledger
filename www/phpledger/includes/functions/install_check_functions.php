@@ -290,6 +290,7 @@ function pl_install_step_label(string $version): string
         '032_user_names' => 'Adding usernames',
         '033_installation_logo' => 'Making room for your logo',
         '034_inventory_locations' => 'Adding stock locations',
+        '036_structured_account_codes' => 'Renumbering the chart of accounts',
     ];
     if (isset($labels[$version])) {
         return $labels[$version];

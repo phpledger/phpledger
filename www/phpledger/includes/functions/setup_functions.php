@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 function pl_starter_template(): array
 {
-    $file = PL_ROOT . '/resources/coa/core-starter-1.0.0.json';
+    $file = PL_ROOT . '/resources/coa/core-starter-1.1.0.json';
     $source = file_get_contents($file);
     if ($source === false) {
         throw new RuntimeException('The bundled starter chart is unavailable.');
@@ -100,10 +100,12 @@ function pl_company_context(int $actorId, int $companyId): array
     unset($company['setup_request_key'], $company['setup_payload_hash']);
     $installed = DB::queryFirstRow('SELECT template_id AS id, template_version AS version, template_digest AS digest FROM pl_template_installations WHERE company_id = %i', $companyId);
     $company['template'] = $installed ?: null;
-    $company['accounts'] = DB::query('SELECT id, code, name, type, semantic_key, role, is_active FROM pl_accounts WHERE company_id = %i AND book_id = %i ORDER BY code', $companyId, $company['book_id']);
+    $company['accounts'] = DB::query('SELECT id, code, legacy_code, name, type, semantic_key, role, is_active, is_contra FROM pl_accounts WHERE company_id = %i AND book_id = %i ORDER BY code', $companyId, $company['book_id']);
     foreach ($company['accounts'] as &$account) {
         $account['id'] = (int) $account['id'];
         $account['is_active'] = (bool) $account['is_active'];
+        $account['is_contra'] = (bool) $account['is_contra'];
+        $account['level'] = pl_account_code_is_valid((string) $account['code']) ? pl_account_code_level((string) $account['code']) : 'account';
     }
     unset($account);
     return $company;
