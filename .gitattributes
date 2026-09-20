@@ -5,6 +5,10 @@
 www/phpledger/install/migrations/*.php text eol=lf
 *.sh text eol=lf
 
+# Signed release metadata must be served byte-identical to the GitHub asset; never convert its line endings.
+www/website/src/static/releases/*.update.json -text
+www/website/public/releases/*.update.json -text
+
 # Custom for Visual Studio
 *.cs     diff=csharp
 
