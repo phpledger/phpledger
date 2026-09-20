@@ -125,7 +125,11 @@ test('simultaneous postings in one book take consecutive numbers with no duplica
     assert_same(['INV-2026-000001', 'INV-2026-000002'], $numbers);
     assert_same(2, (int) DB::queryFirstField('SELECT COUNT(DISTINCT number) FROM pl_document_numbers WHERE book_id=%i', $f['book_id']));
     assert_same(3, series_row($f, 'invoice')['next_number']);
-    $stored = DB::queryFirstColumn('SELECT document_number FROM pl_ar_documents WHERE book_id=%i ORDER BY id', $f['book_id']);
+    // Which of the two racing postings wins the book lock first is not deterministic, so the
+    // number a given document receives is not either. What must hold is that both numbers were
+    // issued exactly once, to different documents, with no gap: sort before comparing.
+    $stored = DB::queryFirstColumn('SELECT document_number FROM pl_ar_documents WHERE book_id=%i', $f['book_id']);
+    sort($stored, SORT_STRING);
     assert_same(['INV-2026-000001', 'INV-2026-000002'], $stored);
 });
 
