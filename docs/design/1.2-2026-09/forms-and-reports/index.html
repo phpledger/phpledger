@@ -1,0 +1,94 @@
+<!--
+  PHP Ledger 1.2 — Trading forms & reports design mockups, index.
+  Static, non-interactive (except native <details> on the trial balance).
+  No application code. See DECISIONS.md alongside this file.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PHP Ledger 1.2 — Trading forms &amp; reports mockups</title>
+<style>
+:root{
+  --canvas:#FAF9F7;--surface:#FFFFFF;--surface-subtle:#F4F3F0;--border:#E8E6E1;--border-strong:#8C8880;
+  --ink:#1F1E1C;--ink-muted:#6B6862;--ink-faint:#706D66;
+  --brand-navy:#0C2052;--brand-blue:#4656E8;--brand-selected:#EEF0FF;
+  --radius-control:6px;--radius-panel:10px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--canvas);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.wrap{max-width:920px;margin:0 auto;padding:56px 24px 90px;}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brand-blue);margin:0 0 10px;}
+h1{font-size:28px;font-weight:700;letter-spacing:-.01em;margin:0 0 10px;color:var(--ink);}
+.lede{font-size:14.5px;line-height:1.6;color:var(--ink-muted);max-width:74ch;margin:0 0 8px;}
+.meta{font-size:12.5px;color:var(--ink-faint);margin:0 0 36px;}
+.meta a{color:var(--brand-blue);}
+ol.list{list-style:none;margin:0;padding:0;counter-reset:item;display:flex;flex-direction:column;gap:2px;}
+ol.list li{counter-increment:item;border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:16px 18px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;}
+.num-badge{flex:none;width:26px;height:26px;border-radius:8px;background:var(--brand-selected);color:var(--brand-navy);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;}
+.item-body{flex:1;min-width:0;}
+.item-body a.file-link{font-size:15px;font-weight:650;color:var(--ink);text-decoration:none;}
+.item-body a.file-link:hover{color:var(--brand-blue);text-decoration:underline;}
+.item-body .desc{margin:4px 0 0;font-size:13px;color:var(--ink-muted);line-height:1.55;}
+.item-body .path{margin:6px 0 0;font-family:ui-monospace,"SF Mono",monospace;font-size:10.5px;color:var(--ink-faint);}
+.decisions-link{margin-top:34px;padding:16px 18px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface);}
+.decisions-link a{color:var(--brand-navy);font-weight:650;text-decoration:none;font-size:14px;}
+.decisions-link a:hover{text-decoration:underline;}
+.decisions-link p{margin:5px 0 0;font-size:12.5px;color:var(--ink-muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">PHP Ledger 1.2 — design, September 2026</p>
+  <h1>Trading forms &amp; reports</h1>
+  <p class="lede">Static HTML mockups of the 1.2 trading forms and reports, sized as 1280&times;720 desktop frames, built on the same design tokens and component patterns as the redesign-0.5 prototype and the installer "Workbench" screens. Sample data is a fictional pharmacy/FMCG distributor, Noor Distributors (Pvt) Ltd, in PKR — two warehouses, three delivery vans, sales staff and areas. Nothing here is wired to the application; every field, button and link is inert except the trial balance's native expand/collapse.</p>
+  <p class="meta">Open each file directly in a browser. Every UI/UX choice these frames embody is recorded, with the taken option, alternatives and how to reverse it, in <a href="DECISIONS.md">DECISIONS.md</a>.</p>
+
+  <ol class="list">
+    <li><span class="num-badge">1</span><div class="item-body">
+      <a class="file-link" href="invoice-editor.html">Invoice editor</a>
+      <p class="desc">Sales invoice with pack/unit line entry, a per-line discount percentage, a free-goods scheme line, sales-staff and area selectors, a warehouse selector, cash received on the invoice, and a transaction-ID style document number with the app's current series style noted alongside.</p>
+      <p class="path">invoice-editor.html</p>
+    </div></li>
+    <li><span class="num-badge">2</span><div class="item-body">
+      <a class="file-link" href="invoice-print-a4.html">Invoice print — A4</a> &middot; <a class="file-link" href="receipt-print-80mm.html">Counter receipt — 80mm</a>
+      <p class="desc">Printable letterhead invoice with a per-rate tax summary and packs/discount/free-goods columns, plus cash received and balance due; and a condensed 80mm thermal receipt for an over-the-counter cash sale.</p>
+      <p class="path">invoice-print-a4.html &middot; receipt-print-80mm.html</p>
+    </div></li>
+    <li><span class="num-badge">3</span><div class="item-body">
+      <a class="file-link" href="customer-statement.html">Customer statement</a>
+      <p class="desc">Statement for one customer over a date range: opening balance, invoices, receipts, credit notes, an unapplied-credit line held as an advance, and the closing balance.</p>
+      <p class="path">customer-statement.html</p>
+    </div></li>
+    <li><span class="num-badge">4</span><div class="item-body">
+      <a class="file-link" href="stock-issue-gate-pass.html">Stock issue &amp; gate pass</a>
+      <p class="desc">A numbered internal stock issue from a warehouse to a delivery van, distinguishing van stock already loaded from stock issued now, plus its printable A4 gate pass.</p>
+      <p class="path">stock-issue-gate-pass.html</p>
+    </div></li>
+    <li><span class="num-badge">5</span><div class="item-body">
+      <a class="file-link" href="stock-by-location.html">Stock by location</a>
+      <p class="desc">Items and value grouped by warehouse and van, each group subtotalled, with an aggregate (all-locations) column per item and a grand total; a low-stock and a negative-stock line are flagged.</p>
+      <p class="path">stock-by-location.html</p>
+    </div></li>
+    <li><span class="num-badge">6</span><div class="item-body">
+      <a class="file-link" href="trial-balance-collapsible.html">Trial balance — collapsible</a>
+      <p class="desc">Structured account codes in the form X-XXX-XXXXX-XX (class-group-account-sub, issue #76) with a genuinely collapsible three-level hierarchy (issue #77) using native &lt;details&gt; — try clicking a row.</p>
+      <p class="path">trial-balance-collapsible.html</p>
+    </div></li>
+    <li><span class="num-badge">7</span><div class="item-body">
+      <a class="file-link" href="receipt-on-account.html">Receipt on account</a>
+      <p class="desc">A single-customer receipt with an oldest-first invoice allocation preview and an unallocated remainder becoming a customer advance, plus a batch-receipts grid for recording many customers' recoveries in one voucher.</p>
+      <p class="path">receipt-on-account.html</p>
+    </div></li>
+  </ol>
+
+  <div class="decisions-link">
+    <a href="DECISIONS.md">Read DECISIONS.md &rarr;</a>
+    <p>Every UI/UX choice these frames embody, numbered, with the taken option, the alternatives shown or considered, and the reversal path — plus a section on what was taken from the owner-supplied Awan prototype and where these frames deliberately differ from it.</p>
+  </div>
+</div>
+</body>
+</html>

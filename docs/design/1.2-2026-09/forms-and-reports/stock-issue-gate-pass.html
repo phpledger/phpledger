@@ -1,0 +1,262 @@
+<!--
+  PHP Ledger 1.2 design mockup — Numbered stock issue to a van, with a printable
+  gate pass. Fictional data: Noor Distributors (Pvt) Ltd, Van 2 (Gulberg & Model
+  Town). Column layout (SM-Stock vs Issue Stock, packing readout) is adapted from
+  the Awan prototype's stock-issue-new screen (docs/design/1.2-2026-09/
+  awan-prototype/Awan-prototype.html, template id screen-stock-issue-new).
+  See DECISIONS.md.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup — Stock issue &amp; gate pass</title>
+<style>
+:root{
+  --canvas:#FAF9F7;--surface:#FFFFFF;--surface-subtle:#F4F3F0;--border:#E8E6E1;--border-strong:#8C8880;
+  --ink:#1F1E1C;--ink-muted:#6B6862;--ink-faint:#706D66;
+  --brand-navy:#0C2052;--brand-blue:#4656E8;--brand-selected:#EEF0FF;
+  --success:#1F7A4D;--success-bg:#E8F4EE;--warning:#9A6200;--warning-bg:#FBF1DE;--info:#2F5BD3;--info-bg:#EEF2FD;
+  --radius-control:6px;--radius-panel:10px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.harness{max-width:1320px;margin:0 auto;padding:36px 20px 80px;}
+.harness-head{color:#c8cad2;margin-bottom:28px;max-width:860px;}
+.harness-head .kicker{font-size:12px;color:#8a8d99;margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em;}
+.harness-head h1{font-size:21px;margin:0 0 8px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13px;line-height:1.6;color:#aeb1bd;margin:0 0 6px;}
+.harness-head .src{font-size:11.5px;color:#8a8d99;}
+.screen-caption{color:#9498a6;font-size:12px;font-weight:600;margin:26px 0 10px 2px;}
+a{color:inherit;text-decoration:none;}
+.tabular-nums,.amount,.num{font-variant-numeric:tabular-nums lining-nums;}
+
+.frame{width:1280px;height:720px;overflow:hidden;background:var(--canvas);border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);display:flex;color:var(--ink);font-size:13px;line-height:19px;}
+.shell-sidebar{width:200px;flex:none;background:var(--surface);border-inline-end:1px solid var(--border);display:flex;flex-direction:column;padding:14px 10px;gap:2px;}
+.brand-row{display:flex;align-items:center;gap:8px;padding:4px 8px 14px;}
+.brand-mark{width:22px;height:22px;border-radius:6px;background:var(--brand-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex:none;}
+.brand-name{font-weight:650;font-size:13px;color:var(--ink);}
+.co-switch{display:flex;flex-direction:column;gap:1px;background:var(--surface-subtle);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:12px;}
+.co-switch .co-name{font-size:12px;font-weight:650;color:var(--ink);}
+.co-switch .co-meta{font-size:10.5px;color:var(--ink-muted);}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);padding:10px 8px 3px;}
+.nav-item{display:flex;align-items:center;gap:8px;height:30px;padding-inline:8px;border-radius:6px;font-size:12.5px;color:var(--ink-muted);font-weight:500;}
+.nav-item .dot{width:5px;height:5px;border-radius:2px;background:currentColor;opacity:.5;flex:none;}
+.nav-item.active{background:var(--brand-selected);color:var(--brand-navy);font-weight:650;}
+.nav-item.active .dot{opacity:1;background:var(--brand-blue);}
+.shell-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{height:42px;flex:none;display:flex;align-items:center;padding-inline:16px;border-bottom:1px solid var(--border);background:var(--surface);font-size:11.5px;color:var(--ink-muted);}
+.topbar b{color:var(--ink);font-weight:600;}
+.content{flex:1;min-height:0;overflow:hidden;padding:12px 16px;display:flex;flex-direction:column;}
+
+.doc{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-panel);flex:1;min-height:0;overflow:hidden;}
+.doc-header{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:.6rem 1rem;border-bottom:1px solid var(--border);}
+.doc-heading{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.doc-type{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);}
+.doc-number{margin:0;font-size:17px;font-weight:650;color:var(--ink);}
+.badge{display:inline-flex;align-items:center;gap:5px;height:18px;padding-inline:7px;border-radius:999px;font-size:10px;font-weight:600;}
+.badge-dot{width:5px;height:5px;border-radius:999px;background:currentColor;}
+.badge-draft{background:var(--surface-subtle);color:var(--ink-muted);}
+.doc-actions{display:flex;gap:7px;}
+.btn{display:inline-flex;align-items:center;gap:5px;height:29px;padding-inline:11px;border-radius:var(--radius-control);font-size:11.5px;font-weight:600;border:1px solid transparent;white-space:nowrap;}
+.btn-primary{background:var(--brand-navy);color:#fff;}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong);}
+.btn-ghost{background:transparent;color:var(--ink);}
+
+.doc-body{flex:1;min-height:0;overflow:auto;padding:.75rem 1rem 1rem;display:flex;flex-direction:column;gap:10px;}
+.top-row{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;}
+.field-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px;flex:1;min-width:340px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:10px;font-weight:600;color:var(--ink);}
+.input,.select{height:28px;padding-inline:7px;border:1px solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);font-size:11px;font-family:inherit;width:100%;}
+.stock-readout{background:var(--surface-subtle);border:1px solid var(--border);border-radius:8px;padding:8px 12px;min-width:230px;display:flex;flex-direction:column;gap:6px;}
+.stock-readout .title{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-faint);}
+.stock-readout .cells{display:flex;gap:14px;}
+.stock-readout .cell-label{font-size:9.5px;color:var(--ink-faint);display:block;}
+.stock-readout .cell-value{font-size:14px;font-weight:700;color:var(--ink);}
+
+.section-title{font-size:12px;font-weight:650;color:var(--ink);margin:2px 0 4px;}
+.table-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+table.lines{width:100%;border-collapse:separate;border-spacing:0;font-size:10.5px;table-layout:fixed;}
+table.lines thead th{background:var(--surface-subtle);text-align:start;font-size:9px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--ink-muted);padding:5px 6px;border-bottom:1px solid var(--border);}
+table.lines thead tr.group th{background:var(--brand-selected);color:var(--brand-navy);text-align:center;border-bottom:1px solid var(--border);}
+table.lines td{padding:3px 6px;border-bottom:1px solid var(--border);vertical-align:middle;}
+table.lines th.num,table.lines td.num{text-align:end;}
+table.lines tbody tr:last-child td{border-bottom:0;}
+table.lines .input,table.lines .select{height:24px;font-size:10.5px;padding-inline:5px;}
+table.lines tfoot td{font-weight:700;background:var(--surface-subtle);border-top:1px solid var(--border-strong);}
+
+.lines-foot{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-top:6px;}
+.add-line-btn{font-size:11px;font-weight:600;color:var(--ink);background:transparent;border:0;padding:0;}
+.add-line-hint{font-size:10px;color:var(--ink-faint);max-width:44ch;}
+.doc-totals{min-width:220px;display:flex;flex-direction:column;gap:4px;}
+.doc-totals-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-muted);}
+.doc-totals-row.is-grand{font-size:14px;font-weight:700;color:var(--ink);border-top:1px solid var(--border);padding-top:5px;}
+
+.alert{display:flex;gap:8px;padding:8px 10px;border-radius:6px;border:1px solid;font-size:11px;}
+.alert-info{background:var(--info-bg);border-color:color-mix(in oklab, var(--info) 28%, transparent);color:var(--info);}
+.alert p{color:var(--ink);margin:2px 0 0;}
+.alert-title{font-weight:650;}
+
+/* gate pass print */
+.gp-frame{width:1280px;height:720px;overflow:hidden;background:#3a3d47;border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:24px;}
+.gp{width:794px;transform:scale(.62);transform-origin:top center;background:#fff;color:var(--ink);box-shadow:0 6px 24px rgba(0,0,0,.35);padding:34px 40px;font-size:12.5px;}
+.gp-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--brand-navy);padding-bottom:14px;margin-bottom:14px;}
+.gp-brand{font-size:17px;font-weight:700;color:var(--brand-navy);margin:0;}
+.gp-title{font-size:19px;font-weight:700;text-align:end;margin:0;}
+.gp-no{font-size:12.5px;color:var(--brand-navy);font-weight:650;text-align:end;margin-top:3px;}
+.gp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 24px;font-size:11.5px;margin-bottom:14px;}
+.gp-grid dt{color:var(--ink-muted);display:inline;}
+.gp-grid dd{display:inline;margin:0;font-weight:600;}
+table.gp-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px;}
+table.gp-table th{background:var(--surface-subtle);text-align:start;padding:5px 7px;border-bottom:1.5px solid var(--brand-navy);font-size:9.5px;text-transform:uppercase;}
+table.gp-table td{padding:5px 7px;border-bottom:1px solid var(--border);}
+table.gp-table th.num,table.gp-table td.num{text-align:end;}
+.gp-sign{display:flex;justify-content:space-between;margin-top:44px;font-size:11px;color:var(--ink-muted);}
+.gp-sign div{width:200px;border-top:1px solid var(--border-strong);padding-top:4px;text-align:center;}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><symbol id="ic-print" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2M17 9V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4m2 6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol></svg>
+<div class="harness">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger 1.2 — design mockup, static, not built</p>
+    <h1>Stock issue &amp; gate pass</h1>
+    <p>A numbered internal stock issue to a delivery van, plus its printable gate pass. Column layout (SM-Stock already on the van vs. Issue Stock going out now, with a packing reference column) is taken from the Awan prototype's stock-issue screen.</p>
+    <p class="src">Source: docs/design/1.2-2026-09/awan-prototype/Awan-prototype.html, template id screen-stock-issue-new</p>
+  </div>
+
+  <p class="screen-caption">1 &middot; Stock issue editor</p>
+  <div class="frame">
+    <aside class="shell-sidebar">
+      <div class="brand-row"><span class="brand-mark">PL</span><span class="brand-name">PHP Ledger</span></div>
+      <div class="co-switch"><span class="co-name">Noor Distributors (Pvt) Ltd</span><span class="co-meta">Primary book &middot; PKR</span></div>
+      <div class="nav-item"><span class="dot"></span>Home</div>
+      <div class="nav-label">Inventory</div>
+      <div class="nav-item active"><span class="dot"></span>Stock issues &amp; returns</div>
+      <div class="nav-item"><span class="dot"></span>Stock position</div>
+      <div class="nav-item"><span class="dot"></span>Warehouses &amp; vans</div>
+    </aside>
+    <div class="shell-main">
+      <div class="topbar">Inventory &rsaquo; Stock issues &amp; returns &rsaquo; <b>New issue</b></div>
+      <div class="content">
+        <div class="doc">
+          <header class="doc-header">
+            <div class="doc-heading">
+              <span class="doc-type">Stock issue</span>
+              <h1 class="doc-number">ISS-2026-000341</h1>
+              <span class="badge badge-draft"><span class="badge-dot"></span>Draft</span>
+            </div>
+            <div class="doc-actions">
+              <button class="btn btn-ghost">Cancel</button>
+              <button class="btn btn-secondary"><svg width="13" height="13"><use href="#ic-print"/></svg>Gate pass</button>
+              <button class="btn btn-primary">Save issue</button>
+            </div>
+          </header>
+          <div class="doc-body">
+            <section class="top-row">
+              <div class="field-grid">
+                <div class="field"><label class="field-label">Issue no. <span style="font-weight:400;color:var(--ink-faint)">/ type</span></label><input class="input" value="ISS-2026-000341 · ISS" disabled></div>
+                <div class="field"><label class="field-label">Dated</label><input class="input" value="21 Sep 2026"></div>
+                <div class="field"><label class="field-label">From warehouse</label><select class="select"><option>Lahore Main Warehouse (WH-01)</option></select></div>
+                <div class="field"><label class="field-label">To van</label><select class="select"><option>Van 2 &middot; Sana Tariq &middot; Gulberg &amp; Model Town</option></select></div>
+                <div class="field"><label class="field-label">Reference <span style="font-weight:400;color:var(--ink-faint)">(optional)</span></label><input class="input" value="Morning load"></div>
+              </div>
+              <div class="stock-readout">
+                <span class="title">Overall stock &middot; Panadol Extra 10s</span>
+                <div class="cells">
+                  <div><span class="cell-label">Warehouse ctn</span><span class="cell-value">412</span></div>
+                  <div><span class="cell-label">Warehouse units</span><span class="cell-value">30</span></div>
+                  <div><span class="cell-label">Van stock (Sana)</span><span class="cell-value">18 ctn</span></div>
+                </div>
+              </div>
+            </section>
+            <section>
+              <h2 class="section-title">Issue lines</h2>
+              <div class="table-wrap">
+                <table class="lines">
+                  <thead>
+                    <tr class="group"><th colspan="3">Item</th><th colspan="2">Van stock (already loaded)</th><th colspan="3">Issue now</th><th></th></tr>
+                    <tr>
+                      <th style="width:7%">Code</th><th style="width:23%">Item</th><th class="num" style="width:8%">Pack size</th>
+                      <th class="num" style="width:8%">Ctn</th><th class="num" style="width:8%">Unit</th>
+                      <th class="num" style="width:9%">Ctn</th><th class="num" style="width:9%">Unit</th><th class="num" style="width:11%">Ctn rate</th>
+                      <th class="num" style="width:13%">Value</th><th style="width:4%"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>1042</td><td>Panadol Extra 10s</td><td class="num">10/ctn</td><td class="num">18</td><td class="num">6</td>
+                      <td><input class="input input-amount" value="25"></td><td><input class="input input-amount" value="0"></td>
+                      <td><input class="input input-amount" value="1,180.00"></td><td class="num">29,500.00</td><td></td></tr>
+                    <tr><td>2210</td><td>Surf Excel 1kg</td><td class="num">12/ctn</td><td class="num">4</td><td class="num">2</td>
+                      <td><input class="input input-amount" value="10"></td><td><input class="input input-amount" value="0"></td>
+                      <td><input class="input input-amount" value="410.00"></td><td class="num">4,100.00</td><td></td></tr>
+                    <tr><td>3305</td><td>Colgate Toothpaste 150g</td><td class="num">24/ctn</td><td class="num">6</td><td class="num">0</td>
+                      <td><input class="input input-amount" value="12"></td><td><input class="input input-amount" value="0"></td>
+                      <td><input class="input input-amount" value="640.00"></td><td class="num">7,680.00</td><td></td></tr>
+                  </tbody>
+                  <tfoot><tr><td colspan="5">Total</td><td class="num">47</td><td class="num">0</td><td></td><td class="num">41,280.00</td><td></td></tr></tfoot>
+                </table>
+              </div>
+              <div class="lines-foot">
+                <div>
+                  <button class="add-line-btn">+ Add line</button>
+                  <p class="add-line-hint">Van stock is what the van already carries from an earlier run — stock often stays loaded overnight. Issue now is what leaves the warehouse on this trip. Value is at sale rate, for the gate pass only.</p>
+                </div>
+                <div class="doc-totals">
+                  <div class="doc-totals-row"><span>Cartons issued</span><span class="amount">47</span></div>
+                  <div class="doc-totals-row is-grand"><span>Value at sale rate</span><span class="amount">PKR 41,280.00</span></div>
+                </div>
+              </div>
+            </section>
+            <section>
+              <div class="alert alert-info">
+                <div><span class="alert-title">Stock effect</span><p>Overall (warehouse) stock does not change &mdash; goods on a van are still company stock; only the van's sales invoices reduce Overall stock. Every line is within warehouse stock; no ledger entry is written.</p></div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="screen-caption">2 &middot; Printable gate pass (A4)</p>
+  <div class="gp-frame">
+    <div class="gp">
+      <div class="gp-head">
+        <div>
+          <p class="gp-brand">Noor Distributors (Pvt) Ltd</p>
+          <p style="margin:2px 0 0;font-size:11px;color:var(--ink-muted);">Plot 14, Industrial Area, Gulberg III, Lahore</p>
+        </div>
+        <div>
+          <p class="gp-title">Gate Pass</p>
+          <p class="gp-no">ISS-2026-000341</p>
+        </div>
+      </div>
+      <dl class="gp-grid">
+        <div><dt>Dated: </dt><dd>21 Sep 2026, 08:40</dd></div>
+        <div><dt>Vehicle: </dt><dd>Van 2 &middot; LEA-4471</dd></div>
+        <div><dt>From: </dt><dd>Lahore Main Warehouse (WH-01)</dd></div>
+        <div><dt>Driver / salesman: </dt><dd>Sana Tariq</dd></div>
+        <div><dt>Route: </dt><dd>Gulberg &amp; Model Town</dd></div>
+        <div><dt>Total cartons: </dt><dd>47</dd></div>
+      </dl>
+      <table class="gp-table">
+        <thead><tr><th>Code</th><th>Item</th><th class="num">Ctn</th><th class="num">Unit</th><th class="num">Value (PKR)</th></tr></thead>
+        <tbody>
+          <tr><td>1042</td><td>Panadol Extra 10s</td><td class="num">25</td><td class="num">0</td><td class="num">29,500.00</td></tr>
+          <tr><td>2210</td><td>Surf Excel 1kg</td><td class="num">10</td><td class="num">0</td><td class="num">4,100.00</td></tr>
+          <tr><td>3305</td><td>Colgate Toothpaste 150g</td><td class="num">12</td><td class="num">0</td><td class="num">7,680.00</td></tr>
+        </tbody>
+        <tfoot><tr style="font-weight:700;"><td colspan="2">Total</td><td class="num">47</td><td class="num">0</td><td class="num">41,280.00</td></tr></tfoot>
+      </table>
+      <p style="font-size:10.5px;color:var(--ink-muted);">Security: verify carton count against this pass before the vehicle leaves the yard. This is an internal transfer, not a sale &mdash; no invoice value is realised until goods are sold from the van.</p>
+      <div class="gp-sign"><div>Issued by (store keeper)</div><div>Received by (driver / salesman)</div><div>Gate security</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

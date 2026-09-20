@@ -1,0 +1,160 @@
+<!--
+  PHP Ledger 1.2 design mockup — Printable A4 invoice.
+  Fictional data: Noor Distributors (Pvt) Ltd. See DECISIONS.md for the
+  choices this frame embodies (letterhead placement, tax summary, packs/
+  discount/free-goods columns, cash received/balance on the printed page).
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup — Invoice print (A4)</title>
+<style>
+:root{
+  --canvas:#FAF9F7;--surface:#FFFFFF;--border:#E8E6E1;--border-strong:#8C8880;
+  --ink:#1F1E1C;--ink-muted:#6B6862;--ink-faint:#706D66;
+  --brand-navy:#0C2052;--brand-blue:#4656E8;--brand-selected:#EEF0FF;
+  --success:#1F7A4D;--success-bg:#E8F4EE;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.harness{max-width:1320px;margin:0 auto;padding:36px 20px 80px;}
+.harness-head{color:#c8cad2;margin-bottom:28px;max-width:820px;}
+.harness-head .kicker{font-size:12px;color:#8a8d99;margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em;}
+.harness-head h1{font-size:21px;margin:0 0 8px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13px;line-height:1.6;color:#aeb1bd;margin:0;}
+.frame{width:1280px;height:720px;overflow:hidden;background:#3a3d47;border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:22px;}
+.a4{width:794px;height:1123px;transform:scale(.605);transform-origin:top center;background:#fff;color:var(--ink);box-shadow:0 6px 24px rgba(0,0,0,.35);padding:40px 46px;font-size:12.5px;line-height:1.5;}
+.tabular-nums,.num{font-variant-numeric:tabular-nums lining-nums;}
+
+.letterhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--brand-navy);padding-bottom:16px;margin-bottom:18px;}
+.brand-block{display:flex;align-items:center;gap:12px;}
+.brand-mark{width:44px;height:44px;border-radius:8px;background:var(--brand-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;}
+.brand-name{font-size:19px;font-weight:700;color:var(--brand-navy);margin:0;}
+.brand-meta{font-size:11px;color:var(--ink-muted);margin:2px 0 0;line-height:1.5;}
+.doc-title-block{text-align:end;}
+.doc-title{font-size:22px;font-weight:700;color:var(--ink);margin:0;letter-spacing:.02em;}
+.doc-number{font-size:13px;color:var(--brand-navy);font-weight:650;margin:4px 0 0;}
+.doc-meta{font-size:11px;color:var(--ink-muted);margin:2px 0 0;}
+
+.parties{display:flex;justify-content:space-between;gap:24px;margin-bottom:18px;}
+.party h3{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);margin:0 0 5px;font-weight:700;}
+.party p{margin:0;font-size:12px;line-height:1.5;}
+.party-right{text-align:end;}
+.party-grid{display:grid;grid-template-columns:auto auto;gap:2px 10px;font-size:11.5px;}
+.party-grid dt{color:var(--ink-muted);text-align:end;}
+.party-grid dd{margin:0;font-weight:600;}
+
+table.lines{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px;}
+table.lines thead th{background:var(--brand-selected);color:var(--brand-navy);text-align:start;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:6px 6px;border-bottom:1.5px solid var(--brand-navy);}
+table.lines th.num,table.lines td.num{text-align:end;}
+table.lines td{padding:5px 6px;border-bottom:1px solid var(--border);}
+table.lines tr.free td{color:var(--success);font-style:italic;}
+
+.bottom{display:flex;justify-content:space-between;gap:20px;}
+.terms{max-width:300px;font-size:10.5px;color:var(--ink-muted);line-height:1.6;}
+.terms h4{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);margin:0 0 4px;}
+.totals{width:260px;display:flex;flex-direction:column;gap:3px;}
+.totals-row{display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0;}
+.totals-row.tax-line{color:var(--ink-muted);font-size:10.5px;}
+.totals-row.grand{font-weight:700;font-size:14px;border-top:1.5px solid var(--ink);border-bottom:3px double var(--ink);padding:5px 0;margin:4px 0;}
+.totals-row.cash{color:var(--ink-muted);}
+.totals-row.balance{font-weight:700;color:var(--brand-navy);background:var(--brand-selected);padding:5px 6px;border-radius:4px;}
+
+.tax-summary{margin-top:8px;border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:10px;}
+.tax-summary table{width:100%;border-collapse:collapse;font-size:10px;}
+.tax-summary th{text-align:end;color:var(--ink-muted);font-weight:600;padding:2px 4px;}
+.tax-summary td{text-align:end;padding:2px 4px;}
+.tax-summary th:first-child,.tax-summary td:first-child{text-align:start;}
+
+.signoff{display:flex;justify-content:space-between;margin-top:40px;font-size:10.5px;color:var(--ink-muted);}
+.sig{width:180px;border-top:1px solid var(--border-strong);padding-top:4px;text-align:center;}
+.footer-note{margin-top:22px;text-align:center;font-size:10px;color:var(--ink-faint);}
+</style>
+</head>
+<body>
+<div class="harness">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger 1.2 — design mockup, static, not built</p>
+    <h1>Invoice print — A4</h1>
+    <p>Printable copy of the same invoice, shown at A4 proportions scaled to fit this frame. Letterhead, packs/discount/free-goods columns, a per-rate tax summary, and cash received with the resulting balance. See DECISIONS.md for the layout choices.</p>
+  </div>
+  <div class="frame">
+    <div class="a4">
+      <div class="letterhead">
+        <div class="brand-block">
+          <span class="brand-mark">ND</span>
+          <div>
+            <p class="brand-name">Noor Distributors (Pvt) Ltd</p>
+            <p class="brand-meta">Plot 14, Industrial Area, Gulberg III, Lahore · 042-111-556-778<br>NTN 3345678-9 · STRN 03-45-1234-567-89</p>
+          </div>
+        </div>
+        <div class="doc-title-block">
+          <p class="doc-title">Sales Invoice</p>
+          <p class="doc-number">INV-2026-000123</p>
+          <p class="doc-meta">Dated 21 Sep 2026 · Due 05 Oct 2026</p>
+        </div>
+      </div>
+      <div class="parties">
+        <div class="party">
+          <h3>Bill to</h3>
+          <p><strong>Al-Shifa Pharmacy</strong><br>Main Boulevard, Gulberg, Lahore<br>NTN 1122334-5</p>
+        </div>
+        <div class="party party-right">
+          <h3>Delivery details</h3>
+          <div class="party-grid">
+            <dt>Warehouse</dt><dd>Lahore Main (WH-01)</dd>
+            <dt>Sales staff</dt><dd>Bilal Ahmed</dd>
+            <dt>Area / route</dt><dd>Gulberg</dd>
+            <dt>Terms</dt><dd>Net 14 days</dd>
+          </div>
+        </div>
+      </div>
+      <table class="lines">
+        <thead><tr>
+          <th style="width:30%">Item</th><th class="num" style="width:8%">Ctn</th><th class="num" style="width:8%">Units</th>
+          <th class="num" style="width:12%">Unit price</th><th class="num" style="width:8%">Disc %</th>
+          <th class="num" style="width:9%">Free</th><th class="num" style="width:8%">GST %</th><th class="num" style="width:17%">Amount</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Panadol Extra 10s (strip pack)</td><td class="num">5</td><td class="num">0</td><td class="num">1,180.00</td><td class="num">5%</td><td class="num">&ndash;</td><td class="num">0%</td><td class="num">56,050.00</td></tr>
+          <tr><td>Surf Excel 1kg (carton of 12)</td><td class="num">3</td><td class="num">4</td><td class="num">410.00</td><td class="num">0%</td><td class="num">&ndash;</td><td class="num">18%</td><td class="num">16,400.00</td></tr>
+          <tr class="free"><td>Panadol Extra 10s — 5+1 scheme bonus</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">0.00</td><td class="num">&ndash;</td><td class="num">1 ctn</td><td class="num">&ndash;</td><td class="num">0.00</td></tr>
+        </tbody>
+      </table>
+      <div class="bottom">
+        <div class="terms">
+          <h4>Terms &amp; notes</h4>
+          <p>Goods once sold are exchangeable within 7 days against a fresh purchase; no cash refunds. Payment due by the date above. Interest may apply after the due date per the standing credit terms.</p>
+          <div class="tax-summary">
+            <table>
+              <thead><tr><th>GST rate</th><th>Taxable</th><th>Tax</th></tr></thead>
+              <tbody>
+                <tr><td>GST 18%</td><td>16,400.00</td><td>2,952.00</td></tr>
+                <tr><td>Exempt / 0%</td><td>56,050.00</td><td>0.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="totals">
+          <div class="totals-row"><span>Subtotal</span><span class="num">72,450.00</span></div>
+          <div class="totals-row tax-line"><span>Line discounts</span><span class="num">&minus;2,950.00</span></div>
+          <div class="totals-row tax-line"><span>GST</span><span class="num">2,952.00</span></div>
+          <div class="totals-row grand"><span>Total (PKR)</span><span class="num">72,452.00</span></div>
+          <div class="totals-row cash"><span>Cash received</span><span class="num">40,000.00</span></div>
+          <div class="totals-row balance"><span>Balance due</span><span class="num">32,452.00</span></div>
+        </div>
+      </div>
+      <div class="signoff">
+        <div class="sig">Prepared by</div>
+        <div class="sig">Received in good order</div>
+      </div>
+      <p class="footer-note">This is a computer-generated document · Noor Distributors (Pvt) Ltd, sample data for design review only</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

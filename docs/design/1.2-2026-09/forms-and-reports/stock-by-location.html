@@ -1,0 +1,153 @@
+<!--
+  PHP Ledger 1.2 design mockup — Stock by location report (warehouses and vans),
+  with an aggregate column and totals. Grouped-with-subtotals layout adapted from
+  the Awan prototype's Stock Position report (docs/design/1.2-2026-09/
+  awan-prototype/Awan-prototype.html, template id screen-stock-position), which
+  groups by company/brand with a subtotal row per group and a grand total.
+  See DECISIONS.md.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup — Stock by location</title>
+<style>
+:root{
+  --canvas:#FAF9F7;--surface:#FFFFFF;--surface-subtle:#F4F3F0;--border:#E8E6E1;--border-strong:#8C8880;
+  --ink:#1F1E1C;--ink-muted:#6B6862;--ink-faint:#706D66;
+  --brand-navy:#0C2052;--brand-blue:#4656E8;--brand-selected:#EEF0FF;
+  --success:#1F7A4D;--success-bg:#E8F4EE;--warning:#9A6200;--warning-bg:#FBF1DE;--danger:#B42318;--danger-bg:#FDECEA;
+  --radius-control:6px;--radius-panel:10px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.harness{max-width:1320px;margin:0 auto;padding:36px 20px 80px;}
+.harness-head{color:#c8cad2;margin-bottom:28px;max-width:860px;}
+.harness-head .kicker{font-size:12px;color:#8a8d99;margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em;}
+.harness-head h1{font-size:21px;margin:0 0 8px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13px;line-height:1.6;color:#aeb1bd;margin:0 0 6px;}
+.harness-head .src{font-size:11.5px;color:#8a8d99;}
+a{color:inherit;text-decoration:none;}
+.tabular-nums,.amount,.num{font-variant-numeric:tabular-nums lining-nums;}
+.frame{width:1280px;height:720px;overflow:hidden;background:var(--canvas);border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);display:flex;color:var(--ink);font-size:13px;line-height:19px;}
+.shell-sidebar{width:200px;flex:none;background:var(--surface);border-inline-end:1px solid var(--border);display:flex;flex-direction:column;padding:14px 10px;gap:2px;}
+.brand-row{display:flex;align-items:center;gap:8px;padding:4px 8px 14px;}
+.brand-mark{width:22px;height:22px;border-radius:6px;background:var(--brand-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex:none;}
+.brand-name{font-weight:650;font-size:13px;color:var(--ink);}
+.co-switch{display:flex;flex-direction:column;gap:1px;background:var(--surface-subtle);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:12px;}
+.co-switch .co-name{font-size:12px;font-weight:650;color:var(--ink);}
+.co-switch .co-meta{font-size:10.5px;color:var(--ink-muted);}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);padding:10px 8px 3px;}
+.nav-item{display:flex;align-items:center;gap:8px;height:30px;padding-inline:8px;border-radius:6px;font-size:12.5px;color:var(--ink-muted);font-weight:500;}
+.nav-item .dot{width:5px;height:5px;border-radius:2px;background:currentColor;opacity:.5;flex:none;}
+.nav-item.active{background:var(--brand-selected);color:var(--brand-navy);font-weight:650;}
+.nav-item.active .dot{opacity:1;background:var(--brand-blue);}
+.shell-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{height:42px;flex:none;display:flex;align-items:center;padding-inline:16px;border-bottom:1px solid var(--border);background:var(--surface);font-size:11.5px;color:var(--ink-muted);}
+.topbar b{color:var(--ink);font-weight:600;}
+.content{flex:1;min-height:0;overflow:hidden;padding:12px 16px;display:flex;flex-direction:column;gap:9px;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;flex:none;}
+.page-title{font-size:17px;font-weight:650;margin:0;color:var(--ink);letter-spacing:-.01em;}
+.page-sub{margin:3px 0 0;font-size:11.5px;color:var(--ink-muted);}
+.hdr-actions{display:flex;gap:8px;}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding-inline:11px;border-radius:var(--radius-control);font-size:11.5px;font-weight:600;border:1px solid transparent;white-space:nowrap;}
+.btn-primary{background:var(--brand-navy);color:#fff;}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong);}
+.filter-bar{display:flex;gap:9px;align-items:flex-end;flex:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 11px;}
+.field{display:flex;flex-direction:column;gap:3px;}
+.field-label{font-size:10px;font-weight:600;color:var(--ink);}
+.input,.select{height:26px;padding-inline:7px;border:1px solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);font-size:11px;font-family:inherit;}
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex:none;}
+.summary-cell{background:var(--surface);padding:7px 11px;}
+.summary-cell .lbl{font-size:10px;color:var(--ink-muted);}
+.summary-cell .val{font-size:15px;font-weight:700;margin-top:1px;}
+.summary-cell .val.brand{color:var(--brand-navy);}
+.table-wrap{flex:1;min-height:0;overflow:auto;border:1px solid var(--border);border-radius:8px;background:var(--surface);}
+table.rpt{width:100%;border-collapse:collapse;font-size:10.8px;}
+table.rpt thead th{position:sticky;top:0;background:var(--surface-subtle);text-align:start;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--ink-muted);padding:5px 8px;border-bottom:1px solid var(--border);z-index:1;}
+table.rpt th.num,table.rpt td.num{text-align:end;}
+table.rpt td{padding:4px 8px;border-bottom:1px solid var(--border);}
+tr.grp td{background:var(--brand-selected);color:var(--brand-navy);font-weight:700;font-size:10.5px;padding-top:5px;padding-bottom:5px;}
+tr.grp .meta{font-weight:500;color:var(--brand-navy);opacity:.75;font-size:10px;}
+tr.sub td{background:var(--surface-subtle);font-weight:700;border-top:1px solid var(--border-strong);}
+tr.grand td{background:var(--ink);color:#fff;font-weight:700;border-top:2px solid var(--ink);}
+td.is-low{color:var(--warning);font-weight:650;}
+.badge{display:inline-flex;align-items:center;gap:4px;height:16px;padding-inline:5px;border-radius:999px;font-size:8.5px;font-weight:700;background:var(--warning-bg);color:var(--warning);margin-inline-start:5px;}
+.badge-dot{width:4px;height:4px;border-radius:999px;background:currentColor;}
+</style>
+</head>
+<body>
+<div class="harness">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger 1.2 — design mockup, static, not built</p>
+    <h1>Stock by location</h1>
+    <p>Items and value grouped by warehouse and van, each group subtotalled, with an aggregate (all-locations) column per item and a grand total. Grouped/subtotal layout adapted from the Awan prototype's Stock Position report.</p>
+    <p class="src">Source: docs/design/1.2-2026-09/awan-prototype/Awan-prototype.html, template id screen-stock-position</p>
+  </div>
+  <div class="frame">
+    <aside class="shell-sidebar">
+      <div class="brand-row"><span class="brand-mark">PL</span><span class="brand-name">PHP Ledger</span></div>
+      <div class="co-switch"><span class="co-name">Noor Distributors (Pvt) Ltd</span><span class="co-meta">Primary book &middot; PKR</span></div>
+      <div class="nav-item"><span class="dot"></span>Home</div>
+      <div class="nav-label">Inventory</div>
+      <div class="nav-item"><span class="dot"></span>Stock issues &amp; returns</div>
+      <div class="nav-item active"><span class="dot"></span>Stock by location</div>
+      <div class="nav-label">Reports</div>
+      <div class="nav-item"><span class="dot"></span>Trial balance</div>
+    </aside>
+    <div class="shell-main">
+      <div class="topbar">Inventory &rsaquo; <b>Stock by location</b></div>
+      <div class="content">
+        <header class="page-header">
+          <div><h1 class="page-title">Stock by location</h1><p class="page-sub">Noor Distributors (Pvt) Ltd &middot; PKR &middot; As at 21 Sep 2026 &middot; 2 warehouses, 3 vans &middot; 1 item negative</p></div>
+          <div class="hdr-actions"><button class="btn btn-secondary">Export CSV</button><button class="btn btn-primary">Print</button></div>
+        </header>
+        <div class="filter-bar">
+          <div class="field"><label class="field-label">As at</label><input class="input" value="21 Sep 2026"></div>
+          <div class="field"><label class="field-label">Location</label><select class="select"><option>All locations</option><option>Warehouses only</option><option>Vans only</option></select></div>
+          <div class="field"><label class="field-label">Item / code</label><input class="input" placeholder="Search"></div>
+          <button class="btn btn-secondary">Update</button>
+        </div>
+        <div class="summary-row">
+          <div class="summary-cell"><div class="lbl">Locations</div><div class="val">5</div></div>
+          <div class="summary-cell"><div class="lbl">Items with stock</div><div class="val">42</div></div>
+          <div class="summary-cell"><div class="lbl">Value at cost</div><div class="val">3,214,600</div></div>
+          <div class="summary-cell"><div class="lbl">Value at sale</div><div class="val brand">4,108,900</div></div>
+        </div>
+        <div class="table-wrap">
+          <table class="rpt">
+            <thead><tr><th style="width:8%">Code</th><th style="width:22%">Item</th><th class="num" style="width:8%">Pack</th><th class="num" style="width:8%">Ctn</th><th class="num" style="width:8%">Loose</th><th class="num" style="width:10%">Units</th><th class="num" style="width:12%">Value @cost</th><th class="num" style="width:12%">Value @sale</th><th class="num" style="width:12%">Aggregate units</th></tr></thead>
+            <tbody>
+              <tr class="grp"><td colspan="9">Lahore Main Warehouse (WH-01) <span class="meta">&middot; 27 items</span></td></tr>
+              <tr><td>1042</td><td>Panadol Extra 10s</td><td class="num">10/ctn</td><td class="num">412</td><td class="num">30</td><td class="num">4,150</td><td class="num">4,398,700</td><td class="num">4,897,000</td><td class="num">4,610</td></tr>
+              <tr><td>2210</td><td>Surf Excel 1kg</td><td class="num">12/ctn</td><td class="num">88</td><td class="num">2</td><td class="num">1,058</td><td class="num">386,180</td><td class="num">433,780</td><td class="num">1,120</td></tr>
+              <tr><td>3305</td><td>Colgate Toothpaste 150g</td><td class="num">24/ctn</td><td class="num">55</td><td class="num">0</td><td class="num">1,320</td><td class="num">590,400</td><td class="num">672,000</td><td class="num">1,464</td></tr>
+              <tr class="sub"><td colspan="5">Sub total &middot; WH-01</td><td class="num">6,528</td><td class="num">5,375,280</td><td class="num">6,002,780</td><td class="num"></td></tr>
+              <tr class="grp"><td colspan="9">Multan Warehouse (WH-02) <span class="meta">&middot; 9 items</span></td></tr>
+              <tr><td>1042</td><td>Panadol Extra 10s</td><td class="num">10/ctn</td><td class="num">140</td><td class="num">5</td><td class="num">1,405</td><td class="num">1,494,850</td><td class="num">1,652,000</td><td class="num">4,610</td></tr>
+              <tr><td>4088</td><td>Lifebuoy Soap 100g</td><td class="num">72/ctn</td><td class="num">22</td><td class="num">10</td><td class="num">1,594</td><td class="num">87,670</td><td class="num">103,610</td><td class="num">2,210</td></tr>
+              <tr class="sub"><td colspan="5">Sub total &middot; WH-02</td><td class="num">2,999</td><td class="num">1,582,520</td><td class="num">1,755,610</td><td class="num"></td></tr>
+              <tr class="grp"><td colspan="9">Van 1 &middot; Bilal Ahmed &middot; Lahore City <span class="meta">&middot; 6 items</span></td></tr>
+              <tr><td>1042</td><td>Panadol Extra 10s</td><td class="num">10/ctn</td><td class="num">18</td><td class="num">6</td><td class="num">186</td><td class="num">197,880</td><td class="num">219,480</td><td class="num">4,610</td></tr>
+              <tr><td>2210</td><td>Surf Excel 1kg</td><td class="num">12/ctn</td><td class="num">6</td><td class="num">0</td><td class="num">72</td><td class="num">26,280</td><td class="num">29,520</td><td class="num">1,120</td></tr>
+              <tr class="sub"><td colspan="5">Sub total &middot; Van 1</td><td class="num">258</td><td class="num">224,160</td><td class="num">249,000</td><td class="num"></td></tr>
+              <tr class="grp"><td colspan="9">Van 2 &middot; Sana Tariq &middot; Gulberg &amp; Model Town <span class="meta">&middot; 5 items</span></td></tr>
+              <tr><td>1042</td><td>Panadol Extra 10s</td><td class="num">10/ctn</td><td class="num">0</td><td class="num">2</td><td class="num">2</td><td class="num">2,124</td><td class="num">2,360</td><td class="num is-low">4,610<span class="badge"><span class="badge-dot"></span>Low</span></td></tr>
+              <tr><td>3305</td><td>Colgate Toothpaste 150g</td><td class="num">24/ctn</td><td class="num">4</td><td class="num">0</td><td class="num">96</td><td class="num">42,960</td><td class="num">48,960</td><td class="num">1,464</td></tr>
+              <tr class="sub"><td colspan="5">Sub total &middot; Van 2</td><td class="num">98</td><td class="num">45,084</td><td class="num">51,320</td><td class="num"></td></tr>
+              <tr class="grp"><td colspan="9">Van 3 &middot; Usman Ali &middot; Multan Route <span class="meta">&middot; 4 items &middot; 1 negative</span></td></tr>
+              <tr><td>4088</td><td>Lifebuoy Soap 100g <span class="badge"><span class="badge-dot"></span>Negative</span></td><td class="num">72/ctn</td><td class="num">&minus;1</td><td class="num">&minus;8</td><td class="num">&minus;80</td><td class="num">&minus;4,400</td><td class="num">&minus;5,200</td><td class="num">2,210</td></tr>
+              <tr class="sub"><td colspan="5">Sub total &middot; Van 3</td><td class="num">&minus;12</td><td class="num">&minus;12,240</td><td class="num">&minus;13,290</td><td class="num"></td></tr>
+              <tr class="grand"><td colspan="5">Grand total &middot; all locations</td><td class="num">9,871</td><td class="num">3,214,600</td><td class="num">4,108,900</td><td class="num"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

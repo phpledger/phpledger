@@ -1,0 +1,244 @@
+<!--
+  PHP Ledger 1.2 design mockup — Receipt on account, two screens:
+  1. Single-customer receipt with an oldest-first allocation preview and an
+     unallocated remainder becoming a customer advance.
+  2. A batch-receipts grid for entering many customers' recoveries in one
+     voucher (adapted from the Awan prototype's Receipt Voucher screen,
+     docs/design/1.2-2026-09/awan-prototype/Awan-prototype.html, template id
+     screen-rv-new) — Previous Balance / Received / Closing Balance columns.
+     The auto-posted "Cash / Bank" credit line there is kept, but every receipt
+     still posts as its own immutable voucher per PHP Ledger's posting rules
+     (no unposted balance is shown as a ledger figure) — see DECISIONS.md.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup — Receipt on account</title>
+<style>
+:root{
+  --canvas:#FAF9F7;--surface:#FFFFFF;--surface-subtle:#F4F3F0;--border:#E8E6E1;--border-strong:#8C8880;
+  --ink:#1F1E1C;--ink-muted:#6B6862;--ink-faint:#706D66;
+  --brand-navy:#0C2052;--brand-blue:#4656E8;--brand-selected:#EEF0FF;
+  --success:#1F7A4D;--success-bg:#E8F4EE;--info:#2F5BD3;--info-bg:#EEF2FD;--warning:#9A6200;--warning-bg:#FBF1DE;
+  --radius-control:6px;--radius-panel:10px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.harness{max-width:1320px;margin:0 auto;padding:36px 20px 80px;}
+.harness-head{color:#c8cad2;margin-bottom:28px;max-width:880px;}
+.harness-head .kicker{font-size:12px;color:#8a8d99;margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em;}
+.harness-head h1{font-size:21px;margin:0 0 8px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13px;line-height:1.6;color:#aeb1bd;margin:0 0 6px;}
+.harness-head .src{font-size:11.5px;color:#8a8d99;}
+.screen-caption{color:#9498a6;font-size:12px;font-weight:600;margin:26px 0 10px 2px;}
+a{color:inherit;text-decoration:none;}
+.tabular-nums,.amount,.num{font-variant-numeric:tabular-nums lining-nums;}
+.frame{width:1280px;height:720px;overflow:hidden;background:var(--canvas);border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);display:flex;color:var(--ink);font-size:13px;line-height:19px;}
+.shell-sidebar{width:200px;flex:none;background:var(--surface);border-inline-end:1px solid var(--border);display:flex;flex-direction:column;padding:14px 10px;gap:2px;}
+.brand-row{display:flex;align-items:center;gap:8px;padding:4px 8px 14px;}
+.brand-mark{width:22px;height:22px;border-radius:6px;background:var(--brand-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex:none;}
+.brand-name{font-weight:650;font-size:13px;color:var(--ink);}
+.co-switch{display:flex;flex-direction:column;gap:1px;background:var(--surface-subtle);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:12px;}
+.co-switch .co-name{font-size:12px;font-weight:650;color:var(--ink);}
+.co-switch .co-meta{font-size:10.5px;color:var(--ink-muted);}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);padding:10px 8px 3px;}
+.nav-item{display:flex;align-items:center;gap:8px;height:30px;padding-inline:8px;border-radius:6px;font-size:12.5px;color:var(--ink-muted);font-weight:500;}
+.nav-item .dot{width:5px;height:5px;border-radius:2px;background:currentColor;opacity:.5;flex:none;}
+.nav-item.active{background:var(--brand-selected);color:var(--brand-navy);font-weight:650;}
+.nav-item.active .dot{opacity:1;background:var(--brand-blue);}
+.shell-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{height:42px;flex:none;display:flex;align-items:center;padding-inline:16px;border-bottom:1px solid var(--border);background:var(--surface);font-size:11.5px;color:var(--ink-muted);}
+.topbar b{color:var(--ink);font-weight:600;}
+.content{flex:1;min-height:0;overflow:hidden;padding:12px 16px;display:flex;flex-direction:column;}
+
+.doc{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-panel);flex:1;min-height:0;overflow:hidden;}
+.doc-header{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:.6rem 1rem;border-bottom:1px solid var(--border);}
+.doc-heading{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.doc-type{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint);}
+.doc-number{margin:0;font-size:17px;font-weight:650;color:var(--ink);}
+.badge{display:inline-flex;align-items:center;gap:5px;height:18px;padding-inline:7px;border-radius:999px;font-size:10px;font-weight:600;}
+.badge-dot{width:5px;height:5px;border-radius:999px;background:currentColor;}
+.badge-draft{background:var(--surface-subtle);color:var(--ink-muted);}
+.doc-actions{display:flex;gap:7px;}
+.btn{display:inline-flex;align-items:center;gap:5px;height:29px;padding-inline:11px;border-radius:var(--radius-control);font-size:11.5px;font-weight:600;border:1px solid transparent;white-space:nowrap;}
+.btn-primary{background:var(--brand-navy);color:#fff;}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong);}
+.btn-ghost{background:transparent;color:var(--ink);}
+
+.doc-body{flex:1;min-height:0;overflow:auto;padding:.75rem 1rem 1rem;display:flex;flex-direction:column;gap:11px;}
+.field-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:10px;font-weight:600;color:var(--ink);}
+.input,.select{height:28px;padding-inline:7px;border:1px solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);font-size:11px;font-family:inherit;width:100%;}
+.input-amount{text-align:end;}
+
+.section-title{font-size:12px;font-weight:650;color:var(--ink);margin:2px 0 4px;}
+.table-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+table.alloc{width:100%;border-collapse:separate;border-spacing:0;font-size:11px;}
+table.alloc thead th{background:var(--surface-subtle);text-align:start;font-size:9px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--ink-muted);padding:5px 8px;border-bottom:1px solid var(--border);}
+table.alloc th.num,table.alloc td.num{text-align:end;}
+table.alloc td{padding:4px 8px;border-bottom:1px solid var(--border);}
+table.alloc tbody tr:last-child td{border-bottom:0;}
+tr.oldest td{background:var(--success-bg);}
+tr.advance-row td{background:var(--info-bg);font-weight:650;color:var(--info);}
+.seq-badge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:999px;background:var(--success);color:#fff;font-size:9px;font-weight:700;margin-inline-end:5px;}
+
+.summary-strip{display:flex;gap:16px;align-items:center;background:var(--surface-subtle);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex-wrap:wrap;}
+.summary-strip .cell{display:flex;flex-direction:column;gap:1px;}
+.summary-strip .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-faint);font-weight:700;}
+.summary-strip .val{font-size:13.5px;font-weight:700;color:var(--ink);}
+.summary-strip .val.brand{color:var(--brand-navy);}
+.summary-strip .val.advance{color:var(--info);}
+
+.alert{display:flex;gap:8px;padding:8px 10px;border-radius:6px;border:1px solid;font-size:11px;}
+.alert-info{background:var(--info-bg);border-color:color-mix(in oklab, var(--info) 28%, transparent);color:var(--info);}
+.alert p{color:var(--ink);margin:2px 0 0;}
+.alert-title{font-weight:650;}
+
+/* batch grid screen */
+table.batch{width:100%;border-collapse:separate;border-spacing:0;font-size:10.5px;table-layout:fixed;}
+table.batch thead th{background:var(--surface-subtle);text-align:start;font-size:9px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--ink-muted);padding:5px 7px;border-bottom:1px solid var(--border);}
+table.batch th.num,table.batch td.num{text-align:end;}
+table.batch td{padding:3px 7px;border-bottom:1px solid var(--border);vertical-align:middle;}
+table.batch .input,table.batch .select{height:24px;font-size:10.5px;padding-inline:5px;}
+table.batch tfoot td{font-weight:700;background:var(--surface-subtle);border-top:1px solid var(--border-strong);}
+.batch-note{font-size:10px;color:var(--ink-faint);max-width:60ch;}
+</style>
+</head>
+<body>
+<div class="harness">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger 1.2 — design mockup, static, not built</p>
+    <h1>Receipt on account</h1>
+    <p>Two related frames: a single-customer receipt that allocates against open invoices oldest-first, with any remainder held as a customer advance; and a batch-receipts grid for recording many customers' recoveries — e.g. a salesman's end-of-day cash — in one voucher.</p>
+    <p class="src">Batch-grid columns (Previous balance / Received / Closing balance) adapted from the Awan prototype's Receipt Voucher screen. Each receipt still posts as its own immutable voucher on Post, per PHP Ledger's posting rules — see DECISIONS.md.</p>
+  </div>
+
+  <p class="screen-caption">1 &middot; Single customer &middot; oldest-first allocation</p>
+  <div class="frame">
+    <aside class="shell-sidebar">
+      <div class="brand-row"><span class="brand-mark">PL</span><span class="brand-name">PHP Ledger</span></div>
+      <div class="co-switch"><span class="co-name">Noor Distributors (Pvt) Ltd</span><span class="co-meta">Primary book &middot; PKR</span></div>
+      <div class="nav-item"><span class="dot"></span>Home</div>
+      <div class="nav-label">Sales</div>
+      <div class="nav-item"><span class="dot"></span>Invoices</div>
+      <div class="nav-item active"><span class="dot"></span>Receipts</div>
+      <div class="nav-item"><span class="dot"></span>Customers</div>
+    </aside>
+    <div class="shell-main">
+      <div class="topbar">Sales &rsaquo; Receipts &rsaquo; <b>New receipt</b></div>
+      <div class="content">
+        <div class="doc">
+          <header class="doc-header">
+            <div class="doc-heading">
+              <span class="doc-type">Receipt</span>
+              <h1 class="doc-number">RCP-2026-000252</h1>
+              <span class="badge badge-draft"><span class="badge-dot"></span>Draft</span>
+            </div>
+            <div class="doc-actions">
+              <button class="btn btn-ghost">Cancel</button>
+              <button class="btn btn-secondary">Save draft</button>
+              <button class="btn btn-primary">Post</button>
+            </div>
+          </header>
+          <div class="doc-body">
+            <section>
+              <div class="field-grid">
+                <div class="field"><label class="field-label">Customer</label><select class="select"><option>Al-Shifa Pharmacy — Gulberg</option></select></div>
+                <div class="field"><label class="field-label">Received date</label><input class="input" value="21 Sep 2026"></div>
+                <div class="field"><label class="field-label">Cash / bank account</label><select class="select"><option>1-100-10001-00 · Cash in hand</option></select></div>
+                <div class="field"><label class="field-label">Amount received</label><input class="input input-amount" value="60,000.00"></div>
+              </div>
+            </section>
+            <section>
+              <h2 class="section-title">Allocation preview &mdash; oldest invoice first</h2>
+              <div class="table-wrap">
+                <table class="alloc">
+                  <thead><tr><th style="width:8%"></th><th style="width:20%">Invoice</th><th style="width:14%">Dated</th><th class="num" style="width:16%">Invoice amount</th><th class="num" style="width:16%">Outstanding</th><th class="num" style="width:16%">Allocated now</th><th class="num" style="width:10%">Remaining</th></tr></thead>
+                  <tbody>
+                    <tr class="oldest"><td><span class="seq-badge">1</span></td><td>INV-2026-000098</td><td>03 Sep 2026</td><td class="num">31,200.00</td><td class="num">31,200.00</td><td class="num">31,200.00</td><td class="num">0.00</td></tr>
+                    <tr class="oldest"><td><span class="seq-badge">2</span></td><td>INV-2026-000107</td><td>09 Sep 2026</td><td class="num">27,300.00</td><td class="num">27,300.00</td><td class="num">27,300.00</td><td class="num">0.00</td></tr>
+                    <tr><td><span class="seq-badge" style="background:var(--border-strong)">3</span></td><td>INV-2026-000116</td><td>14 Sep 2026</td><td class="num">40,352.00</td><td class="num">40,352.00</td><td class="num">1,500.00</td><td class="num">38,852.00</td></tr>
+                    <tr class="advance-row"><td colspan="5">Unallocated remainder &mdash; held as customer advance</td><td class="num">0.00</td><td class="num">&mdash;</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <div class="summary-strip">
+              <div class="cell"><span class="lbl">Amount received</span><span class="val">60,000.00</span></div>
+              <div class="cell"><span class="lbl">Applied to invoices</span><span class="val brand">60,000.00</span></div>
+              <div class="cell"><span class="lbl">Held as advance</span><span class="val advance">0.00</span></div>
+              <div class="cell"><span class="lbl">Balance after receipt</span><span class="val">38,852.00</span></div>
+            </div>
+            <div class="alert alert-info">
+              <div><span class="alert-title">Oldest-first, adjustable</span><p>Allocation fills the earliest unpaid invoice first. Amounts in the "Allocated now" column can be edited before posting to apply a different split; any part left unapplied becomes a customer advance, shown separately on the statement and offered first against the customer's next invoice.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="screen-caption">2 &middot; Batch receipts &mdash; many customers in one voucher</p>
+  <div class="frame">
+    <aside class="shell-sidebar">
+      <div class="brand-row"><span class="brand-mark">PL</span><span class="brand-name">PHP Ledger</span></div>
+      <div class="co-switch"><span class="co-name">Noor Distributors (Pvt) Ltd</span><span class="co-meta">Primary book &middot; PKR</span></div>
+      <div class="nav-item"><span class="dot"></span>Home</div>
+      <div class="nav-label">Sales</div>
+      <div class="nav-item"><span class="dot"></span>Invoices</div>
+      <div class="nav-item active"><span class="dot"></span>Receipts</div>
+      <div class="nav-item"><span class="dot"></span>Customers</div>
+    </aside>
+    <div class="shell-main">
+      <div class="topbar">Sales &rsaquo; Receipts &rsaquo; <b>Batch receipts &mdash; Bilal Ahmed, end of day</b></div>
+      <div class="content">
+        <div class="doc">
+          <header class="doc-header">
+            <div class="doc-heading">
+              <span class="doc-type">Batch receipts</span>
+              <h1 class="doc-number">BR-2026-000019</h1>
+              <span class="badge badge-draft"><span class="badge-dot"></span>Draft</span>
+            </div>
+            <div class="doc-actions">
+              <button class="btn btn-ghost">Cancel</button>
+              <button class="btn btn-secondary">Save draft</button>
+              <button class="btn btn-primary">Post all</button>
+            </div>
+          </header>
+          <div class="doc-body">
+            <section>
+              <div class="field-grid">
+                <div class="field"><label class="field-label">Salesman / collected by</label><select class="select"><option>Bilal Ahmed</option></select></div>
+                <div class="field"><label class="field-label">Received date</label><input class="input" value="21 Sep 2026"></div>
+                <div class="field"><label class="field-label">Cash / bank account</label><select class="select"><option>1-100-10001-00 · Cash in hand</option></select></div>
+                <div class="field"><label class="field-label">Total received</label><input class="input input-amount" value="147,500.00" disabled></div>
+              </div>
+            </section>
+            <section>
+              <h2 class="section-title">Recovery lines &mdash; oldest-first allocation applied per customer on posting</h2>
+              <div class="table-wrap">
+                <table class="batch">
+                  <thead><tr><th style="width:8%">Code</th><th style="width:24%">Customer</th><th style="width:18%">Area</th><th class="num" style="width:15%">Previous balance</th><th class="num" style="width:15%">Received</th><th class="num" style="width:16%">Closing balance</th><th style="width:4%"></th></tr></thead>
+                  <tbody>
+                    <tr><td>C-0231</td><td>Al-Shifa Pharmacy</td><td>Gulberg</td><td class="num">55,452.00</td><td><input class="input input-amount" value="60,000.00"></td><td class="num">&minus;4,548.00 <span style="color:var(--info);font-size:9px;">(advance)</span></td><td></td></tr>
+                    <tr><td>C-0104</td><td>Servaid Pharmacy — Gulberg</td><td>Gulberg</td><td class="num">318,900.00</td><td><input class="input input-amount" value="50,000.00"></td><td class="num">268,900.00</td><td></td></tr>
+                    <tr><td>C-0188</td><td>City General Store</td><td>Model Town</td><td class="num">37,500.00</td><td><input class="input input-amount" value="37,500.00"></td><td class="num">0.00</td><td></td></tr>
+                  </tbody>
+                  <tfoot><tr><td colspan="3">Total</td><td class="num">411,852.00</td><td class="num">147,500.00</td><td class="num"></td><td></td></tr></tfoot>
+                </table>
+              </div>
+              <p class="batch-note">Each row still applies oldest-first against that customer's own open invoices when posted, exactly as the single-receipt screen previews; the grid only speeds up entry for a salesman clearing several customers' cash at once. One Cash in Hand debit line is written for the total; each customer line credits that customer individually.</p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!--
+  PHP Ledger 1.2 design mockup — Collapsible trial balance with structured
+  account codes X-XXX-XXXXX-XX (issue #76/#77): a 1-digit class, 3-digit group,
+  5-digit account and 2-digit sub-account, shown as a three-level hierarchy.
+  Uses native <details>/<summary> so the groups genuinely expand/collapse in a
+  browser. Grouped subtotal styling is informed by the Awan prototype's Trial
+  Balance and Stock Position reports (docs/design/1.2-2026-09/awan-prototype/
+  Awan-prototype.html), but the account-code SHAPE itself follows the accounting
+  design (issue #76), not the Awan prototype's legacy short codes (101, 116…) —
+  see DECISIONS.md, "Taken from the Awan prototype".
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup — Collapsible trial balance</title>
+<style>
+:root{
+  --canvas:#FAF9F7;--surface:#FFFFFF;--surface-subtle:#F4F3F0;--border:#E8E6E1;--border-strong:#8C8880;
+  --ink:#1F1E1C;--ink-muted:#6B6862;--ink-faint:#706D66;
+  --brand-navy:#0C2052;--brand-blue:#4656E8;--brand-selected:#EEF0FF;
+  --success:#1F7A4D;--success-bg:#E8F4EE;
+  --radius-control:6px;--radius-panel:10px;
+  --font-sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:ui-monospace,"SF Mono",monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.harness{max-width:1320px;margin:0 auto;padding:36px 20px 80px;}
+.harness-head{color:#c8cad2;margin-bottom:28px;max-width:880px;}
+.harness-head .kicker{font-size:12px;color:#8a8d99;margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em;}
+.harness-head h1{font-size:21px;margin:0 0 8px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13px;line-height:1.6;color:#aeb1bd;margin:0 0 6px;}
+.harness-head .src{font-size:11.5px;color:#8a8d99;}
+a{color:inherit;text-decoration:none;}
+.tabular-nums,.amount,.num{font-variant-numeric:tabular-nums lining-nums;}
+.frame{width:1280px;height:720px;overflow:hidden;background:var(--canvas);border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);display:flex;color:var(--ink);font-size:13px;line-height:19px;}
+.shell-sidebar{width:200px;flex:none;background:var(--surface);border-inline-end:1px solid var(--border);display:flex;flex-direction:column;padding:14px 10px;gap:2px;}
+.brand-row{display:flex;align-items:center;gap:8px;padding:4px 8px 14px;}
+.brand-mark{width:22px;height:22px;border-radius:6px;background:var(--brand-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex:none;}
+.brand-name{font-weight:650;font-size:13px;color:var(--ink);}
+.co-switch{display:flex;flex-direction:column;gap:1px;background:var(--surface-subtle);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:12px;}
+.co-switch .co-name{font-size:12px;font-weight:650;color:var(--ink);}
+.co-switch .co-meta{font-size:10.5px;color:var(--ink-muted);}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);padding:10px 8px 3px;}
+.nav-item{display:flex;align-items:center;gap:8px;height:30px;padding-inline:8px;border-radius:6px;font-size:12.5px;color:var(--ink-muted);font-weight:500;}
+.nav-item .dot{width:5px;height:5px;border-radius:2px;background:currentColor;opacity:.5;flex:none;}
+.nav-item.active{background:var(--brand-selected);color:var(--brand-navy);font-weight:650;}
+.nav-item.active .dot{opacity:1;background:var(--brand-blue);}
+.shell-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{height:42px;flex:none;display:flex;align-items:center;padding-inline:16px;border-bottom:1px solid var(--border);background:var(--surface);font-size:11.5px;color:var(--ink-muted);}
+.topbar b{color:var(--ink);font-weight:600;}
+.content{flex:1;min-height:0;overflow:hidden;padding:12px 16px;display:flex;flex-direction:column;gap:9px;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;flex:none;}
+.page-title{font-size:17px;font-weight:650;margin:0;color:var(--ink);letter-spacing:-.01em;}
+.page-sub{margin:3px 0 0;font-size:11.5px;color:var(--ink-muted);}
+.hdr-actions{display:flex;gap:8px;}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding-inline:11px;border-radius:var(--radius-control);font-size:11.5px;font-weight:600;border:1px solid transparent;white-space:nowrap;}
+.btn-primary{background:var(--brand-navy);color:#fff;}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong);}
+.filter-bar{display:flex;gap:9px;align-items:flex-end;flex:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 11px;}
+.field{display:flex;flex-direction:column;gap:3px;}
+.field-label{font-size:10px;font-weight:600;color:var(--ink);}
+.input,.select{height:26px;padding-inline:7px;border:1px solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);font-size:11px;font-family:inherit;}
+
+.tb-wrap{flex:1;min-height:0;overflow:auto;border:1px solid var(--border);border-radius:8px;background:var(--surface);}
+.tb-head-row{display:grid;grid-template-columns:16% 1fr 13% 13%;gap:0;padding:5px 10px;background:var(--surface-subtle);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--ink-muted);}
+.tb-head-row span:nth-child(3),.tb-head-row span:nth-child(4){text-align:end;}
+
+details.tb-class{border-bottom:1px solid var(--border);}
+details.tb-class > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:16% 1fr 13% 13%;padding:7px 10px;background:var(--brand-navy);color:#fff;font-weight:700;font-size:12px;align-items:center;}
+details.tb-class > summary::-webkit-details-marker{display:none;}
+details.tb-class > summary .chev{display:inline-block;width:10px;margin-inline-end:6px;transition:transform .1s;}
+details.tb-class[open] > summary .chev{transform:rotate(90deg);}
+details.tb-class > summary span.num{text-align:end;font-variant-numeric:tabular-nums;}
+
+details.tb-group{border-top:1px solid var(--border);}
+details.tb-group > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:16% 1fr 13% 13%;padding:6px 10px 6px 22px;background:var(--surface-subtle);font-weight:650;font-size:11.5px;align-items:center;color:var(--ink);}
+details.tb-group > summary::-webkit-details-marker{display:none;}
+details.tb-group > summary .chev{display:inline-block;width:9px;margin-inline-end:6px;color:var(--ink-faint);transition:transform .1s;}
+details.tb-group[open] > summary .chev{transform:rotate(90deg);}
+details.tb-group > summary span.num{text-align:end;font-variant-numeric:tabular-nums;}
+
+.tb-acct-row{display:grid;grid-template-columns:16% 1fr 13% 13%;padding:4px 10px 4px 36px;border-top:1px solid var(--border);font-size:11px;}
+.tb-acct-row .code{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);}
+.tb-acct-row .num{text-align:end;font-variant-numeric:tabular-nums;}
+.tb-acct-row a{color:var(--brand-blue);}
+
+tfoot-row{}
+.tb-total-row{display:grid;grid-template-columns:16% 1fr 13% 13%;padding:8px 10px;background:var(--ink);color:#fff;font-weight:700;font-size:12.5px;position:sticky;bottom:0;}
+.tb-total-row .num{text-align:end;}
+.balanced{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--success);font-weight:650;flex:none;padding:5px 6px 0;}
+.legend{font-size:9.5px;color:var(--ink-faint);padding:0 6px 4px;font-family:var(--font-mono);}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><symbol id="ic-check" viewBox="0 0 16 16"><path d="M3.5 8.3l3.1 3.1L12.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol></svg>
+<div class="harness">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger 1.2 — design mockup, static, not built</p>
+    <h1>Collapsible trial balance</h1>
+    <p>Structured account codes (issue #76) in the form <code>X-XXX-XXXXX-XX</code> — class, group, account, sub-account — with a genuinely collapsible three-level hierarchy (issue #77) using native &lt;details&gt;. Class 1 (Assets) is shown expanded with its groups; class 4 (Revenue) is shown collapsed. Try clicking a row in a real browser — it works.</p>
+    <p class="src">Grouped/subtotal styling informed by the Awan prototype's Trial Balance report; the account-code shape itself follows the accounting design for issue #76, not the Awan prototype's legacy short codes — see DECISIONS.md.</p>
+  </div>
+  <div class="frame">
+    <aside class="shell-sidebar">
+      <div class="brand-row"><span class="brand-mark">PL</span><span class="brand-name">PHP Ledger</span></div>
+      <div class="co-switch"><span class="co-name">Noor Distributors (Pvt) Ltd</span><span class="co-meta">Primary book &middot; PKR</span></div>
+      <div class="nav-item"><span class="dot"></span>Home</div>
+      <div class="nav-label">Reports</div>
+      <div class="nav-item active"><span class="dot"></span>Trial balance</div>
+      <div class="nav-item"><span class="dot"></span>Chart of accounts</div>
+      <div class="nav-item"><span class="dot"></span>Account statement</div>
+    </aside>
+    <div class="shell-main">
+      <div class="topbar">Reports &rsaquo; <b>Trial balance</b></div>
+      <div class="content">
+        <header class="page-header">
+          <div><h1 class="page-title">Trial balance</h1><p class="page-sub">Noor Distributors (Pvt) Ltd &middot; PKR &middot; Through 21 Sep 2026 &middot; Posted entries only</p></div>
+          <div class="hdr-actions"><button class="btn btn-secondary">Expand all</button><button class="btn btn-secondary">Collapse all</button><button class="btn btn-primary">Export CSV</button></div>
+        </header>
+        <div class="filter-bar">
+          <div class="field"><label class="field-label">Through date</label><input class="input" value="21 Sep 2026"></div>
+          <div class="field"><label class="field-label">Depth shown</label><select class="select"><option>Class &rarr; Group &rarr; Account</option><option>Class &rarr; Group only</option></select></div>
+          <button class="btn btn-secondary">Update report</button>
+        </div>
+        <div class="tb-wrap">
+          <div class="tb-head-row"><span>Code</span><span>Account</span><span>Debit</span><span>Credit</span></div>
+
+          <details class="tb-class" open>
+            <summary><span><span class="chev">&#9656;</span>1 &middot; ASSETS</span><span></span><span class="num">6,412,850.00</span><span class="num">180,240.00</span></summary>
+
+            <details class="tb-group" open>
+              <summary><span><span class="chev">&#9656;</span>1-100 &middot; Cash &amp; bank</span><span></span><span class="num">1,240,500.00</span><span class="num">180,240.00</span></summary>
+              <div class="tb-acct-row"><span class="code">1-100-10001-00</span><a href="#">Cash in hand — Main till</a><span class="num">312,400.00</span><span class="num"></span></div>
+              <div class="tb-acct-row"><span class="code">1-100-10002-00</span><a href="#">Bank Al Habib — current a/c</a><span class="num">928,100.00</span><span class="num">180,240.00</span></div>
+            </details>
+
+            <details class="tb-group" open>
+              <summary><span><span class="chev">&#9656;</span>1-110 &middot; Trade receivables</span><span></span><span class="num">4,120,600.00</span><span class="num"></span></summary>
+              <div class="tb-acct-row"><span class="code">1-110-10010-01</span><a href="#">Al-Shifa Pharmacy</a><span class="num">55,452.00</span><span class="num"></span></div>
+              <div class="tb-acct-row"><span class="code">1-110-10010-02</span><a href="#">Servaid Pharmacy — Gulberg</a><span class="num">318,900.00</span><span class="num"></span></div>
+              <div class="tb-acct-row"><span class="code">1-110-10010-03</span><a href="#">Medicare Store, Multan</a><span class="num">3,746,248.00</span><span class="num"></span></div>
+            </details>
+
+            <details class="tb-group">
+              <summary><span><span class="chev">&#9656;</span>1-120 &middot; Inventory</span><span></span><span class="num">1,051,750.00</span><span class="num"></span></summary>
+              <div class="tb-acct-row"><span class="code">1-120-12001-00</span><a href="#">Stock — Lahore Main Warehouse</a><span class="num">803,540.00</span><span class="num"></span></div>
+              <div class="tb-acct-row"><span class="code">1-120-12002-00</span><a href="#">Stock — Multan Warehouse</a><span class="num">237,900.00</span><span class="num"></span></div>
+              <div class="tb-acct-row"><span class="code">1-120-12003-00</span><a href="#">Stock — vans (in transit)</a><span class="num">10,310.00</span><span class="num"></span></div>
+            </details>
+          </details>
+
+          <details class="tb-class">
+            <summary><span><span class="chev">&#9656;</span>2 &middot; LIABILITIES</span><span></span><span class="num"></span><span class="num">1,972,300.00</span></summary>
+            <details class="tb-group"><summary><span><span class="chev">&#9656;</span>2-200 &middot; Trade payables</span><span></span><span class="num"></span><span class="num">1,972,300.00</span></summary>
+              <div class="tb-acct-row"><span class="code">2-200-20001-00</span><a href="#">Sundry suppliers</a><span class="num"></span><span class="num">1,972,300.00</span></div>
+            </details>
+          </details>
+
+          <details class="tb-class">
+            <summary><span><span class="chev">&#9656;</span>3 &middot; EQUITY</span><span></span><span class="num"></span><span class="num">2,500,000.00</span></summary>
+            <details class="tb-group"><summary><span><span class="chev">&#9656;</span>3-300 &middot; Owner's equity</span><span></span><span class="num"></span><span class="num">2,500,000.00</span></summary>
+              <div class="tb-acct-row"><span class="code">3-300-30001-00</span><a href="#">Capital account</a><span class="num"></span><span class="num">2,500,000.00</span></div>
+            </details>
+          </details>
+
+          <details class="tb-class">
+            <summary><span><span class="chev">&#9656;</span>4 &middot; REVENUE</span><span></span><span class="num"></span><span class="num">8,142,900.00</span></summary>
+            <details class="tb-group"><summary><span><span class="chev">&#9656;</span>4-400 &middot; Sales</span><span></span><span class="num"></span><span class="num">8,142,900.00</span></summary>
+              <div class="tb-acct-row"><span class="code">4-400-40001-00</span><a href="#">Sales — pharma</a><span class="num"></span><span class="num">5,610,400.00</span></div>
+              <div class="tb-acct-row"><span class="code">4-400-40002-00</span><a href="#">Sales — FMCG</a><span class="num"></span><span class="num">2,532,500.00</span></div>
+            </details>
+          </details>
+
+          <details class="tb-class" open>
+            <summary><span><span class="chev">&#9656;</span>5 &middot; EXPENSES</span><span></span><span class="num">6,190,150.00</span><span class="num"></span></summary>
+            <details class="tb-group" open><summary><span><span class="chev">&#9656;</span>5-500 &middot; Cost of goods sold</span><span></span><span class="num">5,742,000.00</span><span class="num"></span></summary>
+              <div class="tb-acct-row"><span class="code">5-500-50001-00</span><a href="#">Cost of goods sold</a><span class="num">5,742,000.00</span><span class="num"></span></div>
+            </details>
+            <details class="tb-group" open><summary><span><span class="chev">&#9656;</span>5-510 &middot; Operating expenses</span><span></span><span class="num">448,150.00</span><span class="num"></span></summary>
+              <div class="tb-acct-row"><span class="code">5-510-51001-00</span><a href="#">Salaries &amp; wages</a><span class="num">312,000.00</span><span class="num"></span></div>
+              <div class="tb-acct-row"><span class="code">5-510-51002-00</span><a href="#">Van running expenses</a><span class="num">136,150.00</span><span class="num"></span></div>
+            </details>
+          </details>
+
+          <div class="tb-total-row"><span></span><span>Total</span><span class="num">12,603,000.00</span><span class="num">12,795,440.00</span></div>
+        </div>
+        <p class="legend">Code shape: class-group-account-sub, e.g. 1-110-10010-02 = Assets &middot; Trade receivables &middot; account 10010 &middot; sub-account 02 (a specific customer under the receivables control account).</p>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
