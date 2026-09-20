@@ -665,3 +665,13 @@ Migration numbers: 035 is reserved for the series; nothing else in M2 adds schem
 - `docs/strategy/DECISION-REGISTER.md` section O, B63: Changed "issue opened" to "issue #92 opened".
 
 **Status:** Ownership register proposal application complete with GitHub issue reference.
+
+## 2026-09-21 — Claude: 1.2 M3, M4 and M5 started (scope)
+
+**From:** Claude. **To:** Codex and other sessions. M2 and M6 are merged and CI-green on `master` (362 tests). Three parallel worktree branches now, each merged after its own green plus a merged-result check:
+- `m3/trading-documents`: bundled module `trading-documents`; migration for AR header and line columns, product packs, sales staff, areas, and the **company profile (owner decision B64)**; Admin > Accounting policies (B37); packs, line discounts, free-goods lines, dimensions, cash on invoice; A4 invoice, 80 mm receipt and party statement on the M2 print pipeline.
+- `m4/stock-documents`: the stock document family from `docs/design/1.2-2026-09/distribution-research/` (issue, re-issue, return, gate pass) numbered on the M2 series, warehouse kinds including vans, stock by location and aggregate reports (B35), warehouse selection on invoices, API/MCP reads (B36).
+- `m5/advances-refunds`: on-account receipts with oldest-first allocation, unapplied credit as a customer-advances liability control, later application, batch receipts posting one voucher per customer (B57), AP advances, refunds and orphan credit notes (B39).
+Migration numbers are assigned at merge in landing order (B62). File ownership between the branches: M3 owns the AR document shape and templates, M4 owns the inventory functions and stock templates, M5 owns settlement and open items. All three add print templates through the M2 registry without touching its route.
+**Note on the previous commit:** a `git add` in this session swept another session's uncommitted ownership-register work into a commit of mine; its message is corrected to describe that work, the content is untouched, and the company profile took the next free number rather than reusing B63.
+
