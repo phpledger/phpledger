@@ -19,7 +19,9 @@ function pl_web_starter_inventory(int $actorId,int $companyId,int $bookId,array 
                 foreach (['inventory_account_id','cogs_account_id','sales_account_id','purchase_account_id'] as $field) { $input[$field]=pl_web_id($_POST,$field)?:null; }
                 $result=pl_save_inventory_product($actorId,$companyId,$bookId,$input,$id?:null,$id?pl_web_id($_POST,'revision'):null); $id=(int)$result['id'];
             } elseif ($action==='warehouse') {
-                $input=['code'=>pl_web_text($_POST,'code'),'name'=>pl_web_text($_POST,'name'),'is_active'=>isset($_POST['is_active']),'reason'=>pl_web_text($_POST,'reason'),'idempotency_key'=>$key];
+                $input=['code'=>pl_web_text($_POST,'code'),'name'=>pl_web_text($_POST,'name'),'kind'=>pl_web_text($_POST,'kind','fixed'),
+                    'driver_name'=>pl_web_text($_POST,'driver_name')?:null,'vehicle_reference'=>pl_web_text($_POST,'vehicle_reference')?:null,'route_name'=>pl_web_text($_POST,'route_name')?:null,
+                    'is_active'=>isset($_POST['is_active']),'reason'=>pl_web_text($_POST,'reason'),'idempotency_key'=>$key];
                 $warehouseId=pl_web_id($_POST,'warehouse_id');
                 pl_save_inventory_warehouse($actorId,$companyId,$bookId,$input,$warehouseId?:null,$warehouseId?pl_web_id($_POST,'revision'):null);
             } elseif ($action==='transfer') {

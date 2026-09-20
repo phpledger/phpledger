@@ -67,6 +67,10 @@ function pl_read_catalog(): array
         'profit_loss' => ['Read posted income, expenses and net profit for an inclusive period. Totals cover all pages.', ['from' => $date, 'to' => $date], ['from','to'], true],
         'balance_sheet' => ['Read assets, liabilities and equity at a date, with unclosed earnings shown separately. Totals cover all pages.', ['as_of' => $date], ['as_of'], true],
         'account_statement' => ['Read opening, debit, credit, running and closing balances with journal/source links. Running balances follow canonical date/journal/line order before pagination.', ['account_id' => $id, 'from' => $date, 'as_of' => $date], ['account_id','from','as_of'], true],
+        // Stock locations (owner decision B36). Reads only, and, like every other stock read,
+        // available whether or not the optional locations module is currently enabled.
+        'warehouses' => ['Read stock locations: warehouses and vans, with the van\'s driver, vehicle and route. Includes inactive locations so historical stock stays readable.', [], [], true],
+        'stock_transfers' => ['Read stock transfers between locations as matched out/in pairs at carrying value, with the stock document number when one raised them. Transfers post no journal.', ['warehouse_id' => $id, 'from' => $date, 'to' => $date], [], true],
     ];
     $catalog = [];
     foreach ($definitions as $name => [$description, $properties, $required, $paginated]) {
@@ -200,6 +204,10 @@ function pl_read_operation(string $connectionId, string $operation, array $input
             'transactions' => pl_list_documents($actor, $company, $book, array_diff_key($args, array_flip(['company_id','book_id']))),
             'general_journals' => pl_list_general_drafts($actor, $company, $book, $page, ['page_size' => $size]),
             'account_statement' => pl_account_activity($actor, $company, $book, $args['account_id'], $args['as_of'], $page, $args['from'], ['page_size' => $size]),
+            'warehouses' => pl_read_page(array_map(static fn (array $row): array => pl_read_fields($row, ['id','code','name','kind','driver_name','vehicle_reference','route_name','is_default','is_active']),
+                pl_list_inventory_warehouses($actor, $company, $book)), $page, $size),
+            'stock_transfers' => pl_read_page(array_map(static fn (array $row): array => pl_read_fields($row, ['out_movement_id','in_movement_id','movement_date','product_id','sku','product_name','quantity','value_base','from_warehouse_id','to_warehouse_id','document_id','document_kind','document_number']),
+                pl_list_stock_transfers($actor, $company, $book, array_diff_key($args, array_flip(['company_id','book_id','page','page_size'])))), $page, $size),
             default => throw new LogicException('Read operation is not implemented.'),
         };
         foreach (match ($operation) { 'trial_balance' => ['accounts'], 'profit_loss' => ['income','cost_of_sales','expenses'], 'balance_sheet' => ['assets','liabilities','equity'], default => [] } as $field) {

@@ -37,6 +37,27 @@ function pl_print_templates(): array
                 '80mm' => ['label' => '80 mm roll', 'view' => 'settlement-80mm.php', 'paper' => '80mm'],
             ],
         ],
+        // Stock documents (1.2 M4). Research decision 7: A4 for the warehouse copy, 80 mm
+        // for the van-facing load list the driver takes on the road.
+        'stock-issue' => [
+            'label' => 'Stock document',
+            'loader' => 'pl_stock_document_print',
+            'reference' => 'pl_print_stock_document_reference',
+            'record' => '/stock-documents/detail',
+            'formats' => [
+                'a4' => ['label' => 'A4 page with gate pass', 'view' => 'stock-issue-a4.php', 'paper' => 'a4'],
+                '80mm' => ['label' => '80 mm load list', 'view' => 'stock-issue-80mm.php', 'paper' => '80mm'],
+            ],
+        ],
+        'gate-pass' => [
+            'label' => 'Gate pass',
+            'loader' => 'pl_gate_pass_print',
+            'reference' => 'pl_print_stock_document_reference',
+            'record' => '/stock-documents/detail',
+            'formats' => [
+                'a4' => ['label' => 'A4 gate copy', 'view' => 'gate-pass-a4.php', 'paper' => 'a4'],
+            ],
+        ],
     ];
 }
 

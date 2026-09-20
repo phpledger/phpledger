@@ -17,7 +17,12 @@ $navGroups = [
         ['/purchasing', 'Purchase orders', 'list', ['purchasing','goods-receipt'], $moduleVisible('purchasing')],
         ['/parties?role=vendor', 'Suppliers', 'building', [], $visibility['show_ap']],
     ],
-    'Inventory' => [['/inventory', 'Products & stock', 'list', ['inventory','stock-count'], $moduleVisible('inventory')]],
+    'Inventory' => [
+        ['/inventory', 'Products & stock', 'list', ['inventory','stock-count'], $moduleVisible('inventory')],
+        ['/stock-documents', 'Stock issues & returns', 'file-text', ['stock-documents','stock-document'], $moduleVisible('inventory-locations')],
+        ['/stock-documents/settlement', 'Van settlement', 'calendar', ['van-settlement'], $moduleVisible('inventory-locations')],
+        ['/reports/stock-by-location', 'Stock by location', 'book', ['stock-by-location'], $moduleVisible('inventory')],
+    ],
     'Banking' => [['/bank-reconciliation', 'Bank reconciliation', 'building', ['bank-reconciliation'], !pl_demo_enabled()]],
     'Reports' => [
         ['/reports', 'All reports', 'book', ['reports'], true],
