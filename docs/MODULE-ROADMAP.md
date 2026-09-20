@@ -122,8 +122,43 @@ Published 21 September 2026 (M1, [release plan](strategy/RELEASE-PLAN-1.2.md)), 
 | `inventory-locations` | `core 1.0.0`, `inventory 1.0.0` | `inventory_location_test.php` (masters, transfers at carrying value, per-location balance/history/valuation/counts, returns pinned to the original warehouse, disabled-with-non-default-stock behaviour); `tools/verify-upgrade.php stable-1.1.1` for the upgrade proof. |
 | `purchasing` | `core 1.0.0`, `ap 1.0.0`, `inventory 1.0.0` | `purchasing_test.php`. |
 | `pos-showcase` | `core 1.0.0` | `pos_test.php`. |
+| `trading-documents` | `core 1.0.0`, `ar 1.0.0`, `inventory 1.0.0` | `trading_documents_test.php` (pack conversion, discount and free-goods posting reconciliation, each B37 policy value, cash-on-invoice atomicity and its reversal, the dimensions on the revision snapshot, the print routes per role and the statement reconciling to the ledger); the print registry itself in `print_test.php`. |
 
 `tests/module_test.php`'s generic module-matrix test drives the combinations every row above needs at minimum: for each optional manifest above, a fresh company enables it alone together with its required dependencies (walking the `requires` chain — for example enabling `inventory` before `inventory-locations`, or `inventory` and `ap` before `purchasing`), disables it, re-enables it, and asserts core-only operation (posting and reversing a general journal, a reconciled trial balance) keeps working throughout. It does not by itself cover every optional module enabled *together* in one company, van-stock-present disablement, failure rollback under a mid-migration fault, or the MariaDB floor image; those remain `inventory_location_test.php`'s and the definition-of-done checklist's job per module (see [Definition of done for a bundled module](DEVELOPMENT.md#definition-of-done-for-a-bundled-module)).
+
+## Trading documents: what the 1.2 M3 module does and does not do
+
+The bundled `trading-documents` module adds a trading shape to the customer/vendor document
+that already exists; it is not a distribution system. What it owns, and the limits it ships
+with, so nothing here is mistaken for more than it is:
+
+- **It extends AR's own tables.** A bundled module cannot extend another module from outside,
+  so migration `037_trading_documents` adds neutral-default columns to `pl_ar_documents` and
+  `pl_ar_document_lines`, exactly as `034` did for stock movements. Disabling the module leaves
+  every posted document, dimension and print readable; it blocks new trading reference data and
+  new trading entry.
+- **Free goods are invoice-only.** A free-goods line accompanies a customer invoice. It is
+  refused on a credit note and on a supplier bill, and a document of free goods alone is
+  refused: free goods accompany a sale rather than forming a document of their own. Returning
+  bonus stock is a reviewed stock adjustment, not a credit line. Widening this needs the credit
+  residual model to carry a zero-valued allocation, which is M5's and M4's ground.
+- **A cash invoice is corrected by reversal, not in place.** The in-place correction path
+  asserts that no allocation is outstanding, and the cash settled on an invoice is exactly such
+  an allocation. A posted cash invoice is therefore reversed — releasing cash and receivable
+  together in one transaction — and a replacement entered.
+- **Gross discount posting is a sales policy.** A discount on a supplier bill always posts net,
+  whatever the book's sales policy says, because contra-income is a sales concept.
+- **The cap is a per-invoice amount, not an authorisation model.** There is no per-salesman or
+  per-warehouse cash cap, and no per-warehouse number series (B55). Route and van settlement,
+  collection sheets and handoff reconciliation remain the separate distribution-operations
+  plugin (sequence item 11 above).
+- **The company profile is text the owner entered.** Every field is optional and the profile is
+  empty by default; a print shows only the lines that exist and never invents an address, a tax
+  registration or a term.
+- **A pack's size is frozen.** A posted line stores only its resolved base quantity, so a
+  changed pack size would silently restate stock history. A different size is a different pack.
+- **Policies are not retrospective.** A B37 policy change applies to documents posted after it;
+  it never restates a document already posted. The immutable policy history records both states.
 
 ## Shop and restaurant dependencies
 

@@ -675,3 +675,23 @@ Migration numbers: 035 is reserved for the series; nothing else in M2 adds schem
 Migration numbers are assigned at merge in landing order (B62). File ownership between the branches: M3 owns the AR document shape and templates, M4 owns the inventory functions and stock templates, M5 owns settlement and open items. All three add print templates through the M2 registry without touching its route.
 **Note on the previous commit:** a `git add` in this session swept another session's uncommitted ownership-register work into a commit of mine; its message is corrected to describe that work, the content is untouched, and the company profile took the next free number rather than reusing B63.
 
+
+## 2026-09-21 — Claude: 1.2 M3 trading documents complete on `m3/trading-documents` (handoff)
+
+**From:** Claude (M3 worktree). **To:** Codex, the M4 and M5 sessions and the releasing session. **Status:** built, green locally, committed on `m3/trading-documents`, not pushed.
+
+**Scope kept:** the AR document shape (`ar_ap_functions.php` document/line handling), the AR templates and editors, and the new `trading-documents` module. `inventory_functions.php` and the stock templates (M4) and `settlement_functions.php` / `open_item_functions.php` (M5) were **not edited** — the cash-on-invoice settlement and the party statement call those services, they do not change them. Free-goods stock is issued from `pl_ar_issue_invoice_stock()` in AR's own file, using the same source type, document, journal, reference and idempotency key the inventory service uses, so M4's existing reversal and credit-allocation readers find those movements unchanged.
+
+**Migration number: `037_trading_documents`** — the next free number at this branch point (`036_structured_account_codes` is M6's). Every place the number appears, for the releasing session if it renumbers in landing order (B62):
+1. `www/phpledger/install/migrations/037_trading_documents.php` (the file name)
+2. `resources/modules/trading-documents.json` → `"migrations": ["037_trading_documents"]`
+3. `tools/package-files.json` → the source/destination pair for the migration file
+4. `tests/trading_documents_test.php` → the manifest test asserts `['037_trading_documents']` and that the file exists
+5. `docs/ARCHITECTURE.md` → "migration 037" in the AR row and in the printing section
+6. `docs/MODULE-ROADMAP.md` → "migration `037_trading_documents`" in the trading-documents limits section
+
+**Shared files touched, for merge awareness:** `module_functions.php` (one registry id added), `print_functions.php` (two registry entries and the B64 letterhead), `templates/print/frame.php`, `public/index.php` (two routes), `templates/partials/ui/shell.php` (two nav entries, through `pl_t()` so the i18n backlog ceiling is not raised), `starter_web_functions.php` and `starter_ar_web_functions.php` (neutral pass-through of the new fields), `tests/run.php`, `tests/print_test.php` (`invoice` and `statement` are now registered types, so the unknown-type list was updated).
+
+**Decisions taken, with alternatives and reversal paths (B53):** recorded in `docs/accounting/examples/trading-document-policies.md` for the accountant (B30) and summarised in `docs/MODULE-ROADMAP.md`. The three that constrain other milestones: free goods are invoice-only (a returned bonus is a reviewed stock adjustment, not a credit line — widening it needs M5's credit residual model); a posted cash invoice is corrected by reversal rather than in place (the in-place path asserts no outstanding allocation, and the cash is exactly such an allocation); and the cash-on-invoice cap is a per-invoice amount with a recommended default of zero, not an authorisation model.
+
+**Evidence:** `docker compose --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` green, and `python tests/package-builder-test.py` green. Verbatim results are in the session handoff.

@@ -117,7 +117,12 @@ function pl_web_ar_editor_input(array $input,string $kind): array
     $data=['kind'=>$kind,'price_mode'=>pl_web_text($input,'price_mode')?:null,'party_id'=>pl_web_id($input,'party_id'),'date'=>pl_web_text($input,'date'),
         'due_date'=>pl_web_text($input,'due_date'),'currency'=>strtoupper(pl_web_text($input,'currency')),'reference'=>pl_web_text($input,'reference'),
         'terms'=>pl_web_text($input,'terms'),'notes'=>pl_web_text($input,'notes'),'creation_key'=>pl_web_text($input,'request_key'),
-        'rounding_account_id'=>pl_web_id($input,'rounding_account_id')?:null,'lines'=>pl_starter_lines($input)];
+        'rounding_account_id'=>pl_web_id($input,'rounding_account_id')?:null,'lines'=>pl_starter_lines($input),
+        // Trading dimensions and counter cash (1.2 M3). Every one is optional; an editor that
+        // does not send them produces the document it produced before this milestone.
+        'sales_staff_id'=>pl_web_id($input,'sales_staff_id')?:'','area_id'=>pl_web_id($input,'area_id')?:'',
+        'warehouse_id'=>pl_web_id($input,'warehouse_id')?:'',
+        'cash_received'=>pl_web_text($input,'cash_received','0')?:'0','cash_account_id'=>pl_web_id($input,'cash_account_id')?:''];
     if (in_array($kind,['customer_credit','supplier_credit'],true)) { $data['original_document_id']=pl_web_id($input,'original_document_id'); }
     return $data;
 }

@@ -1,0 +1,45 @@
+{
+  "id": "trading-documents",
+  "name": "Trading documents",
+  "version": "1.0.0",
+  "contract": 1,
+  "optional": true,
+  "requires": {
+    "core": "1.0.0",
+    "ar": "1.0.0",
+    "inventory": "1.0.0"
+  },
+  "capabilities": [
+    "trading.packs",
+    "trading.discounts",
+    "trading.free-goods",
+    "trading.dimensions",
+    "trading.cash-on-invoice",
+    "trading.company-profile"
+  ],
+  "migrations": [
+    "037_trading_documents"
+  ],
+  "routes": [
+    "/accounting-policies",
+    "/company-profile"
+  ],
+  "permissions": [
+    "owner",
+    "accountant"
+  ],
+  "settings": [
+    "discount_posting",
+    "discount_account_id",
+    "free_goods_account_id",
+    "free_goods_output_tax",
+    "cash_on_invoice_cap",
+    "company_profile"
+  ],
+  "reports": [
+    "party-statement"
+  ],
+  "api_operations": [],
+  "mcp_operations": [],
+  "history": "Pack, discount, free-goods, sales-staff, area, warehouse and cash-on-invoice fields are added to the customer/vendor document shape itself, with neutral defaults, so every document posted before this module keeps its meaning and stays readable when the module is disabled. New trading entry, the accounting policies of B37 and the company profile of B64 require the enabled module; posted documents, their journals and their prints do not."
+}

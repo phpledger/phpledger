@@ -37,6 +37,27 @@ function pl_print_templates(): array
                 '80mm' => ['label' => '80 mm roll', 'view' => 'settlement-80mm.php', 'paper' => '80mm'],
             ],
         ],
+        // Trading documents (1.2 M3). Added through this registry alone: the /print route,
+        // its method rule and its company/book scope are unchanged.
+        'invoice' => [
+            'label' => 'Sales invoice',
+            'loader' => 'pl_trading_invoice_print',
+            'reference' => 'pl_print_invoice_reference',
+            'record' => '/ar',
+            'formats' => [
+                'a4' => ['label' => 'A4 page', 'view' => 'invoice-a4.php', 'paper' => 'a4'],
+                '80mm' => ['label' => '80 mm roll', 'view' => 'invoice-80mm.php', 'paper' => '80mm'],
+            ],
+        ],
+        'statement' => [
+            'label' => 'Account statement',
+            'loader' => 'pl_trading_statement_print',
+            'reference' => 'pl_print_statement_reference',
+            'record' => '/parties',
+            'formats' => [
+                'a4' => ['label' => 'A4 page', 'view' => 'statement-a4.php', 'paper' => 'a4'],
+            ],
+        ],
     ];
 }
 
@@ -91,21 +112,36 @@ function pl_print_formats(string $type, int $id): array
 }
 
 /**
- * Company identity for the letterhead. Only fields the schema already has are used:
- * the optional installation logo (migration 033) and the company's own name, book and
- * functional currency. There is no company address or tax-registration column, so the
- * letterhead states none; party addresses and registrations come from the party record.
+ * Company identity for the letterhead: the optional installation logo (migration 033), the
+ * company's own name, book and functional currency, and — since the company profile of
+ * owner decision B64 exists (migration 037) — its address lines, phone, email and tax
+ * registrations. The profile is empty by default and every field stays optional, so a
+ * letterhead never states an address, a registration or a term the owner has not entered.
+ * Party addresses and registrations still come from the party record.
  *
- * @return array{name: string, book: string, currency: string, logo: array{url: string, width: int, height: int}|null}
+ * @return array{name: string, book: string, currency: string, logo: array{url: string, width: int, height: int}|null,
+ *               address: array<int, string>, phone: string, email: string, registrations: string, terms: string}
  */
-function pl_print_letterhead(array $company): array
+function pl_print_letterhead(array $company, ?array $profile = null): array
 {
     $logo = pl_logo_current();
+    $profile ??= array_fill_keys(pl_company_profile_fields(), '');
+    $address = [];
+    foreach (['address_line1', 'address_line2', 'address_line3'] as $field) {
+        $line = trim((string) ($profile[$field] ?? ''));
+        if ($line !== '') { $address[] = $line; }
+    }
+    $named = trim((string) ($profile['legal_name'] ?? ''));
     return [
-        'name' => (string) $company['name'],
+        'name' => $named !== '' ? $named : (string) $company['name'],
         'book' => (string) ($company['book_name'] ?? ''),
         'currency' => (string) $company['currency'],
         'logo' => $logo === null ? null : ['url' => pl_logo_url($logo), 'width' => $logo['width'], 'height' => $logo['height']],
+        'address' => $address,
+        'phone' => trim((string) ($profile['phone'] ?? '')),
+        'email' => trim((string) ($profile['email'] ?? '')),
+        'registrations' => trim((string) ($profile['tax_registrations'] ?? '')),
+        'terms' => trim((string) ($profile['footer_terms'] ?? '')),
     ];
 }
 
@@ -160,7 +196,7 @@ function pl_web_print(int $actorId, array $company, string $type, int $id, strin
     pl_print_render($template, [
         'template' => $template,
         'company' => $company,
-        'letterhead' => pl_print_letterhead($company),
+        'letterhead' => pl_print_letterhead($company, is_array($data['company_profile'] ?? null) ? $data['company_profile'] : null),
         'formats' => pl_print_formats($type, $id),
         'recordId' => $id,
         'reference' => $reference($data),

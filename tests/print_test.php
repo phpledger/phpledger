@@ -44,7 +44,9 @@ test('an omitted format defaults to A4 and an unknown type or format is refused'
     assert_same(PL_PRINT_DEFAULT_FORMAT, pl_print_template('settlement')['format']);
     assert_same('a4', pl_print_template('settlement', '')['format']);
     assert_same('80mm', pl_print_template('settlement', '80mm')['format']);
-    foreach (['invoice', 'statement', 'unknown', 'Settlement', ''] as $type) {
+    // 'invoice' and 'statement' became registered types in 1.2 M3; an unknown type, a
+    // differently-cased known type and an empty type are still refused rather than guessed.
+    foreach (['unknown', 'Settlement', 'Invoice', 'statements', ''] as $type) {
         assert_throws(fn() => pl_print_template($type), DomainException::class, 'cannot be printed');
     }
     foreach (['a3', 'letter', '58mm', 'A4', 'pdf'] as $format) {

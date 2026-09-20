@@ -36,6 +36,8 @@ $navGroups = [
         ['/opening-conversion', 'Opening documents', 'file-text', ['opening-conversion'], !pl_demo_enabled()],
         ['/periods', 'Periods', 'book', ['periods'], !pl_demo_enabled()],
         ['/numbering', 'Document numbering', 'list', ['numbering'], !pl_demo_enabled()],
+        ['/accounting-policies', pl_t('Accounting policies'), 'adjustments-horizontal', ['accounting-policies'], !pl_demo_enabled()],
+        ['/company-profile', pl_t('Company profile'), 'building', ['company-profile'], !pl_demo_enabled()],
         ['/modules', 'Modules', 'adjustments-horizontal', ['modules'], !pl_demo_enabled()],
         ['/connections', 'Connections & API', 'external-link', ['connections'], true],
     ],
