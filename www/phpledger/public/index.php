@@ -55,6 +55,7 @@ $routes = [
     '/companies' => ['GET'], '/company/select' => ['POST'], '/sample-chooser' => ['GET', 'POST'], '/onboarding' => ['GET', 'POST'],
     '/setup/review' => ['GET', 'POST'], '/transactions' => ['GET'], '/transactions/detail' => ['GET'],
     '/opening-balances' => ['GET', 'POST'], '/periods' => ['GET', 'POST'], '/bank-reconciliation' => ['GET', 'POST'],
+    '/numbering' => ['GET', 'POST'],
     '/transactions/new' => ['GET'], '/transactions/edit' => ['GET'], '/transactions/save' => ['POST'],
     '/transactions/post' => ['POST'], '/transactions/reverse' => ['POST'],
     '/reports/trial-balance' => ['GET'], '/reports/account' => ['GET'], '/journals/detail' => ['GET'], '/reports/export' => ['GET'],
@@ -365,6 +366,10 @@ try {
     if ($path === '/periods') {
         require_once dirname(__DIR__) . '/includes/functions/period_web_functions.php';
         pl_web_periods($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    if ($path === '/numbering') {
+        require_once dirname(__DIR__) . '/includes/functions/document_series_web_functions.php';
+        pl_web_numbering($actorId, $companyId, $bookId, $user, $company, $method);
     }
     if ($path === '/bank-reconciliation') {
         require_once dirname(__DIR__) . '/includes/functions/reconciliation_web_functions.php';
@@ -711,8 +716,8 @@ try {
     }
     // The remaining method-checked route is /journals/detail.
     $journal = pl_get_journal($actorId, $companyId, $bookId, pl_web_id($_GET, 'id'));
-    $commercialSource = DB::queryFirstRow('SELECT d.id,d.kind FROM pl_ar_document_revisions r JOIN pl_ar_documents d ON d.id=r.document_id AND d.company_id=r.company_id AND d.book_id=r.book_id WHERE r.company_id=%i AND r.book_id=%i AND r.journal_id=%i', $companyId, $bookId, $journal['reversal_of_id'] ?? $journal['id']);
-    if ($commercialSource) { $commercialSource['number'] = pl_ar_document_number((int)$commercialSource['id'], $commercialSource['kind']); }
+    $commercialSource = DB::queryFirstRow('SELECT d.id,d.kind,d.document_number FROM pl_ar_document_revisions r JOIN pl_ar_documents d ON d.id=r.document_id AND d.company_id=r.company_id AND d.book_id=r.book_id WHERE r.company_id=%i AND r.book_id=%i AND r.journal_id=%i', $companyId, $bookId, $journal['reversal_of_id'] ?? $journal['id']);
+    if ($commercialSource) { $commercialSource['number'] = pl_document_number_display($commercialSource['document_number'], (int)$commercialSource['id'], $commercialSource['kind']); }
     pl_render('journal', ['title' => 'Journal entry', 'user' => $user, 'company' => $company, 'journal' => $journal, 'commercialSource'=>$commercialSource]);
 } catch (PlDemoUnavailable $error) {
     http_response_code(503);

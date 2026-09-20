@@ -2,6 +2,13 @@
 declare(strict_types=1);
 
 /** Customer/vendor documents are deliberately separate from the cash-document table. */
+/**
+ * The derived number a document carried before migration 035 introduced the per-type series.
+ * Posted documents from those releases keep this form for ever, so history reads unchanged;
+ * everything posted since carries an allocated `pl_document_series` number instead. Read a
+ * document's number through pl_document_number_display() or pl_ar_document_display_number(),
+ * never from this function alone.
+ */
 function pl_ar_document_number(int $id, string $kind): string
 {
     return match ($kind) {
@@ -271,7 +278,8 @@ function pl_ar_document_row(array $row, int $actorId): array
         foreach (['quantity','unit_price','line_total'] as $field) { $line[$field] = bcadd((string) $line[$field], '0', 4); }
     } unset($line);
     $row['subtotal'] = bcadd((string) $row['subtotal'], '0', 4);
-    $row['number'] = pl_ar_document_number($row['id'], $row['kind']); $row['date'] = $row['document_date'];
+    $row['document_number'] = ($row['document_number'] ?? null) === null ? null : (string) $row['document_number'];
+    $row['number'] = pl_document_number_display($row['document_number'], $row['id'], $row['kind']); $row['date'] = $row['document_date'];
     $row['party'] = pl_get_party($actorId, $row['company_id'], $row['book_id'], $row['party_id']);
     $row['payment_status'] = null; $row['outstanding_fc'] = '0.0000'; $row['outstanding_base'] = '0.0000'; $row['reversal_journal_id'] = null;
     $row['is_credit'] = in_array($row['kind'], ['customer_credit','supplier_credit'], true);
@@ -421,7 +429,8 @@ function pl_preview_ar_document(int $actorId,int $companyId,int $bookId,array $i
             if ($current['status']!=='draft' || $current['revision']!==$revision || $current['kind']!==$data['kind']) { throw new DomainException('Review the current draft before previewing these changes.'); }
         }
         $document=pl_ar_price_document($actorId,$companyId,$bookId,$data,$documentId);
-        $document+=['id'=>$documentId??0,'revision'=>$revision??0,'number'=>$documentId===null?'New '.str_replace('_',' ',$data['kind']):pl_ar_document_number($documentId,$data['kind']),
+        $document+=['id'=>$documentId??0,'revision'=>$revision??0,// A draft is unnumbered: its series number is allocated when it is posted.
+            'number'=>($documentId===null?'New ':'Draft ').str_replace('_',' ',$data['kind']),
             'party'=>pl_ar_document_party($actorId,$companyId,$bookId,$data['party_id'],$data['kind'])];
         $plan=pl_ar_posting_plan($actorId,$companyId,$bookId,$document,null,$rate,false);
         $plan['stock']=pl_inventory_ar_preview($actorId,$companyId,$bookId,$plan['document'],$plan['original']);
@@ -448,7 +457,11 @@ function pl_post_ar_document(int $actorId, int $companyId, int $bookId, int $doc
         $document = pl_get_ar_document($actorId, $companyId, $bookId, $documentId);
         if ($document['status'] !== 'draft' || $document['revision'] !== $expectedRevision) { throw new DomainException('Review the latest draft before posting.'); }
         $document = pl_ar_post_version($actorId, $companyId, $bookId, $document, $offsetAccountId, $rate, 'ar-document:' . $documentId . ':post-journal');
-        DB::update('pl_ar_documents', ['status'=>'posted','journal_id'=>$document['journal_id'],'open_item_id'=>$document['open_item_id'],'updated_by'=>$actorId,'updated_at'=>gmdate('Y-m-d H:i:s')], 'id=%i AND journal_id IS NULL', $documentId);
+        // Drafts stay unnumbered: the series is consumed here, inside the posting transaction and
+        // under the book lock the posting funnel already holds. A failure after this point rolls the
+        // whole transaction back, including the counter, so the next posting takes the same number.
+        $document['document_number'] = pl_document_series_allocate($actorId, $companyId, $bookId, $document['kind'], $documentId, $document['document_date']);
+        DB::update('pl_ar_documents', ['status'=>'posted','journal_id'=>$document['journal_id'],'open_item_id'=>$document['open_item_id'],'document_number'=>$document['document_number'],'updated_by'=>$actorId,'updated_at'=>gmdate('Y-m-d H:i:s')], 'id=%i AND journal_id IS NULL', $documentId);
         pl_ar_record_version($actorId, $document, 'Initial posting');
         pl_ar_event($actorId,$companyId,$bookId,$documentId,'draft','posted','Initial posting');
         return pl_get_ar_document($actorId, $companyId, $bookId, $documentId);
@@ -585,7 +598,7 @@ function pl_page_ar_documents(int $actorId,int $companyId,int $bookId,string $si
         // Complete fixed order clauses above; no browser column or direction is SQL text.
         $cte=<<<'SQL'
 WITH effective AS (
- SELECT d.id,d.kind,d.reference,
+ SELECT d.id,d.kind,d.reference,d.document_number,
  COALESCE(r.journal_id,d.journal_id) AS current_journal,
  COALESCE(r.open_item_id,d.open_item_id) AS current_item,
  IF(r.id IS NULL,d.party_id,CAST(JSON_UNQUOTE(JSON_EXTRACT(r.source_snapshot,'$.party_id')) AS UNSIGNED)) AS current_party,
@@ -607,7 +620,8 @@ SQL;
         $join=<<<'SQL'
  FROM registry q JOIN pl_parties p ON p.id=q.current_party AND p.company_id=%i
  WHERE (%s='' OR q.effective_date>=%s) AND (%s='' OR q.effective_date<=%s)
- AND (%s='' OR LOCATE(%s,p.legal_name)>0 OR LOCATE(%s,q.reference)>0 OR LOCATE(%s,CONCAT(CASE q.kind WHEN 'invoice' THEN 'INV-' WHEN 'bill' THEN 'BILL-' WHEN 'customer_credit' THEN 'CR-' ELSE 'SC-' END,LPAD(q.id,6,'0')))>0)
+ AND (%s='' OR LOCATE(%s,p.legal_name)>0 OR LOCATE(%s,q.reference)>0
+ OR LOCATE(%s,COALESCE(q.document_number,CONCAT(CASE q.kind WHEN 'invoice' THEN 'INV-' WHEN 'bill' THEN 'BILL-' WHEN 'customer_credit' THEN 'CR-' ELSE 'SC-' END,LPAD(q.id,6,'0'))))>0)
  AND (%s='all' OR (%s='draft' AND q.current_journal IS NULL)
  OR (%s='reversed' AND q.reversed IS NOT NULL)
  OR (%s='paid' AND q.current_journal IS NOT NULL AND q.reversed IS NULL AND q.kind IN ('invoice','bill') AND q.remaining=0)
@@ -645,7 +659,7 @@ function pl_ar_ap_open_items(int $actorId, int $companyId, int $bookId, string $
             if (bccomp($fc, '0', 4) <= 0) { continue; }
             $version = DB::queryFirstRow('SELECT r.document_id,r.source_snapshot,d.kind FROM pl_ar_document_revisions r JOIN pl_ar_documents d ON d.id=r.document_id WHERE r.open_item_id=%i AND d.kind IN %ls ORDER BY r.id DESC LIMIT 1 FOR SHARE', $row['id'], ['invoice','bill']);
             $row['document_id'] = null; $row['number'] = $row['source_reference'];
-            if ($version) { $snapshot = json_decode($version['source_snapshot'], true, 512, JSON_THROW_ON_ERROR); $date = $snapshot['document_date']; $due = $snapshot['due_date']; $row['document_id'] = (int) $version['document_id']; $row['number'] = pl_ar_document_number($row['document_id'], $version['kind']); }
+            if ($version) { $snapshot = json_decode($version['source_snapshot'], true, 512, JSON_THROW_ON_ERROR); $date = $snapshot['document_date']; $due = $snapshot['due_date']; $row['document_id'] = (int) $version['document_id']; $row['number'] = pl_ar_document_display_number($row['document_id'], $version['kind']); }
             $days = max(0, (int) (new DateTimeImmutable($due ?? $asOf))->diff(new DateTimeImmutable($asOf))->format('%r%a'));
             $bucket = $days === 0 ? 'not_due' : ($days <= 30 ? '1_30' : ($days <= 60 ? '31_60' : ($days <= 90 ? '61_90' : 'over_90')));
             $row += ['remaining_fc'=>$fc,'remaining_base'=>$base,'document_date'=>$date,'due_date'=>$due,'age_days'=>$days,'bucket'=>$bucket];

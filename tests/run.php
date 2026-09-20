@@ -57,8 +57,12 @@ $suites[] = 'stock_preview_test.php';
 $suites[] = 'ar_preview_test.php';
 $suites[] = 'ar_list_test.php';
 $suites[] = 'print_test.php';
+$suites[] = 'document_series_test.php';
 if (($argv[1] ?? '') === '--suite=ar-lists') {
-    $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','ar_list_test.php','reconciliation_test.php','list_test.php'];
+    $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','ar_list_test.php','reconciliation_test.php','list_test.php','document_series_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=numbering') {
+    $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','document_series_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=ar-editors') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','inventory_test.php','purchasing_test.php','tax_test.php','ar_preview_test.php'];
