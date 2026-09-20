@@ -28,6 +28,14 @@ Keep the installed chain through 031 unchanged; 1.0.0 adds no new migration. Thi
 
 Use the backup/maintenance procedure below and run migrations before reopening traffic, exactly as for the 0.5.0-preview to 0.6.0-preview upgrade. Restore both matching code and database if rollback is needed; copying old PHP over an upgraded database is not a tested rollback.
 
+## From 1.1.0 to 1.1.1
+
+A files-only upgrade. **There is no migration in this release**: the schema chain still ends at 034, no receipt changes, and no accounting behaviour changes. Replace the files with the manual procedure below, or use `/maintenance.php` if you pinned the publisher key at 1.1.0.
+
+Everything new is in browser setup, which an existing installation has already completed and which stays closed. Two changes are worth knowing about anyway:
+- A copy whose recorded public URL begins with `http://` now shows a warning on every screen and cannot mark its session cookie `Secure`. That is a statement of what was already true, not a new restriction. Connections still require an HTTPS address.
+- Browser setup no longer offers a second runtime database account (decision B24). An existing installation keeps whatever account its `config.local.php` names.
+
 ## From 1.0.0 to 1.1.0
 
 Keep the installed chain through 031 unchanged. This release adds migration 032 (an optional username for each account) and 033 (the optional installation logo). Existing accounts keep signing in by email. Because 1.0.0 shipped no signed update metadata, use the manual procedure below. 1.1.0 is the first release with official signed metadata: after this manual upgrade, pin the publisher key from the [release signing guide](https://github.com/phpledger/phpledger/blob/master/docs/RELEASE-SIGNING.md#official-publisher-key) as `publisher.pem` in the private installation directory, and later releases can be installed from `/maintenance.php`.

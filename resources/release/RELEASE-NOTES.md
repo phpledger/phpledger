@@ -4,6 +4,24 @@ Each release's exact source revision is recorded in its `PACKAGE-MANIFEST.json` 
 
 PHP Ledger 1.0.0 was the first supported stable release of the restarted application. It preserves the lightweight BixiSoft PHP/MeekroDB structure while separating accounting functions, server permissions, templates and the public front controller. Read "Supported scope and limits" and "Assurance status" below before deployment; the dated preview sections further down record the historical, superseded scope of each earlier development release.
 
+## 1.1.1: setup you can watch, and a database on your own computer
+
+Published 20 September 2026. A patch release: no schema change, no migration, and no change to any accounting behaviour.
+
+- **Setup runs in six stages you can see.** Start, Database, Build, Checks, Account and Ready, each sized for a laptop screen. The Build stage shows a progress bar naming the step it is on, such as "Building the chart of accounts and journals, step 6 of 35", instead of a button that looks like it is waiting for you.
+- **A failed requirement is something to clear, not an error page.** A missing PHP extension now takes over the screen with the places it is actually fixed: the `php.ini` line on XAMPP or Laragon, the package name on Debian, the PHP Selector screen on shared hosting, and a Check again button.
+- **Setup proves what it built.** Fourteen checks on your server before you type anything, and six against the finished database afterwards, including the count of protective database rules that keep posted entries immutable. The last screen itemises what exists, read back from the database.
+- **A database on your own computer needs no preparation** ([issue #84](https://github.com/phpledger/phpledger/issues/84)). On `localhost`, `127.0.0.1` or `::1`, setup accepts the account XAMPP, Laragon and MAMP install, including `root` with no password, and creates the database itself when it does not exist. A database on another server still needs a dedicated account with a password, and is never created.
+- **Setup deduces your environment.** It reports the folders it will use and the address it will record, and finds a database server answering on a loopback port to fill in the port.
+- **Plain HTTP warns instead of refusing** (owner decision, 20 September 2026). A site without a certificate can be installed and used, with a warning on every setup step and on every screen afterwards naming what stays unavailable. Connections (the API, MCP and app integrations) still require an HTTPS address. Sign-in details travel unencrypted until a certificate is in place, so turn on SSL before keeping real books.
+- **The schema applies in six requests instead of 35.** The chain is about two seconds of work; `pl_migrate()` now takes a time budget as well as a batch size, and a host with a short `max_execution_time` still hands control back between steps and resumes from its receipts.
+- **One database account, not two.** Browser setup no longer offers an optional second runtime account (owner decision B24, [issue #87](https://github.com/phpledger/phpledger/issues/87)). Restricting the account after installation is documented in [INSTALL.md](INSTALL.md) and turns off the automatic update path.
+- **Fixes.** An empty key folder that an operator created in advance, or pointed `PL_OAUTH_KEY_DIRECTORY` at, was treated as an interrupted installation and blocked setup; only a folder holding some of the keys is refused now. The two demo landing labels corrected on 19 September ship here.
+
+Upgrading from 1.1.0 replaces files only. There is no migration in this release.
+
+This release ships without a media kit, at the owner's decision on 20 September 2026: minor and patch releases do not carry one. The assurance limits recorded for 1.1.0 and 1.0.0 below still apply, and a real shared host and an unfamiliar operator have still not been observed.
+
 ## 1.1.0: install like WordPress, MariaDB, username and logo
 
 Published 19 September 2026.
