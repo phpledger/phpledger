@@ -130,3 +130,23 @@ Recorded on the owner's approval of decisions 1 to 4 of the [1.2 release plan](R
 | B29 | **Media kits accompany major releases only.** An `x.y.0` release carries a versioned media kit; minor, patch and preview releases do not, and say so in their notes. Every release, including previews, still carries signed update metadata. | `AGENTS.md`, README, release protocol step 6, the signing guide and `release.yml` amended; supersedes the 18 September rule that every release including previews and patches ships a kit. |
 | B30 | **The accountant is engaged before the October close** for a short policy consultation on discount posting, free goods, number series and the representation of customer advances, so 1.2 items (b) and (c) are not built against a policy the accountant later rejects. | The four questions with the planner's recommendations are listed in the findings register; worked examples follow in the 1.2 plan's M2 milestone; the December second session stands (B28). |
 
+## L. Decisions taken by the owner, 21 September 2026
+
+Answers to the dated questions in the [1.2 release plan](RELEASE-PLAN-1.2.md), given after 1.1.2 shipped. Several widen 1.2 beyond the seven items of B20; the plan's calendar is therefore withdrawn until re-estimated (see the note appended to the plan).
+
+| # | Decision | Consequence |
+|---|---|---|
+| B31 | **MariaDB floor: run the full suite plus migration 034 on `mariadb:10.4` and let the result decide** (keep 10.4 and add it to CI if green; raise to 10.6 if red). | Proof run started 21 September; result recorded in the 1.2 M1 receipt and CI matrix. |
+| B32 | **Issue #75: member-digest equality in `build-release.py --compare`, the CI Linux build is the published artifact from the next release.** | Tooling change in 1.2 M1; every later receipt names the published platform. |
+| B33 | **"Transfer documents" means stock documents: stock issue, re-issue, stock return and gate passes**, designed from how real warehouses and distributors work (research first). | Item (a) grows from a linked movement pair to a numbered stock-document family; it shares the number series and print pipeline of (b). |
+| B34 | **1.2 must be able to simulate a multi-warehouse, multi-driver/van distribution business, including a POS for counter sales.** | The distribution operations that the module roadmap placed in a later directory plugin (route and van orders, settlement, collection sheets) and a counter-sales POS over real stock move into 1.2 as bundled behaviour; the sample data must model it. |
+| B35 | **Reports are added, never removed: stock value and items by location, and aggregate reports across locations.** | The manifest's `stock-by-location` report is implemented, not deleted; per-location and aggregate stock reports are 1.2 deliverables. |
+| B36 | **Warehouse-related items move into 1.2**; warehouse selection on invoices and credits and API/MCP read exposure of warehouses and transfers are 1.2, not 1.3. | Added to item (a). |
+| B37 | **Trading-document accounting policies are configurable in the Admin area**, decided report by report rather than fixed in code; the owner leans toward transaction IDs as the numbering basis. | Item (b) gains a policy settings screen (discount posting, free-goods treatment, tax on free goods, series format) with per-company defaults; number series design starts from transaction IDs. |
+| B38 | **Nothing is taken out of 1.2:** structured account codes (#76), collapsible reports (#77) and the Pakistan pharmacy sample (#78) stay in 1.2. | Three more items join the release; #78 needs the package directory and a pharmacy plugin or a plugin-free data pack, to be designed. |
+| B39 | **Nothing is deferred from on-account receipts:** supplier (AP) advances, cash refunds of unapplied credit and credit notes without an original invoice are in 1.2. | Item (c) grows to full symmetric advances and refunds. |
+| B40 | **Plugin runtime: the owner will decide the rules and the interface after a detailed explanation** (requested 21 September). | Item (d) design questions stay open; explanation delivered in the session reply and to be written up as `docs/PLUGINS.md` draft. |
+| B41 | **Security review: accept a disclosure** for 1.2 rather than commission an independent reviewer now. | 1.2.0 ships with the same disclosure wording 1.0.0 used; the Verified badge stays limited to project-key-signed packages. |
+| B42 | **Container registry: GHCR and Docker Hub both** in 1.2. | Docker Hub namespace, account token in repository secrets and the mirror push join item (g); owner supplies the account. |
+| B43 | **Demo cutover at 1.2.0.** | The demo moves to `core-1.2.0` at publication under the runbook; the demo build tool (B26) stays deferred. |
+
