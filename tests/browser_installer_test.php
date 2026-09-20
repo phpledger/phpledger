@@ -187,12 +187,18 @@ try {
         if ($batch === 0) {
             pl_install_connect($config);
             $firstReceipt = DB::queryFirstRow('SELECT * FROM pl_schema_migrations ORDER BY version LIMIT 1');
-            DB::update('pl_schema_migrations', ['status' => 'applying'], 'version=%s', $firstReceipt['version']);
+            // A receipt that recorded no progress leaves an unknown database: still a matter for the operator.
+            DB::update('pl_schema_migrations', ['status' => 'applying', 'statements_done' => null], 'version=%s', $firstReceipt['version']);
             $interrupted = installer_http($url, ['action' => 'migrate', 'csrf_token' => $csrf], $cookie);
-            installer_assert($interrupted['status'] === 400 && str_contains($interrupted['body'], 'incomplete'), 'Interrupted DDL did not stop installation.');
+            installer_assert($interrupted['status'] === 400 && str_contains($interrupted['body'], 'incomplete'), 'Interrupted DDL without recorded progress did not stop installation.');
             installer_assert(DB::queryFirstField('SELECT status FROM pl_schema_migrations WHERE version=%s', $firstReceipt['version']) === 'applying', 'Interrupted receipt was silently repaired.');
+            // A receipt whose statements all ran, losing only its closing status update, completes on retry.
+            DB::update('pl_schema_migrations', ['statements_done' => $firstReceipt['statements_done']], 'version=%s', $firstReceipt['version']);
+            $resumed = installer_http($url, ['action' => 'migrate', 'csrf_token' => $csrf], $cookie);
+            installer_assert($resumed['status'] === 200, 'A recorded interruption did not resume.');
+            installer_assert(DB::queryFirstField('SELECT status FROM pl_schema_migrations WHERE version=%s', $firstReceipt['version']) === 'applied', 'A resumed receipt was not completed.');
             // Only the deliberately corrupted random fixture receipt is restored here.
-            DB::update('pl_schema_migrations', ['status' => $firstReceipt['status']], 'version=%s', $firstReceipt['version']);
+            DB::update('pl_schema_migrations', ['status' => $firstReceipt['status'], 'statements_done' => $firstReceipt['statements_done']], 'version=%s', $firstReceipt['version']);
         }
         if (str_contains($response['body'], 'Save private configuration')) {
             break;
