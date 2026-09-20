@@ -71,6 +71,10 @@ New code belongs under `www/phpledger`. Only its `public` directory is web-acces
 
 Use modern CSS and small JavaScript modules for progressive enhancement. Financial decisions stay on the server. The approved Review Console direction and Inter typography produce one reusable component system. Replace the legacy UI in the new application without editing historical assets for cosmetic consistency.
 
+### Document printing
+
+`GET /print/<type>/<id>` (1.2 M2) is one read-only route serving every printable document. A registry in `print_functions.php`, keyed by document type and paper format, names the view file, the human label and the read-only loader; an optional `format` parameter defaults to A4, and the first registered pair set is the settlement receipt in A4 and 80 mm. The route resolves after the session company context and delegates the read to the same scoped service the document's record screen uses, so company/book scope and role are enforced once: a cross-company id, an unknown type, an unregistered format and any non-GET method are all refused. Printing adds no posting path, no mutation and no new template allow-list in `pl_render()`; print documents render without the application shell from `templates/print`, and their styles are the `@media print` block and paper classes in `resources/ui/app.css`. The letterhead uses only the optional installation logo (migration 033) and the company's existing name, book and functional currency; the schema holds no company address or tax registration, so the print does not claim one.
+
 ## Data and posting boundaries
 
 ### Bundled module lifecycle

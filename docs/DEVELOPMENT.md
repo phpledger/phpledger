@@ -50,6 +50,25 @@ limit; the fixture has ten separate statements/accounts. Migration 031 indexes
 the source lookup used by effective receipt/expense correction history.
 Local before/after evidence is in `docs/design/redesign-0.5/evidence-0.6.0/`.
 
+## Document printing (1.2 M2)
+
+`GET /print/<type>/<id>` renders one shell-less print document: no sidebar, topbar, context strips, notices or scripts, only the letterhead, the document and on-screen format links that `@media print` hides. An optional `format` parameter selects the paper; it defaults to A4 (`PL_PRINT_DEFAULT_FORMAT`). The route is read-only — it accepts GET only, posts nothing and writes nothing — and it is resolved after the session company context, so the company/book scope and the role rule of the document's own record screen apply unchanged. An id from another company is not found in this scope and is refused; an unknown type or an unregistered format is refused rather than guessed.
+
+`pl_print_templates()` in `includes/functions/print_functions.php` is the registry, keyed by document type and then by format. Each type carries a human label, the read-only loader `(actor, company, book, id)` that returns its data, the function that derives the printed reference, and the record screen to return to. Each format carries a human label, its view file under `templates/print` and the paper class the frame applies. The first registered type is the settlement receipt (`settlement`), in `a4` and `80mm`, read by `pl_settlement_receipt()` in `settlement_functions.php`.
+
+**To add a document type or format, do not touch the route.** Add the entry to `pl_print_templates()`; add the view file under `www/phpledger/templates/print/`; add the loader beside the existing service for that document, calling the same scoped read the record screen calls, so the access rule is defined once. Views receive `$document` (the loader's result), `$letterhead`, `$company`, `$template`, `$reference`, `$formats` and `$recordId`, and must render fragments only — the standalone HTML document is `templates/print/frame.php`. `tests/print_test.php` then checks the new pair automatically: every registered format must have its view file, a human label and a default A4 entry.
+
+The letterhead uses only identity the schema already has: the optional installation logo (migration 033), the company name, its book and its functional currency. There is **no** company address or tax-registration column — only parties carry addresses and registrations (`pl_party_details`) — so the letterhead states none and the A4 receipt prints the counterparty's stored address and registration lines instead. Adding a company profile is an owner decision and a migration, not a print change.
+
+Print styles live at the end of `resources/ui/app.css` (an `@media print` block plus the `.paper-a4` and `.paper-80mm` classes). They use design tokens and logical properties only, because the 1.2 Urdu work flips the inline axis; `tests/print_test.php` fails on a hard-coded colour or a physical `left`/`right` property in that block. Rebuild and commit the compiled stylesheet with `npm ci` then `npm run build:css`, as in the 0.6 interface section above; the same test fails if `www/phpledger/public/assets/app.css` is missing the print rules.
+
+```powershell
+docker compose --profile test run --rm test php tests/run.php --suite=print
+python tests/print-http-smoke.py
+```
+
+`tests/print-http-smoke.py` posts one ordinary customer receipt through the settlement service on the local Compose stack, then checks over HTTP that an anonymous visitor is sent to sign in, that owner, accountant and viewer all print, that the rendered output carries no shell markup, that both formats render, and that an id outside the book, another company's scope, an unknown type, an unknown format and any POST are refused.
+
 ## Accounting starter — current local service and route contract
 
 The current source adds AR, AP, Purchasing, Inventory and the configurable core tax engine. The published package and hosted demo remain **0.3.0-preview** until a separately recorded release. Read the [starter scope and validation record](repository/sprint-06/ACCOUNTING-STARTER.md) before implementation or testing; the historical foundation section below describes the published prerequisite release.
