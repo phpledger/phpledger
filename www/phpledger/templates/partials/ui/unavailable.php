@@ -1,6 +1,7 @@
-<?php declare(strict_types=1); ?>
+<?php declare(strict_types=1);
+require_once __DIR__ . '/../../../includes/functions/i18n_functions.php'; ?>
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<html lang="<?= pl_e(pl_locale()) ?>" dir="<?= pl_e(pl_text_direction()) ?>"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
 <title><?= pl_e($title) ?> · PHP Ledger</title><link rel="stylesheet" href="<?= pl_e(pl_url('/assets/app.css')) ?>"></head>
 <body><main class="auth-shell"><div class="auth-card">
 <img class="auth-logo" src="<?= pl_e(pl_url('/assets/brand/phpledger-horizontal.png')) ?>" alt="PHP Ledger" width="2172" height="724">

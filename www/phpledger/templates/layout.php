@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/partials/ui/components.php';
+require_once __DIR__ . '/../includes/functions/i18n_functions.php';
 $posLayout = $user !== null && $company !== null && $view === 'pos';
 $workspace = $user !== null && $company !== null && !in_array($view, ['oauth-consent', 'pos'], true);
 ?>
 <!doctype html>
-<html lang="en" data-screen="<?= pl_e($view) ?>">
+<html lang="<?= pl_e(pl_locale()) ?>" dir="<?= pl_e(pl_text_direction()) ?>" data-screen="<?= pl_e($view) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

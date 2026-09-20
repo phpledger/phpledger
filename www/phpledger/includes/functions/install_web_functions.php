@@ -7,6 +7,7 @@ require_once __DIR__ . '/install_check_functions.php';
 require_once __DIR__ . '/install_oauth_functions.php';
 require_once __DIR__ . '/install_exposure_functions.php';
 require_once __DIR__ . '/security_functions.php';
+require_once __DIR__ . '/i18n_functions.php';
 require_once __DIR__ . '/demo_functions.php';
 
 /** Browser setup is open until installation completes; the hosted demo never offers it. */

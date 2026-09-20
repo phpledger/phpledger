@@ -43,7 +43,7 @@ $summaryWording = static function (array $checks): array {
 $blocking = array_values(array_filter($requirements, static fn (array $check): bool => $check['status'] === PL_CHECK_FAIL));
 ?>
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<html lang="<?= pl_e(pl_locale()) ?>" dir="<?= pl_e(pl_text_direction()) ?>"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
 <title><?= pl_e($view === 'start' ? 'Install PHP Ledger' : $headings[$view]) ?> · PHP Ledger</title>
 <link rel="stylesheet" href="<?= pl_e(pl_url('/assets/app.css', ['v' => pl_app_version()])) ?>">
 <?php if ($view === 'migrating'): $progress = pl_install_progress($schema ?? []); ?>

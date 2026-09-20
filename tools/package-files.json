@@ -1161,6 +1161,14 @@
     {
       "source": "www/phpledger/install/migrations/034_inventory_locations.php",
       "destination": "www/phpledger/install/migrations/034_inventory_locations.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/i18n_functions.php",
+      "destination": "www/phpledger/includes/functions/i18n_functions.php"
+    },
+    {
+      "source": "resources/lang/README.md",
+      "destination": "resources/lang/README.md"
     }
   ]
 }

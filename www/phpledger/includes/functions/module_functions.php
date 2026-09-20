@@ -35,6 +35,13 @@ function pl_validate_module_registry(array $registry): void
             || !is_array($m['requires'] ?? null) || !is_string($m['history'] ?? null)) {
             throw new DomainException('A module requires an unsupported or malformed core contract.');
         }
+        // Optional translation catalogue directory (release plan 1.2 M2). A manifest that omits
+        // `lang` is unchanged, so no bundled manifest's digest and no company's recorded
+        // manifest_hash moves; a module that declares one names a plain project-relative
+        // directory, never an absolute path, a parent traversal or a file.
+        if (array_key_exists('lang', $m) && (!is_string($m['lang']) || !preg_match('#^[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*){0,4}$#D', $m['lang']) || strlen($m['lang']) > 128)) {
+            throw new DomainException('A module translation directory must be a plain relative path.');
+        }
         foreach (['capabilities', 'migrations', 'routes', 'permissions', 'settings', 'reports', 'api_operations', 'mcp_operations'] as $key) {
             if (!is_array($m[$key] ?? null) || !array_is_list($m[$key]) || count($m[$key]) !== count(array_unique($m[$key], SORT_REGULAR))) { throw new DomainException('Module declarations must be unique lists.'); }
             foreach ($m[$key] as $value) { if (!is_string($value) || $value === '') { throw new DomainException('Module declarations must be nonempty strings.'); } }

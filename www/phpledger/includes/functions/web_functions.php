@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/i18n_functions.php';
+
 /** Web presentation helpers. Financial rules remain in the existing services. */
 function pl_web_unavailable_page(int $status): void
 {
@@ -412,6 +414,13 @@ function pl_list_query(int $actorId, int $companyId, int $bookId, string $screen
     };
 }
 
+/**
+ * Write an exact decimal amount for display. The separators and the digit grouping come from
+ * pl_number_format_rules(), which returns today's Western rules for every locale, so this output
+ * is unchanged; South Asian grouping (12,34,56,789) arrives in M11 by adding a row there, with no
+ * call site touched. The string arithmetic is deliberate: the stored exact amount, the
+ * transaction and base currency and the posting precision are not changed by writing it down.
+ */
 function pl_money(string $amount): string
 {
     if (!preg_match('/^(-?)([0-9]+)(?:\.([0-9]{1,4}))?$/D', $amount, $match)) {
@@ -419,14 +428,21 @@ function pl_money(string $amount): string
     }
     $decimals = str_pad($match[3] ?? '', 4, '0');
     $decimals = substr($decimals, 2) === '00' ? substr($decimals, 0, 2) : $decimals;
-    $whole = preg_replace('/\B(?=([0-9]{3})+(?![0-9]))/', ',', $match[2]);
-    return $match[1] . $whole . '.' . $decimals;
+    $rules = pl_number_format_rules();
+    return $match[1] . pl_group_digits($match[2], $rules['grouping'], $rules['group']) . $rules['decimal'] . $decimals;
 }
 
+/**
+ * Write an accounting DATE for display. The pattern comes from pl_date_format_pattern(), which
+ * returns today's 'd M Y' for every locale, so this output is unchanged; M11 adds locale patterns
+ * and translated month names there. The value is a business calendar DATE: it is parsed with a
+ * fixed Y-m-d pattern and reset ('!'), so no timezone arithmetic can move it into the
+ * neighbouring day, and the date used for posting, period checks and reconciliation is untouched.
+ */
 function pl_date_label(string $date): string
 {
     $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date);
-    return $parsed ? $parsed->format('d M Y') : $date;
+    return $parsed ? $parsed->format(pl_date_format_pattern()) : $date;
 }
 
 function pl_icon(string $name): string
