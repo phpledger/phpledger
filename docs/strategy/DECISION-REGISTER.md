@@ -150,3 +150,17 @@ Answers to the dated questions in the [1.2 release plan](RELEASE-PLAN-1.2.md), g
 | B42 | **Container registry: GHCR and Docker Hub both** in 1.2. | Docker Hub namespace, account token in repository secrets and the mirror push join item (g); owner supplies the account. |
 | B43 | **Demo cutover at 1.2.0.** | The demo moves to `core-1.2.0` at publication under the runbook; the demo build tool (B26) stays deferred. |
 
+## M. Decisions taken by the owner, 21 September 2026 (plugin platform and onboarding)
+
+Answers to the six plugin questions put after the detailed explanation, plus one new item.
+
+| # | Decision | Consequence |
+|---|---|---|
+| B44 | **The full Users module is in 1.2, and an installation Admin may install and activate plugins.** | Item (e) grows from the capability catalogue to the full module (users, meta, roles, profile, invitations, sessions, audit); an `installation.admin` role gates package installation and activation. |
+| B45 | **Hooks and filters may change default core behaviour, as in WordPress.** | Actions and filters run inside the core flows, including before posting; the concurrency and lock discipline for hooks inside `pl_ledger_transaction` must be designed and tested, not avoided. |
+| B46 | **Plugin settings: one shared options table; each plugin may also have its own tables for its data and processing.** | `pl_plugin_options` (installation- and company-scoped) plus prefixed plugin tables through the plugin's own migrations. |
+| B47 | **Version requirements: exact versions, as bundled modules use now.** | Contract 2 `requires` keeps the exact-version rule. |
+| B48 | **The reference plugin for 1.2 is the pharmacy plugin with its paired Pakistan pharmacy sample (#78).** | The first directory plugin and sample are built inside 1.2; the archived quotes plugin is not used as the reference. |
+| B49 | **The Packages screen is live in the public demo and plugins run there.** | The demo's isolation, hourly reset and restricted grants must cover uploaded plugin code; a demo policy for what visitors may install is needed. |
+| B50 | **The "onboard a business" wizard is redesigned in 1.2** to match the Workbench installer and the sample companies, with an option to import only a skeleton from a sample (chart of accounts, reports, forms and plugins) without its transactions. | New onboarding design (Workbench style), a skeleton-only import mode in the sample package format and installer, and sample manifests that separate structure from history. |
+

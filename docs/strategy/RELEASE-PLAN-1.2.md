@@ -283,3 +283,5 @@ The owner answered the dated decisions after 1.1.2 shipped (register section L, 
 
 Two answers start work immediately: the MariaDB 10.4 proof (B31) and the reproducibility rule (B32). One is still open pending the plugin explanation the owner asked for (B40).
 
+Later on 21 September the owner also decided (register section M, B44 to B50): the full Users module joins 1.2 with an installation Admin who installs and activates plugins; hooks and filters may change core behaviour including before posting; a shared options table plus per-plugin tables; exact version requirements; the pharmacy plugin and sample are the 1.2 reference package; the Packages screen and plugins run in the public demo; and the business onboarding wizard is redesigned in the Workbench style with a skeleton-only import from samples. These add roughly the full Users module, the pharmacy vertical, demo plugin policy and an onboarding redesign to the re-estimate.
+
