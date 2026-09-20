@@ -3,13 +3,13 @@
   "generated_at": "2026-09-20T00:00:00Z",
   "channels": {
     "stable": {
-      "version": "1.1.2",
+      "version": "1.1.3",
       "channel": "stable",
       "published_at": "2026-09-20",
-      "notes": "https://github.com/phpledger/phpledger/releases/tag/v1.1.2",
-      "zip": "https://github.com/phpledger/phpledger/releases/download/v1.1.2/phpledger-1.1.2.zip",
-      "sha256": "24d499d4b3ba249a7b25eb7874fa18c0c0ece778203d32b927bef3cf260eb882",
-      "update_json": "https://phpledger.com/releases/1.1.2.update.json",
+      "notes": "https://github.com/phpledger/phpledger/releases/tag/v1.1.3",
+      "zip": "https://github.com/phpledger/phpledger/releases/download/v1.1.3/phpledger-1.1.3.zip",
+      "sha256": "208c0a089ee32d377116026a4d0401790d21706399a5c63b5f5f818a4d3b5482",
+      "update_json": "https://phpledger.com/releases/1.1.3.update.json",
       "min_php": "8.2.0",
       "databases": [
         "mysql:8.4",
@@ -21,6 +21,11 @@
     "preview": null
   },
   "history": [
+    {
+      "version": "1.1.3",
+      "channel": "stable",
+      "published_at": "2026-09-20"
+    },
     {
       "version": "1.1.2",
       "channel": "stable",

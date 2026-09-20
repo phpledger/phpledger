@@ -930,14 +930,14 @@
       "path": "/download/",
       "redirectStub": false,
       "indexable": true,
-      "title": "Download PHP Ledger 1.1.2 (PHP 8.2+, MySQL or MariaDB)",
+      "title": "Download PHP Ledger 1.1.3 (PHP 8.2+, MySQL or MariaDB)",
       "descriptionLength": 142,
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 38535,
-        "eager": 349965,
-        "total": 599602
+        "html": 37825,
+        "eager": 349255,
+        "total": 598892
       },
       "budgets": {
         "eager": 700000,
@@ -970,7 +970,7 @@
         },
         {
           "file": "download/index.html",
-          "bytes": 38535
+          "bytes": 37825
         }
       ],
       "lazyAssets": [
@@ -4355,9 +4355,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 23141,
-        "eager": 334571,
-        "total": 423276
+        "html": 22670,
+        "eager": 334100,
+        "total": 422805
       },
       "budgets": {
         "eager": null,
@@ -4390,7 +4390,89 @@
         },
         {
           "file": "news/1-1-2/index.html",
-          "bytes": 23141
+          "bytes": 22670
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "news/1-1-3/index.html": {
+      "path": "/news/1-1-3/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "PHP Ledger 1.1.3: the in-app updater completes",
+      "descriptionLength": 125,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 21531,
+        "eager": 332961,
+        "total": 421666
+      },
+      "budgets": {
+        "eager": null,
+        "total": null
+      },
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "news/1-1-3/index.html",
+          "bytes": 21531
         }
       ],
       "lazyAssets": [
@@ -4437,9 +4519,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 27444,
-        "eager": 338874,
-        "total": 427579
+        "html": 28019,
+        "eager": 339449,
+        "total": 428154
       },
       "budgets": {
         "eager": 650000,
@@ -4472,7 +4554,7 @@
         },
         {
           "file": "news/index.html",
-          "bytes": 27444
+          "bytes": 28019
         }
       ],
       "lazyAssets": [
@@ -4777,9 +4859,9 @@
       "images": 30,
       "lazyImages": 28,
       "bytes": {
-        "html": 62966,
-        "eager": 374396,
-        "total": 2510049
+        "html": 63334,
+        "eager": 374764,
+        "total": 2510417
       },
       "budgets": {
         "eager": 700000,
@@ -4812,7 +4894,7 @@
         },
         {
           "file": "product/index.html",
-          "bytes": 62966
+          "bytes": 63334
         }
       ],
       "lazyAssets": [
@@ -5457,13 +5539,13 @@
       "redirectStub": false,
       "indexable": true,
       "title": "Accounting development roadmap | PHP Ledger",
-      "descriptionLength": 156,
+      "descriptionLength": 145,
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 35081,
-        "eager": 346511,
-        "total": 435216
+        "html": 35570,
+        "eager": 347000,
+        "total": 435705
       },
       "budgets": {
         "eager": 650000,
@@ -5496,7 +5578,7 @@
         },
         {
           "file": "roadmap/index.html",
-          "bytes": 35081
+          "bytes": 35570
         }
       ],
       "lazyAssets": [
@@ -6216,7 +6298,7 @@
   "errors": [],
   "warnings": [],
   "summary": {
-    "pages": 73,
+    "pages": 74,
     "redirectStubs": 2,
     "errors": 0,
     "warnings": 0

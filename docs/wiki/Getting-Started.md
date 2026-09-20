@@ -1,6 +1,6 @@
-## Current package: 1.1.2
+## Current package: 1.1.3
 
-**1.1.2**, published 20 September 2026, is the current package; see the [[1.1.2 release notes|Release-1.1.2]]. **1.1.0**, published 19 September 2026, installs like WordPress: upload the `phpledger` folder into any web folder and open its address, and the installer starts by itself. It adds MariaDB 10.4+, a chosen username, an optional logo, and the first signed update metadata. [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.1.0/phpledger-1.1.0-media-kit.zip). [[Release notes|Release-1.1.0]]. **1.0.0**, published 18 September 2026, was the first stable release.
+**1.1.3**, published 20 September 2026, is the current package; see the [[1.1.3 release notes|Release-1.1.3]]. **1.1.0**, published 19 September 2026, installs like WordPress: upload the `phpledger` folder into any web folder and open its address, and the installer starts by itself. It adds MariaDB 10.4+, a chosen username, an optional logo, and the first signed update metadata. [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.1.0/phpledger-1.1.0-media-kit.zip). [[Release notes|Release-1.1.0]]. **1.0.0**, published 18 September 2026, was the first stable release.
 
 Automated test suites, fault-injection update/recovery tests, exact-artifact install/upgrade/recovery checks and developer-operated browser checks back this release. Independent accounting review, independent security review, supervised pilots with a real month-end close, unfamiliar-operator installation observation and restricted shared-host recovery certification have **not** happened; these continue as post-release commitments. See [[Release 1.0.0|Release-1.0.0]], [INSTALL.md](https://github.com/phpledger/phpledger/blob/master/resources/release/INSTALL.md), [UPGRADE.md](https://github.com/phpledger/phpledger/blob/master/resources/release/UPGRADE.md) and [RELEASE-SIGNING.md](https://github.com/phpledger/phpledger/blob/master/docs/RELEASE-SIGNING.md).
 
@@ -8,7 +8,7 @@ Automated test suites, fault-injection update/recovery tests, exact-artifact ins
 
 Start at [the PHP Ledger website](https://phpledger.com/) or [open the demonstration](https://phpledger.com/demo/).
 
-**[Download the 1.1.2 package](https://github.com/phpledger/phpledger/releases/tag/v1.1.2).** Choose `phpledger-1.1.2.zip` and its SHA-256 file from the release assets; automatic source archives do not include installed dependencies. The ZIP carries a short `README.txt`; the full [INSTALL.md](https://github.com/phpledger/phpledger/blob/master/resources/release/INSTALL.md) and [UPGRADE.md](https://github.com/phpledger/phpledger/blob/master/resources/release/UPGRADE.md) are on GitHub.
+**[Download the 1.1.3 package](https://github.com/phpledger/phpledger/releases/tag/v1.1.3).** Choose `phpledger-1.1.3.zip` and its SHA-256 file from the release assets; automatic source archives do not include installed dependencies. The ZIP carries a short `README.txt`; the full [INSTALL.md](https://github.com/phpledger/phpledger/blob/master/resources/release/INSTALL.md) and [UPGRADE.md](https://github.com/phpledger/phpledger/blob/master/resources/release/UPGRADE.md) are on GitHub.
 
 This release adds universal account statements, chart management, saved general-journal draft/review/post/reverse workflows, the accounting starter (AR/AP, optional Purchasing/Inventory, core tax), browser installation and signed automatic updates. It retains receipts, expenses, owner reports and the sample cash POS. It is the first stable release, with the remaining independent-review and pilot gates described in [[First package|First-Package]].
 
@@ -42,7 +42,7 @@ Accounts are read-only in the public demo; account creation and changes are rese
 
 ## Planning a self-hosted installation
 
-| Requirement | 1.1.2 environment |
+| Requirement | 1.1.3 environment |
 |---|---|
 | PHP | PHP 8.2+ (8.3 recommended) |
 | PHP extensions | BCMath, PDO, PDO MySQL, mbstring, cURL, OpenSSL, fileinfo and sessions; the zip extension is additionally required to use automatic in-browser updates |

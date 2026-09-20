@@ -26,6 +26,7 @@
 - [[Reporting walkthroughs|Reporting-Guides]]
 - [[Read integrations|Integrations]]
 
+- [[1.1.3 release|Release-1.1.3]]
 - [[1.1.2 release|Release-1.1.2]]
 - [[1.1.1 release|Release-1.1.1]]
 - [[1.1.0 release|Release-1.1.0]]

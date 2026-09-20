@@ -26,7 +26,7 @@
   },
   {
     "question": "Is it ready for real books?",
-    "answer": "Version 1.1.2 is the current stable release. The first stable release, 1.0.0, has published technical validation for automated tests, update recovery and package installation. Independent accounting review, independent security review and supervised pilots remain open commitments. Complete your own reviewed acceptance with fictional records before using real books.",
+    "answer": "Version 1.1.3 is the current stable release. The first stable release, 1.0.0, has published technical validation for automated tests, update recovery and package installation. Independent accounting review, independent security review and supervised pilots remain open commitments. Complete your own reviewed acceptance with fictional records before using real books.",
     "source": "https://phpledger.com/"
   },
   {
@@ -536,7 +536,7 @@
   },
   {
     "question": "Is there a stable release?",
-    "answer": "Yes. PHP Ledger 1.1.2, published 20 September 2026, is the current stable release. It follows 1.0.0, the first stable release of 18 September 2026; 1.1.0 (19 September) added installation from any web folder, MariaDB support, a chosen username, an optional logo and signed update metadata, and 1.1.1 (20 September) rebuilt browser setup into six stages you can watch. 1.1.2 corrects the 1.1.1 record, holds cash at the point of sale to whole minor units and restores signed update metadata. Independent accounting review, independent security review and supervised pilots have not yet happened; they continue as post-release commitments, disclosed alongside the release rather than presented as satisfied. The first supervised pilot, on the maintainer's own books, starts 1 October 2026 with a real month-end close.",
+    "answer": "Yes. PHP Ledger 1.1.3, published 20 September 2026, is the current stable release. It follows 1.0.0, the first stable release of 18 September 2026; 1.1.0 (19 September) added installation from any web folder, MariaDB support, a chosen username, an optional logo and signed update metadata; 1.1.1 (20 September) rebuilt browser setup into six stages you can watch; 1.1.2 (20 September) corrected the 1.1.1 record, held cash at the point of sale to whole minor units and restored signed update metadata; and 1.1.3 fixes issue #90, completing the in-app updater's migrate phase. Independent accounting review, independent security review and supervised pilots have not yet happened; they continue as post-release commitments, disclosed alongside the release rather than presented as satisfied. The first supervised pilot, on the maintainer's own books, starts 1 October 2026 with a real month-end close.",
     "source": "https://phpledger.com/roadmap/"
   },
   {

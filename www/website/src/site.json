@@ -2,7 +2,7 @@
   "name": "PHP Ledger",
   "alternateName": "phpledger",
   "baseUrl": "https://phpledger.com",
-  "entity": "PHP Ledger is open-source, self-hosted double-entry accounting software with core invoices, bills and payments, optional purchasing and inventory, and a manually configured tax engine. Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+, 1.1.2 is the current release: unzip it into any web folder, open it, and the browser installer starts; updates are publisher-signed. 1.0.0 was the first stable release; independent accounting and security review remain post-release commitments.",
+  "entity": "PHP Ledger is open-source, self-hosted double-entry accounting software with core invoices, bills and payments, optional purchasing and inventory, and a manually configured tax engine. Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+, 1.1.3 is the current release: unzip it into any web folder, open it, and the browser installer starts; updates are publisher-signed. 1.0.0 was the first stable release; independent accounting and security review remain post-release commitments.",
   "locale": "en_GB",
   "founder": {
     "name": "Rana Mansoor Akbar Khan"
@@ -31,16 +31,16 @@
   },
   "indexNowKey": "240b73d781977f499ab7c75318b9a14f",
   "release": {
-    "version": "1.1.2",
-    "tag": "v1.1.2",
+    "version": "1.1.3",
+    "tag": "v1.1.3",
     "date": "2026-09-20",
     "dateLabel": "20 September 2026",
-    "url": "https://github.com/phpledger/phpledger/releases/tag/v1.1.2",
-    "zipUrl": "https://github.com/phpledger/phpledger/releases/download/v1.1.2/phpledger-1.1.2.zip",
-    "shaUrl": "https://github.com/phpledger/phpledger/releases/download/v1.1.2/phpledger-1.1.2.zip.sha256",
-    "sha256": "24d499d4b3ba249a7b25eb7874fa18c0c0ece778203d32b927bef3cf260eb882",
-    "bytes": 2951475,
-    "bytesLabel": "2,951,475",
+    "url": "https://github.com/phpledger/phpledger/releases/tag/v1.1.3",
+    "zipUrl": "https://github.com/phpledger/phpledger/releases/download/v1.1.3/phpledger-1.1.3.zip",
+    "shaUrl": "https://github.com/phpledger/phpledger/releases/download/v1.1.3/phpledger-1.1.3.zip.sha256",
+    "sha256": "208c0a089ee32d377116026a4d0401790d21706399a5c63b5f5f818a4d3b5482",
+    "bytes": 2952255,
+    "bytesLabel": "2,952,255",
     "sizeLabel": "2.95 MB",
     "license": "https://github.com/phpledger/phpledger/blob/master/LICENSE",
     "mediaKitUrl": null
