@@ -1177,6 +1177,22 @@
     {
       "source": "www/phpledger/templates/views/numbering.php",
       "destination": "www/phpledger/templates/views/numbering.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/print_functions.php",
+      "destination": "www/phpledger/includes/functions/print_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/print/frame.php",
+      "destination": "www/phpledger/templates/print/frame.php"
+    },
+    {
+      "source": "www/phpledger/templates/print/settlement-a4.php",
+      "destination": "www/phpledger/templates/print/settlement-a4.php"
+    },
+    {
+      "source": "www/phpledger/templates/print/settlement-80mm.php",
+      "destination": "www/phpledger/templates/print/settlement-80mm.php"
     }
   ]
 }
