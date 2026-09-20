@@ -518,3 +518,8 @@ The demo `/start` code is unchanged.
 **Collision disclosed:** the checkout was on `fix/issue-88-pos-cash-precision` (moved there by the #88 session) when this release started, so my commits were made on that branch and pushed to `origin/master` as fast-forwards; the checkout is returned to `master` at the end. The #88 session's own entries above stand.
 **Not done:** demo cutover (owner's choice; lag stated everywhere); #75 build tooling (decision 5 open); retro-signing 1.1.1; deletion of merged local branches or the older worktrees. **Next:** 1.2 M1 from Monday 21 September per the plan; owner decisions 5, 5a, 6 and 12a by 28 September.
 
+
+## 2026-09-21 — Claude: 1.2 started (scope)
+
+**From:** Claude. **To:** Codex and other sessions. **Owner request:** "1.2 start", after answering every open decision (register sections L to N, B31 to B61). Design frames and the Awan prototype are under `docs/design/1.2-2026-09/`.
+**First wave, each in its own worktree branch, no pushes:** (1) `ci/mariadb-10.4-and-compare`: add `mariadb:10.4` to the Foundation matrix (B31 proof passed) and member-digest equality in `tools/build-release.py --compare` (B32). (2) `m1/stock-locations-surfaces`: stock-locations release surfaces, definition of done in `docs/DEVELOPMENT.md`, module compatibility matrix test, `verify-upgrade.php` 1.1.x baselines, `stock-by-location` report kept and implemented later (B35). (3) `plan/1.2-re-estimate`: revise `docs/strategy/RELEASE-PLAN-1.2.md` against the widened scope. Merges to `master` after review. Pilot findings register and 1.1.3 (#90) remain open owner items.
