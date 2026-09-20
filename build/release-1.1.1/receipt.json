@@ -1,0 +1,18 @@
+{
+  "archive": "phpledger-1.1.1.zip",
+  "archive_bytes": 2948511,
+  "archive_root": "phpledger",
+  "archive_sha256": "7c24f5ce3b03515c62e52d3d0d379552e5aa094c9257db89fd9ecd56fd535d70",
+  "built_at_utc": "2026-09-20T16:31:44.638881+00:00",
+  "channel": "stable",
+  "commit": "c731ced8645ce885fa03fcb6217007f1ed50d9b5",
+  "commit_requested_as": "c731ced",
+  "manifest_channel": "stable",
+  "manifest_files_verified": 1502,
+  "manifest_source_commit": "c731ced8645ce885fa03fcb6217007f1ed50d9b5",
+  "manifest_status": "stable",
+  "published": false,
+  "reproduced_against": null,
+  "vendor_composer_lock_sha256": "3866a53b20327cc4aa19cab8f86d4ccfaf2563b13ad93e01b5f05516df849a80",
+  "version": "1.1.1"
+}

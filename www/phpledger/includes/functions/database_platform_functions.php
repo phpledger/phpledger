@@ -111,6 +111,80 @@ function pl_database_use_dialect(): void
     });
 }
 
+/*
+ * PHP Ledger keeps posted journals immutable with database triggers, so every
+ * installation creates triggers from the first migration onwards. MySQL and
+ * MariaDB refuse CREATE TRIGGER on a server that writes a binary log unless the
+ * account is trusted to do so, which stops the schema part-way through with a
+ * server error that names no remedy. MySQL 8 enables the binary log by default
+ * and leaves log_bin_trust_function_creators off, so a dedicated application
+ * account hits this on a stock server. These checks read three server facts and
+ * name the parameter to set, before any migration writes a receipt.
+ */
+
+function pl_database_variable_enabled(mixed $value): bool
+{
+    return in_array(strtoupper(trim((string) $value)), ['1', 'ON', 'YES', 'TRUE'], true);
+}
+
+/**
+ * Only a global grant carries the privileges that bypass the binary-log check;
+ * ALL PRIVILEGES on the application's own database does not.
+ *
+ * @param list<string> $grants
+ */
+function pl_database_trigger_creator_trusted(array $grants): bool
+{
+    foreach ($grants as $grant) {
+        if (preg_match('/^GRANT\s+(.+?)\s+ON\s+\*\.\*\s+TO\s/is', (string) $grant, $match) === 1
+            && preg_match('/\b(ALL PRIVILEGES|SUPER|SET_USER_ID)\b/i', $match[1]) === 1) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/** The exact remediation for this server, or null when triggers can be created. */
+function pl_database_trigger_support_issue(bool $binaryLog, bool $trustCreators, bool $trusted): ?string
+{
+    if (!$binaryLog || $trustCreators || $trusted) {
+        return null;
+    }
+    return 'This database server writes a binary log and does not trust this account to create triggers, so the schema would stop part-way through. '
+        . 'PHP Ledger keeps posted entries immutable with database triggers. '
+        . 'Ask whoever administers the server to set log_bin_trust_function_creators = 1 under [mysqld] in my.cnf or my.ini, or in the parameter group of a managed database, and apply it. '
+        . 'Granting this account the SUPER privilege has the same effect and is the less safe choice. Then run this step again; this check changed nothing.';
+}
+
+/**
+ * Read the server facts behind that check. An unreadable variable or grant list
+ * returns null: a server that refuses to describe itself must not be blocked
+ * here, because the migration itself still reports its own failure.
+ */
+function pl_database_trigger_support(): ?string
+{
+    try {
+        $row = DB::queryFirstRow('SELECT @@GLOBAL.log_bin AS binary_log, @@GLOBAL.log_bin_trust_function_creators AS trust_creators');
+        $grants = DB::queryFirstColumn('SHOW GRANTS FOR CURRENT_USER()');
+    } catch (Throwable $error) {
+        return null;
+    }
+    return pl_database_trigger_support_issue(
+        pl_database_variable_enabled($row['binary_log'] ?? '0'),
+        pl_database_variable_enabled($row['trust_creators'] ?? '1'),
+        pl_database_trigger_creator_trusted(is_array($grants) ? $grants : [])
+    );
+}
+
+/** Refuse schema work this account cannot finish, before it writes anything. */
+function pl_database_require_trigger_support(): void
+{
+    $issue = pl_database_trigger_support();
+    if ($issue !== null) {
+        throw new DomainException($issue);
+    }
+}
+
 /**
  * A database on the same server as PHP Ledger: XAMPP, Laragon, MAMP or a hosting
  * panel's `localhost`. Setup treats these as the owner's own machine or hosting

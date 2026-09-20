@@ -112,7 +112,7 @@ The owner's case: the application runs on inexpensive PHP hosting and the databa
 **Plan.**
 - `PL_DB_SSL_CA`, `PL_DB_SSL_VERIFY`, `PL_DB_SSL_CERT` and `PL_DB_SSL_KEY`, with private-configuration equivalents and an installer field for the CA certificate. They map to PDO TLS attributes through MeekroDB's existing `DB::$connect_options`, so no code outside MeekroDB opens the connection.
 - Accept MySQL 8.0 as well as 8.4; keep 8.4 as the tested recommendation and add 8.0 to CI.
-- Preflight detects a binary-logged server without `log_bin_trust_function_creators=1` and says exactly which parameter to set, instead of failing during migration.
+- ~~Preflight detects a binary-logged server without `log_bin_trust_function_creators=1` and says exactly which parameter to set, instead of failing during migration.~~ **Delivered ahead of this work** for every installation, not only cloud databases, after issue #83 reported it on a stock local MySQL 8.4. Migrations also record their progress and resume where they stopped. See the [installer contract](../INSTALLER.md).
 - Guides for AWS RDS, Azure Database for MySQL and Aiven, and for Google Cloud SQL on trial credit. Free-tier terms change often, so each guide carries its check date. Services without triggers or foreign keys are listed as unsupported.
 
 ## Installer identity: username, password and company logo

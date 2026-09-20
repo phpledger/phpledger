@@ -196,7 +196,7 @@ $blocking = array_values(array_filter($requirements, static fn (array $check): b
 <ul class="placed-row"><?php foreach ($justPlaced as $version): ?><li class="placed-chip"><?= $tick ?><?= pl_e(pl_install_step_label($version)) ?></li><?php endforeach; ?></ul></div>
 <?php endif; ?>
 </div></div>
-<div class="bench-actions"><span class="fine-print">Continuing automatically. Nothing to click.</span>
+<div class="bench-actions"><span class="fine-print">Continuing automatically. Nothing to click. If the connection stops, reopen this page and enter the same database details: an interrupted step resumes where it stopped.</span>
 <form method="post" action="<?= pl_e(pl_url('/install')) ?>"<?= $error === '' ? ' data-install-continue' : '' ?>><input type="hidden" name="csrf_token" value="<?= pl_e($csrf) ?>"><input type="hidden" name="action" value="migrate">
 <button class="btn btn-primary" type="submit"<?= $error === '' ? ' data-install-auto' : '' ?>>Continue installation</button></form></div>
 <noscript><p class="field-hint">JavaScript is off, so this does not continue by itself. Select Continue installation until every step is complete.</p></noscript>

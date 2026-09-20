@@ -1,5 +1,14 @@
 # Shared Claude and Codex state
 
+## Latest checkpoint, 20 September 2026 (Claude): installer trigger preflight and resumable migrations
+
+- **Merged and on `origin/master` at `65b3437`** through pull request #85, which closes issue #83. A binary-logged MySQL that does not trust the account to create triggers is named at the database connection check before any migration writes, and an interrupted migration resumes at the statement that stopped instead of needing the database recreated. Issue #83 is closed with the reply and evidence.
+- CI green on the full matrix: MySQL 8.2, 8.3, 8.4 and MariaDB 10.6, 10.11, 11.4, including both browser installer fixtures. `composer check` is 309 tests, 0 failures (307 before). Verified against a disposable stock `mysql:8.4` with `log_bin_trust_function_creators=0`, which was removed afterwards.
+- Migration files and their checksums are unchanged; the new `pl_schema_migrations.statements_done` column is added by `pl_migrate()`, not by a migration.
+- **Note for whoever holds issue #84 (local-install friendliness):** that work was based on `ab70045`, before this merge, and touches `database_platform_functions.php` and `install_web_functions.php`, which this change also touches. Rebase onto `65b3437` first. A handover with the overlap and the design consequence is posted on issue #84. Pushing the fix branch also published the four previously unpushed stock-locations commits, and merging #85 brought them to `origin/master`; the owner accepted that.
+- The website self-hosting requirements page still omits the `log_bin_trust_function_creators` prerequisite and needs a publication to carry it. `resources/release/RELEASE-NOTES.md` has no 1.1.1 section yet.
+
+
 ## Latest checkpoint, 20 September 2026 early morning (Claude): stock-locations module green, awaiting merge
 
 - Branch `harvest/stock-locations` (`1bfcf37`, `85359e9`) holds the bundled `inventory-locations` module: migration `034_inventory_locations.php`, warehouse masters and transfers at carrying value, warehouse-scoped balance, history, valuation, counts, returns, AR previews and opening allocations, a Locations panel and filters on the inventory and stock-count screens, `tests/inventory_location_test.php`, packaging entries and doc wording. `composer check` passes on MySQL 8.4 and MariaDB 10.11 (307 tests, 0 failures each). Browser-checked on a throwaway server; the dev container was not migrated.
