@@ -110,3 +110,20 @@ function pl_database_use_dialect(): void
         return $dialect['mariadb'] ? pl_database_translate((string) $run['query'], $dialect) : null;
     });
 }
+
+/**
+ * A database on the same server as PHP Ledger: XAMPP, Laragon, MAMP or a hosting
+ * panel's `localhost`. Setup treats these as the owner's own machine or hosting
+ * account, so it may create the database there and accepts the credentials those
+ * stacks install by default. Any other host is another server.
+ */
+function pl_database_local_host(string $host): bool
+{
+    $host = strtolower(trim($host));
+    if (in_array($host, ['localhost', '127.0.0.1', '::1', '[::1]'], true)) {
+        return true;
+    }
+    // Test containers name their database service; production never reads this setting.
+    $testHosts = getenv('PL_ENV') === 'test' ? (string) getenv('PL_INSTALL_TEST_LOCAL_DB_HOSTS') : '';
+    return $testHosts !== '' && in_array($host, array_map('strtolower', array_map('trim', explode(',', $testHosts))), true);
+}

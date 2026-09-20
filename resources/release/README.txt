@@ -18,12 +18,13 @@ INSTALL IN FIVE STEPS
    installing.
 2. Upload the folder into your website, for example public_html/accounts.
    On your own computer, put it in C:\xampp\htdocs\ (Windows XAMPP).
-3. Create an empty database and a database user with a password.
-   - cPanel: MySQL Databases. Create the database, create the user, then add
-     the user to the database with all privileges.
-   - XAMPP: open http://localhost/phpmyadmin, choose User accounts, then Add
-     user account. Tick "Create database with same name and grant all
-     privileges". The built-in "root" account cannot be used.
+3. Decide which database to use.
+   - cPanel and most panels: MySQL Databases. Create an empty database, create
+     a user with a password, then add the user to the database with all
+     privileges.
+   - On your own computer (XAMPP, Laragon, MAMP): nothing to prepare. The
+     installer accepts the built-in "root" account with an empty password and
+     creates the database for you.
 4. Open the folder's address in your browser straight away, for example
    https://example.com/accounts or http://localhost/accounts.
    The installer starts by itself.
@@ -36,9 +37,12 @@ sign-in page. Run it right after uploading so nobody else can start it first.
 
 
 HTTPS
-A real website must use https://. Most hosts include a free certificate:
-turn on SSL (AutoSSL or Let's Encrypt) in your hosting panel. Plain
-http://localhost is accepted only for trying PHP Ledger on your own computer.
+PHP Ledger installs and runs over plain http://, so you can try it before a
+certificate is in place. It warns you on every screen while you do: without a
+certificate your sign-in details and your accounting data travel unencrypted,
+and Connections (the API, MCP and app integrations) stay unavailable. Before
+you keep real books, turn on SSL (AutoSSL or Let's Encrypt) in your hosting
+panel, which most hosts include free, and open the site again with https://.
 
 
 THE MOST SECURE SETUP

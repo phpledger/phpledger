@@ -97,7 +97,9 @@ try {
     require_once dirname(__DIR__) . '/includes/functions/security_functions.php';
     require_once dirname(__DIR__) . '/includes/functions/regional_functions.php';
     $localDemoHttp = pl_web_local_demo_http($_SERVER);
-    pl_session_start(!in_array(getenv('PL_ENV') ?: 'production', ['local', 'test'], true) && !$localDemoHttp && !pl_web_local_http($_SERVER));
+    // A copy installed at a plain http:// address cannot carry a Secure cookie at all.
+    pl_session_start(!pl_web_insecure_site() && !in_array(getenv('PL_ENV') ?: 'production', ['local', 'test'], true)
+        && !$localDemoHttp && !pl_web_local_http($_SERVER));
     pl_regional_suggestion();
     require_once dirname(__DIR__) . '/includes/bootstrap.php';
     $actorId = pl_current_user_id();

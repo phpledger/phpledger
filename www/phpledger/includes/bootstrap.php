@@ -35,8 +35,12 @@ foreach (['public_url' => 'PL_PUBLIC_URL', 'oauth_key_directory' => 'PL_OAUTH_KE
         putenv($plEnvironmentName . '=' . $plConfig[$plSetting]);
     }
 }
-if ($plConfig['password'] === '') {
-    throw new RuntimeException('A database password must be configured.');
+require_once __DIR__ . '/functions/database_platform_functions.php';
+// A database account on this same server may have no password: that is what XAMPP,
+// Laragon and MAMP install, and the owner asked for it in issue #84. Credentials for
+// a database on another server cross the network, so there one stays required.
+if ($plConfig['password'] === '' && !pl_database_local_host((string) $plConfig['host'])) {
+    throw new RuntimeException('A database password must be configured for a database on another server.');
 }
 require_once __DIR__ . '/functions/demo_functions.php';
 pl_demo_validate_configuration($plConfig);
@@ -47,7 +51,6 @@ DB::$user = $plConfig['user'];
 DB::$password = $plConfig['password'];
 DB::$encoding = 'utf8mb4';
 DB::$nested_transactions = true;
-require_once __DIR__ . '/functions/database_platform_functions.php';
 pl_database_use_dialect();
 // Persist DATETIME/TIMESTAMP events in UTC; business accounting DATE values stay unchanged.
 DB::query("SET time_zone = '+00:00'");

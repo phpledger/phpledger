@@ -113,6 +113,49 @@ function pl_web_needs_installation(): bool
     }
 }
 
+/**
+ * The address this copy was installed at. The private configuration holds it when
+ * the host sets no PL_PUBLIC_URL, and the session cookie has to be decided before
+ * the bootstrap copies that value into the environment.
+ */
+function pl_web_public_url(): string
+{
+    $url = (string) getenv('PL_PUBLIC_URL');
+    if ($url !== '') {
+        return $url;
+    }
+    require_once __DIR__ . '/installation_state_functions.php';
+    try {
+        $path = pl_install_config_path();
+        $configuration = is_file($path) ? require $path : null;
+    } catch (Throwable $error) {
+        return '';
+    }
+    return is_array($configuration) && is_string($configuration['public_url'] ?? null) ? $configuration['public_url'] : '';
+}
+
+/**
+ * PHP Ledger runs over plain HTTP, but everything that depends on a certificate
+ * does not. Setup warns and continues instead of refusing (owner decision,
+ * 20 September 2026, issue #84), and every screen repeats what is unavailable.
+ */
+function pl_web_insecure_site(): bool
+{
+    return str_starts_with(strtolower(pl_web_public_url()), 'http://');
+}
+
+/** The wording shown on every screen of such a copy, or null for an HTTPS site. */
+function pl_web_insecure_site_notice(): ?string
+{
+    if (!pl_web_insecure_site()) {
+        return null;
+    }
+    $host = strtolower((string) parse_url(pl_web_public_url(), PHP_URL_HOST));
+    return in_array($host, ['127.0.0.1', 'localhost', '[::1]'], true) || str_ends_with($host, '.localhost')
+        ? 'Local test over plain HTTP. Connections (the API, MCP and app integrations) need an HTTPS address, so they stay unavailable here.'
+        : "This site is not using HTTPS. Sign-in details and accounting data travel unencrypted, and Connections (the API, MCP and app integrations) stay unavailable. Turn on SSL in your hosting panel, for example AutoSSL or Let's Encrypt, then reopen this site with https://.";
+}
+
 /** The insecure cookie exception is limited to an explicitly enabled, local demo. */
 function pl_web_local_demo_http(array $server): bool
 {

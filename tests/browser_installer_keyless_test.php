@@ -65,18 +65,24 @@ function keyless_remove(string $directory): void
     rmdir($resolved);
 }
 
-/** One complete browser installation; $localDatabase decides whether db_test counts as "this server". */
-function keyless_install(bool $localDatabase): void
+/**
+ * One complete browser installation. $localDatabase decides whether db_test counts as
+ * "this server"; $localAccount reproduces a XAMPP-style local stack (issue #84): the
+ * account has no password at all and the database does not exist yet, so setup has to
+ * accept the empty password and create the database itself.
+ */
+function keyless_install(bool $localDatabase, bool $localAccount = false): void
 {
     global $packageRoot, $rootConfig, $ownerPassword;
     $fixture = 'pl_keyless_' . bin2hex(random_bytes(6));
     $temporary = sys_get_temp_dir() . '/' . $fixture;
-    $password = bin2hex(random_bytes(24));
+    $password = $localAccount ? '' : bin2hex(random_bytes(24));
     $server = null;
     mkdir($temporary, 0700, true);
     try {
         pl_install_connect($rootConfig);
-        foreach ([$fixture, $fixture . '_b'] as $database) {
+        // A database-level grant on a database that does not exist yet also permits creating it.
+        foreach ($localAccount ? [$fixture . '_b'] : [$fixture, $fixture . '_b'] as $database) {
             DB::query('CREATE DATABASE %b CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci', $database);
         }
         DB::query('CREATE USER %s@%s IDENTIFIED BY %s', $fixture, '%', $password);
@@ -130,6 +136,10 @@ function keyless_install(bool $localDatabase): void
         }
         $response = keyless_http($url, $database, $cookie);
         keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Review your installation'), 'The owner could not connect the empty database.');
+        if ($localAccount) {
+            keyless_assert(str_contains($response['body'], 'created the empty database'), 'Setup did not create the missing database on this server.');
+            keyless_assert(str_contains($response['body'], 'with no password'), 'Setup did not name the database account without a password.');
+        }
         $csrf = keyless_token($response);
 
         // Once bound, another visitor cannot switch this setup to a different database.
@@ -168,7 +178,7 @@ function keyless_install(bool $localDatabase): void
         keyless_assert($closed['status'] === 404 && str_contains($closed['body'], 'already installed'), 'Completed setup reopened without a key.');
         keyless_assert(!is_file($installation . '/setup-code.txt'), 'The one-time setup code outlived installation.');
         $logs = (string) file_get_contents($temporary . '/server.log');
-        keyless_assert(!str_contains($logs, $password) && !str_contains($logs, $ownerPassword), 'HTTP logs contain setup secrets.');
+        keyless_assert(($password === '' || !str_contains($logs, $password)) && !str_contains($logs, $ownerPassword), 'HTTP logs contain setup secrets.');
     } finally {
         if (is_resource($server)) {
             proc_terminate($server);
@@ -187,7 +197,8 @@ function keyless_install(bool $localDatabase): void
 try {
     keyless_install(true);
     keyless_install(false);
-    echo "Keyless browser installer: {$checks} checks passed for same-server and other-server databases.\n";
+    keyless_install(true, true);
+    echo "Keyless browser installer: {$checks} checks passed for same-server, other-server and local-account databases.\n";
 } catch (Throwable $error) {
     fwrite(STDERR, 'Keyless browser installer fixture failed: ' . $error->getMessage() . "\n");
     exit(1);

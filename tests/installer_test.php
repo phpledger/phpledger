@@ -187,10 +187,69 @@ test('uploaded folders may use dotted names but never escape the site', function
 
 test('only a database on this server skips the one-time setup code', function (): void {
     foreach (['localhost', '127.0.0.1', '::1', '[::1]', ' LOCALHOST '] as $host) {
-        assert_true(pl_install_local_database_host($host), $host);
+        assert_true(pl_database_local_host($host), $host);
     }
     foreach (['db.example.com', '10.0.0.5', '127.0.0.2', 'localhost.example.com', 'db_test'] as $host) {
-        assert_true(!pl_install_local_database_host($host), $host);
+        assert_true(!pl_database_local_host($host), $host);
+    }
+});
+
+test('a database on this server accepts the account local stacks install, elsewhere does not', function (): void {
+    // Issue #84: XAMPP, Laragon and MAMP install root with no password, and refusing
+    // that only stopped people from trying PHP Ledger on their own computer.
+    $local = ['host' => 'localhost', 'port' => '3306', 'database' => 'phpledger', 'user' => 'root', 'password' => ''];
+    assert_same(['host' => 'localhost', 'port' => 3306, 'database' => 'phpledger', 'user' => 'root', 'password' => ''],
+        pl_install_database_input($local));
+    assert_same('ledger', pl_install_database_input(array_replace($local, ['user' => 'ledger', 'password' => 'a passphrase']))['user']);
+    // A database on another server keeps both rules: its credentials cross the network.
+    $remote = array_replace($local, ['host' => 'db.example.com']);
+    assert_throws(fn () => pl_install_database_input($remote), InvalidArgumentException::class, 'host, port');
+    assert_throws(fn () => pl_install_database_input(array_replace($remote, ['user' => 'ledger'])), InvalidArgumentException::class, 'host, port');
+    assert_throws(fn () => pl_install_database_input(array_replace($remote, ['password' => 'a passphrase'])), InvalidArgumentException::class, 'not the MySQL root account');
+    assert_same('ledger', pl_install_database_input(array_replace($remote, ['user' => 'ledger', 'password' => 'a passphrase']))['user']);
+    // Every other rule is unchanged, on this server as well.
+    foreach ([['database' => 'has space'], ['database' => ''], ['user' => ''], ['port' => '0'], ['port' => '70000'],
+        ['host' => ''], ['password' => str_repeat('x', 1025)], ['password' => 'pass' . chr(0) . 'word']] as $broken) {
+        assert_throws(fn () => pl_install_database_input(array_replace($local, $broken)), InvalidArgumentException::class, 'host, port');
+    }
+});
+
+test('a site installed at a plain http address keeps working and names what a certificate would add', function (): void {
+    $previous = getenv('PL_PUBLIC_URL');
+    try {
+        putenv('PL_PUBLIC_URL=https://books.example.com');
+        assert_true(!pl_web_insecure_site());
+        assert_same(null, pl_web_insecure_site_notice());
+        putenv('PL_PUBLIC_URL=http://books.example.com');
+        assert_true(pl_web_insecure_site());
+        assert_true(str_contains((string) pl_web_insecure_site_notice(), 'not using HTTPS'));
+        assert_true(str_contains((string) pl_web_insecure_site_notice(), 'Connections'));
+        putenv('PL_PUBLIC_URL=http://localhost:8080');
+        assert_true(str_contains((string) pl_web_insecure_site_notice(), 'Local test'));
+    } finally {
+        putenv($previous === false ? 'PL_PUBLIC_URL' : 'PL_PUBLIC_URL=' . $previous);
+    }
+});
+
+test('the public address may stay plain http only when it is the address the owner is using', function (): void {
+    $previousHost = $_SERVER['HTTP_HOST'] ?? null;
+    $previousPort = $_SERVER['SERVER_PORT'] ?? null;
+    try {
+        $_SERVER['HTTP_HOST'] = 'books.example.com';
+        unset($_SERVER['SERVER_PORT'], $_SERVER['HTTPS']);
+        assert_same('http://books.example.com', pl_install_public_url('http://books.example.com/'));
+        assert_same('https://books.example.com', pl_install_public_url('https://books.example.com'));
+        assert_throws(fn () => pl_install_public_url('http://other.example.com'), InvalidArgumentException::class, 'HTTPS address');
+        $_SERVER['SERVER_PORT'] = '443';
+        assert_throws(fn () => pl_install_public_url('http://books.example.com'), InvalidArgumentException::class, 'HTTPS address');
+    } finally {
+        unset($_SERVER['HTTP_HOST'], $_SERVER['SERVER_PORT']);
+        if ($previousHost !== null) {
+            $_SERVER['HTTP_HOST'] = $previousHost;
+        }
+        if ($previousPort !== null) {
+            $_SERVER['SERVER_PORT'] = $previousPort;
+        }
     }
 });
 

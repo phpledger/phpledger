@@ -16,11 +16,16 @@ function pl_install_public_url(string $input): string
     $base = function_exists('pl_base_path') ? pl_base_path() : '';
     $host = is_array($parts) ? strtolower((string) ($parts['host'] ?? '')) : '';
     $localHost = in_array($host, ['127.0.0.1', 'localhost', '[::1]'], true) || str_ends_with($host, '.localhost');
+    // A site with no certificate yet keeps its own plain address (issue #84). Only the exact
+    // address the owner is using is accepted here, never some other http:// site, and the
+    // features that need a certificate still report themselves unavailable.
+    $ownAddress = function_exists('pl_install_suggested_public_url') ? pl_install_suggested_public_url($_SERVER) : '';
+    $ownPlainAddress = $ownAddress !== '' && str_starts_with($ownAddress, 'http://') && strcasecmp($url, $ownAddress) === 0;
     if (!is_array($parts) || !isset($parts['scheme'], $parts['host'])
         || isset($parts['user']) || isset($parts['pass']) || isset($parts['query']) || isset($parts['fragment'])
         || ($parts['path'] ?? '') !== $base || strlen($url) > 480 || preg_match('/[\x00-\x20\x7f]/', $url)
-        || ($parts['scheme'] !== 'https' && !($local && $parts['scheme'] === 'http' && $localHost))) {
-        throw new InvalidArgumentException('Enter this site\'s public HTTPS address, such as https://books.example.com' . ($base === '' ? '' : ' or https://example.com' . $base) . ', without a query or sign-in details.');
+        || ($parts['scheme'] !== 'https' && !$ownPlainAddress && !($local && $parts['scheme'] === 'http' && $localHost))) {
+        throw new InvalidArgumentException('Enter this site\'s public HTTPS address, such as https://books.example.com' . ($base === '' ? '' : ' or https://example.com' . $base) . ', without a query or sign-in details. If this site has no certificate yet, enter exactly the address shown in your browser.');
     }
     return $url;
 }

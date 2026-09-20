@@ -61,22 +61,6 @@ function pl_install_verify_key(string $expected, string $provided, int $now): vo
     pl_install_save_state(['started' => $now, 'count' => 0], 'attempts.json');
 }
 
-/**
- * Shared hosting and XAMPP keep the database on the same server. A database
- * elsewhere could belong to whoever reached a fresh upload first, so it needs
- * proof of file access (Joomla uses the same rule).
- */
-function pl_install_local_database_host(string $host): bool
-{
-    $host = strtolower(trim($host));
-    if (in_array($host, ['localhost', '127.0.0.1', '::1', '[::1]'], true)) {
-        return true;
-    }
-    // Test containers name their database service; production never reads this setting.
-    $testHosts = getenv('PL_ENV') === 'test' ? (string) getenv('PL_INSTALL_TEST_LOCAL_DB_HOSTS') : '';
-    return $testHosts !== '' && in_array($host, array_map('strtolower', array_map('trim', explode(',', $testHosts))), true);
-}
-
 /** The code is created in private storage on first use and is never shown by the web page. */
 function pl_install_remote_code(): string
 {
@@ -119,11 +103,20 @@ function pl_install_suggested_public_url(array $server): string
     return (pl_install_secure_request($server) ? 'https://' : 'http://') . strtolower($host) . pl_base_path();
 }
 
-/** @return array{host:string,port:int,database:string,user:string,password:string} */
-function pl_install_database_input(array $input, string $prefix = ''): array
+/**
+ * A database on this same server belongs to whoever already controls the machine
+ * or the hosting account, so setup accepts what XAMPP, Laragon and MAMP install
+ * by default: the `root` account, and an account with no password (issue #84).
+ * Refusing them only stopped people from trying PHP Ledger. A database on another
+ * server still needs a dedicated account with a password, because its credentials
+ * cross the network and it is no proof of controlling this website.
+ *
+ * @return array{host:string,port:int,database:string,user:string,password:string}
+ */
+function pl_install_database_input(array $input): array
 {
-    $get = static function (string $name) use ($input, $prefix): string {
-        $value = $input[$prefix . $name] ?? '';
+    $get = static function (string $name) use ($input): string {
+        $value = $input[$name] ?? '';
         return is_string($value) ? $value : '';
     };
     $host = trim($get('host'));
@@ -131,15 +124,16 @@ function pl_install_database_input(array $input, string $prefix = ''): array
     $user = trim($get('user'));
     $password = $get('password');
     $port = $get('port');
+    $local = pl_database_local_host($host);
     if ($host === '' || strlen($host) > 253 || preg_match('/[\x00-\x20;]/', $host)
         || !preg_match('/^[A-Za-z0-9_][A-Za-z0-9_$-]{0,63}$/D', $database)
         || $user === '' || strlen($user) > 128 || preg_match('/[\x00-\x1f]/', $user)
         || !ctype_digit($port) || (int) $port < 1 || (int) $port > 65535
-        || $password === '' || strlen($password) > 1024 || str_contains($password, "\0")) {
+        || ($password === '' && !$local) || strlen($password) > 1024 || str_contains($password, "\0")) {
         throw new InvalidArgumentException('Enter the database host, port, dedicated database name, user and password from your hosting panel.');
     }
-    if (strtolower($user) === 'root') {
-        throw new InvalidArgumentException('Use a dedicated database account, not the MySQL root account.');
+    if (!$local && strtolower($user) === 'root') {
+        throw new InvalidArgumentException('A database on another server needs a dedicated database account, not the MySQL root account.');
     }
     return ['host' => $host, 'port' => (int) $port, 'database' => $database, 'user' => $user, 'password' => $password];
 }
@@ -164,6 +158,54 @@ function pl_install_connect(array $config): void
     DB::$nested_transactions = true;
     pl_database_use_dialect();
     DB::query("SET time_zone = '+00:00'");
+}
+
+/**
+ * On this same server setup creates the empty database itself when it is missing,
+ * so a local owner does not have to open phpMyAdmin first (issue #84). A database
+ * on another server is never created: setup is not entitled to change a server it
+ * only holds credentials for.
+ *
+ * @return bool true when this call created the database
+ */
+function pl_install_provision_database(array $config): bool
+{
+    if (!pl_database_local_host((string) $config['host'])) {
+        return false;
+    }
+    pl_install_require_runtime();
+    require_once dirname(__DIR__, 4) . '/vendor/autoload.php';
+    DB::disconnect();
+    DB::$host = $config['host'];
+    DB::$port = (int) $config['port'];
+    // Every authenticated account may open information_schema, whatever it is granted elsewhere.
+    DB::$dbName = 'information_schema';
+    DB::$user = $config['user'];
+    DB::$password = $config['password'];
+    DB::$encoding = 'utf8mb4';
+    DB::$nested_transactions = true;
+    pl_database_use_dialect();
+    try {
+        $exists = (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = %s', $config['database']) > 0;
+    } catch (Throwable $error) {
+        // The server, the port or the credentials are wrong; the connection check reports that.
+        DB::disconnect();
+        return false;
+    }
+    if ($exists) {
+        DB::disconnect();
+        return false;
+    }
+    try {
+        DB::query('CREATE DATABASE %b CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci', $config['database']);
+    } catch (Throwable $error) {
+        // information_schema hides a database this account has no privilege on, so the
+        // two cases reach here together and the message has to cover both.
+        throw new DomainException('Setup could not use the database ' . $config['database'] . ' on this server: it does not exist and this account cannot create it, or the account has no access to it. Create an empty database with that exact name in phpMyAdmin or your hosting panel and give this user all privileges on it, then check again.');
+    } finally {
+        DB::disconnect();
+    }
+    return true;
 }
 
 /** Reject takeover and unknown databases even when the host's setup key is valid. */
@@ -355,9 +397,11 @@ function pl_install_http(): never
     $lock = null;
     $applicationLock = null;
     $localHttp = false;
+    $insecureHttp = false;
     $exposureWarning = false;
     $remoteProof = false;
     $setupCodePath = '';
+    $createdDatabase = '';
     try {
         if (!in_array($_SERVER['REQUEST_METHOD'] ?? '', ['GET', 'POST'], true)) {
             http_response_code(405);
@@ -370,10 +414,10 @@ function pl_install_http(): never
             $view = 'blocked';
             $secure = pl_install_secure_request($_SERVER);
             $localHttp = !$secure && pl_web_local_http($_SERVER);
-            if (!$secure && !$localHttp && !(in_array(getenv('PL_ENV'), ['local', 'test'], true) && getenv('PL_INSTALL_ALLOW_HTTP') === '1')) {
-                http_response_code(400);
-                throw new DomainException('Open this address with https:// before entering database details. Most hosts include a free certificate: turn on SSL (for example AutoSSL or Let\'s Encrypt) in your hosting panel. To try PHP Ledger on your own computer, use http://localhost/.');
-            }
+            // Plain HTTP used to stop setup here. It now warns and continues (owner decision,
+            // 20 September 2026, issue #84): a site without a certificate yet is still a site,
+            // and every feature that needs one reports its own unavailability.
+            $insecureHttp = !$secure && !$localHttp;
             // Before any secret exists, confirm that private folders cannot be downloaded from this website.
             $exposure = pl_install_exposure_status($_SERVER);
             if ($exposure === 'exposed') {
@@ -418,7 +462,7 @@ function pl_install_http(): never
                     if ($action === 'database') {
                         $view = 'database';
                         $candidate = pl_install_database_input($_POST);
-                        if ($key === null && !pl_install_local_database_host($candidate['host'])) {
+                        if ($key === null && !pl_database_local_host($candidate['host'])) {
                             $code = pl_install_remote_code();
                             $setupCodePath = pl_install_display_path(pl_install_directory() . '/setup-code.txt');
                             if (!pl_install_authorized($code, $_SESSION, time())) {
@@ -436,13 +480,23 @@ function pl_install_http(): never
                                 $remoteProof = false;
                             }
                         }
-                        $runtime = pl_web_text($_POST, 'separate_runtime') === '1'
-                            ? pl_install_database_input(array_merge($_POST, ['runtime_host' => $candidate['host'], 'runtime_port' => (string) $candidate['port'], 'runtime_database' => $candidate['database']]), 'runtime_')
-                            : $candidate;
+                        // Setup asked for an optional second, restricted database account until
+                        // 20 September 2026 (owner decision B24). Hosting panels grant every
+                        // user all privileges on a database, so the second account was usually
+                        // identical; the views and triggers keep the installing account as their
+                        // definer either way; and a narrower identity turns off the updater's
+                        // automatic recovery. Hardening after installation belongs to the operator
+                        // and to INSTALL.md, not to a checkbox on a first install.
+                        $runtime = $candidate;
                         $runtime['public_url'] = pl_install_public_url(pl_web_text($_POST, 'public_url'));
                         $runtime['oauth_key_directory'] = pl_install_private_path((string) (getenv('PL_OAUTH_KEY_DIRECTORY') ?: pl_install_directory() . '/oauth'));
                         $runtime['installation_directory'] = pl_install_directory();
                         pl_install_check_existing_configuration($runtime);
+                        // Never create a database for a setup already bound to a different one.
+                        if ((!isset($state['database_id']) || hash_equals((string) $state['database_id'], pl_install_database_identity($candidate)))
+                            && pl_install_provision_database($candidate)) {
+                            $createdDatabase = $candidate['database'];
+                        }
                         $schema = pl_install_check_target($candidate, $state);
                         if ($schema['status'] === 'empty' && $state === []) {
                             $state = ['format' => 1, 'database_id' => pl_install_database_identity($candidate), 'phase' => 'review', 'created_at' => gmdate('c')];

@@ -101,3 +101,11 @@ Recorded from a planning session. Sequence: [platform roadmap](PLATFORM-ROADMAP.
 | B21 | **Multiple stock locations, packs, line discounts, free-goods lines, document number series, sales-staff and area dimensions, cash on invoice and printable templates are bundled modules on the existing module contract; on-account and batch receipts are core AR behaviour.** None of these is a vertical plugin. | Module roadmap "separate plugins" and "current limits" lines amended; distribution operations remain a later directory plugin over these modules. |
 | B22 | **Queued entry gains a device sub-ledger with settlement posting** for trusted signed devices. | Architecture section extended; posting authority and review policy unchanged. |
 | B23 | **The owner's own company runs its books on PHP Ledger from 1 October 2026** as the first supervised pilot with a real month-end close; the accountant review is commissioned on that close. | Satisfies the open 1.0 pilot commitment in the roadmap; no change to release gates. |
+
+## I. Decisions taken by the owner, 20 September 2026
+
+Recorded while reviewing the browser installer for 1.1.1.
+
+| # | Decision | Consequence |
+|---|---|---|
+| B24 | **Browser setup no longer offers a separate everyday database account.** One account is entered and it becomes the configured runtime identity. Restricting privileges after installation stays an operator activity, documented in the release [INSTALL.md](../../resources/release/INSTALL.md), and may later be surfaced as advice on a system screen but never as a question during a first install. | Optional field removed from the installer database step; `pl_install_database_input()` loses its unused prefix argument. The split delivered nothing on the hosting panels the installer targets, because cPanel and Plesk grant every user all privileges on a database; the views and triggers keep the installing account as their definer regardless; and a narrower runtime identity disables the updater's automatic recovery without saying so. Precedent: WordPress, Drupal, Joomla, Nextcloud and Moodle ask for one account; MediaWiki asks for two but creates the second itself. |
