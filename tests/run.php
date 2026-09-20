@@ -101,6 +101,9 @@ if (($argv[1] ?? '') === '--suite=shell') {
 if (($argv[1] ?? '') === '--suite=lists') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'reconciliation_test.php', 'list_test.php'];
 }
+if (($argv[1] ?? '') === '--suite=modules') {
+    $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'purchasing_test.php', 'pos_test.php', 'module_test.php'];
+}
 foreach ($suites as $suite) {
     if (is_file(__DIR__ . '/' . $suite)) {
         require __DIR__ . '/' . $suite;
