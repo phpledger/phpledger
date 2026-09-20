@@ -42,7 +42,10 @@ $canCheckout = pl_can_write($company) && $company['setup_status'] === 'ready' &&
 <?php elseif ($quote !== null): ?>
     <div class="page-heading pos-heading"><div><p class="eyebrow">Point of sale</p><h1>Confirm cash sale</h1><p class="muted"><?= pl_e((string) $company['name']) ?> &middot; <?= pl_e(pl_date_label((string) $quote['request']['date'])) ?></p></div><span class="badge">Review sale</span></div>
     <?php if ($form['message'] !== ''): ?><div class="alert" role="alert" tabindex="-1" data-form-error><strong>Check this sale</strong><p><?= pl_e((string) $form['message']) ?></p><p>Your items and cash amount are preserved. Correct them before confirming again.</p></div><?php endif; ?>
-    <form action="<?= pl_e(pl_url('/pos/checkout')) ?>" method="post" class="pos-review-grid" data-pos-payment data-total="<?= pl_e((string) $quote['total']) ?>">
+    <?php /* Dropping the total to two places is lossless only because pl_pos_catalog() refuses a
+             price finer than cash; app.js compares the tender against this value and Exact amount
+             types it into a field that now accepts two decimals. Change neither alone. */ ?>
+    <form action="<?= pl_e(pl_url('/pos/checkout')) ?>" method="post" class="pos-review-grid" data-pos-payment data-total="<?= pl_e(bcadd((string) $quote['total'], '0', 2)) ?>">
         <button type="submit" disabled hidden aria-hidden="true" tabindex="-1">Editing cash</button>
         <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?>
         <input type="hidden" name="checkout_key" value="<?= pl_e((string) $quote['request']['checkout_key']) ?>">
@@ -58,7 +61,8 @@ $canCheckout = pl_can_write($company) && $company['setup_status'] === 'ready' &&
             <p class="muted pos-small">Prices verified against the sample catalog. Reviewing does not change the books.</p>
         </section>
         <aside class="panel pos-payment" aria-labelledby="pos-cash-title"><p class="eyebrow">Cash payment</p><h2 id="pos-cash-title">Amount due</h2><p class="pos-due amount"><span><?= pl_e((string) $company['currency']) ?></span><?= pl_e(pl_money((string) $quote['total'])) ?></p>
-            <label class="field">Cash received (<?= pl_e((string) $company['currency']) ?>)<input type="text" inputmode="decimal" name="cash_received" maxlength="21" pattern="(?:0|[1-9][0-9]{0,15})(?:\.[0-9]{1,4})?" required value="<?= pl_e(pl_web_text($input, 'cash_received')) ?>" placeholder="0.00" data-pos-cash autocomplete="off"><span class="muted">Use a decimal point, without grouping separators.</span></label>
+            <?php /* Two places is what a person can tender; pl_cash_amount() still accepts a retry's 20.0000. */ ?>
+            <label class="field">Cash received (<?= pl_e((string) $company['currency']) ?>)<input type="text" inputmode="decimal" name="cash_received" maxlength="21" pattern="(?:0|[1-9][0-9]{0,15})(?:\.[0-9]{1,2})?" required value="<?= pl_e(pl_web_text($input, 'cash_received')) ?>" placeholder="0.00" data-pos-cash autocomplete="off"><span class="muted">Use a decimal point and at most two decimal places, without grouping separators.</span></label>
             <button type="button" class="btn btn-secondary" data-pos-exact>Exact amount</button>
             <p class="pos-change" aria-live="polite" data-pos-change>Enter cash received to see change.</p>
             <button type="submit" name="checkout_intent" value="record_cash_sale" class="btn btn-primary" data-pos-checkout<?= !$canCheckout ? ' disabled' : '' ?>>Record cash sale</button>

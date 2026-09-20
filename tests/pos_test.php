@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__) . '/www/phpledger/includes/functions/web_functions.php';
 
 function pos_fixture(): array
 {
@@ -154,7 +155,10 @@ test('POS rejects forged prices quantities stale catalog and insufficient cash w
     $bad = $input; $bad['items'] = [['sku' => 'NOTE-A5', 'quantity' => '99'], ['sku' => 'PEN-BLUE', 'quantity' => '99'], ['sku' => 'TEA-80', 'quantity' => '99']]; $badInputs[] = $bad;
     $bad = $input; $bad['items'][1]['sku'] = 'NOTE-A5'; $badInputs[] = $bad;
     $bad = $input; $bad['items'][0]['sku'] = 'UNKNOWN'; $badInputs[] = $bad;
-    $bad = $input; $bad['cash_received'] = '12.7499'; $badInputs[] = $bad;
+    // 12.7400 stays a whole-coin tender, so this keeps exercising the insufficient-cash guard
+    // rather than falling through to the tender-precision one the next line covers.
+    $bad = $input; $bad['cash_received'] = '12.7400'; $badInputs[] = $bad;
+    $bad = $input; $bad['cash_received'] = '20.0055'; $badInputs[] = $bad;
     $bad = $input; $bad['catalog_digest'] = str_repeat('0', 64); $badInputs[] = $bad;
     foreach ($badInputs as $bad) { assert_throws(fn () => pl_checkout_pos($f['actor_id'], $f['company_id'], $f['book_id'], $bad), DomainException::class); }
     assert_same(0, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_documents WHERE book_id = %i', $f['book_id']));
@@ -241,4 +245,31 @@ test('POS committed identical recovery works when the current catalog is unavail
     assert_same($sale['document_id'], $retry['id']); assert_same('12.7500', $retry['total']);
     assert_same(1, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_pos_sales WHERE book_id = %i', $f['book_id']));
     assert_same(1, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE book_id = %i', $f['book_id']));
+});
+
+test('POS refuses a tender finer than cash and shows one precision on the receipt', function (): void {
+    $f = pos_fixture();
+    // Issue #88: ninety-nine coffee packs at 12.75 make the reported 1,262.25 sale total.
+    $cart = ['checkout_key' => bin2hex(random_bytes(24)), 'catalog_digest' => pl_pos_catalog()['digest'],
+        'date' => '2026-09-14', 'items' => [['sku' => 'COFFEE-250', 'quantity' => '99']]];
+    assert_same('1262.2500', pl_pos_quote($cart)['total']);
+    $finer = $cart + ['cash_received' => '1262.2555'];
+    assert_throws(fn () => pl_pos_normalize_checkout($finer), DomainException::class, 'whole notes and coins');
+    assert_throws(fn () => pl_pos_recovery($f['company_id'], $f['book_id'], $finer), DomainException::class, 'whole notes and coins');
+    assert_throws(fn () => pl_checkout_pos($f['actor_id'], $f['company_id'], $f['book_id'], $finer), DomainException::class, 'whole notes and coins');
+    foreach (['pl_documents', 'pl_journals', 'pl_pos_sales'] as $table) {
+        assert_same(0, (int) DB::queryFirstField('SELECT COUNT(*) FROM %b WHERE book_id = %i', $table, $f['book_id']));
+    }
+    $sale = pl_checkout_pos($f['actor_id'], $f['company_id'], $f['book_id'], $cart + ['cash_received' => '1300']);
+    assert_same('1262.2500', $sale['total']);
+    assert_same('1300.0000', $sale['cash_received']);
+    assert_same('37.7500', $sale['change_due']);
+    assert_same(['1,262.25', '1,300.00', '37.75'], array_map('pl_money', [$sale['total'], $sale['cash_received'], $sale['change_due']]));
+});
+
+test('POS sample prices stay in whole minor units so every cart total is tenderable', function (): void {
+    foreach (pl_pos_catalog()['products'] as $product) {
+        $price = pl_amount($product['unit_price']);
+        assert_same($price, pl_cash_amount($product['unit_price']), $product['sku'] . ' is priced more finely than cash.');
+    }
 });

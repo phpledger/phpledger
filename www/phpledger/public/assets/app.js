@@ -534,8 +534,10 @@ document.querySelectorAll('[data-forecast-chart]').forEach(canvas => {
         let submitting = false;
         const update = () => {
             const received = money(cash.value);
-            const enough = received !== null && received >= total;
-            payment.querySelector('[data-pos-change]').textContent = received === null ? 'Enter cash received to see change.' : enough ? 'Change: ' + root.dataset.currency + ' ' + formatted(received - total) : 'Amount still due: ' + root.dataset.currency + ' ' + formatted(total - received);
+            // Cash exists in whole minor units; this scale is 1e4, so one minor unit is 100n.
+            const tenderable = received !== null && received % 100n === 0n;
+            const enough = tenderable && received >= total;
+            payment.querySelector('[data-pos-change]').textContent = received === null ? 'Enter cash received to see change.' : !tenderable ? 'Cash is counted in notes and coins — use at most two decimal places.' : enough ? 'Change: ' + root.dataset.currency + ' ' + formatted(received - total) : 'Amount still due: ' + root.dataset.currency + ' ' + formatted(total - received);
             checkout.disabled = unavailable || !enough;
         };
         cash.addEventListener('input', update);

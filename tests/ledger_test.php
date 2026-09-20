@@ -31,6 +31,23 @@ test('financial amounts preserve four decimals without float conversion', functi
     assert_throws(fn() => pl_amount(0.1), TypeError::class);
 });
 
+test('a cash tender is held to whole minor units while the ledger keeps four places', function (): void {
+    assert_same('0.0000', pl_cash_amount('0'));
+    assert_same('20.0000', pl_cash_amount('20'));
+    assert_same('20.0000', pl_cash_amount('20.00'));
+    // A canonical retry re-submits the stored four-place string; its value is still whole cash.
+    assert_same('20.0000', pl_cash_amount('20.0000'));
+    assert_same('1262.2500', pl_cash_amount('1262.25'));
+    assert_same('9999999999999999.9900', pl_cash_amount('9999999999999999.99'));
+    foreach (['1262.2555', '0.001', '0.0001', '12.7499', '0.9999', '1.005'] as $finer) {
+        assert_throws(fn() => pl_cash_amount($finer), DomainException::class, 'whole notes and coins');
+    }
+    foreach (['-1', '+1', '01.00', '.1', '1.', '1,000', '1e3', ' 1', '10000000000000000', 'NaN'] as $bad) {
+        assert_throws(fn() => pl_cash_amount($bad), DomainException::class);
+    }
+    assert_throws(fn() => pl_cash_amount(0.1), TypeError::class);
+});
+
 test('company setup creates one book, an owner, an annual period and scoped template', function (): void {
     $fixture = ledger_fixture('PKR', '2026-09-14', '06-30');
     $period = DB::queryFirstRow('SELECT start_date, end_date FROM pl_periods WHERE id = %i', $fixture['period_id']);

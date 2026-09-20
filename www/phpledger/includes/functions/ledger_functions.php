@@ -10,6 +10,27 @@ function pl_amount(string $amount): string
     return bcadd($amount, '0', 4);
 }
 
+/**
+ * Is a normalized amount payable in coins? Every currency in pl_base_currency_options()
+ * has two minor-unit decimals, so the scale is a constant; the first zero-decimal (JPY)
+ * or three-decimal (KWD) currency added there has to make it depend on the book. BCMath
+ * truncates, so bcadd(..., 2) is the value dropped to whole minor units.
+ */
+function pl_whole_minor_units(string $amount): bool
+{
+    return bccomp($amount, bcadd($amount, '0', 2), 4) === 0;
+}
+
+/** A tender is physical money: reject cash the drawer could not hold or give back. */
+function pl_cash_amount(string $amount): string
+{
+    $value = pl_amount($amount);
+    if (!pl_whole_minor_units($value)) {
+        throw new DomainException('Enter cash in whole notes and coins, with at most two decimal places.');
+    }
+    return $value;
+}
+
 function pl_ledger_date(string $date): string
 {
     $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date, new DateTimeZone('UTC'));

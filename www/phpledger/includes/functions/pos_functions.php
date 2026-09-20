@@ -20,6 +20,11 @@ function pl_pos_catalog(): array
             || bccomp(pl_amount($product['unit_price']), '0', 4) <= 0) {
             throw new RuntimeException('The sample shop catalog has invalid products.');
         }
+        // A whole-minor-unit price times a whole quantity keeps every cart total tenderable,
+        // so cash received and change can never need more precision than the drawer holds.
+        if (!pl_whole_minor_units(pl_amount($product['unit_price']))) {
+            throw new RuntimeException('The sample shop catalog prices goods more finely than cash.');
+        }
         foreach (['name', 'category', 'description', 'mark'] as $field) {
             pl_ledger_text($product[$field] ?? null, 'Catalog ' . $field, 200);
         }
@@ -77,7 +82,7 @@ function pl_pos_normalize_checkout(array $input): array
         'catalog_digest' => $digest,
         'date' => pl_ledger_date(pl_ledger_text($input['date'] ?? null, 'Sale date', 10)),
         'items' => array_values($items),
-        'cash_received' => pl_amount(pl_ledger_text($input['cash_received'] ?? null, 'Cash received', 21)),
+        'cash_received' => pl_cash_amount(pl_ledger_text($input['cash_received'] ?? null, 'Cash received', 21)),
     ];
 }
 
