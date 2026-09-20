@@ -32,11 +32,15 @@ Use the backup/maintenance procedure below and run migrations before reopening t
 
 A files-only upgrade: no migration, no receipt change, no accounting change. It fixes the in-app updater ([issue #90](https://github.com/phpledger/phpledger/issues/90)), and the 1.1.2 notice below no longer applies from this release onward: install it from `/maintenance.php` with `phpledger-1.1.3.update.json` once that metadata is signed (the pinned publisher key applies; the fix is in the new release's files, so the copied runtime of your installed 1.1.2 completes the update), or replace the files with the manual procedure below. `public/maintenance.php` is unchanged.
 
-## From 1.1.0 or 1.1.1 to 1.1.3
+## From 1.1.1 to 1.1.3
 
-**Use the manual procedure below, not `/maintenance.php`.** Replace the files and run `php www/phpledger/install/migrate.php` once; from 1.1.0 that also applies migration 034 (the stock-locations tables and the optional module, which stays off).
+Install it from `/maintenance.php` with the publisher key pinned: the update applies migration 034 (the stock-locations tables and the optional module, which stays off) and completes. That path was driven end to end on a copy of the published 1.1.1 package before this release was published. The manual procedure below works too.
 
-An in-app update from 1.1.0 stops in its migrate step and restores the installation to 1.1.0 by itself, losing nothing: the installed release's copy of the database helpers is loaded for the whole operation, and the 1.1.0 copy lacks a function the 1.1.3 migrations call ([issue #91](https://github.com/phpledger/phpledger/issues/91)). The same limit applies to any installation more than one release behind. From 1.1.1 the in-app path is not yet proven and is documented here once it is.
+## From 1.1.0 to 1.1.3
+
+**Use the manual procedure below, not `/maintenance.php`.** Replace the files and run `php www/phpledger/install/migrate.php` once, which also applies migration 034.
+
+An in-app update from 1.1.0 stops in its migrate step and restores the installation to 1.1.0 by itself, losing nothing: the installed release's copy of the database helpers is loaded for the whole operation, and the 1.1.0 copy lacks a function the 1.1.3 migrations call ([issue #91](https://github.com/phpledger/phpledger/issues/91)). The same limit applies to any installation more than one release behind.
 
 ## From 1.1.1 to 1.1.2
 

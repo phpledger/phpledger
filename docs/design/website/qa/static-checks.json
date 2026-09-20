@@ -935,9 +935,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 37643,
-        "eager": 349073,
-        "total": 598710
+        "html": 37654,
+        "eager": 349084,
+        "total": 598721
       },
       "budgets": {
         "eager": 700000,
@@ -970,7 +970,7 @@
         },
         {
           "file": "download/index.html",
-          "bytes": 37643
+          "bytes": 37654
         }
       ],
       "lazyAssets": [
@@ -4355,9 +4355,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22873,
-        "eager": 334303,
-        "total": 423008
+        "html": 22878,
+        "eager": 334308,
+        "total": 423013
       },
       "budgets": {
         "eager": null,
@@ -4390,7 +4390,7 @@
         },
         {
           "file": "news/1-1-2/index.html",
-          "bytes": 22873
+          "bytes": 22878
         }
       ],
       "lazyAssets": [
@@ -4437,9 +4437,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 21786,
-        "eager": 333216,
-        "total": 421921
+        "html": 21751,
+        "eager": 333181,
+        "total": 421886
       },
       "budgets": {
         "eager": null,
@@ -4472,7 +4472,7 @@
         },
         {
           "file": "news/1-1-3/index.html",
-          "bytes": 21786
+          "bytes": 21751
         }
       ],
       "lazyAssets": [
@@ -5543,9 +5543,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 35773,
-        "eager": 347203,
-        "total": 435908
+        "html": 35778,
+        "eager": 347208,
+        "total": 435913
       },
       "budgets": {
         "eager": 650000,
@@ -5578,7 +5578,7 @@
         },
         {
           "file": "roadmap/index.html",
-          "bytes": 35773
+          "bytes": 35778
         }
       ],
       "lazyAssets": [
