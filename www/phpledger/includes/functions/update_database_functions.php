@@ -18,7 +18,12 @@ function pl_update_database_connect(string $root): void
     if ($config['password'] === '') { throw new RuntimeException('Database credentials are unavailable.'); }
     DB::$host = $config['host']; DB::$port = (int) $config['port']; DB::$dbName = $config['database'];
     DB::$user = $config['user']; DB::$password = $config['password']; DB::$encoding = 'utf8mb4'; DB::$nested_transactions = true;
-    require_once __DIR__ . '/database_platform_functions.php';
+    // Whichever copy of the platform helpers loaded first stays: this runtime's copy here, the
+    // application's when a caller already has it. The new release's install_functions.php does
+    // the same, so the migrate and verify phases never redeclare them (issue #90). The runtime
+    // copy is the installed release's; database_platform_functions.php documents the one-release
+    // compatibility rule that makes that safe.
+    if (!function_exists('pl_database_platform')) { require_once __DIR__ . '/database_platform_functions.php'; }
     pl_database_use_dialect();
     DB::query("SET time_zone = '+00:00'");
     if (!pl_database_platform(pl_database_server_version())['supported']) { throw new DomainException('Automatic updates require ' . pl_database_requirement() . '.'); }
