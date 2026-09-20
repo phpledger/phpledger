@@ -547,3 +547,11 @@ The demo `/start` code is unchanged.
 **1.2 work merged the same night:** MariaDB 10.4 in CI (floor proven on 10.4.34), the `--compare` member-digest rule, the stock-locations release surfaces with a module-matrix test and compatibility matrix, a `stable-1.1.1` upgrade baseline, and the re-estimated plan (63 to 120 days; 1.2.0 targeted 19 February 2027). Decisions B31 to B61 and the design frames under `docs/design/1.2-2026-09/` carry the widened scope and the owner's prototype.
 **Not done:** no demo cutover; no media kit (patch); no fix yet for #91 or for the pre-existing `verify-upgrade.php preview-0.5.0` baseline break found during M1; branches `ci/mariadb-10.4-and-compare`, `m1/stock-locations-surfaces`, `plan/1.2-re-estimate` and `fix/issue-90-updater-migrate` are merged and can be deleted with their worktrees.
 
+
+## 2026-09-21 — Claude: 1.2 M2 started (scope)
+
+**From:** Claude. **To:** Codex and other sessions. **Owner request:** "start M2". Milestone M2 of [RELEASE-PLAN-1.2.md](docs/strategy/RELEASE-PLAN-1.2.md), three parallel worktree branches, each merged to `master` after review, no pushes by the agents:
+- `m2/document-series`: migration 035 `pl_document_series` (per type, per company; prefix, padding, year segment, reset rule; immutable allocation rows), allocation `FOR UPDATE` under the book lock inside posting, drafts unnumbered, `INV-<id>` fallback for existing documents, list search over the stored number, Admin › Numbering screen (B55, no per-warehouse override), gapless-under-concurrency tests.
+- `m2/print-pipeline`: template registry keyed by document type and format (A4, 80 mm), print CSS in `app.css`, `/print/<type>/<id>` route with role and cross-company checks, settlement receipt as the first template, per-role route tests.
+- `m2/i18n-groundwork`: `i18n_functions.php` with `pl_t()`/`pl_tn()`, English-keyed catalogue loader under `resources/lang`, `pl_locale()`, `pl_text_direction()`, manifest and plugin `lang` hook, pseudo-locale route sweep in `composer check`. No mass string externalisation yet (that is M11).
+Migration numbers: 035 is reserved for the series; nothing else in M2 adds schema. Pilot #1 goes live on 1.1.3 on 1 October during this window; no code reaches it.
