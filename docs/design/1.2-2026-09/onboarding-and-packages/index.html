@@ -1,0 +1,72 @@
+<!--
+  PHP Ledger — 1.2 design mockup
+  Index of the onboarding + packages frames for decisions B44, B49, B50,
+  B51, B52 (docs/strategy/DECISION-REGISTER.md sections L and M).
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Onboarding &amp; Packages — 1.2 design mockups</title>
+<style>
+@font-face{font-family:"Inter Variable";src:url("../../../../www/phpledger/public/assets/fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap;}
+:root{
+  --canvas:#FAF9F7; --surface:#FFFFFF; --surface-subtle:#F4F3F0; --border:#E8E6E1; --border-strong:#8C8880;
+  --ink:#1F1E1C; --ink-muted:#6B6862; --ink-faint:#706D66;
+  --brand-navy:#0C2052; --brand-blue:#4656E8; --brand-selected:#EEF0FF;
+  --success:#1F7A4D; --success-bg:#E8F4EE; --warning:#9A6200; --warning-bg:#FBF1DE;
+  --radius-control:6px; --radius-panel:10px;
+  --font-sans:"Inter Variable",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.wrap{max-width:980px;margin:0 auto;padding:56px 24px 90px;}
+h1{font-size:26px;font-weight:650;letter-spacing:-.01em;margin:0 0 8px;}
+.lede{font-size:14px;color:var(--ink-muted);line-height:1.6;max-width:74ch;margin:0 0 6px;}
+.lede a{color:var(--brand-blue);}
+.meta{font-size:12px;color:var(--ink-faint);margin:0 0 36px;}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-faint);margin:34px 0 14px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;text-decoration:none;color:inherit;}
+.card:hover{border-color:var(--brand-blue);}
+.card .n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:var(--brand-selected);color:var(--brand-navy);font-size:10.5px;font-weight:700;margin-bottom:8px;}
+.card h3{margin:0 0 5px;font-size:14px;font-weight:650;}
+.card p{margin:0;font-size:12px;color:var(--ink-muted);line-height:1.5;}
+.decisions-link{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--brand-blue);border-radius:10px;padding:13px 18px;text-decoration:none;color:var(--brand-navy);font-weight:650;font-size:13.5px;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Onboarding &amp; Packages — 1.2 design mockups</h1>
+  <p class="lede">Static HTML frames (1280&times;720, real design tokens) for two screens the owner decided on 21 September 2026: the redesigned "onboard a business" wizard and the Packages screen. See <a href="DECISIONS.md">DECISIONS.md</a> for every open UI/UX question, the option taken, and how to reverse it.</p>
+  <p class="meta">docs/design/1.2-2026-09/onboarding-and-packages &middot; decisions B44, B49, B50, B51, B52 (docs/strategy/DECISION-REGISTER.md, sections L and M)</p>
+
+  <h2>Onboard a business — Workbench-style wizard (B50)</h2>
+  <div class="grid">
+    <a class="card" href="onboarding-1-start.html"><span class="n">1</span><h3>Start</h3><p>New business / bring past records / explore a sample &mdash; the top-level choice, as a five-stage tray.</p></a>
+    <a class="card" href="onboarding-2-business.html"><span class="n">2</span><h3>Business</h3><p>Name, currency, accounting start, financial year, and a proposed "country package" selector.</p></a>
+    <a class="card" href="onboarding-3-source.html"><span class="n">3</span><h3>Source</h3><p>The new decision: blank business, skeleton from a sample, or the full sample &mdash; with a sample-company picker.</p></a>
+    <a class="card" href="onboarding-4-review.html"><span class="n">4</span><h3>Review</h3><p>Not-created-yet summary, the exact chart snapshot, and what a skeleton brings in versus omits.</p></a>
+    <a class="card" href="onboarding-5-ready.html"><span class="n">5</span><h3>Ready</h3><p>The finished-business moment, mirroring the installer's own "done" screen.</p></a>
+  </div>
+
+  <h2>Packages — directory of cards (B44, B49, B51, B52)</h2>
+  <div class="grid">
+    <a class="card" href="packages-installed.html"><span class="n">A</span><h3>Installed</h3><p>The seven bundled modules as cards: Verified badges, Active state, auto-update switches.</p></a>
+    <a class="card" href="packages-directory.html"><span class="n">B</span><h3>Directory</h3><p>The fictional Pharmacy POS plugin, paired with the fictional Pakistan pharmacy sample &mdash; both Unverified.</p></a>
+    <a class="card" href="packages-upload-confirm.html"><span class="n">C</span><h3>Upload confirmation</h3><p>The Unverified-upload confirmation page: manifest preview, three explicit checks, no auto-update.</p></a>
+  </div>
+
+  <h2>Source material read for these frames</h2>
+  <div class="grid">
+    <div class="card" style="cursor:default;"><h3>Workbench installer</h3><p>docs/design/installer-2026-09/direction-b-workbench/index.html &mdash; the tray/tile/challenge pattern reused for onboarding.</p></div>
+    <div class="card" style="cursor:default;"><h3>Current onboarding</h3><p>www/phpledger/templates/views/onboarding.php, install.php, and pl_setup_company() / pl_demo_pack_catalog() in the includes/functions files.</p></div>
+    <div class="card" style="cursor:default;"><h3>Module manifests</h3><p>resources/modules/*.json and resources/demo-packs/catalog.json &mdash; real ids, versions, capabilities and sample names.</p></div>
+    <div class="card" style="cursor:default;"><h3>Awan prototype</h3><p>docs/design/1.2-2026-09/awan-prototype/Awan-prototype.html &mdash; shell, badges, tabs-seg and option-card patterns, adopted where useful.</p></div>
+  </div>
+
+  <a class="decisions-link" href="DECISIONS.md">Read DECISIONS.md &rarr;</a>
+</div>
+</body>
+</html>

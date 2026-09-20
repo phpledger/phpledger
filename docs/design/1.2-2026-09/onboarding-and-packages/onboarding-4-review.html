@@ -1,0 +1,192 @@
+<!--
+  PHP Ledger — 1.2 design mockup
+  Onboarding, redesigned to the Workbench pattern (decision B50)
+  Screen 4 of 5: Review
+
+  Mirrors the existing preview panel in templates/views/onboarding.php
+  ($preview branch: setup-preview-panel, setup-summary dl, starter chart
+  table) and pl_setup_company()'s template_digest confirmation contract —
+  nothing is created until this stage is confirmed. Extends the summary with
+  the new source choice and, when a sample skeleton/full pack is chosen,
+  what it contributes (chart, reports, forms, plugins).
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Onboarding — 4. Review (1.2 design mockup)</title>
+<style>
+@font-face{font-family:"Inter Variable";src:url("../../../../www/phpledger/public/assets/fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap;}
+:root{
+  --canvas:#FAF9F7; --surface:#FFFFFF; --surface-subtle:#F4F3F0; --border:#E8E6E1; --border-strong:#8C8880;
+  --ink:#1F1E1C; --ink-muted:#6B6862; --ink-faint:#706D66;
+  --brand-navy:#0C2052; --brand-blue:#4656E8; --brand-selected:#EEF0FF;
+  --success:#1F7A4D; --success-bg:#E8F4EE; --warning:#9A6200; --warning-bg:#FBF1DE; --danger:#B42318; --danger-bg:#FDECEA;
+  --radius-control:6px; --radius-panel:10px; --control-h:34px;
+  --font-sans:"Inter Variable",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1320px;margin:0 auto;padding:48px 20px 96px;}
+.harness-head{color:#c8cad2;margin-bottom:32px;max-width:820px;}
+.harness-head .kicker{font-size:12.5px;color:#8a8d99;margin:0 0 8px;}
+.harness-head h1{font-size:22px;margin:0 0 10px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13.5px;line-height:1.6;color:#aeb1bd;margin:0 0 8px;}
+.harness-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.harness-nav a{font-size:12px;color:#c8cad2;background:#20222b;border:1px solid #33353f;border-radius:999px;padding:5px 12px;text-decoration:none;}
+.harness-nav a.is-current{background:var(--brand-blue);border-color:var(--brand-blue);color:#fff;}
+.frame{width:1280px;height:720px;overflow:hidden;position:relative;background:var(--canvas);border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);padding:34px 42px;display:flex;flex-direction:column;color:var(--ink);font-family:var(--font-sans);}
+
+.bench-chrome{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.bench-logo{height:22px;width:auto;display:block;}
+.bench-tray{display:flex;gap:6px;align-items:center;position:relative;}
+.bench-tray::before{content:"";position:absolute;left:10px;right:10px;top:50%;height:1px;background:var(--border);z-index:0;}
+.tray-slot{height:21px;min-width:76px;padding:0 9px;border-radius:5px;border:1.5px solid var(--border-strong);background:var(--surface);position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;font-weight:700;color:var(--ink-muted);}
+.tray-slot.is-done{background:var(--brand-navy);border-color:var(--brand-navy);color:#fff;}
+.tray-slot.is-current{border-color:var(--brand-blue);background:var(--brand-selected);color:var(--brand-navy);}
+.tray-slot.is-pending{opacity:.55;}
+.ok-glyph{width:9px;height:9px;color:#fff;}
+
+.bench-head{flex:0 0 auto;margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.bench-heading{margin:0 0 5px;color:var(--ink);font-weight:650;letter-spacing:-.01em;}
+.bench-heading.size-md{font-size:20px;line-height:26px;}
+.bench-sub{margin:0;font-size:13px;line-height:1.5;color:var(--ink-muted);max-width:70ch;}
+.eyebrow{font-size:11.5px;font-weight:700;color:var(--brand-blue);letter-spacing:.02em;text-transform:uppercase;margin:0 0 6px;}
+.badge-notcreated{flex:none;font-size:11px;font-weight:700;color:var(--warning);background:var(--warning-bg);border-radius:999px;padding:5px 12px;}
+
+.bench-body{flex:1 1 auto;min-height:0;display:flex;gap:22px;}
+.review-col{display:flex;flex-direction:column;gap:12px;min-width:0;}
+.review-col.left{flex:1.05;}
+.review-col.right{flex:.95;}
+
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface);}
+.summary-cell{padding:10px 14px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
+.summary-grid .summary-cell:nth-child(2n){border-right:none;}
+.summary-cell dt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--ink-faint);margin:0 0 3px;}
+.summary-cell dd{font-size:12.5px;font-weight:600;color:var(--ink);margin:0;}
+
+.contents-card{background:var(--brand-selected);border:1px solid #c7cdf7;border-radius:10px;padding:14px 16px;}
+.contents-card h3{margin:0 0 4px;font-size:12.5px;color:var(--brand-navy);}
+.contents-card p{margin:0 0 8px;font-size:11.5px;color:var(--brand-navy);line-height:1.5;}
+.contents-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.contents-list li{font-size:11px;color:var(--brand-navy);display:flex;align-items:center;gap:6px;}
+.contents-list li::before{content:"";width:5px;height:5px;border-radius:999px;background:var(--brand-navy);flex:none;}
+.contents-omit{margin-top:8px;font-size:10.5px;color:var(--brand-navy);opacity:.75;}
+
+.table-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;flex:1;min-height:0;display:flex;flex-direction:column;background:var(--surface);}
+.table-head{padding:9px 14px;border-bottom:1px solid var(--border);background:var(--surface-subtle);font-size:11px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.02em;}
+table{width:100%;border-collapse:collapse;font-size:11.5px;}
+thead th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.02em;color:var(--ink-faint);padding:6px 14px;border-bottom:1px solid var(--border);}
+tbody td{padding:5px 14px;border-bottom:1px solid var(--border);color:var(--ink);}
+tbody tr:last-child td{border-bottom:none;}
+.code{font-family:ui-monospace,"SF Mono",monospace;font-size:11px;color:var(--ink-muted);}
+
+.bench-actions{flex:0 0 auto;margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.bench-actions .fine-print{font-size:11.5px;color:var(--ink-faint);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;height:var(--control-h);padding-inline:17px;border-radius:var(--radius-control);font-size:13px;font-weight:600;border:1px solid transparent;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.btn-primary{background:var(--brand-navy);color:#fff;}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong);}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="ico-check" viewBox="0 0 16 16"><path d="M3.5 8.3l3.1 3.1L12.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger — 1.2 design mockup &middot; docs/design/1.2-2026-09/onboarding-and-packages</p>
+    <h1>Onboard a business — 4. Review</h1>
+    <p>Same "not created yet" contract as today's preview step: <code>pl_setup_company()</code> checks a <code>template_digest</code> against the exact chart snapshot shown here before anything is written. Extends the existing summary with the source choice and what the chosen skeleton contributes.</p>
+    <div class="harness-nav">
+      <a href="index.html">&larr; All frames</a>
+      <a href="onboarding-1-start.html">1. Start</a>
+      <a href="onboarding-2-business.html">2. Business</a>
+      <a href="onboarding-3-source.html">3. Source</a>
+      <a class="is-current" href="onboarding-4-review.html">4. Review</a>
+      <a href="onboarding-5-ready.html">5. Ready</a>
+    </div>
+  </div>
+
+  <div class="frame">
+    <div class="bench-chrome">
+      <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+      <div class="bench-tray">
+        <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg>Start</div>
+        <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg>Business</div>
+        <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg>Source</div>
+        <div class="tray-slot is-current">Review</div>
+        <div class="tray-slot is-pending">Ready</div>
+      </div>
+    </div>
+    <div class="bench-head">
+      <div>
+        <p class="eyebrow">Business setup &middot; Stage 4 of 5</p>
+        <h1 class="bench-heading size-md">Check everything before it's created</h1>
+        <p class="bench-sub">This is the last chance to change anything. The chart snapshot below is recorded exactly as shown.</p>
+      </div>
+      <span class="badge-notcreated">Not created yet</span>
+    </div>
+    <div class="bench-body">
+      <div class="review-col left">
+        <dl class="summary-grid">
+          <div class="summary-cell"><dt>Starting point</dt><dd>New business</dd></div>
+          <div class="summary-cell"><dt>Source</dt><dd>Skeleton from a sample</dd></div>
+          <div class="summary-cell"><dt>Business name</dt><dd>Noor Traders</dd></div>
+          <div class="summary-cell"><dt>Base currency</dt><dd>PKR</dd></div>
+          <div class="summary-cell"><dt>Accounting start</dt><dd>1 October 2026</dd></div>
+          <div class="summary-cell"><dt>Financial year end</dt><dd>30 June</dd></div>
+          <div class="summary-cell"><dt>Sample used for skeleton</dt><dd>Harbour Trade (Wholesale / trader)</dd></div>
+          <div class="summary-cell"><dt>Country package</dt><dd>Pakistan &middot; Wholesale trader (proposed)</dd></div>
+        </dl>
+        <div class="table-wrap">
+          <div class="table-head">Accounts that will be created &middot; from Harbour Trade's chart</div>
+          <table>
+            <thead><tr><th>Code</th><th>Account</th><th>Type</th></tr></thead>
+            <tbody>
+              <tr><td class="code">1000</td><td>Cash and bank</td><td>Asset</td></tr>
+              <tr><td class="code">1100</td><td>Trade receivables</td><td>Asset</td></tr>
+              <tr><td class="code">1300</td><td>Inventory &mdash; goods for resale</td><td>Asset</td></tr>
+              <tr><td class="code">2100</td><td>Trade payables</td><td>Liability</td></tr>
+              <tr><td class="code">4000</td><td>Sales &mdash; wholesale</td><td>Income</td></tr>
+              <tr><td class="code">5000</td><td>Cost of goods sold</td><td>Expense</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="review-col right">
+        <div class="contents-card">
+          <h3>What the skeleton brings in</h3>
+          <p>Harbour Trade's structure, without its 72 posted journals or 3 open drafts.</p>
+          <ul class="contents-list">
+            <li>38 chart-of-accounts entries</li>
+            <li>Trade-pricing report views</li>
+            <li>Invoice &amp; bill layouts</li>
+            <li>Inventory + purchasing plugins</li>
+            <li>Customer &amp; supplier records</li>
+            <li>Zero transactions</li>
+          </ul>
+          <p class="contents-omit">Not brought in: the sample's 72 journals, 3 drafts and 36 scenario checkpoints. See ../DECISIONS.md, item 3, on whether customer/supplier master records count as "structure."</p>
+        </div>
+        <div class="contents-card" style="background:var(--surface-subtle);border-color:var(--border);">
+          <h3 style="color:var(--ink);">Plugins this source needs</h3>
+          <p style="color:var(--ink-muted);">Installed and active automatically, since the skeleton depends on them. You can deactivate any of them after setup from Admin &gt; Packages.</p>
+          <ul class="contents-list" style="grid-template-columns:1fr;">
+            <li style="color:var(--ink);">Inventory <span class="code" style="margin-left:auto;">bundled</span></li>
+            <li style="color:var(--ink);">Purchasing <span class="code" style="margin-left:auto;">bundled</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="bench-actions">
+      <span class="fine-print">Confirming records this exact chart snapshot with the setup.</span>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" type="button">Back</button>
+        <button class="btn btn-primary" type="button">Create business and accounts</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

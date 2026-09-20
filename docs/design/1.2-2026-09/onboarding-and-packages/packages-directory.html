@@ -1,0 +1,231 @@
+<!--
+  PHP Ledger — 1.2 design mockup
+  Packages screen (decisions B48, B49, B51, B52) — Directory tab
+
+  The reference directory plugin is the fictional Pharmacy POS, paired with
+  a fictional "Pakistan pharmacy sample" (decision B48). Both are clearly
+  marked planned/fictional, not shipped. Unverified because no project key
+  has signed them (B41: Verified stays limited to project-key-signed
+  packages). See ../DECISIONS.md for the Update/auto-update rules (B51) as
+  applied to an Unverified package, and for what differs from the Awan
+  prototype's own "Proposed" placeholders.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Packages — Directory (1.2 design mockup)</title>
+<style>
+@font-face{font-family:"Inter Variable";src:url("../../../../www/phpledger/public/assets/fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap;}
+:root{
+  --canvas:#FAF9F7; --surface:#FFFFFF; --surface-subtle:#F4F3F0; --border:#E8E6E1; --border-strong:#8C8880;
+  --ink:#1F1E1C; --ink-muted:#6B6862; --ink-faint:#706D66;
+  --brand-navy:#0C2052; --brand-blue:#4656E8; --brand-selected:#EEF0FF;
+  --success:#1F7A4D; --success-bg:#E8F4EE; --warning:#9A6200; --warning-bg:#FBF1DE; --danger:#B42318; --danger-bg:#FDECEA; --info:#2F5BD3; --info-bg:#EEF2FD;
+  --radius-control:6px; --radius-panel:10px; --control-h:32px;
+  --sidebar-w:222px; --sidebar-item-h:30px; --topbar-h:46px;
+  --font-sans:"Inter Variable",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1320px;margin:0 auto;padding:48px 20px 96px;}
+.harness-head{color:#c8cad2;margin-bottom:32px;max-width:860px;}
+.harness-head .kicker{font-size:12.5px;color:#8a8d99;margin:0 0 8px;}
+.harness-head h1{font-size:22px;margin:0 0 10px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13.5px;line-height:1.6;color:#aeb1bd;margin:0 0 8px;}
+.harness-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.harness-nav a{font-size:12px;color:#c8cad2;background:#20222b;border:1px solid #33353f;border-radius:999px;padding:5px 12px;text-decoration:none;}
+.harness-nav a.is-current{background:var(--brand-blue);border-color:var(--brand-blue);color:#fff;}
+.frame{width:1280px;height:720px;overflow:hidden;position:relative;background:var(--canvas);border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);font-family:var(--font-sans);color:var(--ink);display:flex;}
+
+.shell-sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);flex:none;display:flex;flex-direction:column;padding:12px 10px;}
+.shell-brand{display:flex;align-items:center;gap:8px;padding:4px 6px 12px;}
+.shell-brand img{height:18px;width:auto;}
+.nav-group-label{text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);padding:.7rem .625rem .3rem;font-size:10px;font-weight:700;}
+.nav-item{height:var(--sidebar-item-h);border-radius:var(--radius-control);color:var(--ink-muted);white-space:nowrap;align-items:center;gap:.55rem;padding-inline:.625rem;font-size:12px;font-weight:500;text-decoration:none;display:flex;}
+.nav-item[aria-current="page"]{background:var(--brand-selected);color:var(--brand-navy);font-weight:600;}
+.nav-item svg{width:15px;height:15px;flex:none;}
+.shell-body{flex:1;min-width:0;display:flex;flex-direction:column;}
+.shell-topbar{height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);flex:none;display:flex;align-items:center;gap:12px;padding-inline:16px;}
+.crumbs{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-muted);list-style:none;margin:0;padding:0;}
+.crumbs li:not(:last-child)::after{content:"/";margin-left:6px;color:var(--ink-faint);}
+.crumbs li:last-child{color:var(--ink);font-weight:600;}
+.topbar-search{flex:1;display:flex;justify-content:center;}
+.search-trigger{display:flex;align-items:center;gap:8px;height:28px;padding-inline:10px;border-radius:999px;border:1px solid var(--border);background:var(--surface-subtle);color:var(--ink-faint);font-size:11.5px;width:260px;}
+.avatar{width:24px;height:24px;border-radius:999px;background:var(--brand-navy);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.shell-main{flex:1;min-height:0;overflow-y:auto;padding:0 26px 22px;}
+
+.page-header{background:var(--canvas);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-block:16px 12px;position:sticky;top:0;z-index:2;}
+.page-title{font-size:19px;line-height:25px;color:var(--ink);letter-spacing:-.01em;font-weight:650;margin:0;}
+.page-header p{margin:3px 0 0;font-size:12px;color:var(--ink-muted);}
+
+.tabs-seg{background:var(--surface-subtle);border-radius:8px;border:1px solid var(--border);align-items:center;gap:2px;padding:2px;display:inline-flex;margin-bottom:16px;}
+.tabs-seg-item{border-radius:6px;height:28px;color:var(--ink-muted);cursor:pointer;white-space:nowrap;background:none;border:0;align-items:center;padding-inline:14px;font-size:12px;font-weight:600;display:inline-flex;font-family:inherit;}
+.tabs-seg-item[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+
+.badge{letter-spacing:.01em;white-space:nowrap;border-radius:999px;align-items:center;gap:5px;height:20px;padding-inline:8px;font-size:10.5px;font-weight:700;line-height:1;display:inline-flex;}
+.badge-dot{background:currentColor;border-radius:999px;flex:none;width:5px;height:5px;}
+.badge-info{background:var(--info-bg);color:var(--info);}
+.badge-posted{background:var(--success-bg);color:var(--success);}
+.badge-unpaid{background:var(--surface-subtle);color:var(--ink-muted);}
+.badge-sample{background:var(--brand-selected);color:var(--brand-navy);}
+.badge-overdue{background:var(--danger-bg);color:var(--danger);}
+.badge-warn{background:var(--warning-bg);color:var(--warning);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;height:var(--control-h);padding-inline:14px;border-radius:var(--radius-control);font-size:12.5px;font-weight:600;border:1px solid transparent;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.btn-primary{background:var(--brand-navy);color:#fff;}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong);}
+.btn-sm{height:26px;padding-inline:10px;font-size:11.5px;}
+
+.dir-layout{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;align-items:start;}
+.pkg-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;}
+.pkg-card.is-unverified{border-color:#e8d9a8;}
+.pkg-card-top{display:flex;align-items:flex-start;gap:12px;}
+.pkg-thumb{width:44px;height:44px;border-radius:9px;background:var(--surface-subtle);border:1px solid var(--border);flex:none;display:flex;align-items:center;justify-content:center;color:var(--brand-navy);}
+.pkg-name{font-size:14.5px;font-weight:650;color:var(--ink);margin:0;}
+.pkg-meta{font-size:11px;color:var(--ink-faint);margin:2px 0 0;}
+.pkg-badges{display:flex;gap:5px;flex-wrap:wrap;}
+.pkg-desc{font-size:12px;color:var(--ink-muted);line-height:1.55;margin:0;}
+.pkg-thumbs-row{display:flex;gap:6px;}
+.pkg-thumbs-row span{width:74px;height:46px;border-radius:6px;background:var(--surface-subtle);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--ink-faint);}
+.pkg-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:2px;}
+.pkg-col h4{margin:0 0 4px;font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-faint);}
+.pkg-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;}
+.pkg-col li{font-size:11.5px;color:var(--ink-muted);}
+.pkg-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;border-top:1px solid var(--border);}
+
+.alert{display:flex;gap:10px;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.55;}
+.alert-warning{background:var(--warning-bg);color:var(--warning);}
+.alert svg{flex:none;width:16px;height:16px;margin-top:1px;}
+.alert-title{font-weight:700;color:var(--ink);display:block;margin-bottom:2px;}
+.alert p{margin:0;color:var(--ink-muted);}
+
+.side-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px 16px;display:flex;flex-direction:column;gap:8px;}
+.side-panel h3{margin:0;font-size:12.5px;color:var(--ink);}
+.side-panel p{margin:0;font-size:11.5px;color:var(--ink-muted);line-height:1.55;}
+.side-panel .code{font-family:ui-monospace,"SF Mono",monospace;font-size:10.5px;color:var(--brand-navy);background:var(--brand-selected);padding:1px 5px;border-radius:4px;}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="ico-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l-2 0l9 -9l9 9l-2 0"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/></symbol>
+  <symbol id="ico-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"/></symbol>
+  <symbol id="ico-fy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/></symbol>
+  <symbol id="ico-backup" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6c0 1.657 3.582 3 8 3s8 -1.343 8 -3s-3.582 -3 -8 -3s-8 1.343 -8 3"/><path d="M4 6v6c0 1.657 3.582 3 8 3"/><path d="M20 12v-6"/><path d="M4 12v6c0 1.657 3.582 3 8 3"/></symbol>
+  <symbol id="ico-pkg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"/><path d="M12 12l8 -4.5"/><path d="M12 12l0 9"/><path d="M12 12l-8 -4.5"/></symbol>
+  <symbol id="ico-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v.01"/></symbol>
+  <symbol id="ico-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6 -6"/></symbol>
+  <symbol id="ico-rx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h5a4 4 0 0 1 0 8h-5z"/><path d="M6 4v16"/><path d="M11 12l6 8"/></symbol>
+  <symbol id="ico-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0"/><path d="M12 16h.01"/></symbol>
+</svg>
+<div class="wrap">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger — 1.2 design mockup &middot; docs/design/1.2-2026-09/onboarding-and-packages</p>
+    <h1>Packages — Directory</h1>
+    <p>The reference directory plugin (decision B48): a fictional "Pharmacy POS" paired with a fictional "Pakistan pharmacy sample". Both are Unverified &mdash; no project key has signed them, per B41.</p>
+    <div class="harness-nav">
+      <a href="index.html">&larr; All frames</a>
+      <a href="packages-installed.html">Installed</a>
+      <a class="is-current" href="packages-directory.html">Directory</a>
+      <a href="packages-upload-confirm.html">Upload confirm</a>
+    </div>
+  </div>
+
+  <div class="frame">
+    <aside class="shell-sidebar">
+      <div class="shell-brand"><img src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger"></div>
+      <a class="nav-item" href="#"><svg><use href="#ico-home"/></svg>Home</a>
+      <p class="nav-group-label">Setup</p>
+      <a class="nav-item" href="#"><svg><use href="#ico-fy"/></svg>Financial year</a>
+      <a class="nav-item" href="#"><svg><use href="#ico-users"/></svg>Users &amp; roles</a>
+      <a class="nav-item" aria-current="page" href="#"><svg><use href="#ico-pkg"/></svg>Packages</a>
+      <a class="nav-item" href="#"><svg><use href="#ico-backup"/></svg>Backup &amp; restore</a>
+      <div style="margin-top:auto;">
+        <a class="nav-item" href="#"><svg><use href="#ico-help"/></svg>Help</a>
+      </div>
+    </aside>
+    <div class="shell-body">
+      <header class="shell-topbar">
+        <ol class="crumbs"><li>Setup</li><li>Packages</li><li>Directory</li></ol>
+        <div class="topbar-search"><span class="search-trigger"><svg width="13" height="13"><use href="#ico-search"/></svg>Search the directory&hellip;</span></div>
+        <span class="avatar">AN</span>
+      </header>
+      <main class="shell-main">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Directory</h1>
+            <p>phpledger.com's plugin directory &middot; same card metadata as installed packages (B52) &middot; installing writes no data until you confirm</p>
+          </div>
+        </div>
+
+        <div class="tabs-seg" role="tablist" aria-label="Packages view">
+          <button type="button" class="tabs-seg-item" aria-selected="false">Installed &middot; 7</button>
+          <button type="button" class="tabs-seg-item" aria-selected="true">Directory</button>
+          <button type="button" class="tabs-seg-item" aria-selected="false">Upload</button>
+        </div>
+
+        <div class="dir-layout">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="pkg-card is-unverified">
+              <div class="pkg-card-top">
+                <span class="pkg-thumb"><svg width="22" height="22"><use href="#ico-rx"/></svg></span>
+                <div style="flex:1;">
+                  <h3 class="pkg-name">Pharmacy POS</h3>
+                  <p class="pkg-meta">v0.9.0-preview &middot; by Fictional Dispensary Systems &middot; GPL-3.0</p>
+                  <div class="pkg-badges" style="margin-top:6px;"><span class="badge badge-warn">Unverified</span><span class="badge badge-unpaid">Not installed</span></div>
+                </div>
+              </div>
+              <p class="pkg-desc">Counter checkout for a pharmacy: batch/expiry-aware stock issue, prescription reference on the sale line, and a same-day cash or card till reconciliation. Fictional plugin, written for this mockup &mdash; not shipped code.</p>
+              <div class="pkg-thumbs-row"><span>Screenshot 1</span><span>Screenshot 2</span><span>Screenshot 3</span></div>
+              <div class="pkg-cols">
+                <div class="pkg-col"><h4>What it adds</h4><ul><li>Batch/expiry stock issue</li><li>Prescription reference field</li><li>Till reconciliation report</li></ul></div>
+                <div class="pkg-col"><h4>Requirements</h4><ul><li>Accounting core 1.0.0</li><li>Inventory 1.0.0</li><li>PHP Ledger 1.2.0+</li></ul></div>
+              </div>
+              <div class="pkg-foot">
+                <span style="font-size:11px;color:var(--ink-faint);">Pairs with the sample company on the right</span>
+                <button class="btn btn-primary btn-sm" type="button">Install&hellip;</button>
+              </div>
+            </div>
+
+            <div class="pkg-card">
+              <div class="pkg-card-top">
+                <span class="pkg-thumb"><svg width="20" height="20"><use href="#ico-fy"/></svg></span>
+                <div style="flex:1;">
+                  <h3 class="pkg-name">Pakistan pharmacy sample</h3>
+                  <p class="pkg-meta">v0.9.0-preview &middot; sample data pack, not a plugin</p>
+                  <div class="pkg-badges" style="margin-top:6px;"><span class="badge badge-warn">Unverified</span><span class="badge badge-unpaid">Not installed</span></div>
+                </div>
+              </div>
+              <p class="pkg-desc">A fictional Pakistani pharmacy's chart of accounts, forms and a full transaction history, built to demonstrate the Pharmacy POS plugin during onboarding's Source stage. Also fictional and not yet built.</p>
+              <div class="pkg-cols">
+                <div class="pkg-col"><h4>What it adds</h4><ul><li>Pharmacy chart of accounts</li><li>Batch/expiry item records</li><li>Sample transaction history</li></ul></div>
+                <div class="pkg-col"><h4>Requirements</h4><ul><li>Pharmacy POS plugin</li><li>PHP Ledger 1.2.0+</li></ul></div>
+              </div>
+              <div class="pkg-foot">
+                <span style="font-size:11px;color:var(--ink-faint);">Offered on the onboarding Source stage once installed</span>
+                <button class="btn btn-secondary btn-sm" type="button">Install&hellip;</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="alert alert-warning"><svg><use href="#ico-warn"/></svg><div><span class="alert-title">Unverified code runs with this installation's full plugin permissions</span><p>No project key has signed either package. Installing asks for confirmation on a separate page, and updates never apply themselves &mdash; you click Update each time, after re-confirming (decision B51).</p></div></div>
+            <div class="side-panel">
+              <h3>What "Verified" means here</h3>
+              <p>Limited to packages signed by the PHP Ledger project key (decision B41), currently the seven bundled modules only. A directory plugin, however well reviewed, stays Unverified until that changes.</p>
+              <p><span class="code">installation.admin</span> is required to install or activate any package (decision B44).</p>
+            </div>
+            <div class="side-panel">
+              <h3>Public demo</h3>
+              <p>The Packages screen and plugin execution are both live in the public demo (decision B49). The demo's hourly reset and restricted grants apply to anything installed here &mdash; see ../DECISIONS.md for the open question on what visitors may install.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+</body>
+</html>

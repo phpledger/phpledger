@@ -1,0 +1,167 @@
+<!--
+  PHP Ledger — 1.2 design mockup
+  Onboarding, redesigned to the Workbench pattern (decision B50)
+  Screen 2 of 5: Business
+
+  Fields sourced from templates/views/onboarding.php step 2 (name, currency,
+  start date) and step 3 (entity type, financial year end via
+  templates/partials/regional.php and pl_fiscal_year_end_options()), plus the
+  "country package" concept from docs/coa/regional-program/
+  CATALOG-AND-INSTALLATION-CONTRACT.md section 2 (neutral core + primary
+  industry + 0-or-1 country package + optional account groups; agreed country
+  IDs PK, IN, AE, GB, US). That catalogue is a proposed design, not yet
+  implemented — see ../DECISIONS.md, item 4.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Onboarding — 2. Business (1.2 design mockup)</title>
+<style>
+@font-face{font-family:"Inter Variable";src:url("../../../../www/phpledger/public/assets/fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap;}
+:root{
+  --canvas:#FAF9F7; --surface:#FFFFFF; --surface-subtle:#F4F3F0; --border:#E8E6E1; --border-strong:#8C8880;
+  --ink:#1F1E1C; --ink-muted:#6B6862; --ink-faint:#706D66;
+  --brand-navy:#0C2052; --brand-navy-hover:#16296B; --brand-blue:#4656E8; --brand-selected:#EEF0FF;
+  --success:#1F7A4D; --success-bg:#E8F4EE; --warning:#9A6200; --warning-bg:#FBF1DE; --danger:#B42318; --danger-bg:#FDECEA; --info:#2F5BD3; --info-bg:#EEF2FD; --neutral:#6B6862; --neutral-bg:#F4F3F0;
+  --radius-control:6px; --radius-panel:10px; --control-h:34px;
+  --font-sans:"Inter Variable",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1320px;margin:0 auto;padding:48px 20px 96px;}
+.harness-head{color:#c8cad2;margin-bottom:32px;max-width:820px;}
+.harness-head .kicker{font-size:12.5px;color:#8a8d99;margin:0 0 8px;}
+.harness-head h1{font-size:22px;margin:0 0 10px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13.5px;line-height:1.6;color:#aeb1bd;margin:0 0 8px;}
+.harness-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.harness-nav a{font-size:12px;color:#c8cad2;background:#20222b;border:1px solid #33353f;border-radius:999px;padding:5px 12px;text-decoration:none;}
+.harness-nav a.is-current{background:var(--brand-blue);border-color:var(--brand-blue);color:#fff;}
+.frame{width:1280px;height:720px;overflow:hidden;position:relative;background:var(--canvas);border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);padding:34px 42px;display:flex;flex-direction:column;color:var(--ink);font-family:var(--font-sans);}
+
+.bench-chrome{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.bench-logo{height:22px;width:auto;display:block;}
+.bench-tray{display:flex;gap:6px;align-items:center;position:relative;}
+.bench-tray::before{content:"";position:absolute;left:10px;right:10px;top:50%;height:1px;background:var(--border);z-index:0;}
+.tray-slot{height:21px;min-width:76px;padding:0 9px;border-radius:5px;border:1.5px solid var(--border-strong);background:var(--surface);position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;font-weight:700;color:var(--ink-muted);}
+.tray-slot.is-done{background:var(--brand-navy);border-color:var(--brand-navy);color:#fff;}
+.tray-slot.is-current{border-color:var(--brand-blue);background:var(--brand-selected);color:var(--brand-navy);}
+.tray-slot.is-pending{opacity:.55;}
+.ok-glyph{width:9px;height:9px;color:#fff;}
+
+.bench-head{flex:0 0 auto;margin-bottom:14px;}
+.bench-heading{margin:0 0 5px;color:var(--ink);font-weight:650;letter-spacing:-.01em;}
+.bench-heading.size-md{font-size:20px;line-height:26px;}
+.bench-sub{margin:0;font-size:13px;line-height:1.5;color:var(--ink-muted);max-width:76ch;}
+.eyebrow{font-size:11.5px;font-weight:700;color:var(--brand-blue);letter-spacing:.02em;text-transform:uppercase;margin:0 0 6px;}
+
+.bench-body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;}
+.bench-actions{flex:0 0 auto;margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.bench-actions .fine-print{font-size:11.5px;color:var(--ink-faint);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;height:var(--control-h);padding-inline:17px;border-radius:var(--radius-control);font-size:13px;font-weight:600;border:1px solid transparent;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.btn-primary{background:var(--brand-navy);color:#fff;}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong);}
+
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:11.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px;}
+.field-label::before{content:"";width:6px;height:6px;border-radius:1.5px;background:var(--brand-blue);flex:none;}
+.field-label.optional::before{background:var(--border-strong);}
+.input,.select{height:var(--control-h);padding-inline:10px;border:1px solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);font-size:13px;font-family:inherit;width:100%;}
+.field-hint{font-size:10.5px;color:var(--ink-muted);line-height:1.4;}
+
+.s2-body{flex:1;display:grid;grid-template-columns:1.15fr .85fr;gap:26px;min-height:0;}
+.s2-col{display:flex;flex-direction:column;gap:14px;justify-content:center;}
+.field-pair{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
+.field-pair.even{grid-template-columns:1fr 1fr;}
+.section-label{font-size:11px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.03em;margin:2px 0 -4px;}
+
+.pkg-tip{background:var(--brand-selected);border:1px solid #c7cdf7;border-radius:10px;padding:15px 17px;display:flex;flex-direction:column;gap:7px;}
+.pkg-tip h3{margin:0;font-size:12.5px;color:var(--brand-navy);}
+.pkg-tip p{margin:0;font-size:11.5px;color:var(--brand-navy);line-height:1.55;}
+.pkg-layers{display:flex;flex-direction:column;gap:6px;margin-top:2px;}
+.pkg-layer{display:flex;align-items:baseline;gap:8px;font-size:11px;}
+.pkg-layer .lname{flex:none;width:88px;font-weight:700;color:var(--brand-navy);}
+.pkg-layer .lval{color:var(--brand-navy);}
+.pkg-note{font-size:10.5px;color:var(--ink-muted);background:var(--surface);border:1px dashed var(--border-strong);border-radius:8px;padding:9px 11px;line-height:1.5;}
+.badge-proposed{display:inline-flex;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--warning);background:var(--warning-bg);border-radius:999px;padding:2px 7px;}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="ico-check" viewBox="0 0 16 16"><path d="M3.5 8.3l3.1 3.1L12.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger — 1.2 design mockup &middot; docs/design/1.2-2026-09/onboarding-and-packages</p>
+    <h1>Onboard a business — 2. Business</h1>
+    <p>Merges steps 2 and 3 of the current wizard (business identity, then period and profile) into one stage. Adds a "country package" field from the regional chart-of-accounts research, flagged as a proposed design that is not yet implemented.</p>
+    <div class="harness-nav">
+      <a href="index.html">&larr; All frames</a>
+      <a href="onboarding-1-start.html">1. Start</a>
+      <a class="is-current" href="onboarding-2-business.html">2. Business</a>
+      <a href="onboarding-3-source.html">3. Source</a>
+      <a href="onboarding-4-review.html">4. Review</a>
+      <a href="onboarding-5-ready.html">5. Ready</a>
+    </div>
+  </div>
+
+  <div class="frame">
+    <div class="bench-chrome">
+      <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+      <div class="bench-tray">
+        <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg>Start</div>
+        <div class="tray-slot is-current">Business</div>
+        <div class="tray-slot is-pending">Source</div>
+        <div class="tray-slot is-pending">Review</div>
+        <div class="tray-slot is-pending">Ready</div>
+      </div>
+    </div>
+    <div class="bench-head">
+      <p class="eyebrow">Business setup &middot; Stage 2 of 5</p>
+      <h1 class="bench-heading size-md">Tell us about the business</h1>
+      <p class="bench-sub">Its name, currency, and the accounting profile that shapes the chart offered on the next stage. None of this activates country tax rules by itself.</p>
+    </div>
+    <div class="bench-body">
+      <div class="s2-body">
+        <div class="s2-col">
+          <div class="field"><label class="field-label" for="bn">Business name</label><input class="input" id="bn" value="Noor Traders"><p class="field-hint">Use the name your team will recognise.</p></div>
+          <div class="field-pair even">
+            <div class="field"><label class="field-label" for="cur">Base currency</label><select class="select" id="cur"><option>PKR &mdash; Pakistani rupee</option><option>USD &mdash; US dollar</option><option>AED &mdash; UAE dirham</option><option>GBP &mdash; Pound sterling</option><option>INR &mdash; Indian rupee</option></select></div>
+            <div class="field"><label class="field-label" for="sd">Accounting start</label><input class="input" id="sd" type="date" value="2026-10-01"></div>
+          </div>
+          <p class="field-hint" style="margin-top:-6px;">One functional currency per book. Currency selection does not activate country tax rules.</p>
+          <div class="section-label">Financial year</div>
+          <div class="field-pair even">
+            <div class="field"><label class="field-label" for="et">Business or entity type</label><select class="select" id="et"><option>Sole proprietor</option><option>Association of persons (AOP)</option><option>Company</option><option>Other</option></select></div>
+            <div class="field"><label class="field-label" for="fy">Financial year end</label><select class="select" id="fy"><option>30 June</option><option selected>31 December</option><option>Custom&hellip;</option></select></div>
+          </div>
+          <p class="field-hint" style="margin-top:-6px;">30 June is common for a Pakistan sole proprietor or AOP; confirm the period actually used by these books.</p>
+        </div>
+        <div class="s2-col">
+          <div class="pkg-tip">
+            <h3>Country package <span class="badge-proposed">Proposed &mdash; not yet built</span></h3>
+            <p>A composed starting chart: one neutral core, one industry profile, an optional country package, and any explicitly selected account groups. Selecting these does not turn on country tax rules, statutory reports or a payment connector by itself.</p>
+            <div class="pkg-layers">
+              <div class="pkg-layer"><span class="lname">Country</span><span class="lval">Pakistan (PK)</span></div>
+              <div class="pkg-layer"><span class="lname">Industry</span><span class="lval">Wholesale trader</span></div>
+              <div class="pkg-layer"><span class="lname">Neutral core</span><span class="lval">Always included</span></div>
+              <div class="pkg-layer"><span class="lname">Groups</span><span class="lval">None selected</span></div>
+            </div>
+          </div>
+          <p class="pkg-note">Today, <code>onboarding.php</code> only offers a neutral starter chart or "bring your own." The country/industry selector shown here mirrors <code>docs/coa/regional-program/CATALOG-AND-INSTALLATION-CONTRACT.md</code> (agreed countries: PK, IN, AE, GB, US) and is included for review, not as a shipped capability.</p>
+        </div>
+      </div>
+    </div>
+    <div class="bench-actions">
+      <span class="fine-print">Accounting dates do not shift with time zones.</span>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" type="button">Back</button>
+        <button class="btn btn-primary" type="button">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

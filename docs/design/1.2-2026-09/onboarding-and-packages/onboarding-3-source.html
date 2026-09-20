@@ -1,0 +1,196 @@
+<!--
+  PHP Ledger — 1.2 design mockup
+  Onboarding, redesigned to the Workbench pattern (decision B50)
+  Screen 3 of 5: Source — blank / skeleton from sample / full sample
+
+  This is the new decision from decision register section M, B50:
+  "an option to import only a skeleton from a sample (chart of accounts,
+  reports, forms and plugins) without its transactions." Sample identities
+  are the real eleven packs in resources/demo-packs/catalog.json plus the
+  zero-balance "accounting-starter" playground
+  (www/phpledger/includes/functions/demo_pack_functions.php), and the new
+  Pakistan pharmacy sample from decision B48 (not yet built — shown as
+  "planned"). Today's onboarding.php only has one sample path
+  (start_mode=sample, chart_choice=neutral) that always brings full history;
+  this screen splits that into skeleton vs full, per B50.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Onboarding — 3. Source (1.2 design mockup)</title>
+<style>
+@font-face{font-family:"Inter Variable";src:url("../../../../www/phpledger/public/assets/fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap;}
+:root{
+  --canvas:#FAF9F7; --surface:#FFFFFF; --surface-subtle:#F4F3F0; --border:#E8E6E1; --border-strong:#8C8880;
+  --ink:#1F1E1C; --ink-muted:#6B6862; --ink-faint:#706D66;
+  --brand-navy:#0C2052; --brand-navy-hover:#16296B; --brand-blue:#4656E8; --brand-selected:#EEF0FF;
+  --success:#1F7A4D; --success-bg:#E8F4EE; --warning:#9A6200; --warning-bg:#FBF1DE; --danger:#B42318; --danger-bg:#FDECEA; --info:#2F5BD3; --info-bg:#EEF2FD; --neutral:#6B6862; --neutral-bg:#F4F3F0;
+  --radius-control:6px; --radius-panel:10px; --control-h:34px;
+  --font-sans:"Inter Variable",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1320px;margin:0 auto;padding:48px 20px 96px;}
+.harness-head{color:#c8cad2;margin-bottom:32px;max-width:860px;}
+.harness-head .kicker{font-size:12.5px;color:#8a8d99;margin:0 0 8px;}
+.harness-head h1{font-size:22px;margin:0 0 10px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13.5px;line-height:1.6;color:#aeb1bd;margin:0 0 8px;}
+.harness-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.harness-nav a{font-size:12px;color:#c8cad2;background:#20222b;border:1px solid #33353f;border-radius:999px;padding:5px 12px;text-decoration:none;}
+.harness-nav a.is-current{background:var(--brand-blue);border-color:var(--brand-blue);color:#fff;}
+.frame{width:1280px;height:720px;overflow:hidden;position:relative;background:var(--canvas);border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);padding:34px 42px;display:flex;flex-direction:column;color:var(--ink);font-family:var(--font-sans);}
+
+.bench-chrome{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.bench-logo{height:22px;width:auto;display:block;}
+.bench-tray{display:flex;gap:6px;align-items:center;position:relative;}
+.bench-tray::before{content:"";position:absolute;left:10px;right:10px;top:50%;height:1px;background:var(--border);z-index:0;}
+.tray-slot{height:21px;min-width:76px;padding:0 9px;border-radius:5px;border:1.5px solid var(--border-strong);background:var(--surface);position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;font-weight:700;color:var(--ink-muted);}
+.tray-slot.is-done{background:var(--brand-navy);border-color:var(--brand-navy);color:#fff;}
+.tray-slot.is-current{border-color:var(--brand-blue);background:var(--brand-selected);color:var(--brand-navy);}
+.tray-slot.is-pending{opacity:.55;}
+.ok-glyph{width:9px;height:9px;color:#fff;}
+
+.bench-head{flex:0 0 auto;margin-bottom:12px;}
+.bench-heading{margin:0 0 5px;color:var(--ink);font-weight:650;letter-spacing:-.01em;}
+.bench-heading.size-md{font-size:20px;line-height:26px;}
+.bench-sub{margin:0;font-size:13px;line-height:1.5;color:var(--ink-muted);max-width:78ch;}
+.eyebrow{font-size:11.5px;font-weight:700;color:var(--brand-blue);letter-spacing:.02em;text-transform:uppercase;margin:0 0 6px;}
+
+.bench-body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:12px;}
+.bench-actions{flex:0 0 auto;margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.bench-actions .fine-print{font-size:11.5px;color:var(--ink-faint);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;height:var(--control-h);padding-inline:17px;border-radius:var(--radius-control);font-size:13px;font-weight:600;border:1px solid transparent;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.btn-primary{background:var(--brand-navy);color:#fff;}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong);}
+
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.choice-card{position:relative;text-align:left;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:15px 16px 14px;cursor:pointer;display:flex;flex-direction:column;gap:7px;}
+.choice-card.is-selected{border-color:var(--brand-blue);background:var(--brand-selected);}
+.choice-radio{position:absolute;top:14px;right:14px;width:15px;height:15px;border-radius:999px;border:1.5px solid var(--border-strong);background:var(--surface);}
+.choice-card.is-selected .choice-radio{border-color:var(--brand-blue);background:var(--brand-blue);box-shadow:inset 0 0 0 3px #fff;}
+.choice-title{font-size:13.5px;font-weight:650;color:var(--ink);margin:0;padding-right:20px;}
+.choice-detail{font-size:11.5px;line-height:1.5;color:var(--ink-muted);margin:0;}
+.contents-list{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;}
+.contents-list li{font-size:10.5px;color:var(--ink-muted);display:flex;align-items:center;gap:5px;}
+.contents-list li.is-in::before{content:"";width:5px;height:5px;border-radius:999px;background:var(--success);flex:none;}
+.contents-list li.is-out::before{content:"";width:5px;height:5px;border-radius:999px;background:var(--border-strong);flex:none;}
+.contents-list li.is-out{text-decoration:line-through;opacity:.6;}
+
+.picker-row{display:flex;align-items:flex-end;gap:14px;background:var(--surface-subtle);border:1px solid var(--border);border-radius:10px;padding:13px 16px;}
+.picker-field{flex:1;display:flex;flex-direction:column;gap:5px;}
+.picker-field label{font-size:11px;font-weight:600;color:var(--ink);}
+.select{height:var(--control-h);padding-inline:10px;border:1px solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);font-size:12.5px;font-family:inherit;width:100%;}
+.picker-hint{flex:1.4;font-size:11px;color:var(--ink-muted);line-height:1.5;}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;text-transform:uppercase;border-radius:999px;padding:2px 7px;}
+.pill-planned{background:var(--warning-bg);color:var(--warning);}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="ico-check" viewBox="0 0 16 16"><path d="M3.5 8.3l3.1 3.1L12.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger — 1.2 design mockup &middot; docs/design/1.2-2026-09/onboarding-and-packages</p>
+    <h1>Onboard a business — 3. Source</h1>
+    <p>The new decision from B50: splits the old single "sample" starting point into a <strong>skeleton</strong> (structure only, no transactions) and a <strong>full sample</strong> (structure and transaction history), alongside the existing blank chart. Shown here for the "New business" path from screen 1 — see ../DECISIONS.md, item 2, for whether "Explore a sample company" reuses this same screen or a narrower one.</p>
+    <div class="harness-nav">
+      <a href="index.html">&larr; All frames</a>
+      <a href="onboarding-1-start.html">1. Start</a>
+      <a href="onboarding-2-business.html">2. Business</a>
+      <a class="is-current" href="onboarding-3-source.html">3. Source</a>
+      <a href="onboarding-4-review.html">4. Review</a>
+      <a href="onboarding-5-ready.html">5. Ready</a>
+    </div>
+  </div>
+
+  <div class="frame">
+    <div class="bench-chrome">
+      <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+      <div class="bench-tray">
+        <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg>Start</div>
+        <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg>Business</div>
+        <div class="tray-slot is-current">Source</div>
+        <div class="tray-slot is-pending">Review</div>
+        <div class="tray-slot is-pending">Ready</div>
+      </div>
+    </div>
+    <div class="bench-head">
+      <p class="eyebrow">Business setup &middot; Stage 3 of 5</p>
+      <h1 class="bench-heading size-md">How much starting structure?</h1>
+      <p class="bench-sub">Choose what Noor Traders begins with. A skeleton or full sample is a real, complete accounting setup you can keep &mdash; only its transactions differ.</p>
+    </div>
+    <div class="bench-body">
+      <div class="choice-grid">
+        <div class="choice-card is-selected">
+          <span class="choice-radio"></span>
+          <h2 class="choice-title">Blank business</h2>
+          <p class="choice-detail">PHP Ledger's neutral starter chart only. No sample company involved.</p>
+          <ul class="contents-list">
+            <li class="is-in">Neutral chart of accounts</li>
+            <li class="is-out">Reports beyond the core four</li>
+            <li class="is-out">Forms and document layouts</li>
+            <li class="is-out">Plugins</li>
+            <li class="is-out">Transactions</li>
+          </ul>
+        </div>
+        <div class="choice-card">
+          <span class="choice-radio"></span>
+          <h2 class="choice-title">Skeleton from a sample</h2>
+          <p class="choice-detail">One sample company's structure, with none of its transactions. A real starting point, not a demo.</p>
+          <ul class="contents-list">
+            <li class="is-in">Chart of accounts</li>
+            <li class="is-in">Reports configured for it</li>
+            <li class="is-in">Forms and document layouts</li>
+            <li class="is-in">Plugins it depends on</li>
+            <li class="is-out">Transactions and opening balances</li>
+          </ul>
+        </div>
+        <div class="choice-card">
+          <span class="choice-radio"></span>
+          <h2 class="choice-title">Full sample company</h2>
+          <p class="choice-detail">Everything in the skeleton, plus its complete fictional transaction history &mdash; for exploring, not real records.</p>
+          <ul class="contents-list">
+            <li class="is-in">Chart of accounts</li>
+            <li class="is-in">Reports configured for it</li>
+            <li class="is-in">Forms and document layouts</li>
+            <li class="is-in">Plugins it depends on</li>
+            <li class="is-in">Full transaction history</li>
+          </ul>
+        </div>
+      </div>
+      <div class="picker-row">
+        <div class="picker-field">
+          <label for="pack">Sample company</label>
+          <select class="select" id="pack">
+            <option>Willow Corner Shop &mdash; Retail shop</option>
+            <option>Harbour Trade &mdash; Wholesale / trader</option>
+            <option>Harbor Supply Company &mdash; Distribution</option>
+            <option>Cedar Studio &mdash; Professional services / agency</option>
+            <option>Cedar Table &mdash; Restaurant / cafe</option>
+            <option>Riverside Community Club &mdash; Membership club</option>
+            <option>Meadow Training Pharmacy &mdash; Non-medicinal training inventory</option>
+            <option disabled>Pakistan pharmacy sample &mdash; planned, decision B48 &middot; pairs with the Pharmacy POS plugin</option>
+            <option>Lantern Finch Jewelry Studio &mdash; Jewelry studio</option>
+            <option>Maple Bench Works &mdash; Light manufacturing</option>
+            <option>Wheel &amp; Spoke Workshop &mdash; Service workshop</option>
+            <option>Sunrise Garden Services &mdash; Seasonal business</option>
+          </select>
+        </div>
+        <div class="picker-hint">Disabled while "Blank business" is selected. Eleven bundled sample companies today (<code>resources/demo-packs/catalog.json</code>); the Pakistan pharmacy sample <span class="pill pill-planned">Planned</span> is decision B48 and not yet built.</div>
+      </div>
+    </div>
+    <div class="bench-actions">
+      <span class="fine-print">A skeleton or full sample still needs your confirmation on the next stage before anything is created.</span>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" type="button">Back</button>
+        <button class="btn btn-primary" type="button">Preview and continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
