@@ -104,6 +104,30 @@ function pl_install_schema_state(?array $receipts, array $checksums, int $tableC
     return ['status' => $pending === 0 ? 'current' : 'pending', 'applied' => count($seen), 'pending' => $pending];
 }
 
+/**
+ * The schema steps in the order the runner applies them. The progress bar and
+ * the runner must agree on that order, so both read it from here.
+ *
+ * @return list<string>
+ */
+/**
+ * How long one installer request may spend applying steps. PHP's own limit is the
+ * ceiling; a share of it leaves room for the response, and an unlimited setting
+ * (the CLI, and some hosts) still stops often enough to keep the page responsive.
+ */
+function pl_install_migration_budget(string $maximumExecutionTime): float
+{
+    $limit = (float) $maximumExecutionTime;
+    return $limit <= 0 ? 15.0 : max(3.0, min(15.0, $limit * 0.6));
+}
+
+function pl_install_migration_versions(): array
+{
+    $files = glob(dirname(__DIR__, 2) . '/install/migrations/[0-9]*.php') ?: [];
+    sort($files, SORT_STRING);
+    return array_map(static fn (string $file): string => basename($file, '.php'), $files);
+}
+
 function pl_install_database_check(): array
 {
     pl_database_require_supported();
@@ -125,11 +149,25 @@ function pl_install_database_check(): array
 }
 
 /** @return array{applied: list<string>, skipped: list<string>} */
-function pl_migrate(?int $limit = null): array
+/**
+ * Apply pending schema steps.
+ *
+ * $limit caps how many steps one call applies; $seconds stops the call once that
+ * much wall time has gone, checked between steps so no step is ever cut in half.
+ * The browser installer passes a budget rather than a limit: the whole chain is
+ * about two seconds of work, so a normal host finishes it in one request, while a
+ * shared host with a short max_execution_time still hands control back in time and
+ * the next request carries on from the receipts.
+ */
+function pl_migrate(?int $limit = null, ?float $seconds = null): array
 {
     if ($limit !== null && $limit < 1) {
         throw new InvalidArgumentException('Migration batch size must be positive.');
     }
+    if ($seconds !== null && $seconds <= 0) {
+        throw new InvalidArgumentException('Migration time budget must be positive.');
+    }
+    $startedAt = microtime(true);
     $lock = 'phpledger:migrate:' . substr(hash('sha256', (string) DB::queryFirstField('SELECT DATABASE()')), 0, 40);
     if ((int) DB::queryFirstField('SELECT GET_LOCK(%s, 10)', $lock) !== 1) {
         throw new DomainException('Another installer is running. Try again after it finishes.');
@@ -176,7 +214,8 @@ function pl_migrate(?int $limit = null): array
                 $result['skipped'][] = $version;
                 continue;
             }
-            if ($limit !== null && count($result['applied']) >= $limit) {
+            if (($limit !== null && count($result['applied']) >= $limit)
+                || ($seconds !== null && $result['applied'] !== [] && microtime(true) - $startedAt >= $seconds)) {
                 break;
             }
             $statements = require $file;

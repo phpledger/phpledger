@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/installation_state_functions.php';
 require_once __DIR__ . '/install_functions.php';
+require_once __DIR__ . '/install_check_functions.php';
 require_once __DIR__ . '/install_oauth_functions.php';
 require_once __DIR__ . '/install_exposure_functions.php';
 require_once __DIR__ . '/security_functions.php';
@@ -481,7 +482,7 @@ function pl_install_http(): never
                             }
                         }
                         // Setup asked for an optional second, restricted database account until
-                        // 20 September 2026 (owner decision B24). Hosting panels grant every
+                        // 20 September 2026 (owner decision B24, issue #87). Hosting panels grant every
                         // user all privileges on a database, so the second account was usually
                         // identical; the views and triggers keep the installing account as their
                         // definer either way; and a narrower identity turns off the updater's
@@ -520,7 +521,9 @@ function pl_install_http(): never
                             }
                             $state['phase'] = 'migrating';
                             pl_install_save_state($state);
-                            pl_migrate(1);
+                            // One request applies as much of the chain as it safely can; the
+                            // whole chain is about two seconds of work on a normal server.
+                            pl_migrate(null, pl_install_migration_budget((string) ini_get('max_execution_time')));
                             $schema = pl_install_database_check();
                             if ($schema['status'] === 'current') {
                                 $state['phase'] = 'configuration';

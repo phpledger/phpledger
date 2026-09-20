@@ -253,6 +253,86 @@ test('the public address may stay plain http only when it is the address the own
     }
 });
 
+test('one installer request applies as much of the chain as its PHP time limit allows', function (): void {
+    // The whole chain is about two seconds of work, so a normal host finishes in one
+    // request; a host with a short limit hands control back and resumes from receipts.
+    assert_same(15.0, pl_install_migration_budget('0'));
+    assert_same(15.0, pl_install_migration_budget('30'));
+    assert_same(6.0, pl_install_migration_budget('10'));
+    assert_same(3.0, pl_install_migration_budget('5'));
+    assert_same(3.0, pl_install_migration_budget('1'));
+    assert_throws(fn () => pl_migrate(0), InvalidArgumentException::class, 'batch size');
+    assert_throws(fn () => pl_migrate(null, 0.0), InvalidArgumentException::class, 'time budget');
+});
+
+test('the progress bar names the step that is running in words an owner recognises', function (): void {
+    $versions = pl_install_migration_versions();
+    assert_same('001_foundation', $versions[0]);
+    assert_true(count($versions) >= 35, 'every migration file is listed');
+    assert_same($versions, array_values(array_unique($versions)));
+    assert_same('Creating the core tables', pl_install_step_label('001_foundation'));
+    assert_same('Building the chart of accounts and journals', pl_install_step_label('006_core_accounts_journals'));
+    // A step added after this release still reads as a sentence rather than a file name.
+    assert_same('Adding future thing', pl_install_step_label('099_future_thing'));
+    $started = pl_install_progress(['status' => 'pending', 'applied' => 0, 'pending' => count($versions)]);
+    assert_same(2, $started['percent'], 'a chain that has not started still shows movement');
+    assert_same('Creating the core tables', $started['label']);
+    $middle = pl_install_progress(['status' => 'pending', 'applied' => 5, 'pending' => count($versions) - 5]);
+    assert_same(5, $middle['done']);
+    assert_same(count($versions), $middle['total']);
+    assert_same('Building the chart of accounts and journals', $middle['label']);
+    $finished = pl_install_progress(['status' => 'current', 'applied' => count($versions), 'pending' => 0]);
+    assert_same(100, $finished['percent']);
+    assert_same('Finishing up', $finished['label']);
+});
+
+test('the setup lights summarise what the server can and cannot do', function (): void {
+    // The rule is stated for any PHP, not only the one running the suite.
+    assert_same(PL_CHECK_PASS, pl_install_php_version_check(80200, '8.2.0')['status']);
+    assert_same(PL_CHECK_PASS, pl_install_php_version_check(80500, '8.5.0')['status']);
+    assert_same(PL_CHECK_FAIL, pl_install_php_version_check(80199, '8.1.99')['status']);
+    assert_true(str_contains(pl_install_php_version_check(80199, '8.1.99')['detail'], 'needs 8.2 or newer'));
+    $checks = pl_install_requirement_checks(['HTTPS' => 'on', 'SERVER_PORT' => '443'], 'protected');
+    assert_true(count($checks) >= 13, 'every requirement gets its own light');
+    $byName = [];
+    foreach ($checks as $check) {
+        assert_same(['name', 'status', 'detail'], array_keys($check));
+        assert_true(in_array($check['status'], [PL_CHECK_PASS, PL_CHECK_WARN, PL_CHECK_FAIL], true), $check['name']);
+        assert_true($check['detail'] !== '', $check['name'] . ' explains itself');
+        $byName[$check['name']] = $check;
+    }
+    // Whatever the host, what the application itself brings must pass here.
+    foreach (['PHP version', 'PHP bcmath', 'PHP pdo_mysql', 'PHP openssl', 'Bundled dependencies'] as $required) {
+        assert_same(PL_CHECK_PASS, $byName[$required]['status'], $required);
+    }
+    assert_same(PL_CHECK_PASS, $byName['HTTPS']['status']);
+    assert_same(PL_CHECK_PASS, $byName['Private folders hidden']['status']);
+    // The worst light decides the summary, and plain HTTP is a warning rather than a refusal.
+    $plain = pl_install_requirement_checks(['HTTP_HOST' => 'books.example.com'], 'exposed');
+    assert_same(PL_CHECK_FAIL, pl_install_check_summary($plain));
+    assert_same(PL_CHECK_WARN, pl_install_check_summary([pl_install_check_row('a', PL_CHECK_PASS, ''), pl_install_check_row('b', PL_CHECK_WARN, '')]));
+    assert_same(PL_CHECK_PASS, pl_install_check_summary([]));
+    $environment = pl_install_environment(['SERVER_SOFTWARE' => 'Apache/2.4.58'], [3306]);
+    $names = array_column($environment, 'name');
+    foreach (['PHP', 'Web server', 'Application folder', 'Private storage', 'Database servers found here'] as $expected) {
+        assert_true(in_array($expected, $names, true), $expected);
+    }
+    assert_same('127.0.0.1 port 3306', $environment[array_search('Database servers found here', $names, true)]['value']);
+});
+
+test('the checks setup runs against the finished database prove what the owner cannot see', function (): void {
+    $checks = pl_install_self_checks(pl_install_database_check());
+    $byName = array_column($checks, 'detail', 'name');
+    assert_same(PL_CHECK_PASS, pl_install_check_summary($checks));
+    assert_true(str_contains($byName['Database structure'], 'every checksum matches'));
+    assert_true(str_contains($byName['Posted entries protected'], 'database rules are active'));
+    assert_true(str_contains($byName['Money arithmetic'], 'exactly'));
+    // An incomplete chain is reported as a red light, not hidden.
+    $pending = pl_install_self_checks(['status' => 'pending', 'applied' => 30, 'pending' => 5]);
+    assert_same(PL_CHECK_FAIL, $pending[0]['status']);
+    assert_true(str_contains($pending[0]['detail'], '5 of 35 steps still to run'));
+});
+
 test('private-folder probes stay inside the uploaded folder and are skipped for a public document root', function (): void {
     assert_same('https://books.example.com/accounts/www/phpledger/storage/installation/exposure-probe.txt',
         pl_install_probe_url('https://books.example.com/accounts', '/srv/site/accounts', '/srv/site/accounts/www/phpledger/storage/installation/exposure-probe.txt'));

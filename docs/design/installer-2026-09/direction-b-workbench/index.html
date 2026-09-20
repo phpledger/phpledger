@@ -1,0 +1,648 @@
+<!--
+  PHP Ledger installer — visual prototype
+  Direction B: "Workbench"
+
+  Three ideas carrying this direction:
+  1. A persistent "assembly tray" of six compartments (Start, Database, Build,
+     Checks, Account, Ready) runs across every screen, so the whole install
+     reads as one physical setup being fitted together piece by piece, not a
+     linear wizard counting pages.
+  2. Every server check, schema step and self-check renders as a small
+     concrete module — a labelled tile with its own status light — that
+     visibly settles into place when it clears, instead of living inside a
+     paragraph or a bare list.
+  3. A failed check opens into a focused view: the rest of the tray stays
+     visible and mostly lit, one part sits under direct light with
+     plain-language causes and named fixes, and "Check again" re-tests just
+     that part so you watch it click into place rather than hitting a dead
+     end.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PHP Ledger installer — Direction B: Workbench</title>
+<style>
+@font-face{
+  font-family:"Inter Variable";
+  src:url("../../../../www/phpledger/public/assets/fonts/InterVariable.woff2") format("woff2");
+  font-weight:100 900; font-style:normal; font-display:swap;
+}
+:root{
+  --canvas:#FAF9F7; --surface:#FFFFFF; --surface-subtle:#F4F3F0; --border:#E8E6E1; --border-strong:#8C8880;
+  --ink:#1F1E1C; --ink-muted:#6B6862; --ink-faint:#706D66;
+  --brand-navy:#0C2052; --brand-navy-hover:#16296B; --brand-blue:#4656E8; --brand-blue-hover:#3646D6; --brand-selected:#EEF0FF; --brand-charcoal:#424242;
+  --success:#1F7A4D; --success-bg:#E8F4EE; --warning:#9A6200; --warning-bg:#FBF1DE; --danger:#B42318; --danger-bg:#FDECEA; --info:#2F5BD3; --info-bg:#EEF2FD; --neutral:#6B6862; --neutral-bg:#F4F3F0;
+  --radius-control:6px; --radius-panel:10px;
+  --control-h:34px;
+  --font-sans:"Inter Variable",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#101114;color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+
+/* ---------- harness (review page chrome, not part of the product design) ---------- */
+.wrap{max-width:1320px;margin:0 auto;padding:48px 20px 96px;}
+.harness-head{color:#c8cad2;margin-bottom:44px;max-width:760px;}
+.harness-head .kicker{font-size:12.5px;color:#8a8d99;margin:0 0 8px;}
+.harness-head h1{font-size:22px;margin:0 0 10px;color:#f2f3f6;font-weight:650;}
+.harness-head p{font-size:13.5px;line-height:1.6;color:#aeb1bd;margin:0;}
+.screen-wrap{margin-bottom:56px;}
+.screen-caption{display:flex;align-items:center;gap:9px;color:#9498a6;font-size:12.5px;font-weight:600;margin:0 0 12px 2px;}
+.cap-n{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:999px;background:#2a2c33;color:#d7d9e0;font-size:10px;font-weight:700;flex:none;}
+.frame{width:1280px;height:720px;overflow:hidden;position:relative;background:var(--canvas);border-radius:12px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);padding:34px 42px;display:flex;flex-direction:column;color:var(--ink);font-family:var(--font-sans);}
+
+/* ---------- shared product-style atoms ---------- */
+.bench-chrome{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;position:relative;}
+.bench-logo{height:22px;width:auto;display:block;}
+.bench-tray{display:flex;gap:6px;align-items:center;position:relative;}
+.bench-tray::before{content:"";position:absolute;left:10px;right:10px;top:50%;height:1px;background:var(--border);z-index:0;}
+.tray-slot{width:44px;height:21px;border-radius:5px;border:1.5px solid var(--border-strong);background:var(--surface);position:relative;z-index:1;display:flex;align-items:center;justify-content:center;}
+.tray-slot .ok-glyph{width:10px;height:10px;color:#fff;}
+.tray-slot.is-done{background:var(--brand-navy);border-color:var(--brand-navy);}
+.tray-slot.is-current{border-color:var(--brand-blue);background:var(--brand-selected);}
+.tray-slot.is-current::after{content:"";position:absolute;inset:-4px;border-radius:8px;border:1.5px solid var(--brand-blue);opacity:.35;}
+.tray-slot.is-pending{opacity:.5;}
+
+.bench-head{flex:0 0 auto;margin-bottom:18px;}
+.bench-heading{margin:0 0 5px;color:var(--ink);font-weight:650;letter-spacing:-.01em;}
+.bench-heading.size-lg{font-size:27px;line-height:33px;}
+.bench-heading.size-md{font-size:20px;line-height:26px;}
+.bench-sub{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink-muted);max-width:74ch;}
+
+.bench-body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;}
+.bench-actions{flex:0 0 auto;margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.bench-actions .fine-print{font-size:11.5px;color:var(--ink-faint);}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;height:var(--control-h);padding-inline:17px;border-radius:var(--radius-control);font-size:13px;font-weight:600;border:1px solid transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background-color .12s ease,border-color .12s ease,color .12s ease;}
+.btn-primary{background:var(--brand-navy);color:#fff;}
+.btn-primary:hover{background:var(--brand-navy-hover);}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong);}
+.btn-secondary:hover{background:var(--surface-subtle);}
+.btn.is-checking,.btn.is-cleared{opacity:.85;cursor:default;}
+.btn.is-cleared{background:var(--success);}
+
+.field{display:flex;flex-direction:column;gap:6px;}
+.field-label{font-size:11.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px;}
+.field-label::before{content:"";width:6px;height:6px;border-radius:1.5px;background:var(--brand-blue);flex:none;}
+.input{height:var(--control-h);padding-inline:10px;border:1px solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface);color:var(--ink);font-size:13px;font-family:inherit;width:100%;}
+.input:focus{outline:2px solid var(--brand-blue);outline-offset:1px;border-color:var(--brand-blue);}
+.input::placeholder{color:var(--ink-faint);}
+.field-hint{font-size:11px;color:var(--ink-muted);line-height:1.45;}
+.field-pair{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
+.field-pair.even{grid-template-columns:1fr 1fr;}
+
+.snip{font-family:ui-monospace,"SF Mono",monospace;font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;}
+.ok-glyph{width:12px;height:12px;flex:none;}
+
+/* ---------- animation ---------- */
+@keyframes sheen{from{background-position:140% 0;}to{background-position:-140% 0;}}
+@keyframes pin-pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+@keyframes bench-settle{0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}
+@keyframes bench-flash{0%{box-shadow:0 0 0 0 rgba(31,122,77,.35);}70%{box-shadow:0 0 0 10px rgba(31,122,77,0);}100%{box-shadow:0 0 0 0 rgba(31,122,77,0);}}
+@keyframes glow-ring{0%{box-shadow:0 0 0 0 rgba(70,86,232,.30);}70%{box-shadow:0 0 0 18px rgba(70,86,232,0);}100%{box-shadow:0 0 0 0 rgba(70,86,232,0);}}
+.js .reveal{opacity:0;transform:translateY(8px);}
+.js .frame.in-view .reveal{animation:bench-settle .5s ease-out forwards;animation-delay:calc(var(--i,0) * 70ms);}
+.js .frame.in-view .reward-card.reveal{animation-name:bench-settle,glow-ring;animation-duration:.6s,1.2s;animation-timing-function:ease-out,ease-out;animation-fill-mode:forwards;animation-delay:calc(var(--i,0) * 70ms),calc(var(--i,0) * 70ms);}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;}
+  .js .reveal{opacity:1 !important;transform:none !important;}
+}
+
+/* ---------- screen 1: tiles + stats ---------- */
+#screen-1 .bench-body{justify-content:center;}
+.s1-body{display:grid;grid-template-columns:300px 1fr;gap:30px;}
+.stat-row{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);}
+.stat-row:first-child{padding-top:0;}
+.stat-row:last-child{border-bottom:none;}
+.stat-num{font-size:21px;font-weight:700;color:var(--brand-navy);font-variant-numeric:tabular-nums;flex:none;min-width:34px;}
+.stat-label{font-size:12.5px;color:var(--ink-muted);}
+.stat-intro{font-size:12.5px;color:var(--ink-muted);line-height:1.55;margin:14px 0 0;}
+.checks-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.checks-head h2{font-size:12.5px;font-weight:600;color:var(--ink);margin:0;}
+.status-pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-muted);}
+.status-pill::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--success);}
+.status-pill.has-issue{color:var(--danger);}
+.status-pill.has-issue::before{background:var(--danger);}
+.tile-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.tile{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--border-strong);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;min-height:62px;position:relative;}
+.tile .led{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:999px;background:var(--border-strong);}
+.tile.is-pass{border-top-color:var(--success);}
+.tile.is-pass .led{background:var(--success);}
+.tile.is-fail{border-top-color:var(--danger);}
+.tile.is-fail .led{background:var(--danger);}
+.tile-name{font-size:12px;font-weight:600;color:var(--ink);padding-right:14px;}
+.tile-detail{font-size:10.5px;color:var(--ink-muted);line-height:1.35;}
+.tile.is-fail .tile-detail{color:var(--danger);}
+.checks-foot{font-size:11.5px;color:var(--ink-faint);margin:12px 0 0;}
+
+/* ---------- screen 2: rail + challenge ---------- */
+.s2-body{flex:1;display:grid;grid-template-columns:242px 1fr;gap:26px;min-height:0;}
+.rail{display:flex;flex-direction:column;gap:10px;min-height:0;}
+.rail-list{display:flex;flex-direction:column;gap:2px;}
+.rail-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:11.5px;}
+.rail-row .led{width:7px;height:7px;border-radius:999px;background:var(--success);flex:none;}
+.rail-row.is-fail{background:var(--danger-bg);}
+.rail-row.is-fail .led{background:var(--danger);}
+.rail-row.is-fail .rail-name{color:var(--danger);font-weight:600;}
+.rail-row.just-settled{animation:bench-flash .7s ease-out;}
+.rail-name{color:var(--ink);font-weight:500;}
+.challenge-card{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--danger);border-radius:10px;padding:22px 26px;display:flex;flex-direction:column;gap:13px;min-height:0;}
+.challenge-card.is-resolved{border-left-color:var(--success);}
+.challenge-title{font-size:19px;font-weight:650;color:var(--ink);margin:0;}
+.challenge-detail{font-size:13px;color:var(--ink-muted);line-height:1.55;margin:0;transition:opacity .2s ease;}
+.is-resolved .challenge-detail,.is-resolved .fix-list{opacity:.38;}
+.resolved-banner{display:none;align-items:center;gap:8px;background:var(--success-bg);color:var(--success);padding:9px 12px;border-radius:8px;font-size:12.5px;font-weight:600;}
+.resolved-banner .ok-glyph{color:var(--success);}
+.is-resolved .resolved-banner{display:flex;}
+.fix-head{font-size:12.5px;font-weight:650;color:var(--ink);margin:2px 0 0;}
+.fix-list{display:flex;flex-direction:column;gap:8px;transition:opacity .2s ease;}
+.fix-item{display:flex;gap:10px;padding:10px 12px;background:var(--surface-subtle);border-radius:8px;font-size:12px;line-height:1.55;color:var(--ink);}
+.fix-num{flex:none;width:18px;height:18px;border-radius:999px;background:var(--surface);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ink-muted);}
+.recheck-row{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:4px;}
+.recheck-note{font-size:11.5px;color:var(--ink-faint);}
+
+/* ---------- screen 3: database ---------- */
+#screen-3 .bench-body{justify-content:center;}
+.s3-body{display:grid;grid-template-columns:1.3fr 1fr;gap:30px;}
+.db-form{display:flex;flex-direction:column;gap:13px;}
+.detect-chip{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--brand-navy);background:var(--brand-selected);padding:3px 8px;border-radius:999px;width:fit-content;grid-column:1/-1;}
+.tip-module{background:var(--brand-selected);border:1px solid #c7cdf7;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;}
+.tip-module h3{margin:0;font-size:13px;color:var(--brand-navy);}
+.tip-module p{margin:0;font-size:12px;color:var(--brand-navy);line-height:1.55;}
+.recap-pill{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--success);background:var(--success-bg);padding:6px 12px;border-radius:999px;width:fit-content;}
+.recap-pill .ok-glyph{color:var(--success);}
+
+/* ---------- screen 4: reward ---------- */
+.reward-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;}
+.reward-card{width:640px;background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--success);border-radius:12px;padding:24px 30px;text-align:left;}
+.reward-badge{display:inline-flex;align-items:center;gap:6px;background:var(--success-bg);color:var(--success);font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-bottom:12px;}
+.reward-title{font-size:25px;font-weight:650;color:var(--ink);margin:0 0 8px;letter-spacing:-.01em;}
+.reward-detail{font-size:13.5px;color:var(--ink-muted);font-variant-numeric:tabular-nums;margin:0 0 6px;}
+.reward-note{font-size:12px;color:var(--ink-faint);margin:0;}
+.next-row{display:flex;gap:10px;}
+.next-chip{border:1.5px dashed var(--border-strong);border-radius:999px;padding:7px 16px;font-size:11.5px;color:var(--ink-muted);background:var(--canvas);}
+
+/* ---------- screen 5: installing ---------- */
+.progress-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;max-width:760px;}
+.progress-status{display:flex;justify-content:space-between;align-items:baseline;}
+.progress-step{font-size:19px;font-weight:650;color:var(--ink);}
+.progress-count{font-size:13px;color:var(--ink-muted);font-variant-numeric:tabular-nums;}
+.progress-track{height:10px;border-radius:999px;background:var(--surface-subtle);border:1px solid var(--border);overflow:hidden;}
+.progress-bar{height:100%;border-radius:999px;background:var(--brand-navy);background-image:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.35) 50%,transparent 80%);background-size:240% 100%;animation:sheen 1.6s linear infinite;width:14%;}
+.pin-strip{display:flex;gap:11px;margin-top:4px;}
+.pin-cluster{display:flex;gap:3px;}
+.pin{width:8px;height:22px;border-radius:2px;background:var(--surface-subtle);border:1px solid var(--border);}
+.pin.is-done{background:var(--brand-navy);border-color:var(--brand-navy);}
+.pin.is-current{background:var(--brand-blue);border-color:var(--brand-blue);animation:pin-pulse 1s ease-in-out infinite;}
+.placed-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.placed-chip{font-size:11px;color:var(--ink-muted);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:5px 11px;display:flex;align-items:center;gap:5px;}
+.placed-chip .ok-glyph{width:9px;height:9px;color:var(--success);}
+.auto-note{font-size:11.5px;color:var(--ink-faint);}
+
+/* ---------- screen 6: gauges ---------- */
+.gauge-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:14px;}
+.gauge-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px 17px;display:flex;flex-direction:column;gap:7px;justify-content:center;}
+.gauge-top{display:flex;align-items:center;gap:8px;}
+.gauge-led{width:10px;height:10px;border-radius:999px;background:var(--success);flex:none;box-shadow:0 0 0 3px var(--success-bg);}
+.gauge-name{font-size:13px;font-weight:650;color:var(--ink);}
+.gauge-detail{font-size:11.5px;color:var(--ink-muted);line-height:1.5;}
+
+/* ---------- screen 7: account ---------- */
+#screen-7 .bench-body{justify-content:center;}
+.account-body{display:grid;grid-template-columns:1.2fr .85fr;gap:32px;}
+.account-form{display:flex;flex-direction:column;gap:12px;}
+.nameplate-wrap{display:flex;flex-direction:column;gap:14px;}
+.nameplate{background:var(--brand-navy);border-radius:10px;padding:18px 20px;display:flex;align-items:center;gap:12px;}
+.nameplate-avatar{width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none;}
+.nameplate-name{color:#fff;font-weight:650;font-size:14.5px;}
+.nameplate-meta{color:rgba(255,255,255,.68);font-size:11.5px;margin-top:1px;}
+.account-aside{background:var(--surface-subtle);border:1px solid var(--border);border-radius:10px;padding:15px 17px;display:flex;flex-direction:column;gap:9px;font-size:12px;color:var(--ink-muted);line-height:1.55;}
+.account-aside strong{color:var(--ink);}
+.file-fake{height:var(--control-h);border:1px dashed var(--border-strong);border-radius:var(--radius-control);display:flex;align-items:center;padding-inline:10px;font-size:12px;color:var(--ink-faint);background:var(--surface);}
+
+/* ---------- screen 8: done ---------- */
+.done-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;}
+.manifest-card{width:520px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 28px;}
+.manifest-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--ink);}
+.manifest-row:last-child{border-bottom:none;}
+.manifest-row .ok-glyph{color:var(--success);}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="ico-check" viewBox="0 0 16 16"><path d="M3.5 8.3l3.1 3.1L12.5 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+  <div class="harness-head">
+    <p class="kicker">PHP Ledger installer — visual prototype</p>
+    <h1>Direction B — Workbench</h1>
+    <p>Eight screens, each a real 1280&times;720 laptop viewport. Scroll to review the whole flow in order. Everything below the fold of a real browser window is exactly what a person installing PHP Ledger would see with no scrolling.</p>
+  </div>
+
+  <div class="screen-wrap">
+    <p class="screen-caption"><span class="cap-n">1</span>Start — what setup does, and the server checks running</p>
+    <div class="frame" id="screen-1">
+      <div class="bench-chrome">
+        <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+        <div class="bench-tray">
+          <div class="tray-slot is-current"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+        </div>
+      </div>
+      <div class="bench-head">
+        <h1 class="bench-heading size-lg">This installs PHP Ledger on this server.</h1>
+        <p class="bench-sub">A private installer builds your ledger&rsquo;s structure and protections, then hands you the keys. No company and no transaction is created yet.</p>
+      </div>
+      <div class="bench-body">
+        <div class="s1-body">
+          <div>
+            <div class="stat-row"><span class="stat-num">35</span><span class="stat-label">tables and views built</span></div>
+            <div class="stat-row"><span class="stat-num">108</span><span class="stat-label">protective database rules</span></div>
+            <div class="stat-row"><span class="stat-num">1</span><span class="stat-label">sign-in account you create</span></div>
+            <p class="stat-intro">Each one is checked on your own server before it counts &mdash; not assumed.</p>
+          </div>
+          <div>
+            <div class="checks-head">
+              <h2>Checking this server</h2>
+              <span class="status-pill has-issue">1 need attention, 9 passed</span>
+            </div>
+            <div class="tile-grid">
+              <div class="tile is-pass reveal" style="--i:1"><span class="led"></span><span class="tile-name">PHP version</span><span class="tile-detail">8.3.14</span></div>
+              <div class="tile is-fail reveal" style="--i:2"><span class="led"></span><span class="tile-name">PHP bcmath</span><span class="tile-detail">missing, needed for exact money arithmetic</span></div>
+              <div class="tile is-pass reveal" style="--i:3"><span class="led"></span><span class="tile-name">PHP pdo_mysql</span><span class="tile-detail">available</span></div>
+              <div class="tile is-pass reveal" style="--i:4"><span class="led"></span><span class="tile-name">PHP mbstring</span><span class="tile-detail">available</span></div>
+              <div class="tile is-pass reveal" style="--i:5"><span class="led"></span><span class="tile-name">PHP curl</span><span class="tile-detail">available</span></div>
+              <div class="tile is-pass reveal" style="--i:6"><span class="led"></span><span class="tile-name">PHP openssl</span><span class="tile-detail">available</span></div>
+              <div class="tile is-pass reveal" style="--i:7"><span class="led"></span><span class="tile-name">PHP fileinfo</span><span class="tile-detail">available</span></div>
+              <div class="tile is-pass reveal" style="--i:8"><span class="led"></span><span class="tile-name">PHP session</span><span class="tile-detail">available</span></div>
+              <div class="tile is-pass reveal" style="--i:9"><span class="led"></span><span class="tile-name">PHP json</span><span class="tile-detail">available</span></div>
+              <div class="tile is-pass reveal" style="--i:10"><span class="led"></span><span class="tile-name">Bundled dependencies</span><span class="tile-detail">the vendor folder is in place</span></div>
+            </div>
+            <p class="checks-foot">A red light will stop the installation later, so fix it first.</p>
+          </div>
+        </div>
+      </div>
+      <div class="bench-actions">
+        <span class="fine-print">Takes about two minutes.</span>
+        <button class="btn btn-primary" type="button">Start setup</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-wrap">
+    <p class="screen-caption"><span class="cap-n">2</span>A failed check, presented as a challenge</p>
+    <div class="frame" id="screen-2">
+      <div class="bench-chrome">
+        <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+        <div class="bench-tray">
+          <div class="tray-slot is-current"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+        </div>
+      </div>
+      <div class="bench-head">
+        <h1 class="bench-heading size-md">Checking this server</h1>
+        <p class="bench-sub">Nine parts are already in place. One needs a quick fix before setup can continue.</p>
+      </div>
+      <div class="bench-body">
+        <div class="s2-body">
+          <div class="rail">
+            <span class="status-pill has-issue" id="challenge-summary">1 need attention, 9 passed</span>
+            <div class="rail-list">
+              <div class="rail-row"><span class="led"></span><span class="rail-name">PHP version</span></div>
+              <div class="rail-row is-fail" id="bcmath-tile"><span class="led"></span><span class="rail-name">PHP bcmath</span></div>
+              <div class="rail-row"><span class="led"></span><span class="rail-name">PHP pdo_mysql</span></div>
+              <div class="rail-row"><span class="led"></span><span class="rail-name">PHP mbstring</span></div>
+              <div class="rail-row"><span class="led"></span><span class="rail-name">PHP curl</span></div>
+              <div class="rail-row"><span class="led"></span><span class="rail-name">PHP openssl</span></div>
+              <div class="rail-row"><span class="led"></span><span class="rail-name">PHP fileinfo</span></div>
+              <div class="rail-row"><span class="led"></span><span class="rail-name">PHP session</span></div>
+              <div class="rail-row"><span class="led"></span><span class="rail-name">PHP json</span></div>
+              <div class="rail-row"><span class="led"></span><span class="rail-name">Bundled dependencies</span></div>
+            </div>
+          </div>
+          <div class="challenge-card" id="bcmath-challenge">
+            <h2 class="challenge-title">PHP bcmath is missing</h2>
+            <p class="challenge-detail">bcmath is missing, and it is needed for exact money arithmetic &mdash; without it, PHP Ledger cannot guarantee that amounts add up exactly.</p>
+            <div class="resolved-banner"><svg class="ok-glyph"><use href="#ico-check"/></svg><span>bcmath is now available &mdash; exact money arithmetic is back online.</span></div>
+            <p class="fix-head">Ways to fix this</p>
+            <div class="fix-list">
+              <div class="fix-item"><span class="fix-num">1</span><span>On XAMPP or Laragon: open php.ini, remove the semicolon before <span class="snip">extension=bcmath</span>, and restart Apache.</span></div>
+              <div class="fix-item"><span class="fix-num">2</span><span>On Ubuntu or Debian hosting: run <span class="snip">sudo apt install php8.3-bcmath</span>, then restart PHP-FPM.</span></div>
+              <div class="fix-item"><span class="fix-num">3</span><span>On shared hosting: open the PHP Selector or MultiPHP INI Editor in your control panel and enable bcmath.</span></div>
+            </div>
+            <div class="recheck-row">
+              <button class="btn btn-primary" type="button" id="recheck-btn">Check again</button>
+              <span class="recheck-note">We&rsquo;ll only re-test this one thing.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-wrap">
+    <p class="screen-caption"><span class="cap-n">3</span>Database — connection details</p>
+    <div class="frame" id="screen-3">
+      <div class="bench-chrome">
+        <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+        <div class="bench-tray">
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-current"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+        </div>
+      </div>
+      <div class="bench-head">
+        <h1 class="bench-heading size-md">Connect your database</h1>
+        <p class="bench-sub">PHP Ledger stores every transaction here. On this computer, setup can create it for you.</p>
+      </div>
+      <div class="bench-body">
+        <div class="s3-body">
+          <div class="db-form">
+            <div class="field-pair even">
+              <div class="field"><label class="field-label">Database host</label><input class="input" value="localhost"></div>
+              <div class="field"><label class="field-label">Port</label><input class="input" value="3306"></div>
+              <span class="detect-chip">A database server answered on this computer at port 3306</span>
+            </div>
+            <div class="field"><label class="field-label">Database name</label><input class="input" value="noortraders_ledger"><p class="field-hint">Any name will do here &mdash; setup creates it if it does not exist yet.</p></div>
+            <div class="field-pair even">
+              <div class="field"><label class="field-label">Database user</label><input class="input" value="root"></div>
+              <div class="field"><label class="field-label">Database password</label><input class="input" type="password" placeholder="Leave empty on this computer"></div>
+            </div>
+            <p class="field-hint">Leave the password empty only on this computer, where XAMPP and Laragon install root without one. A database on another server always needs one.</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="tip-module">
+              <h3>Setting up locally?</h3>
+              <p>XAMPP and Laragon already create a root account with no password. Leave the password field empty and setup does the rest &mdash; including creating the database itself.</p>
+            </div>
+            <span class="recap-pill"><svg class="ok-glyph"><use href="#ico-check"/></svg>Server checks: all 10 passed</span>
+          </div>
+        </div>
+      </div>
+      <div class="bench-actions">
+        <span class="fine-print">MySQL 8.4 or MariaDB 10.4+ &mdash; no terminal needed.</span>
+        <button class="btn btn-primary" type="button">Check database</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-wrap">
+    <p class="screen-caption"><span class="cap-n">4</span>Reward &mdash; the moment after the database connects</p>
+    <div class="frame" id="screen-4">
+      <div class="bench-chrome">
+        <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+        <div class="bench-tray">
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-current"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="reward-body">
+          <div class="reward-card reveal" style="--i:1">
+            <span class="reward-badge">Connected</span>
+            <h1 class="reward-title">Database connected.</h1>
+            <p class="reward-detail">noortraders_ledger on localhost:3306 &middot; MariaDB 10.11.6</p>
+            <p class="reward-note">Created just now, because it did not exist yet.</p>
+          </div>
+          <div class="next-row reveal" style="--i:2">
+            <span class="next-chip">Chart of accounts</span>
+            <span class="next-chip">Protections</span>
+            <span class="next-chip">Reports</span>
+            <span class="next-chip">Your account</span>
+          </div>
+        </div>
+      </div>
+      <div class="bench-actions" style="justify-content:center;">
+        <button class="btn btn-primary" type="button">Install database</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-wrap">
+    <p class="screen-caption"><span class="cap-n">5</span>Installing &mdash; 35 schema steps, one at a time</p>
+    <div class="frame" id="screen-5">
+      <div class="bench-chrome">
+        <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+        <div class="bench-tray">
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-current"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+        </div>
+      </div>
+      <div class="bench-head">
+        <h1 class="bench-heading size-md">Preparing your database</h1>
+        <p class="bench-sub">Your browser is building the database one step at a time. Keep this tab open &mdash; it usually takes under a minute.</p>
+      </div>
+      <div class="bench-body">
+        <div class="progress-wrap">
+          <div>
+            <div class="progress-status">
+              <span class="progress-step">Building the chart of accounts and journals</span>
+              <span class="progress-count">Step 6 of 35 &middot; 14%</span>
+            </div>
+            <div class="progress-track" style="margin-top:8px;"><div class="progress-bar"></div></div>
+          </div>
+          <div class="pin-strip reveal" style="--i:1">
+            <div class="pin-cluster"><div class="pin is-done"></div><div class="pin is-done"></div><div class="pin is-done"></div><div class="pin is-done"></div><div class="pin is-done"></div><div class="pin is-current"></div><div class="pin"></div></div>
+            <div class="pin-cluster"><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div></div>
+            <div class="pin-cluster"><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div></div>
+            <div class="pin-cluster"><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div></div>
+            <div class="pin-cluster"><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div><div class="pin"></div></div>
+          </div>
+          <div>
+            <p class="auto-note">Just placed</p>
+            <div class="placed-row">
+              <span class="placed-chip"><svg class="ok-glyph"><use href="#ico-check"/></svg>Separating sample data</span>
+              <span class="placed-chip"><svg class="ok-glyph"><use href="#ico-check"/></svg>Adding the counter and till</span>
+              <span class="placed-chip"><svg class="ok-glyph"><use href="#ico-check"/></svg>Protecting sample periods</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bench-actions">
+        <span class="fine-print">Continuing automatically &mdash; nothing to click.</span>
+        <span class="fine-print">If the connection stops, reopen this page: an interrupted step waits for review.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-wrap">
+    <p class="screen-caption"><span class="cap-n">6</span>Database checks passed &mdash; the six self-checks</p>
+    <div class="frame" id="screen-6">
+      <div class="bench-chrome">
+        <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+        <div class="bench-tray">
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-current"></div>
+          <div class="tray-slot is-pending"></div>
+          <div class="tray-slot is-pending"></div>
+        </div>
+      </div>
+      <div class="bench-head">
+        <h1 class="bench-heading size-md">Database checks</h1>
+        <p class="bench-sub">Setup has just proved these on your own server.</p>
+      </div>
+      <div class="bench-body">
+        <div class="gauge-grid">
+          <div class="gauge-tile reveal" style="--i:1"><div class="gauge-top"><span class="gauge-led"></span><span class="gauge-name">Database structure</span></div><p class="gauge-detail">35 of 35 steps applied, and every checksum matches this release</p></div>
+          <div class="gauge-tile reveal" style="--i:2"><div class="gauge-top"><span class="gauge-led"></span><span class="gauge-name">Database server</span></div><p class="gauge-detail">MariaDB 10.11.6</p></div>
+          <div class="gauge-tile reveal" style="--i:3"><div class="gauge-top"><span class="gauge-led"></span><span class="gauge-name">Posted entries protected</span></div><p class="gauge-detail">108 database rules are active, so a posted entry cannot be edited away</p></div>
+          <div class="gauge-tile reveal" style="--i:4"><div class="gauge-top"><span class="gauge-led"></span><span class="gauge-name">Report sources</span></div><p class="gauge-detail">6 report views are readable by this account</p></div>
+          <div class="gauge-tile reveal" style="--i:5"><div class="gauge-top"><span class="gauge-led"></span><span class="gauge-name">Dates and times</span></div><p class="gauge-detail">events are stored in UTC, so they survive a server move</p></div>
+          <div class="gauge-tile reveal" style="--i:6"><div class="gauge-top"><span class="gauge-led"></span><span class="gauge-name">Money arithmetic</span></div><p class="gauge-detail">amounts add up exactly, with no rounding drift</p></div>
+        </div>
+      </div>
+      <div class="bench-actions">
+        <span class="fine-print">All six checks passed.</span>
+        <button class="btn btn-primary" type="button">Save private configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-wrap">
+    <p class="screen-caption"><span class="cap-n">7</span>Your account</p>
+    <div class="frame" id="screen-7">
+      <div class="bench-chrome">
+        <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+        <div class="bench-tray">
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-current"></div>
+          <div class="tray-slot is-pending"></div>
+        </div>
+      </div>
+      <div class="bench-head">
+        <h1 class="bench-heading size-md">Create your sign-in account</h1>
+        <p class="bench-sub">The last step before your first business.</p>
+      </div>
+      <div class="bench-body">
+        <div class="account-body">
+          <div class="account-form">
+            <div class="field-pair even">
+              <div class="field"><label class="field-label">Your name</label><input class="input" value="Ayesha Noor"></div>
+              <div class="field"><label class="field-label">Username</label><input class="input" value="ayesha.noor"></div>
+            </div>
+            <p class="field-hint" style="margin-top:-6px;">3&ndash;60 letters, numbers, dots, dashes or underscores, such as &ldquo;owner&rdquo; or &ldquo;ali.khan&rdquo;.</p>
+            <div class="field"><label class="field-label">Email address</label><input class="input" type="email" value="ayesha@noortraders.pk"></div>
+            <div class="field-pair even">
+              <div class="field"><label class="field-label">Password</label><input class="input" type="password" value="............"></div>
+              <div class="field"><label class="field-label">Type it again</label><input class="input" type="password" value="............"></div>
+            </div>
+            <p class="field-hint" style="margin-top:-6px;">At least 12 characters. You will sign in with your username or your email address.</p>
+            <div class="field"><label class="field-label">Your logo (optional)</label><div class="file-fake">No file chosen &mdash; PNG, JPEG or WebP up to 1&nbsp;MB</div></div>
+          </div>
+          <div class="nameplate-wrap">
+            <div class="nameplate reveal" style="--i:1">
+              <span class="nameplate-avatar">AN</span>
+              <span>
+                <span class="nameplate-name" style="display:block;">Ayesha Noor</span>
+                <span class="nameplate-meta">ayesha.noor &middot; Noor Traders</span>
+              </span>
+            </div>
+            <div class="account-aside">
+              <p><strong>This is the last step.</strong> Next you set up your first business, and browser setup then closes permanently.</p>
+              <p>Your private installation directory also holds <span class="snip">operator.key</span>, for maintenance. Keep it with your private backups.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bench-actions">
+        <span class="fine-print">You&rsquo;ll sign in with your username or your email.</span>
+        <button class="btn btn-primary" type="button">Finish and create your business</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-wrap">
+    <p class="screen-caption"><span class="cap-n">8</span>Done &mdash; installation complete</p>
+    <div class="frame" id="screen-8">
+      <div class="bench-chrome">
+        <img class="bench-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724">
+        <div class="bench-tray">
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+          <div class="tray-slot is-done"><svg class="ok-glyph"><use href="#ico-check"/></svg></div>
+        </div>
+      </div>
+      <div class="bench-body">
+        <div class="done-body">
+          <div style="text-align:center;">
+            <h1 class="bench-heading size-lg" style="text-align:center;">Your installation is complete.</h1>
+            <p class="bench-sub" style="text-align:center;margin:0 auto;">Next, set up your first business.</p>
+          </div>
+          <div class="manifest-card reveal" style="--i:1">
+            <div class="manifest-row"><svg class="ok-glyph"><use href="#ico-check"/></svg>35 tables and views built</div>
+            <div class="manifest-row"><svg class="ok-glyph"><use href="#ico-check"/></svg>108 protective database rules active</div>
+            <div class="manifest-row"><svg class="ok-glyph"><use href="#ico-check"/></svg>Signed in as ayesha.noor</div>
+            <div class="manifest-row"><svg class="ok-glyph"><use href="#ico-check"/></svg>Every check passed</div>
+          </div>
+        </div>
+      </div>
+      <div class="bench-actions" style="justify-content:center;">
+        <button class="btn btn-primary" type="button">Set up your first business</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in-view'); } });
+    },{threshold:.3});
+    document.querySelectorAll('.frame').forEach(function(f){ io.observe(f); });
+  } else {
+    document.querySelectorAll('.frame').forEach(function(f){ f.classList.add('in-view'); });
+  }
+
+  var btn=document.getElementById('recheck-btn');
+  if(btn){
+    btn.addEventListener('click',function(){
+      if(btn.classList.contains('is-checking')||btn.classList.contains('is-cleared')) return;
+      btn.classList.add('is-checking');
+      btn.textContent='Checking…';
+      window.setTimeout(function(){
+        btn.classList.remove('is-checking');
+        btn.classList.add('is-cleared');
+        btn.textContent='Cleared';
+        var rail=document.getElementById('bcmath-tile');
+        var card=document.getElementById('bcmath-challenge');
+        var pill=document.getElementById('challenge-summary');
+        if(rail){ rail.classList.remove('is-fail'); rail.classList.add('just-settled'); }
+        if(card){ card.classList.add('is-resolved'); }
+        if(pill){ pill.textContent='all 10 passed'; pill.classList.remove('has-issue'); }
+      },900);
+    });
+  }
+})();
+</script>
+</body>
+</html>

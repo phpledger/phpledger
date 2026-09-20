@@ -696,6 +696,99 @@ a {
   .strip-dismiss:hover { background: rgb(0 0 0 / .08); opacity: 1; }
   [data-dismissible][hidden] { display: none; }
 
+  /* Setup is a desktop task, so it is laid out across the screen rather than down
+     it: one wider card, the form beside what setup found, and no step that needs
+     scrolling on a laptop. */
+  .install-card { max-width: 60rem; gap: 1rem; }
+  .install-panel { padding: 1.5rem 1.75rem; }
+  .install-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .375rem 1.5rem; }
+  .install-head h1 { margin: 0; }
+  .install-steps { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem .5rem; margin: 0; padding: 0; list-style: none; font-size: .75rem; color: var(--ink-muted); }
+  .install-steps li { display: flex; align-items: center; gap: .5rem; }
+  .install-steps li + li::before { content: ""; inline-size: 1rem; block-size: 1px; background: var(--border); }
+  .install-step-mark {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .6875rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .install-steps [aria-current="step"] { color: var(--ink); font-weight: 600; }
+  .install-steps [aria-current="step"] .install-step-mark { background: var(--brand-navy); border-color: var(--brand-navy); color: #fff; }
+  .install-step-done .install-step-mark { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+  .install-columns { display: grid; gap: 1.25rem 1.75rem; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; }
+  .install-aside {
+    display: flex;
+    flex-direction: column;
+    gap: .625rem;
+    padding: .875rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    background: var(--surface-subtle);
+    font-size: .8125rem;
+  }
+  .install-aside > details, .install-aside > p { margin: 0; }
+  .install-panel .alert { font-size: .75rem; padding: .5rem .75rem; }
+  .field-grid { display: grid; gap: .625rem .75rem; grid-template-columns: minmax(0, 1fr); }
+  .field-grid-pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .field-grid-host { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+  @media (max-width: 52rem) {
+    .install-columns, .field-grid-pair, .field-grid-host { grid-template-columns: minmax(0, 1fr); }
+    .install-panel { padding: 1.25rem; }
+  }
+
+  /* Setup: the progress bar for the schema steps, and the green and red lights. */
+  .install-progress { display: flex; flex-direction: column; gap: .5rem; }
+  .install-progress-track {
+    height: .625rem;
+    border-radius: 999px;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .install-progress-bar {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--brand-navy);
+    background-image: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / .35) 50%, transparent 80%);
+    background-size: 240% 100%;
+    transition: width .45s ease;
+    animation: install-progress-sheen 1.6s linear infinite;
+  }
+  @keyframes install-progress-sheen { from { background-position: 140% 0; } to { background-position: -140% 0; } }
+  .install-progress-status { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 0; font-size: .875rem; }
+  .install-progress-step { font-weight: 600; }
+  .install-progress-count { color: var(--ink-muted); font-variant-numeric: tabular-nums; flex: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .install-progress-bar { animation: none; transition: none; background-image: none; }
+  }
+
+  .check-list { display: flex; flex-direction: column; gap: .125rem; margin: 0; padding: 0; list-style: none; }
+  .check-row { display: flex; gap: .625rem; align-items: baseline; padding: .375rem 0; border-block-end: 1px solid var(--border); font-size: .8125rem; }
+  .check-row:last-child { border-block-end: 0; }
+  .check-light { width: .5rem; height: .5rem; border-radius: 999px; flex: none; translate: 0 -.125rem; }
+  .check-pass .check-light { background: var(--success); }
+  .check-warn .check-light { background: var(--warning); }
+  .check-fail .check-light { background: var(--danger); }
+  .check-name { font-weight: 600; flex: none; min-width: 11rem; }
+  .check-detail { color: var(--ink-muted); min-width: 0; }
+  .check-fail .check-detail { color: var(--danger); }
+  .check-summary { cursor: pointer; font-weight: 600; display: flex; gap: .5rem; align-items: center; }
+  .check-summary .check-light { translate: 0; }
+  .env-list { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .25rem .75rem; margin: 0; font-size: .8125rem; }
+  .env-list dt { font-weight: 600; }
+  .env-list dd { margin: 0; color: var(--ink-muted); overflow-wrap: anywhere; }
+  @media (max-width: 30rem) {
+    .check-row { flex-wrap: wrap; }
+    .check-name { min-width: 0; }
+    .env-list { grid-template-columns: minmax(0, 1fr); }
+    .env-list dd { margin-block-end: .25rem; }
+  }
+
   .alert {
     display: flex;
     gap: .625rem;

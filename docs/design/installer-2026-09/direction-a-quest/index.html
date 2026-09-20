@@ -1,0 +1,700 @@
+<!--
+  PHP Ledger installer — visual direction: "Quest"
+
+  Three ideas carrying this direction:
+
+  1. One visible path, one task at a time. A solid navy route sits across the
+     top of every screen with five plain-word waypoints (Start, Database,
+     Install, Account, Done) connected by a cleared/uncleared line. It never
+     lists every sub-step and there is no numbered "chapter" styling anywhere
+     — the person only ever sees the single task in front of them — but the
+     route always answers "where am I, and what's left."
+
+  2. A failed check is a challenge screen, not a red line. PHP bcmath missing
+     gets its own screen: the real check name and detail string verbatim, a
+     plain "Needs attention" tag instead of alarm styling, three concrete
+     fixes for the hosting situations people actually have (a host's control
+     panel, XAMPP/Laragon on this computer, or asking the host directly), and
+     one action: Check again. Nothing invented, nothing left as a dead end.
+
+  3. Reward is a change of register, not a badge. Clearing the database
+     connection and finishing the install each get a full screen where the
+     frame turns to the brand navy for a moment, with one real, specific fact
+     ("Connected to ledger_demo on localhost", "108 database rules are
+     active") standing in for congratulation copy. Momentum comes from
+     concrete confidence, not confetti or trophy icons — this is accounting
+     software.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PHP Ledger installer — direction: Quest</title>
+<style>
+
+/* ===========================================================================
+   0. Font + tokens — copied verbatim from resources/ui/app.css so colours,
+   radii and control heights match the product exactly.
+   =========================================================================== */
+@font-face {
+  font-family: "Inter Variable";
+  src: url("../../../../www/phpledger/public/assets/fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  /* Canvas & surfaces */
+  --canvas: #FAF9F7;
+  --surface: #FFFFFF;
+  --surface-subtle: #F4F3F0;
+  --border: #E8E6E1;
+  --border-strong: #8C8880;
+
+  /* Text */
+  --ink: #1F1E1C;
+  --ink-muted: #6B6862;
+  --ink-faint: #706D66;
+
+  /* Brand */
+  --brand-navy: #0C2052;
+  --brand-navy-hover: #16296B;
+  --brand-blue: #4656E8;
+  --brand-blue-hover: #3646D6;
+  --brand-selected: #EEF0FF;
+  --brand-charcoal: #424242;
+
+  /* Semantic (separate from brand) */
+  --success: #1F7A4D;
+  --success-bg: #E8F4EE;
+  --warning: #9A6200;
+  --warning-bg: #FBF1DE;
+  --danger: #B42318;
+  --danger-bg: #FDECEA;
+  --danger-hover: #96190F;
+  --info: #2F5BD3;
+  --info-bg: #EEF2FD;
+  --neutral: #6B6862;
+  --neutral-bg: #F4F3F0;
+
+  /* Shape */
+  --radius-control: 6px;
+  --radius-panel: 10px;
+
+  /* Elevation — hairlines everywhere; this is the ONE soft shadow, for popovers/dialogs only */
+  --shadow-popover: 0 12px 28px -6px rgb(12 32 82 / 0.16), 0 2px 8px -2px rgb(12 32 82 / 0.08);
+
+  /* Density */
+  --control-h: 34px;
+  --control-h-lg: 36px;
+  --table-row-h: 40px;
+  --sidebar-item-h: 32px;
+  --topbar-h: 48px;
+
+  /* Shell geometry */
+  --sidebar-w: 240px;
+  --sidebar-w-rail: 56px;
+}
+
+/* ===========================================================================
+   1. Reset + page scaffold (the gallery page itself — not part of the
+   installer design being reviewed).
+   =========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: #EDEAE3;
+  font-family: "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+p { margin: 0; }
+h1, h2, h3 { margin: 0; }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+.q-page { max-width: 1280px; margin: 0 auto; padding: 40px 24px 96px; }
+.q-page-head { padding: 0 0 36px; max-width: 760px; }
+.q-page-head h1 { font-size: 21px; font-weight: 700; letter-spacing: -.01em; }
+.q-page-head p { margin-top: 8px; font-size: 14px; color: var(--ink-muted); line-height: 1.55; }
+
+.q-screen { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 52px; }
+.q-caption { font-size: 13px; font-weight: 600; color: #57534E; margin: 0; align-self: flex-start; }
+.q-caption b { color: var(--ink); font-weight: 700; }
+
+/* ===========================================================================
+   2. The frame — exactly 1280x720, clipped, styled like the product surface.
+   =========================================================================== */
+.q-frame {
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  position: relative;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-popover);
+  display: flex;
+  flex-direction: column;
+  flex: none;
+}
+
+.q-header { height: 44px; padding-inline: 72px; display: flex; align-items: center; background: var(--canvas); flex: none; }
+.q-logo { height: 17px; width: auto; display: block; }
+
+/* ===========================================================================
+   3. The quest rail — the one visible path, present on every screen.
+   =========================================================================== */
+.quest-rail { height: 80px; background: var(--brand-navy); display: flex; align-items: center; justify-content: center; flex: none; }
+.quest-path { display: flex; align-items: flex-start; list-style: none; margin: 0; padding: 0; width: 100%; max-width: 860px; padding-inline: 72px; }
+.quest-stop { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.quest-stop::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: rgb(255 255 255 / .22);
+  z-index: 0;
+}
+.quest-stop:last-child::before { content: none; }
+.quest-stop.is-done::before { background: rgb(255 255 255 / .55); }
+.quest-dot {
+  position: relative;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 2px solid rgb(255 255 255 / .38);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.quest-dot svg { width: 11px; height: 11px; color: #fff; display: none; }
+.quest-stop.is-done .quest-dot { background: var(--success); border-color: var(--success); }
+.quest-stop.is-done .quest-dot svg { display: block; }
+.quest-stop.is-current .quest-dot { width: 22px; height: 22px; background: var(--brand-blue); border-color: #fff; box-shadow: 0 0 0 5px rgb(70 86 232 / .35); }
+.quest-stop.is-justdone .quest-dot { box-shadow: 0 0 0 6px rgb(31 122 77 / .30); }
+.quest-label { font-size: 12.5px; font-weight: 600; color: rgb(255 255 255 / .55); }
+.quest-stop.is-done .quest-label { color: rgb(255 255 255 / .85); }
+.quest-stop.is-current .quest-label { color: #fff; }
+
+/* ===========================================================================
+   4. Shared content chrome.
+   =========================================================================== */
+.q-content { flex: 1; padding: 34px 72px 30px; display: flex; flex-direction: column; gap: 18px; min-height: 0; }
+.q-content-center { align-items: center; justify-content: center; }
+.q-intro h1 { font-size: 27px; line-height: 1.22; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+.q-intro .q-sub { margin-top: 7px; font-size: 14px; color: var(--ink-muted); line-height: 1.5; }
+.q-section-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+
+.q-footer { height: 84px; padding-inline: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid var(--border); background: var(--surface); flex: none; }
+.q-footer-note { font-size: 12.5px; color: var(--ink-faint); max-width: 60ch; }
+
+/* Buttons ------------------------------------------------------------------ */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: var(--control-h); padding-inline: 16px; border-radius: var(--radius-control); font-size: 13.5px; font-weight: 600; border: 1px solid transparent; cursor: pointer; white-space: nowrap; font-family: inherit; }
+.btn-primary { background: var(--brand-navy); color: #fff; }
+.btn-primary:hover { background: var(--brand-navy-hover); }
+.btn-secondary { background: #fff; color: var(--ink); border-color: var(--border-strong); }
+.btn-secondary:hover { background: var(--surface-subtle); }
+.btn-on-dark { background: #fff; color: var(--brand-navy); }
+.btn-on-dark:hover { background: var(--brand-selected); }
+.btn-lg { height: 44px; padding-inline: 24px; font-size: 14.5px; }
+.btn-sm { height: 26px; padding-inline: 10px; font-size: 12px; }
+.btn-disabled { opacity: .6; cursor: default; background: transparent; color: var(--ink-muted); border: 1px dashed var(--border-strong); }
+
+/* Icon sprite use ------------------------------------------------------------ */
+.ic { width: 15px; height: 15px; flex: none; }
+.ic-sm { width: 15px; height: 15px; }
+.ic-chev { width: 14px; height: 14px; color: var(--ink-faint); transition: transform .15s ease; }
+
+/* Form fields ---------------------------------------------------------------- */
+.q-cols { display: grid; grid-template-columns: 1.15fr .85fr; gap: 36px; flex: 1; min-height: 0; }
+.q-form { display: flex; flex-direction: column; gap: 12px; }
+.f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.f-field { display: flex; flex-direction: column; gap: 4px; }
+.f-label { font-size: 12px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 5px; }
+.f-optional { font-weight: 400; color: var(--ink-faint); }
+.f-input { height: var(--control-h); padding-inline: 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-control); background: #fff; font-size: 13px; font-family: inherit; color: var(--ink); }
+.f-hint { font-size: 12px; color: var(--ink-muted); line-height: 1.45; margin-top: 1px; }
+.f-file-row { display: flex; align-items: center; gap: 12px; height: var(--control-h); }
+.f-file-name { font-size: 12px; color: var(--ink-faint); }
+
+.q-aside { display: flex; flex-direction: column; gap: 12px; }
+.q-aside-note { display: flex; align-items: flex-start; gap: 9px; padding: 11px 13px; background: var(--success-bg); border: 1px solid color-mix(in oklab, var(--success) 25%, transparent); border-radius: var(--radius-control); font-size: 12.5px; color: var(--ink); line-height: 1.45; }
+.q-aside-note svg { color: var(--success); flex: none; margin-top: 2px; }
+.q-aside-note-strong { background: var(--brand-selected); border-color: color-mix(in oklab, var(--brand-blue) 25%, transparent); }
+.q-aside-details { border: 1px solid var(--border); border-radius: var(--radius-control); padding: 9px 13px; background: #fff; font-size: 12.5px; }
+.q-aside-details summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-weight: 600; color: var(--ink); }
+.q-aside-details summary::-webkit-details-marker { display: none; }
+.q-aside-details[open] summary { margin-bottom: 8px; }
+.q-aside-details p { margin: 6px 0 0; color: var(--ink-muted); font-size: 12px; line-height: 1.5; }
+.q-aside-details p:first-of-type { margin-top: 0; }
+.q-aside-details[open] .ic-chev { transform: rotate(90deg); }
+.q-aside-foot { font-size: 11.5px; color: var(--ink-faint); margin: 0; line-height: 1.5; }
+
+/* Check list ------------------------------------------------------------------ */
+.q-panel { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-panel); padding: 16px 22px; display: flex; flex-direction: column; gap: 8px; max-width: 720px; width: 100%; box-shadow: 0 1px 2px rgb(31 30 28 / .04); }
+.q-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.q-panel-status { margin: 0; font-size: 12.5px; color: var(--ink-muted); }
+.q-live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 999px; background: var(--ink-faint); margin-inline: 1px; vertical-align: middle; animation: qc-pulse 1.4s ease-in-out infinite; }
+
+.qc-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.qc-row { display: flex; align-items: baseline; gap: 12px; padding: 7px 2px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+.qc-row:last-child { border-bottom: 0; }
+.qc-dot { width: 7px; height: 7px; border-radius: 999px; flex: none; translate: 0 -1px; }
+.qc-pass .qc-dot { background: var(--success); }
+.qc-checking .qc-dot { background: var(--ink-faint); animation: qc-pulse 1.4s ease-in-out infinite; }
+.qc-name { font-weight: 600; min-width: 168px; flex: none; color: var(--ink); }
+.qc-detail { color: var(--ink-muted); min-width: 0; }
+.qc-checking .qc-detail { color: var(--ink-faint); font-style: italic; }
+@keyframes qc-pulse { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+
+.qc-list-lg .qc-row { padding: 13px 2px; font-size: 13.5px; align-items: center; }
+.qc-list-lg .qc-name { min-width: 210px; font-size: 13.5px; }
+.qc-list-lg svg.ic-sm { color: var(--success); width: 17px; height: 17px; flex: none; }
+
+/* Challenge card ---------------------------------------------------------------- */
+.challenge-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+.challenge-status { font-size: 12.5px; color: var(--ink-muted); margin: 0; }
+.challenge-card { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--danger); border-radius: var(--radius-panel); padding: 24px 30px; display: flex; flex-direction: column; gap: 18px; max-width: 740px; width: 100%; box-shadow: 0 1px 2px rgb(31 30 28 / .04); }
+.challenge-tag { display: inline-flex; align-self: flex-start; align-items: center; height: 22px; padding-inline: 10px; border-radius: 999px; background: var(--danger-bg); color: var(--danger); font-size: 12px; font-weight: 600; }
+.challenge-h1 { margin-top: 8px; font-size: 23px; }
+.challenge-detail { margin: 0; color: var(--ink-muted); font-size: 13.5px; line-height: 1.5; }
+.challenge-detail strong { color: var(--ink); font-weight: 600; }
+.challenge-fixes-title { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 0 0 9px; }
+.challenge-fix-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; counter-reset: fix; }
+.challenge-fix-list li { position: relative; padding-left: 28px; font-size: 12.8px; color: var(--ink); line-height: 1.5; counter-increment: fix; }
+.challenge-fix-list li::before { content: counter(fix); position: absolute; left: 0; top: 0; width: 19px; height: 19px; border-radius: 999px; background: var(--surface-subtle); border: 1px solid var(--border-strong); color: var(--ink-muted); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.challenge-fix-list code { background: var(--surface-subtle); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+/* Install progress + timeline ------------------------------------------------------ */
+.install-block { width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 20px; }
+.i-progress-track { position: relative; height: 14px; border-radius: 999px; background: var(--surface-subtle); border: 1px solid var(--border); overflow: hidden; }
+.i-progress-bar { height: 100%; border-radius: 999px; background: var(--brand-navy); background-image: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / .35) 50%, transparent 80%); background-size: 240% 100%; animation: i-sheen 1.6s linear infinite; }
+@keyframes i-sheen { from { background-position: 140% 0; } to { background-position: -140% 0; } }
+.i-progress-status { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.i-progress-step { font-weight: 700; font-size: 16px; color: var(--ink); }
+.i-progress-count { font-size: 12.5px; color: var(--ink-muted); font-variant-numeric: tabular-nums; flex: none; }
+.i-timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--radius-panel); background: #fff; overflow: hidden; }
+.i-timeline li { display: flex; align-items: center; gap: 10px; padding: 13px 18px; font-size: 13px; border-bottom: 1px solid var(--border); }
+.i-timeline li:last-child { border-bottom: 0; }
+.i-tl-done { color: var(--ink-muted); }
+.i-tl-done svg { color: var(--success); width: 15px; height: 15px; flex: none; }
+.i-tl-now { color: var(--ink); font-weight: 700; background: var(--brand-selected); }
+.i-tl-now .i-tl-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--brand-blue); box-shadow: 0 0 0 4px rgb(70 86 232 / .18); flex: none; }
+.i-tl-next { color: var(--ink-faint); }
+.i-tl-next .i-tl-dot { width: 8px; height: 8px; border-radius: 999px; border: 1.5px solid var(--border-strong); background: transparent; flex: none; }
+.i-tl-tag { margin-left: auto; font-size: 10.5px; font-weight: 700; letter-spacing: .01em; color: var(--ink-faint); }
+.i-tl-now .i-tl-tag { color: var(--brand-blue); }
+
+/* Reward screens ----------------------------------------------------------------- */
+.q-reward-wrap { flex: 1; display: flex; background: var(--brand-navy); min-height: 0; }
+.q-reward { margin: auto; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; max-width: 620px; padding: 32px; }
+.q-reward-badge { width: 78px; height: 78px; border-radius: 999px; background: var(--success); display: flex; align-items: center; justify-content: center; flex: none; box-shadow: 0 0 0 8px rgb(31 122 77 / .25); animation: reward-pop .5s cubic-bezier(.34, 1.56, .64, 1) both; }
+.q-reward-badge-final { width: 92px; height: 92px; box-shadow: 0 0 0 9px rgb(31 122 77 / .24), 0 0 0 18px rgb(31 122 77 / .12); }
+.q-reward-badge svg { width: 36px; height: 36px; color: #fff; }
+.q-reward-badge-final svg { width: 42px; height: 42px; }
+@keyframes reward-pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.q-reward-h1 { color: #fff; font-size: 26px; }
+.q-reward-sub { color: rgb(255 255 255 / .78); max-width: 480px; }
+.q-reward-foot { color: rgb(255 255 255 / .5); font-size: 12px; margin-top: 2px; }
+.q-reward .btn-lg { margin-top: 4px; }
+
+/* Reduced motion -------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .qc-checking .qc-dot,
+  .q-live-dot,
+  .i-progress-bar,
+  .q-reward-badge {
+    animation: none !important;
+  }
+  .i-progress-bar { background-image: none; }
+  .q-reward-badge { opacity: 1; transform: none; }
+}
+
+</style>
+</head>
+<body>
+
+<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="q-page">
+  <header class="q-page-head">
+    <h1>PHP Ledger installer — direction: Quest</h1>
+    <p>Eight screens, 1280×720 each, no scrolling. One task in front of the installer at a time, a visible path across the top, and a genuine pause to register each win before the next task appears.</p>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 1 — Start -->
+  <!-- ============================================================ -->
+  <div class="q-screen">
+    <p class="q-caption"><b>1 · Start</b> — what this will do, and the server checks running</p>
+    <div class="q-frame">
+      <div class="q-header"><img class="q-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724"></div>
+      <nav class="quest-rail" aria-label="Installation progress">
+        <ol class="quest-path">
+          <li class="quest-stop is-current"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Start</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Database</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Install</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Account</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Done</span></li>
+        </ol>
+      </nav>
+      <div class="q-content">
+        <div class="q-intro">
+          <h1>PHP Ledger sets up its own database, then your sign-in.</h1>
+          <p class="q-sub">Four short tasks, about a minute, mostly automatic. First, a look at this server.</p>
+        </div>
+        <div class="q-panel">
+          <div class="q-panel-head">
+            <h2 class="q-section-title">Checking this server</h2>
+            <p class="q-panel-status"><strong>12 of 14</strong> checks passed <span class="q-live-dot" aria-hidden="true"></span> <strong>2</strong> still running</p>
+          </div>
+          <ul class="qc-list">
+            <li class="qc-row qc-pass"><span class="qc-dot"></span><span class="qc-name">PHP version</span><span class="qc-detail">8.2.12</span></li>
+            <li class="qc-row qc-pass"><span class="qc-dot"></span><span class="qc-name">PHP bcmath</span><span class="qc-detail">available</span></li>
+            <li class="qc-row qc-pass"><span class="qc-dot"></span><span class="qc-name">PHP pdo_mysql</span><span class="qc-detail">available</span></li>
+            <li class="qc-row qc-pass"><span class="qc-dot"></span><span class="qc-name">Bundled dependencies</span><span class="qc-detail">the vendor folder is in place</span></li>
+            <li class="qc-row qc-pass"><span class="qc-dot"></span><span class="qc-name">Private storage</span><span class="qc-detail">writable</span></li>
+            <li class="qc-row qc-checking"><span class="qc-dot"></span><span class="qc-name">Session storage</span><span class="qc-detail">confirming this server can write session files…</span></li>
+            <li class="qc-row qc-checking"><span class="qc-dot"></span><span class="qc-name">HTTPS</span><span class="qc-detail">checking this address…</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="q-footer">
+        <p class="q-footer-note">A check that fails later becomes its own screen — never just a red line.</p>
+        <button class="btn btn-primary btn-lg" type="button">Continue to database</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 2 — A failed check as a challenge -->
+  <!-- ============================================================ -->
+  <div class="q-screen">
+    <p class="q-caption"><b>2 · Challenge</b> — a failed check, presented as something to clear</p>
+    <div class="q-frame">
+      <div class="q-header"><img class="q-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724"></div>
+      <nav class="quest-rail" aria-label="Installation progress">
+        <ol class="quest-path">
+          <li class="quest-stop is-current"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Start</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Database</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Install</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Account</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Done</span></li>
+        </ol>
+      </nav>
+      <div class="q-content q-content-center">
+        <div class="challenge-wrap">
+          <p class="challenge-status">Checking this server — <strong>13 of 14</strong> passed, <strong>1</strong> needs attention</p>
+          <div class="challenge-card">
+            <div>
+              <span class="challenge-tag">Needs attention</span>
+              <h1 class="q-h1 challenge-h1">PHP needs the bcmath extension.</h1>
+              <p class="challenge-detail"><strong>PHP bcmath</strong> — missing, and it is needed for exact money arithmetic.</p>
+            </div>
+            <div class="challenge-fixes">
+              <h3 class="challenge-fixes-title">Ways to clear this</h3>
+              <ol class="challenge-fix-list">
+                <li><strong>Hosting control panel.</strong> Open &ldquo;Select PHP Version&rdquo; or &ldquo;PHP Extensions&rdquo; and turn bcmath on. Most hosts apply it within a minute — no restart needed.</li>
+                <li><strong>XAMPP or Laragon, on this computer.</strong> Open php.ini, remove the semicolon before <code>extension=bcmath</code>, save, then restart Apache from the control panel.</li>
+                <li><strong>No extensions screen?</strong> Ask your host to turn bcmath on for this account — it's a standard PHP extension every host can enable.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="q-footer">
+        <p class="q-footer-note">Nothing has been saved yet. Clear this, then try again.</p>
+        <button class="btn btn-primary btn-lg" type="button">Check again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 3 — Database -->
+  <!-- ============================================================ -->
+  <div class="q-screen">
+    <p class="q-caption"><b>3 · Database</b> — connect, or let setup create one on this computer</p>
+    <div class="q-frame">
+      <div class="q-header"><img class="q-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724"></div>
+      <nav class="quest-rail" aria-label="Installation progress">
+        <ol class="quest-path">
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Start</span></li>
+          <li class="quest-stop is-current"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Database</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Install</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Account</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Done</span></li>
+        </ol>
+      </nav>
+      <div class="q-content">
+        <div class="q-intro">
+          <h1>Connect your database.</h1>
+          <p class="q-sub">On this computer, setup can create it for you — and root with no password is fine here.</p>
+        </div>
+        <div class="q-cols">
+          <form class="q-form">
+            <div class="f-field">
+              <label class="f-label" for="f-url">This site's address</label>
+              <input class="f-input" id="f-url" type="url" value="http://localhost/phpledger/public">
+              <p class="f-hint">It should match the address in your browser bar.</p>
+            </div>
+            <div class="f-row">
+              <div class="f-field">
+                <label class="f-label" for="f-host">Database host</label>
+                <input class="f-input" id="f-host" value="localhost">
+              </div>
+              <div class="f-field">
+                <label class="f-label" for="f-port">Port</label>
+                <input class="f-input" id="f-port" value="3306">
+              </div>
+            </div>
+            <div class="f-field">
+              <label class="f-label" for="f-name">Database name</label>
+              <input class="f-input" id="f-name" value="ledger_demo">
+              <p class="f-hint">On this same computer, any name will do: setup creates it if it does not exist.</p>
+            </div>
+            <div class="f-row">
+              <div class="f-field">
+                <label class="f-label" for="f-user">Database user</label>
+                <input class="f-input" id="f-user" value="root">
+              </div>
+              <div class="f-field">
+                <label class="f-label" for="f-pass">Database password</label>
+                <input class="f-input" id="f-pass" type="password" placeholder="">
+              </div>
+            </div>
+            <p class="f-hint">Leave the password empty only on this same computer, where XAMPP and Laragon install root without one. A database on another server always needs one.</p>
+          </form>
+          <aside class="q-aside">
+            <div class="q-aside-note">
+              <svg class="ic"><use href="#i-check"/></svg>
+              <p>A database server is answering on this computer at port 3306.</p>
+            </div>
+            <details class="q-aside-details">
+              <summary>Where do I create the database? <svg class="ic-chev"><use href="#i-chevron"/></svg></summary>
+              <p><strong>XAMPP, Laragon or MAMP:</strong> nothing to prepare — leave the host as localhost and use root with no password.</p>
+              <p><strong>cPanel and most hosts:</strong> open MySQL Databases, create a database and a user, then add the user with all privileges.</p>
+            </details>
+            <p class="q-aside-foot">MySQL 8.4 and MariaDB 10.4 or newer both work. No terminal or Composer command is needed.</p>
+          </aside>
+        </div>
+      </div>
+      <div class="q-footer">
+        <p class="q-footer-note">Start is cleared.</p>
+        <button class="btn btn-primary btn-lg" type="button">Check database</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 4 — Reward: database connected -->
+  <!-- ============================================================ -->
+  <div class="q-screen">
+    <p class="q-caption"><b>4 · Reward</b> — the moment right after the database connects</p>
+    <div class="q-frame">
+      <div class="q-header"><img class="q-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724"></div>
+      <nav class="quest-rail" aria-label="Installation progress">
+        <ol class="quest-path">
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Start</span></li>
+          <li class="quest-stop is-done is-justdone"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Database</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Install</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Account</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Done</span></li>
+        </ol>
+      </nav>
+      <div class="q-reward-wrap">
+        <div class="q-reward">
+          <div class="q-reward-badge"><svg><use href="#i-check"/></svg></div>
+          <h1 class="q-reward-h1">Connected to ledger_demo on localhost.</h1>
+          <p class="q-sub q-reward-sub">MariaDB 10.4.32 found and ready. No existing tables — PHP Ledger builds everything it needs next.</p>
+          <button class="btn btn-on-dark btn-lg" type="button">Continue to install</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 5 — Installing -->
+  <!-- ============================================================ -->
+  <div class="q-screen">
+    <p class="q-caption"><b>5 · Installing</b> — the 35 schema steps, with a progress bar and a plain-language label</p>
+    <div class="q-frame">
+      <div class="q-header"><img class="q-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724"></div>
+      <nav class="quest-rail" aria-label="Installation progress">
+        <ol class="quest-path">
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Start</span></li>
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Database</span></li>
+          <li class="quest-stop is-current"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Install</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Account</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Done</span></li>
+        </ol>
+      </nav>
+      <div class="q-content q-content-center">
+        <div class="q-intro" style="text-align:center;">
+          <h1>Building your database.</h1>
+        </div>
+        <div class="install-block">
+          <div class="i-progress-track"><div class="i-progress-bar" style="width:14%"></div></div>
+          <div class="i-progress-status">
+            <span class="i-progress-step">Building the chart of accounts and journals</span>
+            <span class="i-progress-count">Step 6 of 35 · 14%</span>
+          </div>
+          <ul class="i-timeline">
+            <li class="i-tl-done"><svg class="ic-sm"><use href="#i-check"/></svg><span>Protecting sample periods</span></li>
+            <li class="i-tl-now"><span class="i-tl-dot"></span><span>Building the chart of accounts and journals</span><span class="i-tl-tag">NOW</span></li>
+            <li class="i-tl-next"><span class="i-tl-dot"></span><span>Preparing opening balances</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="q-footer">
+        <p class="q-footer-note">Keep this tab open — it continues by itself and usually takes under a minute.</p>
+        <span class="btn btn-lg btn-disabled" aria-hidden="true">Installing…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 6 — Database checks passed -->
+  <!-- ============================================================ -->
+  <div class="q-screen">
+    <p class="q-caption"><b>6 · Verified</b> — the six real self-checks, proved on the owner's own server</p>
+    <div class="q-frame">
+      <div class="q-header"><img class="q-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724"></div>
+      <nav class="quest-rail" aria-label="Installation progress">
+        <ol class="quest-path">
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Start</span></li>
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Database</span></li>
+          <li class="quest-stop is-done is-justdone"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Install</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Account</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Done</span></li>
+        </ol>
+      </nav>
+      <div class="q-content">
+        <div class="q-intro">
+          <h1>Every database check passed.</h1>
+          <p class="q-sub">Setup just proved these on your own server.</p>
+        </div>
+        <ul class="qc-list qc-list-lg">
+          <li class="qc-row qc-pass"><svg class="ic-sm"><use href="#i-check"/></svg><span class="qc-name">Database structure</span><span class="qc-detail">35 of 35 steps applied, and every checksum matches this release</span></li>
+          <li class="qc-row qc-pass"><svg class="ic-sm"><use href="#i-check"/></svg><span class="qc-name">Database server</span><span class="qc-detail">MariaDB 10.4.32</span></li>
+          <li class="qc-row qc-pass"><svg class="ic-sm"><use href="#i-check"/></svg><span class="qc-name">Posted entries protected</span><span class="qc-detail">108 database rules are active, so a posted entry cannot be edited away</span></li>
+          <li class="qc-row qc-pass"><svg class="ic-sm"><use href="#i-check"/></svg><span class="qc-name">Report sources</span><span class="qc-detail">1 report view is readable by this account</span></li>
+          <li class="qc-row qc-pass"><svg class="ic-sm"><use href="#i-check"/></svg><span class="qc-name">Dates and times</span><span class="qc-detail">events are stored in UTC, so they survive a server move</span></li>
+          <li class="qc-row qc-pass"><svg class="ic-sm"><use href="#i-check"/></svg><span class="qc-name">Money arithmetic</span><span class="qc-detail">amounts add up exactly, with no rounding drift</span></li>
+        </ul>
+      </div>
+      <div class="q-footer">
+        <p class="q-footer-note">Your private configuration is saved outside the public folder.</p>
+        <button class="btn btn-primary btn-lg" type="button">Continue to your account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 7 — Your account -->
+  <!-- ============================================================ -->
+  <div class="q-screen">
+    <p class="q-caption"><b>7 · Account</b> — name, username, email, password, optional logo</p>
+    <div class="q-frame">
+      <div class="q-header"><img class="q-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724"></div>
+      <nav class="quest-rail" aria-label="Installation progress">
+        <ol class="quest-path">
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Start</span></li>
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Database</span></li>
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Install</span></li>
+          <li class="quest-stop is-current"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Account</span></li>
+          <li class="quest-stop"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Done</span></li>
+        </ol>
+      </nav>
+      <div class="q-content">
+        <div class="q-intro">
+          <h1>Create your sign-in account.</h1>
+          <p class="q-sub">This is the last step before your first business.</p>
+        </div>
+        <div class="q-cols">
+          <form class="q-form">
+            <div class="f-row">
+              <div class="f-field">
+                <label class="f-label" for="f-name2">Your name</label>
+                <input class="f-input" id="f-name2" value="Rana Mansoor">
+              </div>
+              <div class="f-field">
+                <label class="f-label" for="f-username">Username</label>
+                <input class="f-input" id="f-username" value="owner">
+              </div>
+            </div>
+            <p class="f-hint">3–60 letters, numbers, dots, dashes or underscores, such as &ldquo;owner&rdquo; or &ldquo;ali.khan&rdquo;.</p>
+            <div class="f-field">
+              <label class="f-label" for="f-email">Email address</label>
+              <input class="f-input" id="f-email" type="email" value="owner@example.com">
+            </div>
+            <div class="f-row">
+              <div class="f-field">
+                <label class="f-label" for="f-pw1">Password</label>
+                <input class="f-input" id="f-pw1" type="password" value="............">
+              </div>
+              <div class="f-field">
+                <label class="f-label" for="f-pw2">Type it again</label>
+                <input class="f-input" id="f-pw2" type="password" value="............">
+              </div>
+            </div>
+            <p class="f-hint">At least 12 characters. You will sign in with your username or your email address.</p>
+            <div class="f-field">
+              <label class="f-label" for="f-logo">Your logo <span class="f-optional">(optional)</span></label>
+              <div class="f-file-row"><span class="btn btn-secondary btn-sm" aria-hidden="true">Choose file</span><span class="f-file-name">No file chosen</span></div>
+              <p class="f-hint">PNG, JPEG or WebP up to 1 MB. It replaces the PHP Ledger logo in the menu and on the sign-in page.</p>
+            </div>
+          </form>
+          <aside class="q-aside">
+            <div class="q-aside-note q-aside-note-strong">
+              <p><strong>This is the last step.</strong> Next you set up your first business, and browser setup then closes permanently.</p>
+            </div>
+            <p class="q-aside-foot">Your private installation directory also holds <code>operator.key</code>, for maintenance. Keep it with your private backups.</p>
+          </aside>
+        </div>
+      </div>
+      <div class="q-footer">
+        <p class="q-footer-note">Database and install are cleared.</p>
+        <button class="btn btn-primary btn-lg" type="button">Finish and create your business</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 8 — Done / reward -->
+  <!-- ============================================================ -->
+  <div class="q-screen">
+    <p class="q-caption"><b>8 · Done</b> — installation complete, next is the first business</p>
+    <div class="q-frame">
+      <div class="q-header"><img class="q-logo" src="../../../../www/phpledger/public/assets/brand/phpledger-horizontal.png" alt="PHP Ledger" width="2172" height="724"></div>
+      <nav class="quest-rail" aria-label="Installation progress">
+        <ol class="quest-path">
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Start</span></li>
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Database</span></li>
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Install</span></li>
+          <li class="quest-stop is-done"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Account</span></li>
+          <li class="quest-stop is-done is-justdone"><span class="quest-dot"><svg><use href="#i-check"/></svg></span><span class="quest-label">Done</span></li>
+        </ol>
+      </nav>
+      <div class="q-reward-wrap">
+        <div class="q-reward">
+          <div class="q-reward-badge q-reward-badge-final"><svg><use href="#i-check"/></svg></div>
+          <h1 class="q-reward-h1">PHP Ledger is installed.</h1>
+          <p class="q-sub q-reward-sub">Next, set up your first business — its accounts, currency and opening balances.</p>
+          <button class="btn btn-on-dark btn-lg" type="button">Set up your first business</button>
+          <p class="q-reward-foot">Browser setup is now closed for good.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
