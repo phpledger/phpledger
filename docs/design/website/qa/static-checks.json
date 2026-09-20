@@ -935,9 +935,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 37679,
-        "eager": 349109,
-        "total": 598746
+        "html": 38531,
+        "eager": 349961,
+        "total": 599598
       },
       "budgets": {
         "eager": 700000,
@@ -970,7 +970,7 @@
         },
         {
           "file": "download/index.html",
-          "bytes": 37679
+          "bytes": 38531
         }
       ],
       "lazyAssets": [
@@ -4355,9 +4355,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22285,
-        "eager": 333715,
-        "total": 422420
+        "html": 23137,
+        "eager": 334567,
+        "total": 423272
       },
       "budgets": {
         "eager": null,
@@ -4390,7 +4390,7 @@
         },
         {
           "file": "news/1-1-2/index.html",
-          "bytes": 22285
+          "bytes": 23137
         }
       ],
       "lazyAssets": [

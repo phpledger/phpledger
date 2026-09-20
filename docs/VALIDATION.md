@@ -1,5 +1,23 @@
 # Foundation validation
 
+## 1.1.2 publication — 20 September 2026
+
+Patch release published 2026-09-20 18:43:56 UTC from tag `v1.1.2` (`3df5755`) on the owner's instruction "cut 1.1.2 now" (decisions B27–B30). It corrects the 1.1.1 record (1.1.1 shipped migration 034 and the optional Stock locations module while its notes said "no migration"; 1.1.1 also shipped without signed update metadata), fixes issue #88 (a point-of-sale cash tender must be a whole number of minor units) and restores publisher-signed update metadata. Machine-readable receipt: [STABLE-1.1.2-PUBLICATION.json](repository/STABLE-1.1.2-PUBLICATION.json); narrative: [PUBLICATION-2026-09-20-1.1.2.md](repository/PUBLICATION-2026-09-20-1.1.2.md). The 1.1.1 receipt, missing at its publication, was backfilled the same night with errata: [PUBLICATION-2026-09-20-1.1.1.md](repository/PUBLICATION-2026-09-20-1.1.1.md).
+
+| Check | Result |
+|---|---|
+| `composer check` on MySQL 8.4 (lint, PHPStan level 5, samples, `tests/run.php`) | **319 tests, 0 failures** (316 at 1.1.1; three added by the #88 fix); PHP lint 241 files after the version bump; update-channel checks 38 |
+| CI on `3df5755` | Foundation checks: two runs, both success (PHP 8.2/8.3/8.4 on MySQL 8.4; MariaDB 10.6/10.11/11.4 with installer fixtures and update/recovery tests); Release build: success, two byte-identical CI builds |
+| Reproducible build | two local builds of `v1.1.2` byte-identical (2,951,475 bytes, SHA-256 `24d499d4…eb882`); CI archive differs only in ZIP compression bytes, all 1,503 members hash-identical; the tested local archive is the published one |
+| Signed metadata | `phpledger-1.1.2.update.json` (312,687 bytes, SHA-256 `5868d812…b49d`) signed by the owner with the official key; verified with `pl_update_verify_metadata()` as an upgrade from 1.1.0 and 1.1.1, rejected for 1.1.2; the copy served at `https://phpledger.com/releases/1.1.2.update.json` verified the same way |
+| Upgrade proof, 1.1.0 → 1.1.2 by file replacement plus `install/migrate.php` | disposable MySQL 8.4.9 schema: 1.1.0 migrated (34 receipts) with one company and book; 1.1.2 files applied exactly `034_inventory_locations` (35 receipts, checksum equal to the package file); one `DEFAULT` warehouse per book; second run a no-op; preflight clean |
+| Upgrade proof, 1.1.1 → 1.1.2 through the updater with the real signed metadata | **failed** at the migrate phase with a duplicate declaration of `pl_database_platform()` between the copied recovery runtime and the application ([issue #90](https://github.com/phpledger/phpledger/issues/90)); backup and apply succeeded, the envelope was accepted, automatic recovery started but was not observed to finish (`resume-update.php --drain` refused while the operation was in flight). Present since 1.1.0; the update tests bypass the real migrate function. Every 1.1.2 surface now says: use the manual procedure until 1.1.3. |
+| Anonymous downloads | all three assets re-downloaded from GitHub after publication and hash-verified |
+| Website | website-1-1-2-20260920-185427 published through the reviewed lane; document root only; feed offers stable 1.1.2 with the signed metadata address; download, news and roadmap pages verified live; demo untouched at `core-1.1.0-af0f4895f85a` |
+| Wiki, About, issues | wiki `7a4fd75`; About names 1.1.2; #74, #87, #88 closed; milestone 1.1.2 created and 1.1.1 closed; #71–#73 on milestone 1.2 |
+
+These are technical checks. Independent accounting and security review, supervised pilots with a real month-end close (pilot #1 starts on this release on 1 October 2026), unfamiliar-operator observation and restricted shared-host recovery remain open. The MariaDB 10.4 floor still has no CI evidence, `tools/verify-upgrade.php` still has no 1.x baseline (the proofs above were scripted disposable runs), and the notes inside the 1.1.2 package say "21 September" although publication was 20 September (23:43 PKT).
+
 ## WordPress-style installation, MariaDB, username and logo — 19 September 2026 (released as 1.1.0)
 
 The work is on branch `wordpress-style-install` (worktree `.claude/worktrees/install-package`, from `master` 75f85f7). The implementation and rules are in [Installer](INSTALLER.md#wordpress-style-installation-next-release-implemented-locally-19-september-2026-not-yet-published). Nothing was released, pushed or deployed.

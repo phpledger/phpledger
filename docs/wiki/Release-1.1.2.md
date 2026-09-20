@@ -11,6 +11,8 @@ Upgrading from 1.1.1 replaces files only; see [UPGRADE.md](https://github.com/ph
 
 This release ships **without a media kit**: minor and patch releases do not carry one, by the owner's decision of 20 September 2026. The assurance limits recorded for 1.1.1, 1.1.0 and 1.0.0 still apply; the first supervised pilot, on the maintainer's own books, starts on this release on 1 October 2026. The public demo still runs 1.1.0.
 
+**Known issue, found 20 September 2026 ([issue #90](https://github.com/phpledger/phpledger/issues/90)):** the in-app updater cannot complete a real update. After the backup and file replacement succeed, the migrate step fails with a duplicate function declaration between the copied recovery runtime and the application, the updater enters automatic recovery, and on the disposable copy used for the proof that recovery did not finish on its own. The cause has existed since 1.1.0 and was never exercised because no earlier release pair had signed metadata on both sides. **Until 1.1.3 fixes it, do not start an update from `/maintenance.php` on a live installation.** Upgrade by the manual procedure instead: replace the files and run `php www/phpledger/install/migrate.php` once (proven for 1.1.0 and 1.1.1 to 1.1.2). The signed metadata remains valid and will serve the fixed updater.
+
 ### Verify the download
 
 | File | SHA-256 |

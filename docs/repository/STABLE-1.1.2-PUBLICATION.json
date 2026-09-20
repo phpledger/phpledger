@@ -1,0 +1,162 @@
+{
+  "version": "1.1.2",
+  "channel": "stable",
+  "published_at": "2026-09-20T18:43:56Z",
+  "tag": "v1.1.2",
+  "package_source_commit": "3df5755cb777a6e60e545d644ece6cb93f56fd7f",
+  "release_url": "https://github.com/phpledger/phpledger/releases/tag/v1.1.2",
+  "assets": {
+    "phpledger-1.1.2.zip": {
+      "bytes": 2951475,
+      "files": 1502,
+      "sha256": "24d499d4b3ba249a7b25eb7874fa18c0c0ece778203d32b927bef3cf260eb882"
+    },
+    "phpledger-1.1.2.update.json": {
+      "bytes": 312687,
+      "sha256": "5868d8124d06a2c9e8fafac2a7c7a6e93d984db4ffba97b8f472cc575876b49d"
+    }
+  },
+  "asset_checksum_file": {
+    "name": "phpledger-1.1.2.zip.sha256",
+    "bytes": 86
+  },
+  "anonymous_download_verified": true,
+  "signed_update_metadata": true,
+  "media_kit": false,
+  "media_kit_waived_by_owner": "2026-09-20, for minor and patch releases (decision B29)",
+  "publisher_key": {
+    "algorithm": "RSA-4096",
+    "spki_der_sha256": "4e58a5f46b0538c9b37aaadbfced9a2d8ad2f7d413bc168a67b1b94feaa78e78",
+    "pem_sha256": "85ad4ac665961fbf290067edf0d010145310e8c07d05097626e285a4cba4a257",
+    "used_for_this_release": true,
+    "cloud_backup_recorded": true,
+    "offline_backup_recorded": false
+  },
+  "reproducible_build": {
+    "local_builds_identical": true,
+    "local_build_receipts": [
+      "build/release-1.1.2/receipt.json",
+      "build/release-1.1.2-check/receipt.json"
+    ],
+    "ci_builds_identical": true,
+    "ci_matches_local_bytes": false,
+    "ci_matches_local_contents": true,
+    "ci_archive_bytes": 2946503,
+    "ci_archive_sha256": "2da79e9102e9d5b4144c86c5f9ec7b2454c7b1abea86426aa9024d1dab89368a",
+    "ci_run_id": 35529190431,
+    "contents_comparison_note": "All 1,503 members identical (ZIP compression bytes differ, as with 1.1.0 and 1.1.1)"
+  },
+  "tests": {
+    "main_suite": "319 tests, 0 failures",
+    "main_suite_database": "mysql:8.4",
+    "three_tests_added_by_fix": "issue #88 (POS cash tender precision)",
+    "browser_installer": "passed at 1440, 768, 390 px",
+    "update_channel": 38,
+    "ci_foundation_on_tag": "success",
+    "ci_foundation_on_tag_run_ids": [
+      "35529190381",
+      "35529187092"
+    ],
+    "ci_release_build_on_tag": "build, byte-identical rebuild, draft created with CI archive",
+    "ci_release_build_on_tag_run_id": "35529190431",
+    "signature_verification": "verified as upgrade from 1.1.0 and from 1.1.1; rejected for 1.1.2 (correct); 1,503 files in signed inventory"
+  },
+  "upgrade_proofs": {
+    "files_and_migrate_from_1_1_0": "published 1.1.0 archive, file replacement, migrate.php applied 034_inventory_locations (35 receipts, checksum 5aea895a51b4582023498c5b8f7720df01edd133482b3c890d9f8608e751c7ca equal to package); second migrate.php run a no-op; preflight.php exit 0",
+    "in_app_from_1_1_1": "FAILED at the migrate phase, and the failure is a product defect, not a harness problem (issue #90). On a disposable MySQL 8.4 schema the published 1.1.1 package was installed, the operator key and the official publisher key were provisioned, and the real 1.1.2 archive and signed metadata were submitted through /maintenance.php: pl_update_begin() accepted the envelope (operation 149ec4afbe4c1059a99ce802582f562f, phase backup, version 1.1.2, archive hash matching), the backup phase (steps 0-95) and the apply phase (98-110) completed, step 114 entered migrate, and step 115 returned 500 with `PHP Fatal error: Cannot redeclare pl_database_platform() (previously declared in .../storage/installation/updates/<id>/runtime/database_platform_functions.php:22) in .../www/phpledger/includes/functions/database_platform_functions.php on line 22`. The updater recorded `interrupted_update` and entered `recovering`; the driver's operator session then expired, and `tools/resume-update.php --drain` afterwards reported `Installation recovery could not continue. Private storage and database access require host review; maintenance remains active.` with the operation still marked in flight, so automatic restoration was not observed to finish. The disposable copy was left in maintenance with 1.1.2 files. Cause: `pl_update_database_connect()` loads the copied runtime's `database_platform_functions.php`, then `pl_update_database_migrate()` requires the application's `install_functions.php`, which requires the application's copy of the same file; present since 1.1.0 (`01ebc1c`); the update tests inject a `migrate` callback and never run the real function under the copied runtime. Every surface of 1.1.2 now carries a known-issue notice telling operators to use the manual procedure; the fix is the first item of 1.1.3."
+  },
+  "demo": {
+    "refreshed": false,
+    "reason": "owner's choice of 20 September 2026",
+    "release": "core-1.1.0-af0f4895f85a",
+    "source_commit": "af0f4895f85a9c9c8b2107b5b919428c9919d551",
+    "version": "1.1.0",
+    "issue_88_visible": true
+  },
+  "website": {
+    "published": true,
+    "release": "website-1-1-2-20260920-185427",
+    "source_commit": "ac0639d6dcfb46a3f16f8670c24e7287a2b4ed60",
+    "source_files": "305",
+    "archive_sha256": "1eb6a0a7fad783197a30367accc4391f179a5cf30b03406c3ae2cbab9daadc82",
+    "vhost_sha256": "5ff56e18f65e6a15fe6cbe61e0189cf613b4f76735c11df7964cef39ec22a7a8",
+    "backup": "/var/www/phpledger/data/backups/website-1-1-2-20260920-185427",
+    "pages_built": 73,
+    "build_errors": 0,
+    "build_warnings": 0,
+    "release_feed": "https://phpledger.com/releases/index.json",
+    "releases_in_feed": 4
+  },
+  "wiki_commit": "7a4fd75aae39aec516e12898ba1f5a75d6e98f0c",
+  "wiki_pushed": true,
+  "wiki_release_1_1_1_corrected": true,
+  "repository_about_updated": true,
+  "corrections_to_1_1_1": [
+    {
+      "id": 1,
+      "claim": "no schema change, no migration",
+      "correction": "migration 034_inventory_locations and Stock locations module do ship in 1.1.1; file-replacement upgrades from 1.1.0 must run migrate.php once",
+      "surfaces_amended": [
+        "resources/release/RELEASE-NOTES.md",
+        "resources/release/UPGRADE.md",
+        "README.md",
+        "docs/wiki/Release-1.1.1.md",
+        "www/website/src/pages/news-1-1-1.html",
+        "GitHub release v1.1.1 body (correction block prepended)"
+      ]
+    },
+    {
+      "id": 2,
+      "claim": "1.1.1 includes the demo-pack unbundling (issue #71)",
+      "correction": "issue #71 moves to 1.2; demo-packs remain in 1.1.1 release",
+      "surfaces_amended": [
+        "docs/ROADMAP.md",
+        "README.md",
+        "docs/wiki/Roadmap.md",
+        "www/website/public/roadmap/index.html"
+      ]
+    },
+    {
+      "id": 3,
+      "claim": "use /maintenance.php if you pinned the publisher key at 1.1.0",
+      "correction": "1.1.1 has no signed metadata; 1.1.2 restores the signed path from both 1.1.0 and 1.1.1",
+      "surfaces_amended": [
+        "resources/release/UPGRADE.md"
+      ]
+    }
+  ],
+  "issues_closed": [
+    "#88"
+  ],
+  "issues_on_milestones": {
+    "1.1.2": [
+      "#88"
+    ],
+    "1.2": [
+      "#71",
+      "#72",
+      "#73"
+    ]
+  },
+  "milestone_1_1_1_closed": true,
+  "gitattributes_rule_added": "*.update.json -text (to prevent CRLF conversion of signed metadata)",
+  "last_commit_on_master": "ac0639d (the .gitattributes rule; the receipt itself is committed after it)",
+  "coordination_files_updated": [
+    "AGENTS.md",
+    "docs/RELEASE-PROTOCOL.md (status table and step 6)",
+    "docs/RELEASE-SIGNING.md",
+    ".github/workflows/release.yml"
+  ],
+  "open_gates": [
+    "demo not refreshed (1.1.0; #88 fix visible in 1.1.2 but not on demo)",
+    "MariaDB 10.4 floor has no CI or local evidence (CI: 10.6, 10.11, 11.4)",
+    "tools/verify-upgrade.php has no 1.x baseline",
+    "cross-platform reproducible compression (issue #75, open by decision)",
+    "offline backup of the publisher key",
+    "independent accounting review",
+    "independent security review",
+    "supervised pilots with a real month-end close (pilot #1 on 1.1.2, 1 October 2026, decision B28)",
+    "unfamiliar-operator installation observation",
+    "restricted shared-host recovery certification"
+  ]
+}

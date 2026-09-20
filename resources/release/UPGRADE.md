@@ -30,6 +30,8 @@ Use the backup/maintenance procedure below and run migrations before reopening t
 
 ## From 1.1.1 to 1.1.2
 
+**Known issue, found 20 September 2026 ([issue #90](https://github.com/phpledger/phpledger/issues/90)):** the in-app updater cannot complete a real update. After the backup and file replacement succeed, the migrate step fails with a duplicate function declaration between the copied recovery runtime and the application, the updater enters automatic recovery, and on the disposable copy used for the proof that recovery did not finish on its own. The cause has existed since 1.1.0 and was never exercised because no earlier release pair had signed metadata on both sides. **Until 1.1.3 fixes it, do not start an update from `/maintenance.php` on a live installation.** Upgrade by the manual procedure instead: replace the files and run `php www/phpledger/install/migrate.php` once (proven for 1.1.0 and 1.1.1 to 1.1.2). The signed metadata remains valid and will serve the fixed updater.
+
 A files-only upgrade: no migration, no receipt change, and one point-of-sale validation change (cash received must be a whole number of minor units). Replace the files with the manual procedure below, or install it from `/maintenance.php` with `phpledger-1.1.2.update.json`: 1.1.2 is the first release since 1.1.0 with signed metadata, so the pinned publisher key applies.
 
 If your 1.1.1 was installed over 1.1.0 by replacing files and you never ran `install/migrate.php`, migration 034 is still pending (see the correction below). The maintenance page reports it; `/maintenance.php` applies it as part of this update, or run `php www/phpledger/install/migrate.php` once after replacing files.
