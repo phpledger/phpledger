@@ -117,3 +117,43 @@ function pl_confirm_settlement(int $actorId,int $companyId,int $bookId,array $in
         return pl_settle_open_items($actorId,$companyId,$bookId,$input);
     });
 }
+
+/**
+ * Read-only receipt view of one posted settlement, for the print pipeline (1.2 M2).
+ *
+ * It reads through pl_get_journal(), so the company/book scope and the viewer-readable
+ * role rule of the settlement's record screen apply unchanged, and a journal id from
+ * another company is refused there. Nothing is posted, allocated or written.
+ */
+function pl_settlement_receipt(int $actorId,int $companyId,int $bookId,int $journalId): array
+{
+    $journal=pl_get_journal($actorId,$companyId,$bookId,$journalId);
+    if (!in_array($journal['source_type'],['open_item_settlement','open_item_batch_settlement'],true)) {
+        throw new DomainException('This journal is not a customer receipt or supplier payment.');
+    }
+    $allocations=DB::query('SELECT i.id AS item_id,i.source_reference,i.currency,i.direction,i.party_id,l.amount_fc,l.amount_base '
+        .'FROM pl_open_item_entries e JOIN pl_journal_lines l ON l.id=e.journal_line_id '
+        .'JOIN pl_open_items i ON i.id=e.item_id AND i.company_id=e.company_id AND i.book_id=e.book_id '
+        .'WHERE l.journal_id=%i AND e.company_id=%i AND e.book_id=%i AND e.kind=%s ORDER BY e.id',
+        $journalId,$companyId,$bookId,'allocation');
+    if ($allocations===[]) { throw new DomainException('This payment has no allocated open item to receipt.'); }
+    $allocated='0.0000';
+    foreach ($allocations as &$allocation) {
+        $allocation['item_id']=(int)$allocation['item_id'];
+        $allocation['party_id']=(int)$allocation['party_id'];
+        $allocated=bcadd($allocated,(string)$allocation['amount_fc'],4);
+    }
+    unset($allocation);
+    $bankAccounts=array_map('intval',array_column(DB::query('SELECT id FROM pl_accounts WHERE company_id=%i AND book_id=%i AND role=%s',$companyId,$bookId,'cash_bank'),'id'));
+    $bank=null;
+    foreach ($journal['lines'] as $line) {
+        if ($bank===null && in_array((int)$line['account_id'],$bankAccounts,true)) { $bank=$line; }
+    }
+    return ['journal'=>$journal,'direction'=>(string)$allocations[0]['direction'],'currency'=>(string)$allocations[0]['currency'],
+        'party'=>pl_get_party($actorId,$companyId,$bookId,(int)$allocations[0]['party_id']),
+        'allocations'=>$allocations,'allocated_fc'=>$allocated,
+        'bank'=>$bank===null?null:['code'=>(string)$bank['code'],'name'=>(string)$bank['name'],'amount_fc'=>(string)$bank['amount_fc'],
+            'amount_base'=>(string)$bank['amount_base'],'currency'=>(string)$bank['currency']],
+        'reversed'=>(bool)DB::queryFirstField('SELECT id FROM pl_journals WHERE reversal_of_id=%i AND company_id=%i AND book_id=%i',$journalId,$companyId,$bookId),
+        'is_reversal'=>$journal['reversal_of_id']!==null];
+}

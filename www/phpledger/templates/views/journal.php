@@ -22,6 +22,7 @@ if ($journal['source_type'] === 'general_journal' && preg_match('/^general:([1-9
         </dl>
         <div class="flex flex-wrap gap-2">
             <?php if (!empty($commercialSource)): ?><a class="btn btn-secondary" href="<?= pl_e(pl_workflow_url(in_array($commercialSource['kind'],['invoice','customer_credit'],true)?'/ar':'/ap',['id'=>$commercialSource['id']])) ?>">View source <?= pl_e($commercialSource['number']) ?></a><?php endif; ?>
+            <?php if (in_array($journal['source_type'], ['open_item_settlement', 'open_item_batch_settlement'], true)): ?><a class="btn btn-secondary" href="<?= pl_e(pl_url('/print/settlement/' . $journal['id'])) ?>"><?= pl_icon('printer') ?> Print receipt</a><?php endif; ?>
             <?php if ($documentSource !== null): ?><a class="btn btn-secondary" href="<?= pl_e(pl_workflow_url('/transactions/detail', ['id' => $documentSource,'return_account'=>$accountReturn])) ?>">View source transaction</a><?php endif; ?>
             <?php if ($journal['source_type'] === 'opening_balance'): ?><a class="btn btn-secondary" href="<?= pl_e(pl_url('/opening-balances')) ?>">View opening cutover</a><?php endif; ?>
             <?php if ($generalSource !== null): ?><a class="btn btn-secondary" href="<?= pl_e(pl_workflow_url('/general-journals/detail', ['id' => $generalSource,'return_account'=>$accountReturn])) ?>">View source general journal</a><?php endif; ?>

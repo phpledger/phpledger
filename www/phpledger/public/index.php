@@ -66,12 +66,19 @@ $routes = [
     '/general-journals' => ['GET'], '/general-journals/new' => ['GET'], '/general-journals/edit' => ['GET'],
     '/general-journals/detail' => ['GET'], '/general-journals/save' => ['POST'], '/general-journals/post' => ['POST'], '/general-journals/reverse' => ['POST'],
 ];
-if (!isset($routes[$path]) || !in_array($method, $routes[$path], true)) {
-    http_response_code(isset($routes[$path]) ? 405 : 404);
-    if (isset($routes[$path])) {
-        header('Allow: ' . implode(', ', $routes[$path]));
+// /print/<type>/<id> is one read-only route for every registered print template; the
+// template registry in print_functions.php decides which types and formats exist.
+$printRequest = null;
+if (preg_match('~^/print/([a-z0-9-]{1,40})/([0-9]{1,18})$~D', $path, $printPath)) {
+    $printRequest = ['type' => $printPath[1], 'id' => (int) $printPath[2]];
+}
+if ($printRequest !== null ? $method !== 'GET' : (!isset($routes[$path]) || !in_array($method, $routes[$path], true))) {
+    $allowed = $printRequest !== null ? ['GET'] : ($routes[$path] ?? null);
+    http_response_code($allowed === null ? 404 : 405);
+    if ($allowed !== null) {
+        header('Allow: ' . implode(', ', $allowed));
     }
-    pl_web_unavailable_page(isset($routes[$path]) ? 405 : 404);
+    pl_web_unavailable_page($allowed === null ? 404 : 405);
     exit;
 }
 // A freshly uploaded copy has no database settings yet: start the browser installer, as WordPress does.
@@ -308,6 +315,10 @@ try {
     $company = pl_web_context($actorId);
     $companyId = (int) $company['id'];
     $bookId = (int) $company['book_id'];
+    if ($printRequest !== null) {
+        require_once dirname(__DIR__) . '/includes/functions/print_functions.php';
+        pl_web_print($actorId, $company, $printRequest['type'], $printRequest['id'], pl_web_text($_GET, 'format'));
+    }
     if ($path === '/home') {
         $overview = pl_home_overview($actorId, $companyId, $bookId, gmdate('Y-m-d'));
         pl_render('home', ['title' => 'Home', 'user' => $user, 'company' => $company, 'overview' => $overview]);
