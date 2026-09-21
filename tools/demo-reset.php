@@ -20,8 +20,22 @@ try {
             $state = DB::queryFirstRow('SELECT * FROM phpledger_demo.pl_demo_state WHERE id = 1');
             if (!$state || !preg_match('/^[a-f0-9]{64}$/D', $state['generation'])
                 || (int) DB::queryFirstField('SELECT COUNT(*) FROM phpledger_demo.pl_companies WHERE is_sample <> 1') !== 0
-                || (int) DB::queryFirstField('SELECT COUNT(*) FROM phpledger_demo.pl_users u LEFT JOIN phpledger_demo.pl_demo_visitors v ON v.user_id = u.id WHERE v.user_id IS NULL') !== 0) {
-                throw new DomainException('Refusing reset: every user and company must be an explicitly isolated demo visitor.');
+                // Every account here is either a visitor, or a person a visitor's own sample
+                // created inside it: 1.2.0 samples seed a second person so the capability
+                // system is visible, and that person belongs to nothing else. Anyone with no
+                // membership at all, or with one company that is not an isolated visitor's
+                // sample, is still a stranger and still stops the reset.
+                || (int) DB::queryFirstField(
+                    'SELECT COUNT(*) FROM phpledger_demo.pl_users u
+                     LEFT JOIN phpledger_demo.pl_demo_visitors v ON v.user_id = u.id
+                     WHERE v.user_id IS NULL AND (
+                       (SELECT COUNT(*) FROM phpledger_demo.pl_company_members m WHERE m.user_id = u.id) = 0
+                       OR (SELECT COUNT(*) FROM phpledger_demo.pl_company_members m2
+                           LEFT JOIN phpledger_demo.pl_companies c ON c.id = m2.company_id AND c.is_sample = 1
+                           LEFT JOIN phpledger_demo.pl_demo_visitors d ON d.company_id = m2.company_id
+                           WHERE m2.user_id = u.id AND (c.id IS NULL OR d.company_id IS NULL)) > 0
+                     )') !== 0) {
+                throw new DomainException('Refusing reset: every user and company must be an explicitly isolated demo visitor, or a person one of their samples created inside it.');
             }
             if (!in_array('--now', $_SERVER['argv'] ?? [], true) && strtotime($state['next_reset_at'] . ' UTC') > time()) {
                 echo "Demo reset is not due; no records changed.\n";
