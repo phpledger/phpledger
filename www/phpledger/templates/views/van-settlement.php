@@ -41,10 +41,63 @@ foreach ($vans as $van) { $vanOptions[(string) $van['id']] = $van['code'].' · '
 <td class="amount"><?= pl_e($p['expected_closing']) ?></td><td class="amount"><?= pl_e($p['closing']) ?></td>
 <td class="amount<?= $p['reconciles'] ? '' : ' text-danger' ?>"><?= pl_e($p['variance']) ?></td></tr>
 <?php endforeach; }, pl_t('The driver’s day')); ?>
-<?php pl_ui_totals([pl_t('Loaded') => $day['totals']['loaded'], pl_t('Sold') => $day['totals']['sold'], pl_t('Returned') => $day['totals']['returned'],
-    pl_t('Cost of stock loaded ({currency})', ['currency' => $company['currency']]) => pl_money($day['totals']['loaded_cost']),
-    pl_t('Cost of stock sold ({currency})', ['currency' => $company['currency']]) => pl_money($day['totals']['sold_cost'])]); ?>
+<?php $goods = [pl_t('Loaded') => $day['totals']['loaded'], pl_t('Sold') => $day['totals']['sold'], pl_t('Returned') => $day['totals']['returned']];
+if ($day['cost_visible']) {
+    $goods[pl_t('Cost of stock loaded ({currency})', ['currency' => $company['currency']])] = pl_money((string) $day['totals']['loaded_cost']);
+    $goods[pl_t('Cost of stock sold ({currency})', ['currency' => $company['currency']])] = pl_money((string) $day['totals']['sold_cost']);
+}
+pl_ui_totals($goods); ?>
+<?php if (!$day['cost_visible']): ?>
+<p class="text-xs text-ink-muted"><?= pl_e(pl_t('Cost is not shown to you. Carrying value is a separate permission, chosen report by report in Admin > Cost visibility; the quantities and the reconciliation above are never withheld.')) ?></p>
+<?php endif; ?>
 <p class="text-xs text-ink-muted"><?= pl_e(pl_t('This sheet reconciles the goods, from the stock movements themselves. The cash and credit the driver collected are carried by the sale documents the van raised and post through the ordinary posting service; this sheet neither posts nor changes them.')) ?></p>
+</section>
+
+<section>
+<h2 class="section-title mb-2"><?= pl_e(pl_t('What the driver collected')) ?></h2>
+<?php if ($day['sales']['documents'] === []): ?>
+<p class="text-sm"><?= pl_e(pl_t('No sale was raised against this van on this day.')) ?></p>
+<?php else: ?>
+<?php pl_ui_table([pl_t('Document'), pl_t('Customer'), pl_t('Payment'), pl_t('Total'), pl_t('Cash'), pl_t('On account')],
+    static function () use ($day): void { foreach ($day['sales']['documents'] as $sale): ?>
+<tr><td><?= pl_e($sale['number']) ?></td><td><?= pl_e($sale['party_name']) ?></td>
+<td><?= pl_e(match ($sale['tender']) { 'cash' => pl_t('Cash'), 'credit' => pl_t('On account'), 'part_cash' => pl_t('Part cash'), default => pl_t('Return') }) ?></td>
+<td class="amount"><?= pl_e(pl_money($sale['total_fc'])) ?></td><td class="amount"><?= pl_e(pl_money($sale['cash_fc'])) ?></td>
+<td class="amount"><?= pl_e(pl_money($sale['credit_fc'])) ?></td></tr>
+<?php endforeach; }, pl_t('Sales raised from this van')); ?>
+<?php pl_ui_totals([
+    pl_t('Sales ({currency})', ['currency' => $company['currency']]) => pl_money($day['sales']['totals']['sales']),
+    pl_t('Cash expected ({currency})', ['currency' => $company['currency']]) => pl_money($day['sales']['totals']['cash']),
+    pl_t('Left on account ({currency})', ['currency' => $company['currency']]) => pl_money($day['sales']['totals']['credit']),
+    pl_t('Customer returns ({currency})', ['currency' => $company['currency']]) => pl_money($day['sales']['totals']['returns']),
+]); ?>
+<?php endif; ?>
+</section>
+
+<section>
+<h2 class="section-title mb-2"><?= pl_e(pl_t('Credit given on the road')) ?></h2>
+<?php if ($day['credit']['parties'] === []): ?>
+<p class="text-sm"><?= pl_e(pl_t('Nothing was sold on credit from this van on this day.')) ?></p>
+<?php else: ?>
+<?php pl_ui_strip($day['credit']['within_limits']
+    ? pl_t('Every customer who took credit today is inside the limit recorded for them.')
+    : pl_t('A customer is outside their credit limit. Approval is refused until the receipt, the credit note or the changed limit is recorded and the day is reviewed again.'),
+    $day['credit']['within_limits'] ? 'info' : 'warning'); ?>
+<?php pl_ui_table([pl_t('Customer'), pl_t('Credit today'), pl_t('Owed in total'), pl_t('Credit limit'), pl_t('Left'), pl_t('Status')],
+    static function () use ($day): void { foreach ($day['credit']['parties'] as $party): ?>
+<tr><td><?= pl_e($party['party_name']) ?></td>
+<td class="amount"><?= pl_e(pl_money($party['credit_today_base'])) ?></td>
+<td class="amount"><?= pl_e(pl_money($party['exposure_base'])) ?></td>
+<td class="amount"><?= pl_e($party['credit_limit'] === null ? '—' : pl_money((string) $party['credit_limit'])) ?></td>
+<td class="amount"><?= pl_e($party['available_base'] === null ? '—' : pl_money((string) $party['available_base'])) ?></td>
+<td class="<?= $party['status'] === 'over' ? 'text-danger' : '' ?>"><?= pl_e(match ($party['status']) {
+    'over' => pl_t('Over by {amount}', ['amount' => pl_money($party['excess_base'])]),
+    'within' => pl_t('Within the limit'),
+    default => pl_t('No limit recorded'),
+}) ?></td></tr>
+<?php endforeach; }, pl_t('Credit limits, checked at settlement')); ?>
+<p class="text-xs text-ink-muted"><?= pl_e(pl_t('A van may be out of touch when the driver extends credit, so the limit is checked here rather than on the road. A customer with no recorded limit is not a breach; a limit of zero is a real limit and any credit breaks it.')) ?></p>
+<?php endif; ?>
 </section>
 
 <?php if ($write): ?>
@@ -62,7 +115,8 @@ foreach ($vans as $van) { $vanOptions[(string) $van['id']] = $van['code'].' · '
 <button class="btn btn-primary" name="action" value="approve" <?= $canApprove ? '' : 'disabled' ?>><?= pl_e(pl_t('Approve the settlement')) ?></button>
 <?php endif; ?>
 </div>
-<p class="text-xs text-ink-muted"><?= pl_e(pl_t('Approving a settlement is a separate permission from recording one. Until user permissions ship, only the business owner can approve. An approved settlement is immutable.')) ?></p>
+<p class="text-xs text-ink-muted"><?= pl_e(pl_t('Approving a settlement is a separate permission from recording one: it needs “Approve a van settlement”, which an administrator grants in Admin > Roles. An approved settlement is immutable.')) ?></p>
+<?php if (!$canApprove): ?><p class="text-xs text-ink-muted"><?= pl_e(pl_t('Your role can review this day but cannot approve it.')) ?></p><?php endif; ?>
 </form>
 <?php if ($settlement !== null): ?>
 <p class="text-sm mt-3"><?= pl_e(pl_t('Status:')) ?> <strong><?= pl_e($settlement['status']) ?></strong> · <?= pl_e(pl_t('reviewed {when}', ['when' => (string) $settlement['reviewed_at']])) ?><?= $settlement['approved_at'] === null ? '' : ' · '.pl_e(pl_t('approved {when}', ['when' => (string) $settlement['approved_at']])) ?></p>

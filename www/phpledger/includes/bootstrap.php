@@ -103,6 +103,10 @@ require_once __DIR__ . '/functions/trading_functions.php';
 require_once __DIR__ . '/functions/stock_document_functions.php';
 require_once __DIR__ . '/functions/asset_functions.php';
 require_once __DIR__ . '/functions/ar_ap_functions.php';
+// 1.2 M9: the money side of a driver's day and the counter till. Both compose the AR
+// document services above, so they are loaded after them.
+require_once __DIR__ . '/functions/distribution_functions.php';
+require_once __DIR__ . '/functions/counter_pos_functions.php';
 require_once __DIR__ . '/functions/purchasing_functions.php';
 require_once __DIR__ . '/functions/opening_conversion_functions.php';
 // 1.2.1 M10 (B50): a sample company's structure, read separately from its history, so a new

@@ -1657,3 +1657,51 @@ i18n backlog: 12 untranslated interface text runs in 4 template files (ceiling 1
 - The previous run of the same command found exactly one failure, `/assets` colliding with the static asset directory. That is fixed and guarded, not silenced.
 
 **Deliberately not done, and not to be assumed.** Straight line and reducing balance only — **no** units of production, sum-of-the-years-digits, double declining with an automatic switch, componentisation, revaluation, or separate **tax-depreciation basis** (issue #95 wants that last one as data for a country tax plugin; the engine is parameterised for it but nothing stores or exposes a second basis). No capitalise-from-posted-document, no opening-cutover import of an existing register, location is text rather than a stock location, and disposal is sale or scrap with no owner-drawings route. **Decision 3 is only half reachable:** the module posts acquisitions and disposals, but the demo packs still record theirs as journals, because replaying a pack through the module needs a pack-format asset section and an importer step that do not exist. The pack metadata now says so in its `status` instead of implying the feature is there. Definition of done: items 5 to 8 are met; **MariaDB, a fresh install from the built ZIP and an upgrade baseline are not run.**
+
+## 2026-09-21 — Claude: 1.2.1 M9 counter POS and the distribution simulation built (result and evidence)
+
+**From:** Claude (worktree `.claude/worktrees/agent-ad1f6c2ce3475be05`, branch `m9/pos-and-distribution`, rebased onto `master` `843d941`, after `m15/chart-headings` and `m14/fixed-assets` landed; one commit, **not pushed, not merged**). Owner decisions **B34**, **B35**, **B36**, **B58**; research decisions 1 to 8 in `docs/design/1.2-2026-09/distribution-research/DECISIONS.md`.
+
+**No migration, and that is a fact rather than an assumption:** `git diff --name-only 843d941..HEAD -- www/phpledger/install/ resources/modules/core.json` returns nothing. Migrations end at **046** and this branch adds none, which is exactly why it could be sequenced last and renumber nothing. The whole of `resources/` it touches is one file, `resources/modules/ar.json`, carrying the two `/counter` routes — no demo pack, no `core.json`, nothing generated.
+
+**Evidence.** Own Compose project `plcountertill`, own subnet `10.218.44.0/24` checked free with `docker network inspect` before starting, `COMPOSER_PROCESS_TIMEOUT=1800` passed inside the container, output redirected to a file and read from the file.
+- `docker compose -p plcountertill --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` — exit 0. `PHP lint: 344 files, 0 failures.`, PHPStan `[OK] No errors`, sample data valid, **`560 tests, 0 failures.`**
+- `i18n backlog: 12 untranslated interface text runs in 4 template files (ceiling 12)` — every run is pre-existing (`install.php` 6, `opening-balances.php` 4, `accounting-policies.php` 1, `owner.php` 1) and none is mine. `i18n sweep: 51 of 55 routes rendered`, `/counter` among them.
+- **`python tests/package-builder-test.py` — `Ran 13 tests ... OK`.** It is not in `composer check` and is the only gate on `tools/package-files.json`, to which this branch adds five entries; all five are under `www/phpledger/`, so the rule keeping `resources/distribution/` out of the release allowlist is untouched.
+- `php tools/simulate-distribution.php` prints the day end to end and exits 0, re-run after the rebase.
+
+**m15's chart headings broke nothing here, and I checked for the shape that caught m14 rather than assuming.** Neither test file builds an account, a heading or a chart by hand — both compose `inventory_fixture()` and `trading_fixture()` from the existing suites — so there is no hand-minted `core.group.*` key to collide with `uq_account_semantic` and no "no key" fixture to stop being keyless. The only hand-built accounts in the branch are `1300` and `2100` in `tools/simulate-distribution.php`, with `role => null` and no semantic key, which are the codes `inventory_fixture()` already uses on green master. After the rebase the simulation still reports `Across every location: 605.0000; summed per location: 605.0000; they agree` and `stock 605.0000, ledger 605.0000, difference 0.0000` against the new nineteen-heading chart — the control-account tie that sits downstream of m15's report tree.
+
+**The one thing to read before writing another screen that posts a document.** `pl_ar_posting_plan()` refuses a line with no `account_id`, and that refusal cost twelve of my thirteen tests on the first run. A till must never ask a cashier to choose a general-ledger account, so `pl_counter_sale_line_account()` takes the product's own `sales_account_id` in the review, where the product master is readable, and **refuses by name a product that has none** rather than defaulting. A guessed account misclassifies revenue silently, which is the one failure a till must not have. The credit note in the scenario takes the income account of the line it credits, because a credit reverses revenue where the sale recognised it — not wherever a fresh resolution would land.
+
+**There is no counter-sale table, journal or number series, and none should be added.** A counter sale IS an invoice that names a warehouse and took cash. `cash_received` is the sale total; the tender and the change are the drawer's arithmetic and are never posted, because the change never entered the business. The same service records a van sale — the warehouse decides — which is what makes a driver's day recordable at all.
+
+**Credit limits bind in two different places on purpose** (research decision 4). At a **fixed** location the server is present, so a credit sale over the limit is refused before it posts. From a **mobile** one it is recorded and checked at **settlement**, because the device may have been offline. `credit_enforced_now` in the readout says which rule applied. A NULL limit is not enforced — that is how the decision's reversal path disables enforcement — and a recorded `0.0000` is a real limit that any credit breaks.
+
+**M7's open item is closed.** M7 recorded the van settlement's cost totals as the one cost-bearing surface still outside B58, because they feed the comparison `pl_approve_van_settlement()` makes. The fix is the split that note asked for: `pl_van_day_figures()` is unmasked and is what a review stores and an approval compares, `pl_van_day()` is the read every screen and every API caller uses and withholds carrying value as `null`. So **an approver holding `settlement.approve` but not `cost.view` can still approve** — which is exactly the demo pack's second person — and a reader without `cost.view` sees cost nowhere, including through the API.
+
+**The reconciliation identity, proved with figures rather than asserted.** `tools/distribution-scenario.php` is one driver's day, shared by `tools/simulate-distribution.php` and `tests/distribution_simulation_test.php` so the printed walkthrough and the proof are the same day. Verbatim from the tool:
+
+```
+  Item          Opening     Loaded      Returns in   Sold        Returned    Expected    Closing     Variance
+  COLA-500      0.0000      80.0000     5.0000       30.0000     55.0000     0.0000      0.0000      0.0000
+  JUICE-1L      0.0000      40.0000     0.0000       15.0000     25.0000     0.0000      0.0000      0.0000
+  TOTAL         0.0000      120.0000    5.0000       45.0000     80.0000                 0.0000
+
+    0.0000 + 120.0000 + 5.0000 - 45.0000 - 80.0000 = 0.0000 and the van holds 0.0000
+    The van balances.
+  Carrying value moved: loaded 280.0000, sold 105.0000, returned 185.0000
+  TOTAL               3 sales                                 1350.0000       500.0000        850.0000
+  Ali Traders                 today 850.0000        owes 725.0000         limit 600.0000      OVER by 125.0000
+  Approval refused: This day put 1 customer outside the credit limit recorded for them: Ali Traders owes 725.0000 against a limit of 600.0000 (125.0000 over)...
+  Recovery posted: 125.0000 received, journal 13
+  Approval refused again: The van day changed since it was reviewed. Review it again before approving.
+  Reviewed again, then approved: status approved, reconciles yes
+  Across every location: 605.0000; summed per location: 605.0000; they agree
+```
+
+**Two deviations, both recorded in the release plan.** (1) The till is `GET/POST /counter` on the `ar` manifest, not a warehouse-aware `POST /pos/checkout` as the plan said: `/pos` is the `pos-showcase` module's sample cart with its own table and published receipts, and teaching a demonstration module to issue real stock would have entangled a sample with live stock and money. `/pos` is relabelled "Point of sale (sample)". Reversible — the till is one adapter over one service. (2) Damaged returns held on the van (decision 5's second half) are not modelled: there is no condition field, so a damaged return today is an ordinary credit note.
+
+**For whoever owns the samples — one gap, and it is data, not behaviour.** The distributor's driver day is built in code, in `pl_demo_showcase_van_day()`, and its van sale is a bare `pl_inventory_issue()` with `source_type = 'sample_van_sale'` rather than an invoice. The goods side is complete and the day reconciles and approves, but `pl_van_day_sales()` correctly finds no sale document, so the sample shows no cash, no credit and no limit check. To show the whole sheet it needs the van sale raised as a counter sale, a customer whose `credit_limit` the day's credit exceeds, and a `cash_on_invoice_cap` in the trading policies. `tools/simulate-distribution.php` prints that list at the end of every run. **`resources/demo-packs/` and `demo_pack_functions.php` were not touched.**
+
+**The plugin runtime's hook guard cannot bite this branch:** `ar_ap_functions.php`, `inventory_functions.php` and `open_item_functions.php` raise no hooks at all, so `pl_hook_assert_unlocked()` has nothing to refuse. The extra outer transaction `pl_post_counter_sale()` holds only delays a queued `pl_hook_after_commit()` flush to the outermost commit, which is what that function is for.

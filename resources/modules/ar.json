@@ -15,7 +15,9 @@
     "017_ar_ap_documents"
   ],
   "routes": [
-    "/ar"
+    "/ar",
+    "/counter",
+    "/counter/receipt"
   ],
   "permissions": [
     "owner",
@@ -28,5 +30,5 @@
   ],
   "api_operations": [],
   "mcp_operations": [],
-  "history": "Bundled with the starter. Hiding navigation never disables authorised services or financial reporting."
+  "history": "Bundled with the starter. Hiding navigation never disables authorised services or financial reporting. 1.2 adds the counter till at /counter: a counter or van sale is an ordinary customer invoice raised from a stock location, so it needs no module of its own and no separate document kind."
 }

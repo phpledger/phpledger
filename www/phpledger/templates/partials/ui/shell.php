@@ -5,7 +5,8 @@ $moduleVisible = static fn (string $id): bool => pl_module_available((int)$user[
 $navGroups = [
     'Daily work' => [
         ['/transactions', pl_t('Receipts & expenses'), 'receipt', ['transactions','editor'], true],
-        ['/pos', pl_t('Point of sale'), 'receipt', ['pos'], $moduleVisible('pos-showcase')],
+        ['/counter', pl_t('Counter sale'), 'cash-register', ['counter','counter-receipt'], $visibility['show_ar'] && $moduleVisible('inventory')],
+        ['/pos', pl_t('Point of sale (sample)'), 'receipt', ['pos'], $moduleVisible('pos-showcase')],
         ['/general-journals', pl_t('Journals'), 'book', ['general-journals','general-editor','general-detail'], true],
     ],
     'Sales' => [

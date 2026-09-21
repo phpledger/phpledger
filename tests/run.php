@@ -72,6 +72,10 @@ $suites[] = 'owner_test.php';
 // own fixtures create books, and it removes the rows it wrote.
 $suites[] = 'chart_headings_test.php';
 $suites[] = 'stock_document_test.php';
+// 1.2 M9: the counter till over real stock, and the distributor's day end to end. They run
+// after the stock documents and the trading documents whose fixtures and services they use.
+$suites[] = 'counter_pos_test.php';
+$suites[] = 'distribution_simulation_test.php';
 // Reads the catalogue and the templates, then starts its own server for the rendered bubble.
 $suites[] = 'guidance_test.php';
 // 1.2 M7: the Users module and the authorisation equivalence proof. They run after the
@@ -121,6 +125,9 @@ if (($argv[1] ?? '') === '--suite=editors') {
 }
 if (($argv[1] ?? '') === '--suite=pos') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'pos_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=counter') {
+    $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','inventory_test.php','inventory_location_test.php','purchasing_test.php','tax_test.php','open_item_test.php','settlement_test.php','document_series_test.php','trading_documents_test.php','stock_document_test.php','counter_pos_test.php','distribution_simulation_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=reports') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'report_test.php', 'account_code_test.php', 'report_tree_test.php', 'owner_test.php', 'chart_headings_test.php'];
