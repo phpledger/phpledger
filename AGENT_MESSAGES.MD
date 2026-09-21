@@ -1156,3 +1156,33 @@ Not started yet: the actual file changes below this entry are what follows. This
 **Two out-of-scope issues found in passing and flagged for separate sessions (task chips, not fixed here):** (1) the root `.dockerignore`'s bare `install`/`includes`/`modules`/`legacy`/`assets`/`example-pages` patterns are stale leftovers from the removed legacy app and, being gitignore-style unanchored, also match `www/phpledger/install/` — meaning the *existing* dev `Dockerfile`'s own `COPY . .` layer is missing `install/migrate.php` etc., currently invisible only because `compose.yaml` bind-mounts `./www` over it at runtime. (2) `tests/browser_installer_keyless_test.php` fails deterministically with "The logo does not appear in the app." — confirmed pre-existing and unrelated to this branch by reproducing it identically against a clean worktree at `master` `0bb6c7d` (this branch's own parent commit, no changes applied).
 
 **Deliberately not done:** no push, no merge, no `VERSION` bump, no release, no tag, no registry push, no website/wiki/demo change, no deployment. The GitHub Actions workflow has never actually run (no `release: published` event exists yet for it to fire on); its shell/Python logic was reviewed and the tag-computation half is unit-tested, but the workflow YAML itself is unexercised end-to-end. Multi-arch (`linux/amd64,linux/arm64`) in the workflow was not tested locally (matches `RELEASE-PLAN-1.2.md`'s own M12 description; only native-arch builds were run here). Docker Hub push was not exercised (no owner-supplied `DOCKERHUB_NAMESPACE`/`DOCKERHUB_TOKEN` exist yet); the workflow's own guard for that absence was read, not executed against real secrets.
+
+## 2026-09-21 — Claude: README badges and a review of six proposed channels
+
+**From:** Claude, main checkout `C:\phpledger`, branch `master`, working tree otherwise clean at `106dcfb`. **Nothing committed, nothing pushed, nothing deployed.**
+
+**Two owner requests, both local only.**
+
+**1. README badges.** The hero carried a hand-made `docs/repository/assets/release-1-1-3.svg`, stale by two releases, and a prose line reading "Current release: 1.1.3". Replaced with two rows of live shields.io badges in the site's own navy `#0c2052` / indigo `#4656e8` palette and the same `for-the-badge` shape the hand-made SVG used, so the visual language is unchanged: release, Packagist, `ghcr.io`, Foundation checks; then PHP 8.2+, MySQL 8.4, MariaDB 10.4+, licence. The hardcoded version was dropped from the prose line because the release badge now carries it and cannot go stale. Every badge is a link.
+
+**Evidence:** each of the eight badge URLs and all four link targets fetched before use — all HTTP 200. The release and Packagist badges both resolve to **v1.2.1**, the checks badge to **build: passing**, the GHCR tag list to `1.2.1`, `1.2`, `1`, `latest`. Rendered locally in a browser and inspected: both rows render, colours match, no broken image. The root `README.md` does not ship in the release package (`tools/package-files.json` ships `resources/release/README.txt` instead), so no installation fetches these at runtime.
+
+**The five unused `release-1-x-x.svg` assets are now referenced by nothing.** Left in place; removing them is a separate decision.
+
+**2. New file `docs/strategy/CHANNEL-PROPOSAL-2026-09-21.md`.** A review of an owner proposal listing a Homebrew tap, an npm package, GitHub Pages, Cloudflare Pages, the awesome-selfhosted/awesome-php listings and Softaculous. It is a review only and records no decision.
+
+Findings worth carrying:
+- **Five of the six are already in the distribution plan.** The question is whether their gates are met, and mostly they are not.
+- **Homebrew is blocked internally, not externally.** A third-party tap needs no review at all; the proposal's formula symlinks `bin/phpledger`, which does not exist, and the tap is gated on SQLite, of which there is no code in `www/phpledger/includes/`.
+- **npm is the one channel whose own prerequisite is met** (release feed live). The release protocol's position stands: npm carries no application package, only `create-phpledger` and the API client.
+- **The website cannot move to GitHub or Cloudflare Pages.** `PL_RELEASE_FEED_URL` in `update_channel_functions.php` pins `https://phpledger.com/releases/index.json`, and the same origin proxies the demo. Both verified live: the feed answers 200 with 1.2.1, `/demo/` answers 200 at `/demo/login`. Static hosting cannot proxy a PHP container. The narrow use worth considering is Cloudflare Pages previews for website pull requests.
+- **awesome-selfhosted would reject a submission today.** It has moved to YAML in `awesome-selfhosted-data`, the category is **Money, Budgeting & Management**, its checklist requires a first release **more than four months old** (1.0.0 was 18 September 2026, so about 18 January 2027), and it requires the submission be made **by a human, not a machine or a language model** — the owner files that one personally.
+- **Softaculous:** the custom-package file list is documented and buildable now; the official-library submission process could not be verified from a primary source and still needs direct contact.
+
+**Also noticed, not changed:** the GitHub About description still says 1.1.3, and the README body below the hero still describes 1.1.3 as the current release. Both are release-protocol surfaces that 1.2.0 and 1.2.1 did not update. The Packagist webhook exists as of 21 September 2026, so tags now publish automatically.
+
+**Not done:** no commit, no push, no public repository created, no package published, no third-party submission, no change to any live surface.
+
+**Precision on the badge-asset claim above (same session).** A repository-wide search returns twenty further hits for `release-1-1-3.svg` and one for `release-1-1-2.svg`, all of them line 14 of a `README.md` inside `.claude/worktrees/agent-*`. Those are untracked agent checkouts, excluded through `.git/info/exclude`, not repository files; `git ls-files .claude` is empty. The statement stands for tracked files: after this change nothing tracked references any `release-1-x-x.svg`. The stale copies resolve when each worktree next takes `master`.
+
+**Housekeeping, not acted on:** `git worktree list` reports 27 entries in this checkout. Most are finished agent worktrees from earlier milestones. Pruning them is a separate task and was left alone.

@@ -7,11 +7,21 @@
 <h1 align="center">Open-source, self-hosted accounting and cash POS for small businesses</h1>
 
 <p align="center">
-  Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+. New code is AGPL-3.0-or-later licensed; a commercial licence is available. Current release: 1.1.3.
+  Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+. New code is AGPL-3.0-or-later licensed; a commercial licence is available.
 </p>
 
 <p align="center">
-  <img src="docs/repository/assets/release-1-1-3.svg" width="190" height="26" alt="Release: 1.1.3 stable">
+  <a href="https://github.com/phpledger/phpledger/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/phpledger/phpledger?style=for-the-badge&label=release&labelColor=0c2052&color=4656e8"></a>
+  <a href="https://packagist.org/packages/phpledger/phpledger"><img alt="Packagist version" src="https://img.shields.io/packagist/v/phpledger/phpledger?style=for-the-badge&label=packagist&labelColor=0c2052&color=4656e8&logo=packagist&logoColor=white"></a>
+  <a href="https://github.com/phpledger/phpledger/pkgs/container/phpledger"><img alt="Container image on GitHub Container Registry" src="https://img.shields.io/badge/ghcr.io-phpledger%2Fphpledger-4656e8?style=for-the-badge&labelColor=0c2052&logo=docker&logoColor=white"></a>
+  <a href="https://github.com/phpledger/phpledger/actions/workflows/foundation.yml"><img alt="Foundation checks" src="https://img.shields.io/github/actions/workflow/status/phpledger/phpledger/foundation.yml?branch=master&style=for-the-badge&label=checks&labelColor=0c2052&color=4656e8&logo=githubactions&logoColor=white"></a>
+</p>
+
+<p align="center">
+  <a href="docs/INSTALLER.md"><img alt="PHP 8.2 or newer" src="https://img.shields.io/badge/PHP-8.2%2B-4656e8?style=for-the-badge&labelColor=0c2052&logo=php&logoColor=white"></a>
+  <a href="docs/INSTALLER.md"><img alt="MySQL 8.4" src="https://img.shields.io/badge/MySQL-8.4-4656e8?style=for-the-badge&labelColor=0c2052&logo=mysql&logoColor=white"></a>
+  <a href="docs/INSTALLER.md"><img alt="MariaDB 10.4 or newer" src="https://img.shields.io/badge/MariaDB-10.4%2B-4656e8?style=for-the-badge&labelColor=0c2052&logo=mariadb&logoColor=white"></a>
+  <a href="LICENSE"><img alt="Licence: AGPL-3.0-or-later" src="https://img.shields.io/badge/licence-AGPL--3.0--or--later-4656e8?style=for-the-badge&labelColor=0c2052"></a>
 </p>
 
 <p align="center">
