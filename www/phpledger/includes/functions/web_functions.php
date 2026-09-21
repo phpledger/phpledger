@@ -668,7 +668,9 @@ function pl_render(string $view, array $data = []): never
         'contra-review',
         // 1.2 M7: the Users module. 'account-access' is the signed-out screen that redeems an
         // invitation token or a forced-reset token.
-        'users', 'roles', 'profile', 'cost-visibility', 'account-access'];
+        'users', 'roles', 'profile', 'cost-visibility', 'account-access',
+        // 1.2 M8: Admin > Packages.
+        'packages'];
     if (!in_array($view, $allowed, true)) {
         throw new LogicException('Unknown template.');
     }

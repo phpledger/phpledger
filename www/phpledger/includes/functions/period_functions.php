@@ -115,6 +115,11 @@ function pl_change_period_status(int $actorId, int $companyId, int $bookId, int 
         $period['status'] = $status;
         $period['revision'] = $expectedRevision + 1;
         DB::update('pl_periods', ['status' => $status, 'revision' => $period['revision']], 'id = %i AND company_id = %i AND book_id = %i', $periodId, $companyId, $bookId);
+        if ($status === 'closed') {
+            // 1.2 M8: queued, not fired. The book row above is locked for the rest of this
+            // transaction; pl_ledger_transaction() runs this after the commit, outside the lock.
+            pl_hook_after_commit('period.closed', [$period, ['company_id' => $companyId, 'book_id' => $bookId, 'actor_id' => $actorId]]);
+        }
         return pl_period_record_action($actorId, $companyId, $bookId, $period, $action, $priorStatus, $reason, $key, $hash);
     });
 }

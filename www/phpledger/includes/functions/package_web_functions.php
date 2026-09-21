@@ -1,0 +1,186 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Admin > Packages (release plan 1.2 M8; frames `packages-installed.html` and
+ * `packages-upload-confirm.html`; decisions B44, B51, B52 and onboarding decision 10).
+ *
+ * The screen is visible to anyone who can open the workspace and read-only without
+ * `installation.admin`: a business owner reasonably wants to see what a package does to their
+ * business without being able to change what code runs here. Nothing on this page decides a
+ * permission; every service call below authorises itself.
+ *
+ * The Directory tab and the one-click and automatic updates of B51 are not built here — they
+ * need the phpledger.com feed, which is a separate milestone. What exists is Installed and
+ * Upload, and an upload is always Unverified, because nothing in this release signs a package.
+ */
+function pl_web_packages(int $actorId, int $companyId, int $bookId, array $user, array $company, string $method): never
+{
+    if (pl_demo_enabled()) {
+        throw new DomainException(pl_t('Package administration is unavailable in the public sample.'));
+    }
+    $administers = pl_user_can($actorId, 0, 'installation.admin');
+    if ($method === 'POST') {
+        pl_web_packages_post($actorId, $company);
+    }
+    $form = pl_form_state(pl_url('/packages'));
+    // The full-page confirmation (onboarding decision 9): installing code that can change what a
+    // posting does is a heavier decision than a modal invites, so it is its own reloadable page.
+    $confirm = pl_web_text($_GET, 'confirm');
+    $review = null;
+    if ($confirm !== '' && $administers) {
+        try {
+            $manifest = pl_plugin_read_manifest($confirm);
+            $review = ['slug' => $confirm, 'manifest' => $manifest,
+                'files_digest' => pl_plugin_files_digest($confirm, $manifest),
+                'requirements' => pl_web_package_requirements($manifest)];
+        } catch (DomainException $error) {
+            pl_notice($error->getMessage());
+            pl_redirect('/packages');
+        }
+    }
+    pl_render('packages', [
+        'title' => pl_t('Packages'), 'user' => $user, 'company' => $company,
+        'administers' => $administers,
+        'cards' => pl_plugin_cards(),
+        'staged' => $administers ? pl_web_packages_staged() : [],
+        'review' => $review,
+        'acknowledgements' => pl_plugin_acknowledgements(),
+        'safe_mode' => pl_plugins_safe_mode(),
+        'history' => $administers ? pl_plugin_history($actorId) : [],
+        'form' => $form, 'input' => $form['input'],
+    ]);
+}
+
+/**
+ * Folders sitting in the package directory that nothing has recorded: a ZIP just uploaded, or a
+ * folder an operator copied in over SFTP. Neither has been reviewed, so both reach the same
+ * confirmation page before a line of their code runs.
+ *
+ * @return list<array{slug:string, name:string, version:string, problem:string}>
+ */
+function pl_web_packages_staged(): array
+{
+    $recorded = pl_plugin_records();
+    $staged = [];
+    foreach (pl_plugin_directory_slugs() as $slug) {
+        if (isset($recorded[$slug])) {
+            continue;
+        }
+        try {
+            $manifest = pl_plugin_read_manifest($slug);
+            $staged[] = ['slug' => $slug, 'name' => (string) $manifest['name'], 'version' => (string) $manifest['version'], 'problem' => ''];
+        } catch (DomainException $error) {
+            $staged[] = ['slug' => $slug, 'name' => $slug, 'version' => '', 'problem' => $error->getMessage()];
+        }
+    }
+    return $staged;
+}
+
+/**
+ * Each requirement with whether this copy satisfies it, so the confirmation page names the
+ * missing one rather than failing on submit (B47, issue #72).
+ *
+ * @param array<string, mixed> $manifest
+ * @return list<array{name:string, version:string, satisfied:bool, present:string}>
+ */
+function pl_web_package_requirements(array $manifest): array
+{
+    $modules = pl_module_registry();
+    $packages = pl_plugin_records();
+    $requirements = [];
+    /** @var array<string, string> $requires */
+    $requires = $manifest['requires'];
+    foreach ($requires as $dependency => $version) {
+        $present = '';
+        if (isset($modules[$dependency])) {
+            $present = (string) $modules[$dependency]['version'];
+        } elseif (isset($packages[$dependency])) {
+            $present = (string) $packages[$dependency]['version'] . ' (' . (string) $packages[$dependency]['status'] . ')';
+        }
+        $requirements[] = ['name' => $dependency, 'version' => $version,
+            'satisfied' => isset($modules[$dependency]) ? $modules[$dependency]['version'] === $version
+                : (isset($packages[$dependency]) && (string) $packages[$dependency]['version'] === $version && $packages[$dependency]['status'] === 'active'),
+            'present' => $present];
+    }
+    return $requirements;
+}
+
+function pl_web_packages_post(int $actorId, array $company): void
+{
+    $return = pl_url('/packages');
+    try {
+        pl_web_assert_scope($company, $_POST);
+        $action = pl_web_text($_POST, 'action');
+        $slug = pl_web_text($_POST, 'slug');
+        $reason = pl_web_text($_POST, 'reason');
+        $key = pl_web_text($_POST, 'request_key');
+        if ($action === 'upload') {
+            $staged = pl_web_packages_upload($actorId);
+            pl_notice(pl_t('{name} was unpacked and has not been installed yet. Read what it says about itself, then confirm below.', ['name' => $staged['manifest']['name']]));
+            pl_redirect(pl_url('/packages', ['confirm' => $staged['slug']]));
+        }
+        if ($action === 'confirm_upload') {
+            $acknowledged = [];
+            foreach (array_keys(pl_plugin_acknowledgements()) as $name) {
+                $acknowledged[$name] = pl_web_text($_POST, 'ack_' . $name) === '1';
+            }
+            $result = pl_plugin_install($actorId, $slug, 'unverified', $reason, $key, $acknowledged);
+            pl_notice(pl_t('{slug} is installed and marked Unverified. It is not running yet: activate it when you are ready.', ['slug' => $result['slug']]));
+            pl_redirect($return);
+        }
+        if ($action === 'discard') {
+            pl_plugin_require_admin($actorId);
+            if (pl_plugin_record($slug) !== null) {
+                throw new DomainException(pl_t('This package is installed. Remove it from its card instead.'));
+            }
+            pl_plugin_remove_directory(pl_plugin_directory() . '/' . pl_plugin_slug($slug));
+            pl_notice(pl_t('The unpacked files were deleted. Nothing was installed and nothing ran.'));
+            pl_redirect($return);
+        }
+        if ($action === 'activate') {
+            pl_plugin_activate($actorId, $slug, $reason, $key);
+            pl_notice(pl_t('{slug} is active. Its code now loads on every request while its files match what you installed.', ['slug' => $slug]));
+            pl_redirect($return);
+        }
+        if ($action === 'deactivate') {
+            pl_plugin_deactivate($actorId, $slug, $reason, $key);
+            pl_notice(pl_t('{slug} is deactivated. Its data and settings are kept.', ['slug' => $slug]));
+            pl_redirect($return);
+        }
+        if ($action === 'uninstall') {
+            $deleteData = pl_web_text($_POST, 'delete_data') === '1';
+            if ($deleteData && pl_web_text($_POST, 'confirm') !== 'delete') {
+                throw new DomainException(pl_t('Type delete to confirm removing this package\'s data. This cannot be undone.'));
+            }
+            pl_plugin_uninstall($actorId, $slug, $deleteData, $reason, $key);
+            pl_notice($deleteData
+                ? pl_t('{slug} was removed with its own tables and settings. Nothing in your books changed.', ['slug' => $slug])
+                : pl_t('{slug} was removed. Its tables and settings were kept, so reinstalling it finds its data.', ['slug' => $slug]));
+            pl_redirect($return);
+        }
+        throw new DomainException(pl_t('Choose a valid action.'));
+    } catch (DomainException $error) {
+        $input = array_map(static fn (mixed $value): string => is_scalar($value) ? (string) $value : '', $_POST);
+        pl_form_failure($return, $input, $error->getMessage());
+    }
+}
+
+/**
+ * Read the uploaded archive and stage it. Nothing is recorded and no plugin code runs here; the
+ * confirmation page is next.
+ *
+ * @return array{slug:string, manifest:array<string, mixed>, files_digest:string}
+ */
+function pl_web_packages_upload(int $actorId): array
+{
+    pl_plugin_require_admin($actorId);
+    $upload = $_FILES['package'] ?? null;
+    if (!is_array($upload) || ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_string($upload['tmp_name'] ?? null)) {
+        throw new DomainException(pl_t('Choose a package ZIP to upload. Very large files may also be refused by this server before they reach the application.'));
+    }
+    if (!is_uploaded_file($upload['tmp_name'])) {
+        throw new DomainException(pl_t('That upload could not be read.'));
+    }
+    return pl_plugin_stage_archive($actorId, $upload['tmp_name']);
+}

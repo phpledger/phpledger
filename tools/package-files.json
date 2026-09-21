@@ -1409,6 +1409,26 @@
     {
       "source": "www/phpledger/templates/views/account-access.php",
       "destination": "www/phpledger/templates/views/account-access.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/hook_functions.php",
+      "destination": "www/phpledger/includes/functions/hook_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/plugin_functions.php",
+      "destination": "www/phpledger/includes/functions/plugin_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/package_web_functions.php",
+      "destination": "www/phpledger/includes/functions/package_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/packages.php",
+      "destination": "www/phpledger/templates/views/packages.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/042_plugin_runtime.php",
+      "destination": "www/phpledger/install/migrations/042_plugin_runtime.php"
     }
   ]
 }

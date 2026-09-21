@@ -23,7 +23,8 @@
     "010_module_lifecycle",
     "022_tax_engine",
     "025_tax_price_mode",
-    "041_users_and_roles"
+    "041_users_and_roles",
+    "042_plugin_runtime"
   ],
   "routes": [
     "/accounts",
@@ -36,7 +37,8 @@
     "/users",
     "/roles",
     "/cost-visibility",
-    "/profile"
+    "/profile",
+    "/packages"
   ],
   "permissions": [
     "owner",
@@ -52,5 +54,5 @@
   ],
   "api_operations": [],
   "mcp_operations": [],
-  "history": "Core journal and source history is always available to authorized readers. 1.2 adds users, roles and capabilities: authorisation is pl_user_can() over a capability catalogue, the three protected system roles are installation-wide definitions assigned per company, and the 1.1 role ENUM on pl_company_members stays mirrored through 1.2 and is dropped in 1.3."
+  "history": "Core journal and source history is always available to authorized readers. 1.2 adds users, roles and capabilities: authorisation is pl_user_can() over a capability catalogue, the three protected system roles are installation-wide definitions assigned per company, and the 1.1 role ENUM on pl_company_members stays mirrored through 1.2 and is dropped in 1.3. 1.2.1 adds the plugin runtime: packages are recorded in pl_packages with an immutable pl_package_actions audit, their own migration receipts and one shared options table, and only an installation administrator installs or activates one."
 }

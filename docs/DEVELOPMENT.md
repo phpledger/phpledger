@@ -273,6 +273,30 @@ Screens: `/users`, `/roles`, `/cost-visibility` (company-scoped, in Setup), `/pr
 
 Run the suite with `docker compose --profile test run --rm test php tests/run.php --suite=users`. Use your own Compose project name and a non-overlapping `PL_DOCKER_SUBNET` when another agent or worktree may be running: two stacks sharing the default project tear each other's database down.
 
+## Packages and the plugin runtime (1.2 M8)
+
+A package lives in `www/phpledger/plugins/<slug>/`, or wherever `PL_PLUGIN_DIRECTORY` points — an absolute path outside the document root. It carries `plugin.json` (contract 2) and the files that manifest lists with a SHA-256 each; the folder may hold nothing the manifest does not list, because otherwise a file dropped in beside a listed one and required from it would run with the digest still matching. `plugin.php` may register at file scope in the WordPress way, or return one callable that core calls with the package's context. The loader uses `require()`, not `require_once()`, so a package that declares functions at file scope breaks on the second boot in one process; return a closure instead.
+
+| What you need | Call |
+|---|---|
+| Change core behaviour | `pl_add_filter('journal.validate', …, $priority, $slug)` — validation phase, before the book is locked; throw `PL_Hook_Veto` to refuse |
+| Hear about a completed change | `pl_add_action('journal.posted', …)`, `'period.closed'`, `'plugin.activated'`, `'plugin.deactivated'` — all after the commit |
+| Add a screen to the sidebar | `pl_add_filter('navigation.groups', …)` |
+| Send a message | `pl_add_filter('outbound.consumers', …)` and declare the consumer name in the manifest; there is one outbound queue and this is how you join it |
+| Store a setting | `pl_plugin_option_set()` / `pl_plugin_option_get()`, installation scope with `company_id` 0 |
+| Own a table | declare it in `tables` and create it from `migrations/NNN_name.php`; the name must start with `pl_<slug_with_underscores>_` |
+
+`pl_hook_points()` is the list core actually raises, and `pl_plugin_api_functions()` is the published surface. **Both are frozen by `tests/plugin_surface_test.php` against `PL_PLUGIN_API_VERSION`**: change a signature and that test fails until you either put it back or bump the version and retake the snapshot with `PL_PRINT_PLUGIN_SURFACE=1` into `tests/fixtures/plugin-surface.json`. That is the whole mechanism keeping the promise in B80, because the contract document itself is not in this repository.
+
+Three things that bite:
+- **No hook runs while a book row is locked.** `pl_do_action()` and `pl_apply_filters()` throw a `LogicException` from the moment `pl_ledger_book($company, $book, true)` is taken until the outermost transaction ends. If you need a hook point inside a flow that has already locked the book, it belongs in that flow's own validation phase, before the lock — not inside it.
+- **A filter shares the posting's transaction.** Anything it writes rolls back with the posting, which is what makes a throwing filter safe.
+- **`pl_package_actions` is immutable and keeps one row per (slug, request key) for ever.** A test fixture that reuses a fixed request key collides the second time it runs against a warm `db_test`; `tests/plugin_test.php` generates a new key per run for that reason.
+
+Recovery: `PL_PLUGINS_DISABLED=1` is safe mode — no package loads and nothing recorded changes. A package whose files stopped matching, whose manifest stopped validating, or whose code ended a request is set to `failed` with a `auto_deactivated` audit row naming the package; that is distinct from the core updater's maintenance state, which `pl_update_application_guard()` decides before any package is touched.
+
+Run the suite with `docker compose --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test php tests/run.php --suite=plugins`. Use your own Compose project name and a non-overlapping `PL_DOCKER_SUBNET`.
+
 ## Opening cutover, periods and bank reconciliation
 
 These existing core workflows are also used by the accounting starter. Back up existing development data, then apply the complete versioned migration chain with `docker compose exec -T web php www/phpledger/install/migrate.php`. Local source changes do not update a published package or hosted demo.

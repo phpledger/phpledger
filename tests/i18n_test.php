@@ -301,6 +301,8 @@ test('every route renders under the pseudo-locale and the document language foll
         // 1.2 M7: the Users module's screens. /invitation and /reset-password render without a
         // token as the empty form they are, which is what the sweep needs to see.
         '/users', '/roles', '/cost-visibility', '/profile', '/invitation', '/reset-password',
+        // 1.2 M8: Admin > Packages.
+        '/packages',
         '/no-such-route'];
     $rendered = 0;
     $translated = 0;
