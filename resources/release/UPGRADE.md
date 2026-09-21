@@ -28,13 +28,11 @@ Keep the installed chain through 031 unchanged; 1.0.0 adds no new migration. Thi
 
 Use the backup/maintenance procedure below and run migrations before reopening traffic, exactly as for the 0.5.0-preview to 0.6.0-preview upgrade. Restore both matching code and database if rollback is needed; copying old PHP over an upgraded database is not a tested rollback.
 
-## From 1.1.3 to 1.2.0-preview.1
+## From 1.1.3 to 1.2.0
 
-**This is a preview, for disposable copies only.** It applies migrations `035` through `040`, and none of them can be reverted. Do not install it over a real installation's data; rehearse it on a copy you can discard.
+It applies migrations `035` through `041`, and **none of them can be reverted**. Take a full backup first, and rehearse the upgrade on a copy before running it anywhere that matters.
 
-Install it from `/maintenance.php`, choosing the **Preview** channel, with the publisher key pinned; or replace the files and run `php www/phpledger/install/migrate.php` once. Either way, take a full backup first, per the manual procedure below.
-
-A preview installation is offered the next preview by the update feed. A stable installation is not offered previews at all; it only ever sees stable releases such as 1.1.3.
+Install it from `/maintenance.php` with the publisher key pinned, or replace the files and run `php www/phpledger/install/migrate.php` once. Either way, take a full backup first, per the manual procedure below.
 
 ### Your account numbers change, and your chart starts with no contra accounts
 
