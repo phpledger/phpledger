@@ -1420,3 +1420,81 @@ The owner set `NPM_TOKEN` themselves with `gh secret set`, which is the mechanis
 **Out of scope, deliberately:** no posting behaviour, balance, account type or `is_contra` change; no schema change beyond the heading rows; the `phpledger.com/learn/` pages themselves belong to another piece of work.
 
 **Verification plan:** own Compose project `plchartnames` on a subnet checked free with `docker network inspect`, `COMPOSER_PROCESS_TIMEOUT` passed inside the container, output redirected to a file, torn down with `down -v`.
+
+## 2026-09-21 — Claude: 1.3 M15 chart-of-accounts headings built (result and evidence)
+
+**From:** Claude (worktree `.claude/worktrees/agent-aa0c52126a96173f0`, branch `m15/chart-headings` from `master` `57b4d49`, two commits). **Not pushed, not merged, nothing deployed.**
+
+**The defect and what actually caused it.** `pl_report_tree_node()` (`report_functions.php`) names a class or group from an account row whose code is a heading code, and falls back to `'Group ' . pl_account_code_short($code)` when there is none. **No chart package contained a single heading row**, so every group of every book, on every report, in every installation read "Group 1-100". Migration 036 renumbered existing charts into groups and named none of them either. This is seed data and a migration, not schema: there is no group-name table anywhere and none was added.
+
+**The names, and a new chart version rather than an edit in place.** `resources/coa/core-starter-1.2.0.json` carries the 1.1.0 chart's thirteen postable accounts **byte-identical** plus nineteen headings — the owner's fourteen groups and the five classes. `core-starter-1.1.0.json` and `core-starter-1.0.0.json` are left exactly as they shipped and still ship: a book records the digest of the chart it was installed from in `pl_template_installations`, so a chart's bytes are never rewritten under a version number already recorded somewhere. `pl_starter_template()` now reads 1.2.0. `1.0.0` is legacy-numbered (`1000`, `1100` …) and has no code hierarchy to name, so it gets no headings; `industry-profiles-0.5.0.json` is `runtime_importable: false` research vocabulary and `upstream/` is an unshipped mirror.
+
+**A chart package now has two lists and they are not interchangeable.** `accounts` are postable and carry the starter purposes the prior-foundation review maps; `headings` are names. Keeping them apart is what stops nineteen headings appearing among the thirteen purposes `pl_confirm_existing_setup()` asks the owner to map, and keeps them out of `pl_install_template_snapshot()`'s mapping.
+
+**Every heading carries a `semantic_key`, and that is the recognition mechanism** — not the name, which is translated and which an owner may edit, and not the number, which 036 allocated from each chart's own groups. The keys are in their own namespace because `uq_account_semantic (book_id, semantic_key)` is one account per key per book:
+
+| Code | Name | Semantic key |
+|---|---|---|
+| `1-000-00000-00` | Assets | `core.class.asset` |
+| `2-000-00000-00` | Liabilities | `core.class.liability` |
+| `3-000-00000-00` | Equity | `core.class.equity` |
+| `4-000-00000-00` | Revenue | `core.class.income` |
+| `5-000-00000-00` | Expenses | `core.class.expense` |
+| `1-100-00000-00` | Cash and Cash Equivalents | `core.group.asset.cash_equivalents` |
+| `1-110-00000-00` | Trade and Other Receivables | `core.group.asset.receivables` |
+| `1-120-00000-00` | Prepayments and Advances | `core.group.asset.prepayments` |
+| `1-200-00000-00` | Property, Plant and Equipment | **`core.group.asset.ppe`** |
+| `1-900-00000-00` | Accumulated Depreciation and Impairment | `core.group.asset.accumulated_depreciation` |
+| `2-100-00000-00` | Trade and Other Payables | `core.group.liability.payables` |
+| `2-110-00000-00` | Loans and Borrowings | `core.group.liability.borrowings` |
+| `2-120-00000-00` | Contract Liabilities and Customer Advances | `core.group.liability.contract_liabilities` |
+| `3-100-00000-00` | Capital and Reserves | `core.group.equity.capital` |
+| `3-900-00000-00` | Drawings | `core.group.equity.drawings` |
+| `4-100-00000-00` | Revenue | `core.group.income.revenue` |
+| `4-900-00000-00` | Revenue Deductions | `core.group.income.revenue_deductions` |
+| `5-100-00000-00` | Operating Expenses | `core.group.expense.operating` |
+| `5-900-00000-00` | Purchase Returns and Discounts Received | `core.group.expense.purchase_returns` |
+
+`1-900` is not "Property, Plant and Equipment": the 900 band of every class is reserved for **contra** accounts under B60, so the equipment itself is `1-200` and the depreciation collected against it is `1-900`.
+
+**`pl_account_heading_by_key($companyId, $bookId, $key)`** (`setup_functions.php`) is the one resolver. It matches the key, falls back to the code the *bundled* chart uses for that key when a book predates the keys, returns `matched_by` (`semantic_key` / `bundled_code`) so a caller never assumes silently, and answers **null** for a book that has no such group — the module then asks its owner instead of refusing to work.
+
+**No heading carries a `role`, and that is deliberate, not an omission.** A role names where a posting goes. `pl_save_account()` (`core_functions.php`) already refuses a role on a heading code, and — the reason that rule exists — `pl_ar_control()` (`ar_ap_functions.php:433`) and `pl_advance_control()` (`advance_functions.php:27`) both require **exactly one** active account per role and throw "there must be one unambiguous default" otherwise. A heading holding `receivables`, `payables`, `customer_advances` or `supplier_advances` would refuse every AR/AP document and every advance in the book. Five of the thirteen leaves carry a role; eight carry NULL; every heading carries NULL.
+
+**Migration `045_chart_headings`.** 042 and 043 are on `master`, 044 is the unmerged `m14/fixed-assets`, so **045** is the number used. It runs **19 statements, every one an `INSERT INTO pl_accounts`** — no UPDATE, no DELETE, no posting account touched, no schema change, and `pl_core_audit` is neither written to nor altered, so migration 038's ENUM-union bug is not in scope.
+
+- Class headings: deterministic from the class digit, for every book that has a structured account of that class.
+- Group headings: named from the `semantic_key` of the **single** starter purpose in the group, and **refused where two starter purposes share a group** — after 036 a group is the chart's own group, and a book that numbered cash `1000` and receivables `1010` has both in one, where naming it after either describes the other wrongly. Such a group keeps the fallback label until its owner names it, which is the ordinary audited edit on the chart screen.
+- Each statement carries a `NOT EXISTS` on the **code** (idempotence) *and* one on the **semantic key**, so an upgrade can never die on `uq_account_semantic`.
+- `1-200 Property, Plant and Equipment` **is** created for an existing book, but only where the number provably means it: no rows in `pl_account_code_map` (written only by 036's conversion) and `core.cash_bank` still at the bundled `1-100-10001-00`. A converted book is left without it and the resolver answers null for it.
+- Every row is marked `creation_key = 'migration-045-<code>'`, which is the exact reversal: `DELETE FROM pl_accounts WHERE creation_key LIKE 'migration-045-%'`. Proved in the test, including that it changes no posting account.
+
+**An empty group is deliberately absent from a report and present on the chart screen.** The tree is built from the accounts that can hold a figure, so a group nothing is posted under has no node and no zero line; the chart screen states what the book *may* hold and is where `1-200` is visible and usable. Documented in `pl_report_tree()` and asserted.
+
+**Nineteen help concepts**, `resources/guidance/concepts/chart-class-<n>.php` and `chart-group-<x>-<yyy>.php`, 40 to 70 plain words each with a "how it works here" line, all `placeholder`. The id is **derived from the code** (`pl_account_heading_concept()`), so the report tree — which holds a code and nothing else — can ask without carrying the chart around; `pl_ui_heading_help()` renders nothing when the catalogue has no words for a heading, because a book may hold a group its owner invented. Placed under each heading in the report tree (a line of its own, never inside the `<summary>`: `<summary>` takes phrasing content, a bubble is a `<details>`, and nesting them would toggle the branch on every click) and beside the level on the chart of accounts screen.
+
+**The `document` field now also takes an external link**, `['label' => …, 'url' => 'https://phpledger.com/learn/<slug>']`, allowlisted by regex in `pl_guidance_concept()` — host, path and slug shape, so no query string, fragment, port or other host can reach a screen — and rendered `target="_blank" rel="noopener noreferrer"` with an sr-only note. The `/learn/` pages are another piece of work's; the slugs are reserved.
+
+**Four things found and fixed in passing, each of which this change would otherwise have broken:**
+
+1. `pl_demo_pack_reconcile()` compares a pack's authored checkpoint balances against the whole trial balance with `!==`. Nineteen heading rows would have failed **every** demo pack reconciliation. Headings are now skipped there: a heading is a name, not a balance.
+2. The trial-balance, profit-and-loss and balance-sheet **CSV exports** would have carried nineteen rows of zeros. Skipped.
+3. The **account pickers** on the journal editor, opening balances, the setup review and the account statement would have offered headings the posting funnel then refuses. `pl_company_context()` now carries `is_postable` (computed for the whole chart in PHP by `pl_account_code_postable_map()`, not one query per row) and those screens filter on it. The server side was already safe: `pl_post_journal()` refuses a heading in the one central funnel, and the opening cutover posts through it.
+4. Both `tools/verify-upgrade.php` baselines assert that a prior book's chart may grow by exactly the two advances controls. They now check the headings by name and key separately and still fail on an unexplained new *account*; every class the book uses must be named. **Not executed** — the verifier is not part of `composer check` and needs its own disposable schemas. Whoever next runs it should expect this change.
+
+**Also fixed, and it was already broken on `master`:** `views/packages.php` (from the merged `m8/plugin-runtime`) shipped a bare `UTC`, putting the i18n backlog at **13 against a ceiling of 12**, so `composer check` fails on `master` `57b4d49` as it stands. It now uses the `{time} UTC` pattern every other history list uses, and the backlog is back at exactly 12.
+
+**Evidence.** `PL_DOCKER_SUBNET=10.215.15.0/24 docker compose -p plchartnames --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` on MySQL 8.4, own Compose project, own subnet (checked free against `docker network inspect`), the timeout passed **inside** the container, output redirected to a file, torn down with `down -v`. Exit 0:
+
+```
+PHP lint: 321 files, 0 failures.
+ [OK] No errors
+Sample data valid: {"packs":7,"events":77,"documents":42,"items":16}.
+i18n sweep: 45 of 48 routes rendered under the pseudo-locale; 45 of them show translated text.
+i18n backlog: 12 untranslated interface text runs in 4 template files (ceiling 12)
+512 tests, 0 failures.
+```
+
+The nine tests added here: the chart names its classes and groups with the approved names and keys; a module finds a group by its key and says when it fell back; 045 names the same groups from the same purposes; every heading has plain words; everything shipped is in the manifest; **a freshly created book shows no placeholder group on any report**; an empty group is in the chart and not on a report; **045 names a converted chart, touches no posting account and runs twice safely**; 045 refuses to name a group holding two purposes. The two in bold are the regression guard the defect needs.
+
+**Deliberately not done:** no push, no merge, no `VERSION` bump, no release, no website, wiki, demo or deployment. No posting behaviour, balance, account type or `is_contra` changed. `resources/demo-packs/` and `tools/build-demo-packs.py` untouched, so `python tools/build-sample-structures.py --write` is not needed. `tools/verify-upgrade.php` was edited but not run. The `/learn/` articles do not exist yet, so those links 404 until the website work lands.
