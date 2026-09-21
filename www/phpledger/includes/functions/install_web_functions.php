@@ -587,6 +587,13 @@ function pl_install_http(): never
                             $user = pl_install_finish($sessionConfig, $runtimeConfig, pl_web_text($_POST, 'email'), pl_web_text($_POST, 'name'), $password, $state, pl_web_text($_POST, 'username'), $logo);
                             // Itemise what was built before the setup session is cleared.
                             $completion = pl_install_completion_lines(pl_web_text($_POST, 'username'), pl_install_database_check());
+                            // 1.2 M7 made a sign-in durable: a server-side session row, not just the
+                            // cookie, is what pl_current_user_id() accepts. pl_login_session() only
+                            // opens that row when pl_session_open() exists, and it lives in
+                            // user_functions.php, which the installer had never loaded. So the owner
+                            // was signed in cookie-only and the very next request signed them out
+                            // again, landing on /login straight after "Your installation is complete."
+                            require_once __DIR__ . '/user_functions.php';
                             pl_login_session($user); // Clears temporary schema/runtime credentials and setup proof.
                             $view = 'ready';
                             $completed = true;
