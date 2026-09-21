@@ -356,6 +356,8 @@ raising it to make a change pass is not an acceptable fix.
 Nothing in the application calls `pl_set_locale()` yet: resolving a user's or company's stored
 preference, and the screen to choose one, are M11.
 
+The translation backlog is measured by `tests/i18n_test.php` from the template sources, not from rendered pages: a rendered page also carries data (document numbers, party and account names, rows that depend on the day), which no catalogue translates and which moved the number run to run. The source count needs no database or server, returns the same number on every machine, and its ceiling may only be lowered. A new screen written in bare English raises it, which is the failure; put the strings through `pl_t()` instead.
+
 ## Repository working boundaries
 
 ### Core CSV exports

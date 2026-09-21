@@ -234,7 +234,6 @@ test('every route renders under the pseudo-locale and the document language foll
     // Ceiling for the visible English text runs that have not been through pl_t(). The strings are
     // externalised in M11; this number is the backlog, it is printed on every run, and it may only
     // be lowered. It must never be raised to make a change pass.
-    $untranslatedCeiling = 2400;
 
     $suffix = bin2hex(random_bytes(6));
     $email = 'i18n-sweep-' . $suffix . '@example.test';
@@ -276,19 +275,17 @@ test('every route renders under the pseudo-locale and the document language foll
         preg_match('/\s(\d{3})\s/', $responseHeaders[0] ?? '', $status);
         return [(int) ($status[1] ?? 0), $response === false ? '' : $response];
     };
-    /** Visible text runs, split by markup; a run that went through pl_t() carries the bracket. */
-    $countText = static function (string $html): array {
-        $stripped = (string) preg_replace('#<(script|style)\b[^>]*>.*?</\1>#isu', ' ', $html);
-        $stripped = (string) preg_replace('#<[^>]*>#u', "\n", $stripped);
-        $stripped = html_entity_decode($stripped, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-        $translated = 0;
-        $untranslated = 0;
-        foreach (preg_split('/\R+/u', $stripped) ?: [] as $run) {
-            $run = trim($run);
-            if ($run === '' || !preg_match('/\p{L}/u', $run)) { continue; }
-            if (str_contains($run, '⟦')) { ++$translated; } else { ++$untranslated; }
-        }
-        return [$translated, $untranslated];
+    /**
+     * Did any of this page's text go through pl_t()? The pseudo-locale brackets every translated
+     * string, so one bracket proves the helper is live on the rendered page. Deliberately a
+     * boolean and not a count: the rendered page also carries data (document numbers, party and
+     * account names, rows that depend on the clock), which moves with the fixture and the day, so
+     * counting it made this test fail at random. The backlog is counted from the source instead,
+     * in "the untranslated interface text in the source only falls" below.
+     */
+    $usesHelper = static function (string $html): bool {
+        $stripped = (string) preg_replace('#<(script|style)\\b[^>]*>.*?</\\1>#isu', ' ', $html);
+        return str_contains($stripped, "\u{27e6}");
     };
 
     $routes = ['/login', '/', '/home', '/companies', '/accounts', '/transactions', '/transactions/new', '/general-journals',
@@ -297,7 +294,6 @@ test('every route renders under the pseudo-locale and the document language foll
         '/ar', '/ap', '/inventory', '/purchasing', '/tax', '/modules', '/connections', '/help', '/pos', '/no-such-route'];
     $rendered = 0;
     $translated = 0;
-    $untranslated = 0;
     $statuses = [];
     try {
         for ($retry = 0; $retry < 100; $retry++) {
@@ -327,9 +323,7 @@ test('every route renders under the pseudo-locale and the document language foll
             ++$rendered;
             assert_true(str_contains($body, '<html lang="qps" dir="ltr"'), 'Route ' . $route . ' does not carry the active locale on its document element.');
             assert_true(!str_contains($body, 'lang="en"'), 'Route ' . $route . ' still hard-codes an English document language.');
-            [$pageTranslated, $pageUntranslated] = $countText($body);
-            $translated += $pageTranslated;
-            $untranslated += $pageUntranslated;
+            if ($usesHelper($body)) { ++$translated; }
         }
     } finally {
         proc_terminate($server);
@@ -338,7 +332,56 @@ test('every route renders under the pseudo-locale and the document language foll
     }
     assert_true($rendered >= 15, 'Only ' . $rendered . ' routes rendered a document; the sweep is not covering the screens.');
     echo 'i18n sweep: ' . $rendered . ' of ' . count($routes) . ' routes rendered under the pseudo-locale; '
-        . $untranslated . ' untranslated visible text runs (ceiling ' . $untranslatedCeiling . '), ' . $translated . " already translated.\n";
-    assert_true($untranslated <= $untranslatedCeiling, 'Untranslated visible text runs rose to ' . $untranslated . ', above the recorded ceiling of ' . $untranslatedCeiling . '. Externalise the new strings (M11) rather than raising the ceiling.');
+        . $translated . " of them show translated text.\n";
+    assert_true($translated >= 1, 'No rendered screen showed a translated string, so the helper is not reaching the interface at all.');
     assert_same(0, count(array_filter($statuses, static fn (int $status): bool => $status === 500)), 'A route answered with an uncaught error.');
+});
+
+/**
+ * The backlog M11 has to clear, measured where it lives: literal interface text in the templates.
+ * PHP blocks are removed first, so a string inside pl_t() does not count; what is left is text the
+ * browser shows and no catalogue can reach. This reads files only, with no database, server or
+ * fixture, so unlike a rendered-page count it returns the same number on every run and on every
+ * machine.
+ *
+ * The ceiling may only be lowered. Raising it to make a change pass is the one thing this test
+ * exists to prevent: a new screen written in bare English goes through pl_t() instead.
+ */
+test('the untranslated interface text in the source only falls', function (): void {
+    $ceiling = 1700;
+    $root = dirname(__DIR__) . '/www/phpledger/templates';
+    $counts = [];
+    $total = 0;
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
+    foreach ($files as $file) {
+        if (!$file->isFile() || $file->getExtension() !== 'php') { continue; }
+        $source = (string) file_get_contents((string) $file->getPathname());
+        $markup = (string) preg_replace('#<\?(?:php|=).*?(?:\?>|$)#su', ' ', $source);
+        $markup = (string) preg_replace('#<(script|style)\b[^>]*>.*?</\1>#isu', ' ', $markup);
+        $shown = [];
+        if (preg_match_all('/\b(?:placeholder|title|aria-label|alt)\s*=\s*"([^"]*)"/i', $markup, $attributes)) {
+            $shown = $attributes[1];
+        }
+        $markup = (string) preg_replace('#<[^>]*>#u', "\n", $markup);
+        $markup = html_entity_decode($markup, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $count = 0;
+        foreach (array_merge($shown, preg_split('/\R+/u', $markup) ?: []) as $run) {
+            $run = trim($run);
+            // Two adjacent letters make it prose: stray punctuation, units and single letters are
+            // not text a translator would carry.
+            if ($run === '' || !preg_match('/\p{L}\p{L}/u', $run)) { continue; }
+            ++$count;
+        }
+        if ($count > 0) {
+            $counts[str_replace('\\', '/', substr((string) $file->getPathname(), strlen($root) + 1))] = $count;
+            $total += $count;
+        }
+    }
+    arsort($counts);
+    $named = [];
+    foreach (array_slice($counts, 0, 5, true) as $name => $count) { $named[] = $name . ' ' . $count; }
+    echo 'i18n backlog: ' . $total . ' untranslated interface text runs in ' . count($counts)
+        . ' template files (ceiling ' . $ceiling . '); most: ' . implode(', ', $named) . ".\n";
+    assert_true($total <= $ceiling, 'Untranslated interface text rose to ' . $total . ', above the recorded ceiling of '
+        . $ceiling . '. Put the new strings through pl_t() rather than raising the ceiling.');
 });
