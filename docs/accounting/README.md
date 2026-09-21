@@ -7,6 +7,8 @@ The current application is a tested accounting preview, not a complete supported
 - [Pakistan reporting research](PAKISTAN_REPORTING_RESEARCH.md): SECP classification, ICAP/ICMAP/ACCA guidance, actual illustrative formats, edition checks and system requirements.
 - [UK and UAE reporting research](UK_UAE_REPORTING_RESEARCH.md): framework choices, authoritative format references, effective dates and access limits.
 - [Reporting gap analysis](REPORTING_GAP_ANALYSIS.md): current schema/service evidence, mapping/version/completeness needs, and implementation sequence.
+- [Owner transactions](OWNER-TRANSACTIONS.md): capital introduced, owner loans and repayments, drawings and partner accounts over the central posting service (owner decision B61).
+- [The ownership register](OWNERSHIP-REGISTER.md): the legal form and registration profile, the members and officers registers, share classes and the append-only share ledger, the related-party marker as narrowed by B74, and **two-period worked examples of the equity presentation for a private company and for a partnership**, with the five questions this milestone puts to accounting review.
 - [Original two-year retail example](examples/retail-statements.md): reconciled sample statements for design and later acceptance fixtures. It is not installed sample data or a tax calculation.
 - [POS research](../design/POS_RESEARCH.md): observed current-screen problems and public product references, including the requested CodeCanyon comparison as it is completed.
 - [Typography study](../design/typography-review/README.md): designer reference and font roles, with Inter retained for financial figures.

@@ -1509,6 +1509,26 @@
     {
       "source": "www/phpledger/install/migrations/042_plugin_runtime.php",
       "destination": "www/phpledger/install/migrations/042_plugin_runtime.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/044_ownership_register.php",
+      "destination": "www/phpledger/install/migrations/044_ownership_register.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/ownership_functions.php",
+      "destination": "www/phpledger/includes/functions/ownership_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/ownership_web_functions.php",
+      "destination": "www/phpledger/includes/functions/ownership_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/ownership.php",
+      "destination": "www/phpledger/templates/views/ownership.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/ownership-reports.php",
+      "destination": "www/phpledger/templates/views/ownership-reports.php"
     }
   ]
 }

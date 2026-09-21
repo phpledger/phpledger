@@ -140,8 +140,17 @@ function pl_print_formats(string $type, int $id): array
  * letterhead never states an address, a registration or a term the owner has not entered.
  * Party addresses and registrations still come from the party record.
  *
+ * 1.2 M8a adds the registration profile B63 asks for: the legal form, the registration number
+ * and the authority that issued it. Several jurisdictions require a company's registration
+ * number on its business letters and order forms — Companies Act 2006 s.82 and the Companies
+ * (Trading Disclosures) Regulations in the UK, and the Companies Act 2017 in Pakistan — so it
+ * belongs on the letterhead rather than only on a screen. It stays optional like everything
+ * else in the profile, and `incorporation` is one readable line rather than three fields, so a
+ * template needs no new logic to carry it.
+ *
  * @return array{name: string, book: string, currency: string, logo: array{url: string, width: int, height: int}|null,
- *               address: array<int, string>, phone: string, email: string, registrations: string, terms: string}
+ *               address: array<int, string>, phone: string, email: string, registrations: string, terms: string,
+ *               legal_form: string, incorporation: string}
  */
 function pl_print_letterhead(array $company, ?array $profile = null): array
 {
@@ -153,8 +162,16 @@ function pl_print_letterhead(array $company, ?array $profile = null): array
         if ($line !== '') { $address[] = $line; }
     }
     $named = trim((string) ($profile['legal_name'] ?? ''));
+    // "Registered in England and Wales, number 01234567" reads as one line and prints as one
+    // line. Whichever half the owner filled in appears; neither is invented.
+    $number = trim((string) ($profile['registration_number'] ?? ''));
+    $authority = trim((string) ($profile['registration_authority'] ?? ''));
+    $incorporation = trim(($authority === '' ? '' : 'Registered with ' . $authority)
+        . ($number === '' ? '' : ($authority === '' ? 'Registration number ' : ', number ') . $number));
     return [
         'name' => $named !== '' ? $named : (string) $company['name'],
+        'legal_form' => (string) ($profile['legal_form_label'] ?? (pl_legal_forms()[(string) ($profile['legal_form'] ?? '')] ?? '')),
+        'incorporation' => $incorporation,
         'book' => (string) ($company['book_name'] ?? ''),
         'currency' => (string) $company['currency'],
         'logo' => $logo === null ? null : ['url' => pl_logo_url($logo), 'width' => $logo['width'], 'height' => $logo['height']],

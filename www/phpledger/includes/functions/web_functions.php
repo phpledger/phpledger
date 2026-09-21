@@ -794,7 +794,11 @@ function pl_render(string $view, array $data = []): never
         // invitation token or a forced-reset token.
         'users', 'roles', 'profile', 'cost-visibility', 'account-access',
         // 1.2 M8: Admin > Packages.
-        'packages'];
+        'packages',
+        // 1.2.1 M8a: the ownership register (issue #92) and its reports. Two screens shipped
+        // unreachable in 1.2 because a route was added without its entry here; tests/i18n_test.php
+        // now requests both of these over HTTP and tests/render_allowlist_test.php reads this list.
+        'ownership', 'ownership-reports'];
     if (!in_array($view, $allowed, true)) {
         throw new LogicException('Unknown template.');
     }

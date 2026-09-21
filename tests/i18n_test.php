@@ -410,6 +410,8 @@ test('every route renders under the pseudo-locale and the document language foll
         '/onboarding', '/onboarding?stage=start', '/sample-chooser',
         // 1.2 M8: Admin > Packages.
         '/packages',
+        // 1.2.1 M8a: the ownership register and its reports.
+        '/ownership', '/reports/ownership',
         '/no-such-route'];
     $rendered = 0;
     $translated = 0;

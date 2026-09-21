@@ -76,6 +76,9 @@ $routes = [
     '/packages' => ['GET', 'POST'],
     '/accounts' => ['GET'], '/accounts/save' => ['POST'], '/logo' => ['GET'],
     '/owner' => ['GET'], '/owner/post' => ['POST'], '/owner/reverse' => ['POST'],
+    // 1.2 M8a: the ownership register (issue #92). Every screen here is also in the pl_render()
+    // allowlist in web_functions.php and in the route sweep in tests/i18n_test.php.
+    '/ownership' => ['GET', 'POST'], '/ownership/export' => ['GET'], '/reports/ownership' => ['GET'],
     '/contra-review' => ['GET'], '/contra-review/confirm' => ['POST'],
     '/general-journals' => ['GET'], '/general-journals/new' => ['GET'], '/general-journals/edit' => ['GET'],
     '/general-journals/detail' => ['GET'], '/general-journals/save' => ['POST'], '/general-journals/post' => ['POST'], '/general-journals/reverse' => ['POST'],
@@ -353,6 +356,22 @@ try {
     if ($path === '/bank-reconciliation') {
         require_once dirname(__DIR__) . '/includes/functions/reconciliation_web_functions.php';
         pl_web_reconciliation($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    // 1.2 M8a: the ownership register. The Open Cap Format export is a plain read of the
+    // register, so it needs no more authority than opening the screen does.
+    if ($path === '/ownership' || $path === '/reports/ownership') {
+        require_once dirname(__DIR__) . '/includes/functions/ownership_web_functions.php';
+        if ($path === '/ownership') {
+            pl_web_ownership($actorId, $companyId, $bookId, $user, $company, $method);
+        }
+        pl_web_ownership_reports($actorId, $companyId, $bookId, $user, $company);
+    }
+    if ($path === '/ownership/export') {
+        $export = pl_ownership_export_file($actorId, $companyId, pl_web_text($_GET, 'as_of', gmdate('Y-m-d')));
+        header('Content-Type: application/json; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $export['filename'] . '"');
+        echo $export['json'];
+        exit;
     }
     if ($path === '/owner/post' || $path === '/owner/reverse') {
         try {

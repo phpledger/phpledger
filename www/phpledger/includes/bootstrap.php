@@ -108,6 +108,11 @@ require_once __DIR__ . '/functions/opening_conversion_functions.php';
 // business can start from it. Loaded after the services it composes.
 require_once __DIR__ . '/functions/sample_structure_functions.php';
 require_once __DIR__ . '/functions/branding_functions.php';
+// 1.2.1 M8a: the ownership register. It loads before the plugin runtime because a package may
+// register a listener on its hook points while it boots, so pl_ownership_on() has to exist by
+// then; and because a country company-secretarial package is exactly the caller B63 designed
+// those hook points for.
+require_once __DIR__ . '/functions/ownership_functions.php';
 // 1.2 M8: the plugin runtime loads last, so every core service a package may call already
 // exists, and so a package can never shadow one. pl_plugin_boot() costs one is_dir() and one
 // scandir() on an installation with no packages, which is every installation until one is

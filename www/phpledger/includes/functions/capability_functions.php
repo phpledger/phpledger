@@ -70,6 +70,16 @@ function pl_capability_catalogue(): array
         'cost.view' => ['label' => 'See cost and margin', 'description' => 'See purchase cost, carrying value and margin. Cost is a trade secret in many businesses (owner decision B58).', 'scope' => 'company'],
         'settlement.approve' => ['label' => 'Approve a van settlement', 'description' => 'Approve a reconciled van day. Approving is a distinct act from recording.', 'scope' => 'company'],
 
+        // 1.2 M8a: the ownership register (B63) and the related-party marker (B72 as narrowed by
+        // B74). The marker is split into two capabilities on purpose. Reading one says that a
+        // named customer or supplier is a director, a director's spouse or a company a director
+        // controls, which is exactly the sensitive fact B58 keeps from whoever manages customers;
+        // and the person who prepares the disclosure is usually not the person who decides who is
+        // key management personnel, so the read is grantable without the write.
+        'ownership.manage' => ['label' => 'Maintain the ownership register', 'description' => 'Record members, officers, share classes and share ledger events, and the company\'s legal form and registration.', 'scope' => 'company'],
+        'relatedparty.view' => ['label' => 'See related-party information', 'description' => 'Read the related-party markers and the related-party and director loan reports. Restricted, because a marker names a customer or supplier as a director or a director\'s family (owner decision B58).', 'scope' => 'company'],
+        'relatedparty.manage' => ['label' => 'Record a related-party marker', 'description' => 'Designate a customer or supplier as key management personnel, a close family member of one, or an entity either controls. Nobody is related by default; the designation is always affirmative.', 'scope' => 'company'],
+
         // The Users module itself.
         'users.manage' => ['label' => 'Manage people in this company', 'description' => 'Invite, edit, suspend, reactivate and deactivate the people who can use this company.', 'scope' => 'company'],
         'roles.manage' => ['label' => 'Manage roles', 'description' => 'Create and edit custom roles and their capabilities for this company.', 'scope' => 'company'],
