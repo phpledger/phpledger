@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_DIR="${APP_DATA_DIR:-$(readlink -f "$(dirname "${BASH_SOURCE[0]}")/..")}"
+DATA_DIR="${APP_DIR}/data"
+
+# umbrelOS creates ${APP_DATA_DIR} owned by 1000:1000, but the phpledger image's `web`
+# service always runs as its own baked-in `www-data` user (docs/CONTAINER.md,
+# "Non-root and read-only") - the image has no PUID/PGID-style setting and cannot be
+# told to run as an arbitrary UID. Widen permissions on the bind-mounted private-state
+# directory so www-data can write to it regardless of its numeric UID on this image.
+mkdir -p "${DATA_DIR}/private" "${DATA_DIR}/db"
+chmod -R go+rwX "${DATA_DIR}/private"

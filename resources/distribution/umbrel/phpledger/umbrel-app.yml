@@ -1,0 +1,39 @@
+manifestVersion: 1
+id: phpledger
+category: finance
+name: PHP Ledger
+version: "1.2.1"
+tagline: Complete double-entry accounting that runs on your own PHP hosting
+description: >-
+  PHP Ledger is complete double-entry accounting you install on your own server:
+  invoices, expenses, a point-of-sale flow, and a full general ledger with balanced
+  journal entries behind every transaction.
+
+
+  This app starts the published PHP Ledger image with its own MySQL 8.4 database and
+  installs the owner account you set below on first start - no command line or SSH
+  step is needed after install.
+
+
+  - Invoicing, expense tracking and a point-of-sale flow
+
+  - A full general ledger with balanced journal entries behind every transaction
+
+  - Financial reports: profit & loss, balance sheet and more
+releaseNotes: ""
+
+developer: PHP Ledger
+website: https://phpledger.com
+dependencies: []
+repo: https://github.com/phpledger/phpledger
+support: https://github.com/phpledger/phpledger/issues
+
+port: 8773
+gallery: []
+path: ""
+
+defaultUsername: umbrel@umbrel.local
+deterministicPassword: true
+
+submitter: PHP Ledger
+submission: ""

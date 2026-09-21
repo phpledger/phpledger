@@ -1,109 +1,213 @@
-# Container catalogue manifests
+# Distribution manifests
 
-This directory holds the source manifests for the "container catalogue" one-click
-channels tracked by [issue #101](https://github.com/phpledger/phpledger/issues/101):
-CasaOS, CapRover and Coolify. Each one wraps the same published image,
-`ghcr.io/phpledger/phpledger`, the way `compose.production.yaml` (repository root)
-already runs it, so none of them builds application code a different way
-(`docs/RELEASE-PROTOCOL.md` principle 2).
+Source manifests for every one-click and hosting-panel channel tracked by
+[issue #101](https://github.com/phpledger/phpledger/issues/101). Eleven platforms in
+two groups, which behave very differently.
 
-**Nothing here has been submitted anywhere yet.** These are local, reviewed source
-files kept in this repository. Opening the actual pull requests against each
-upstream catalogue is a separate, explicit step - not implied by this directory
-existing.
+**Nothing here has been submitted anywhere.** These are local, reviewed source files.
+Opening the pull requests and sending the requests is a separate, explicit step that
+this directory existing does not imply.
 
-## Layout and where each one goes
+## The two groups
 
-| Path | Upstream repository | Real path there |
-|---|---|---|
-| `casaos/docker-compose.yml` | [`IceWhaleTech/CasaOS-AppStore`](https://github.com/IceWhaleTech/CasaOS-AppStore) | `Apps/PHPLedger/docker-compose.yml` (one folder per app, confirmed from their `Apps/` tree) |
-| `caprover/phpledger.yml` | [`CapRover/one-click-apps`](https://github.com/CapRover/one-click-apps) | `public/v4/apps/phpledger.yml` (flat file per app, confirmed from their `public/v4/apps/` tree - **not** the `captain-definition-oneclick.yml` name a naive guess would use) |
-| `coolify/phpledger.yaml` | [`coollabsio/coolify`](https://github.com/coollabsio/coolify) | `templates/compose/phpledger.yaml`, plus an entry added to `templates/compose/service-templates.json` (confirmed file convention; the JSON-index update step is inferred, see below) |
+**Container catalogues** wrap the published image, `ghcr.io/phpledger/phpledger`, the
+way [`compose.production.yaml`](../../compose.production.yaml) already runs it. None of
+them builds application code a different way, so [release protocol principle
+2](../../docs/RELEASE-PROTOCOL.md) holds: they deploy the same artifact everyone else
+installs.
 
-Each manifest keeps the same shape `compose.production.yaml` defines: the app on
-port 8080 internally, `PL_DB_HOST`/`PL_DB_PORT`/`PL_DB_NAME`/`PL_DB_USER`/`PL_DB_PASSWORD`,
-`PL_PUBLIC_URL`, the private volume mounted at `/var/lib/phpledger`, a MySQL 8.4
-database with `--log-bin-trust-function-creators=1`, and the
-`PL_ADMIN_EMAIL`/`PL_ADMIN_NAME`/`PL_ADMIN_USERNAME`/`PL_ADMIN_PASSWORD` variables
-that install the owner on first start (`docs/CONTAINER.md`).
+**Hosting panels and native packagers** install the release ZIP into a web root and drive
+the application's own command-line install path. They need nothing new in the
+application: milestone M12 shipped that path in 1.2.1.
 
-## Keeping these in step with the release
+| Directory | Platform | Kind | Upstream destination |
+|---|---|---|---|
+| `casaos/` | CasaOS | container | `IceWhaleTech/CasaOS-AppStore`, `Apps/PHPLedger/docker-compose.yml` |
+| `caprover/` | CapRover | container | `CapRover/one-click-apps`, `public/v4/apps/phpledger.yml` |
+| `coolify/` | Coolify | container | `coollabsio/coolify`, `templates/compose/phpledger.yaml` |
+| `cloudron/` | Cloudron | container | Self-hosted `CloudronVersions.json`; community store listing optional |
+| `portainer/` | Portainer | container | Self-hosted template URL |
+| `umbrel/` | Umbrel | container | `getumbrel/umbrel-apps`, `phpledger/` |
+| `elestio/` | Elestio | container, managed | Outreach; no public schema |
+| `pikapods/` | PikaPods | container, managed | Request on their feedback page; they package it |
+| `yunohost/` | YunoHost | native Debian | `YunoHost/apps` catalogue, via its own app repository |
+| `softaculous/` | Softaculous | hosting panel | Custom package now; official library by request |
+| `installatron/` | Installatron | hosting panel | Application submission |
 
-Bumping the image tag in each manifest here is [release protocol step
-10](../../docs/RELEASE-PROTOCOL.md#the-per-release-sequence): *"Bump the image tag
-in each catalogue manifest under `resources/distribution/` and open the catalogue
-update requests."* Concretely, on every release:
+## The deployment contract
 
-- `casaos/docker-compose.yml`: bump the `image:` tag on the `web` service. CasaOS
-  forbids `:latest`, so this must always be a concrete version (currently `1.2.1`).
-- `caprover/phpledger.yml`: bump `defaultValue` on the `$$cap_phpledger_version`
-  variable.
-- `coolify/phpledger.yaml`: bump the `image:` tag on the `phpledger` service.
+Every container manifest reproduces the same shape, and none of them diverges from
+`compose.production.yaml` without that file changing first:
 
-None of the three ever changes `PL_DB_*` shape, the volume paths, or the MySQL
-service definition without a corresponding change to `compose.production.yaml`
-first - these manifests follow that file, they do not diverge from it.
+- Image `ghcr.io/phpledger/phpledger` pinned to a concrete version, never `latest`.
+- Application on port 8080 internally, health probe at `/health`.
+- MySQL 8.4 started with `--log-bin-trust-function-creators=1`.
+- Private application state on a volume at `/var/lib/phpledger`.
+- `PL_DB_HOST`, `PL_DB_PORT`, `PL_DB_NAME`, `PL_DB_USER`, `PL_DB_PASSWORD`,
+  `PL_PUBLIC_URL`, `PL_AUTO_MIGRATE`, and `PL_ADMIN_EMAIL` / `PL_ADMIN_NAME` /
+  `PL_ADMIN_USERNAME` / `PL_ADMIN_PASSWORD`, which install the owner on first start.
+
+The panel and native packages instead drive this sequence, which is the same one the
+container entrypoint runs:
+
+1. Write `www/phpledger/includes/config.local.php`, a PHP file returning an array. It
+   **overrides** environment variables.
+2. Create `www/phpledger/storage/installation`, mode 0700. The bootstrap refuses every
+   request until it exists.
+3. `php www/phpledger/install/migrate.php`
+4. `php www/phpledger/install/create-admin.php --email= --name= [--username=]`, with the
+   password on stdin or in `PL_ADMIN_PASSWORD`, **never as an argument**.
+5. `php www/phpledger/install/complete.php`
+
+## Spec quirks worth knowing before you touch these
+
+Each of these cost real time to find. They are recorded here so nobody pays twice.
+
+**The release archive wraps everything in one directory.** `phpledger-1.2.1.zip` contains
+a single top-level `phpledger/`. YunoHost's `ynh_setup_source` strips one wrapping
+directory by default, which is correct. The Softaculous package archive must be built
+with it stripped, so build it from the extracted tree rather than by renaming the release
+ZIP. `softaculous/install.php` checks for `www/phpledger/install` first and stops with a
+clear message if that step was missed.
+
+**CasaOS forbids `:latest`.** Every shipped app in their store pins a version, so ours
+does too.
+
+**CapRover names a flat file per app** under `public/v4/apps/`, not a per-app directory
+and not the `captain-definition-oneclick.yml` filename a reasonable guess produces.
+
+**Coolify wants a leading `#` metadata comment block** and its own
+`$SERVICE_PASSWORD_*` / `$SERVICE_USER_*` generator syntax rather than plain variables.
+
+**Cloudron's MySQL addon cannot take our startup flag.** This is the one genuine contract
+mismatch in the set and it is unresolved. The addon is one shared MySQL server for every
+app on the box, not a per-app container, so `--log-bin-trust-function-creators=1` cannot
+be passed. Our migrations create triggers and functions under binary logging, which MySQL
+refuses without either that flag or every routine being marked `DETERMINISTIC`. The two
+real options are named in `cloudron/NOTES.md`: mark the routines correctly in the
+migrations, which is the proper fix and helps every engine, or ask a Cloudron operator to
+set the flag server-wide, which a package cannot request. **Do not submit the Cloudron
+package until one of those happens.** The package has also never been through
+`cloudron build`, since the CLI was not available here.
+
+**Portainer cannot pin a branch or tag.** Their documented template format accepts only
+`url` and `stackfile`, so the stack file is read from the default branch. The version is
+pinned instead through the template's own `PL_VERSION` default. A structural change to
+`compose.production.yaml` on `master` therefore reaches existing template users
+immediately, which is worth remembering when editing that file.
+
+**Umbrel's compose does not validate on its own**, and should not. `app_proxy` has no
+image until umbrelOS patches the file at install time, so `docker compose config` fails
+with "neither an image nor a build context". Upstream's own shipped apps behave
+identically. Strip `app_proxy` and supply their injected variables to validate the rest.
+Umbrel is also the only manifest here pinning by digest as well as tag.
+
+**Softaculous field names follow their own example**, so `admin_pass` rather than
+`admin_password`, and there is no `softdbport` in `$__settings`, so the port is its own
+field defaulting to 3306. The `<datadir>` semantics are undocumented, so the private
+directory is created explicitly in PHP instead. No `cust.sql`: the schema belongs to the
+versioned migrations, and a static dump would either drift from them or do nothing.
+`upgrade.php` re-runs `migrate.php`, because the application has no upgrade entry point
+of its own ([#100](https://github.com/phpledger/phpledger/issues/100)).
+
+**Installatron's embedded PHP has no documented interface.** Their docs never state how
+the `<install>` block receives database credentials or the site path, or how it signals
+success or failure. That block is therefore a commented stub that throws, rather than an
+invented API. Everything around it follows their published examples.
+
+**Elestio and PikaPods publish no schema at all.** Each gets a working compose file plus a
+`SUBMISSION.md` dossier a maintainer can act on. The revenue-share figures widely quoted
+for both appear on neither company's own page, so they are recorded as unconfirmed rather
+than stated.
 
 ## Secrets
 
-No manifest hard-codes a password. Coolify's generator syntax
-(`$SERVICE_PASSWORD_*`, `$SERVICE_USER_*`) is used where the platform supports it.
-CasaOS and CapRover have no equivalent generator: CasaOS ships the password fields
-as empty strings that the app's environment-editing UI (`x-casaos.envs`) prompts
-the installer to fill in before first start; CapRover exposes them as required
-`caproverOneClickApp.variables` entries with no default, which the panel's
-install wizard forces the operator to fill in.
+**No manifest hard-codes a password.** Where a platform can generate one it does: Coolify's
+`$SERVICE_PASSWORD_*`, Umbrel's `derive_entropy`, YunoHost's `ynh_string_random`.
+Where it cannot, the value is a required operator-supplied variable with no default, so
+the platform's own wizard forces it. CasaOS ships empty environment fields its UI prompts
+for; CapRover uses `caproverOneClickApp.variables` with no defaults.
+
+The administrator password never reaches a command line. Softaculous passes it through
+`proc_open`'s environment array and YunoHost pipes it to `--password-stdin`, both because
+`create-admin.php` refuses a password as an argument, and an argument would land in the
+process list.
 
 ## Assets
 
-Real, already-published assets are used everywhere one was available:
+Only these four, all verified publicly reachable, are referenced:
 
-- Icon (CasaOS `x-casaos.icon`, CapRover `logoUrl`): the existing 512x512
-  `www/website/public/assets/brand/icon-512.png`, referenced via
-  `raw.githubusercontent.com`. This is a placeholder for the PR, not the final
-  choice: both CasaOS and CapRover conventionally want a contributor to add a
-  dedicated icon file inside their own repository's app folder alongside the
-  manifest (documented as a `TODO` comment in each manifest, naming that exact
-  path), and CapRover marks the app `isOfficial: false` until that happens.
-- Screenshots (CasaOS `x-casaos.screenshot_link`): the existing
-  `docs/repository/assets/owner-overview-preview.webp`,
-  `expense-to-journal-preview.webp` and `cash-pos-click-preview.png`.
-- Coolify's `# logo:` header comment points at `svgs/phpledger.svg`, matching
-  their own templates' convention of referencing a file inside their `svgs/`
-  directory rather than an external URL - that file does not exist yet in the
-  Coolify repository and would need to be contributed with the PR (left as a
-  comment, not a working URL, since inventing one would be worse than leaving it
-  named).
+- `www/website/public/assets/brand/icon-512.png`
+- `docs/repository/assets/owner-overview-preview.webp`
+- `docs/repository/assets/expense-to-journal-preview.webp`
+- `docs/repository/assets/cash-pos-click-preview.png`
 
-## What is confirmed vs. inferred
+Several catalogues conventionally want a dedicated icon committed inside their own app
+folder rather than an external URL, and Coolify references a file in its own `svgs/`
+directory. Those are left as named TODOs in the manifests rather than as invented URLs.
+Umbrel's current packaging guidance asks for an empty gallery, which contradicts issue
+#101's text; the fresher source was followed.
 
-Confirmed directly from each upstream repository's own current tree and file
-contents (via `gh api`, 21 September 2026):
+## The npm package
 
-- CasaOS: `Apps/<Name>/docker-compose.yml` layout, the full `x-casaos` schema
-  (`id`, `architectures`, `main`, `category`, `developer`, `author`, `tagline`,
-  `description`, `title`, `icon`, `screenshot_link`, `thumbnail`, `scheme`,
-  `port_map`, `index`), the per-service `x-casaos.ports`/`volumes`/`envs` blocks,
-  and that `:latest` is never used in a shipped app (every inspected app pins a
-  version).
-- CapRover: `public/v4/apps/<kebab-name>.yml` layout (flat, one file per app,
-  no per-app subdirectory or `-oneclick` suffix), `captainVersion: 4`, the
-  `$$cap_*` variable substitution syntax, and the `caproverOneClickApp` schema
-  (`variables`, `instructions.start`/`end`, `displayName`, `isOfficial`,
-  `description`, `documentation`).
-- Coolify: `templates/compose/<name>.yaml` layout, the leading `#` metadata
-  comment block (`documentation`, `slogan`, `category`, `tags`, `logo`, `port`),
-  and the `$SERVICE_PASSWORD_*`/`$SERVICE_USER_*`/`$SERVICE_URL_*` generator
-  syntax (cross-checked against `wordpress-with-mariadb.yaml`, `paperless.yaml`
-  and `plunk.yaml`).
+`create-phpledger` is published and is the quickest route to a container deployment:
 
-Inferred, not confirmed against upstream process docs:
+```
+npm create phpledger@latest
+```
 
-- Whether Coolify's `templates/compose/service-templates.json` index needs a
-  manual entry alongside a new compose file, or is generated from the directory
-  automatically - issue #101 lists Coolify's review process as "not confirmed"
-  and this manifest does not resolve that.
-- The exact contribution mechanics for adding a per-app icon/screenshot file to
-  CasaOS-AppStore or a logo to CapRover's `one-click-apps` (both clearly expect
-  one, per their existing apps, but neither's CONTRIBUTING docs were read here -
-  only their shipped app files).
+It lives at <https://www.npmjs.com/package/create-phpledger>. **Note it is not on the
+organisation page** at <https://www.npmjs.com/org/phpledger>, because an unscoped package
+is owned by the publishing user account. npm's own documentation states that an
+organisation "can also use organizations to manage unscoped packages" and then gives no
+mechanism for doing so, so check the package's own settings before assuming it can be
+moved. The name must stay unscoped regardless: npm resolves `npm init foo` to `create-foo`,
+so scoping it would change the published command to `npm create @phpledger`.
+
+## Keeping these in step with a release
+
+Bumping the image tag here is [release protocol step
+10](../../docs/RELEASE-PROTOCOL.md). On every release:
+
+- `casaos/docker-compose.yml`, `coolify/phpledger.yaml`, `elestio/compose.yaml`,
+  `pikapods/compose.yaml`: bump the `image:` tag.
+- `caprover/phpledger.yml`: bump `defaultValue` on `$$cap_phpledger_version`.
+- `portainer/phpledger.json`: bump the `PL_VERSION` default in `env`.
+- `cloudron/CloudronVersions.json`: add the new version entry.
+- `umbrel/phpledger/docker-compose.yml`: bump the tag **and** the digest, and
+  `umbrel-app.yml`'s `version`.
+- `yunohost/manifest.toml`: bump `version`, the source `url` and its `sha256`.
+- `softaculous/info.xml` and `installatron/phpledger/`: bump `<version>` and add a
+  version directory.
+
+## These files never ship
+
+`resources/distribution/` is excluded from the release package, the same way
+`docker/release/*` is. They describe how to deploy a release; they are never unzipped
+into one. This is enforced, not merely observed:
+`tests/package-builder-test.py` fails if the prefix appears in
+`tools/package-files.json`.
+
+## What is confirmed and what is not
+
+Confirmed against each platform's own current sources on 21 September 2026: the CasaOS,
+CapRover and Coolify file layouts and schemas; Cloudron's manifest fields and
+`CLOUDRON_MYSQL_*` variable names, cross-checked against a real published
+`CloudronVersions.json`; Portainer's v3 schema; Umbrel's current packaging guidance and
+the `akaunting` app as a finance precedent; YunoHost's `manifest.toml` v2 schema and
+helper syntax, cross-checked against `firefly-iii_ynh` as the closest analogue; PikaPods'
+published application criteria. The 1.2.1 release checksum was verified against the
+published checksum file and by hashing the download independently. The GHCR image digest
+Umbrel pins was resolved live.
+
+Not confirmed, and marked inline where it matters: whether Coolify's
+`service-templates.json` index needs a manual entry; the contribution mechanics for
+committing icons to CasaOS and CapRover; Softaculous's `fileindex.php` syntax, which is
+nowhere shown verbatim; Installatron's embedded-PHP interface; Softaculous's official
+library process, criteria and cost; Elestio's and PikaPods' exact commercial terms;
+whether PikaPods accepts a bundled database service given their one-HTTPS-port rule;
+Umbrel port 8773's uniqueness across their catalogue; and data-directory ownership
+assumptions on Cloudron and Umbrel.
+
+No package here has been installed on its real platform. They validate, and they follow
+formats read from those platforms' own repositories, which is not the same thing.
