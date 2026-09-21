@@ -1407,3 +1407,16 @@ The owner set `NPM_TOKEN` themselves with `gh secret set`, which is the mechanis
 **A gap that follows from the above, filed as [#102](https://github.com/phpledger/phpledger/issues/102):** the project has a rotation procedure for the signing key and a preventive rule in B86, but no procedure for what to do once an operational credential is exposed. The non-obvious parts are worth writing down once rather than during an incident.
 
 **Also for the record:** `create-phpledger` must stay unscoped, because npm resolves `npm init foo` to `create-foo`; the `@phpledger` organisation is for the planned API client. See the entry above.
+## 2026-09-21 — Claude: 1.3 M15 chart-of-accounts heading names (scope)
+
+**From:** Claude (worktree `.claude/worktrees/agent-aa0c52126a96173f0`, branch `m15/chart-headings` from `master` `57b4d49`). **To:** Codex and other sessions.
+
+**Scope.** Reports show `Group 1-100` because the bundled chart contains no heading accounts, so `pl_report_tree_node()` falls back on every group of every book. Building: named class and group heading accounts in the bundled chart package, a follow-up migration that creates them for charts migration 036 already converted, one help concept per heading, the bubbles wired on the report tree and the chart screen, and an external `https://phpledger.com/learn/<slug>` link the `document` field can carry.
+
+**Files I expect to touch.** New: `resources/coa/core-starter-1.2.0.json` (1.1.0's thirteen posting accounts unchanged plus a new `headings` array; 1.1.0 and 1.0.0 are left byte-identical because their digests are recorded in installed books), `www/phpledger/install/migrations/045_chart_headings.php`, nineteen `resources/guidance/concepts/chart-*.php`, `tests/chart_headings_test.php`. Existing: `setup_functions.php` (`pl_starter_template()` path, heading install), `ledger_functions.php` (`pl_create_company()` inserts the headings), `account_code_functions.php` (the code -> concept id helper), `guidance_functions.php` (the external `document` link), `templates/partials/ui/components.php` (`pl_ui_help()` renders it with `rel="noopener"`), `templates/partials/ui/report-tree.php`, `templates/views/accounts.php`, `install_check_functions.php`, `resources/modules/core.json`, `tools/package-files.json`, `tests/run.php`, `tests/account_code_test.php`, docs.
+
+**Migration number: 045.** 042 (`plugin_runtime`) and 043 (`sample_skeletons`) are on `master`; 044 is taken by the unmerged `m14/fixed-assets`. It does not touch `pl_core_audit`, so migration 038's ENUM-union bug is not in scope. It writes only new heading rows and never touches a posting account.
+
+**Out of scope, deliberately:** no posting behaviour, balance, account type or `is_contra` change; no schema change beyond the heading rows; the `phpledger.com/learn/` pages themselves belong to another piece of work.
+
+**Verification plan:** own Compose project `plchartnames` on a subnet checked free with `docker network inspect`, `COMPOSER_PROCESS_TIMEOUT` passed inside the container, output redirected to a file, torn down with `down -v`.
