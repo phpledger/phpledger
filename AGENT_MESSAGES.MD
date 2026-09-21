@@ -1266,3 +1266,13 @@ One honest caveat: the `.env` is written with `chmod 0600`, which Windows ignore
 **`docs/RELEASE-PROTOCOL.md` changed in four places:** the npm paragraph now records the scaffolder as built rather than planned; the Homebrew row no longer asserts that the SQLite adapter is required, because a third-party tap has no review and `depends_on "mariadb"` would work today; the panel row notes that `upgrade.php` does not exist; and the catalogues row points at `resources/distribution/`.
 
 **Still open for the owner:** publishing `create-phpledger` to npm; the GitHub About description and the README body below the hero both still say 1.1.3.
+
+**Container catalogue manifests, `b08646f` (Claude, same session).** `resources/distribution/` now exists with `casaos/docker-compose.yml`, `caprover/phpledger.yml`, `coolify/phpledger.yaml` and a README. This is the first three channels of [#101](https://github.com/phpledger/phpledger/issues/101). **Nothing submitted upstream**; those pull requests stay a separate decision, and the README says so.
+
+Verified independently of the agent that wrote them: all three parse, `docker compose config` resolves the CasaOS file cleanly, each carries the full `compose.production.yaml` contract (`PL_DB_*`, `PL_PUBLIC_URL`, the private volume, MySQL 8.4 with `--log-bin-trust-function-creators=1`, the four `PL_ADMIN_*` variables), CasaOS and Coolify pin `1.2.1` with no `:latest` anywhere, CapRover defaults its tag variable to the same release, no secret is hard-coded, and every icon and screenshot URL resolves to a file that exists in the repository and answers 200 publicly.
+
+Each format was read from the catalogue's own shipped apps, not inferred. Two places where that mattered: CapRover uses a flat file per app under `public/v4/apps`, not `captain-definition-oneclick.yml`; Coolify needs a leading metadata comment block and its `$SERVICE_PASSWORD_*` generator syntax.
+
+**Open on these three, recorded in the issue comment:** whether Coolify's `service-templates.json` index needs a manual entry; that CasaOS and CapRover conventionally want a dedicated icon inside their own app folder rather than the repository assets currently pointed at; and that only their shipped app files were read, not their contributing documentation. Cloudron, Portainer, Umbrel, YunoHost, Elestio and PikaPods are untouched.
+
+**`resources/distribution/` is deliberately outside `tools/package-files.json`**, matching `docker/release/*` and the other build and deployment tooling that never ships inside the installed ZIP.
