@@ -398,8 +398,13 @@ controls with no bank line at all, realising the difference between the two
 frozen rates when they differ. `pl_refund_unapplied_credit()` is the ordinary
 single-item settlement of an advance against the bank, and
 `pl_recognize_unapplied_credit()` posts a credit note that has no original
-invoice against a contra-income account. `pl_post_batch_receipts()` posts one
-voucher per party row (B57) inside one transaction with one batch receipt, so a
+invoice against an income account for a customer or an expense account for a
+supplier — a goodwill credit reduces revenue rather than creating a cost (IFRS
+15.70-72, IAS 1.32) — with the reserved contra group offered as the default, a
+bank or control account refused outright, and an owner-given reasoned override
+recorded on the posting for the genuine exception. The rule is enforced again by
+`pl_open_item_validate_direct_advance_basis()` in the posting funnel.
+`pl_post_batch_receipts()` posts one voucher per party row (B57) inside one transaction with one batch receipt, so a
 row can be reversed without touching another's. B7's reversal rules hold
 throughout: a whole receipt can no longer be reversed once its remainder has
 been applied, an application reverses on its own, and a reversed advance is

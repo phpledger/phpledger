@@ -245,6 +245,17 @@ function pl_refund_unapplied_credit(int $actorId, int $companyId, int $bookId, a
  * application). The supplier mirror credits purchase returns and debits supplier
  * advances.
  *
+ * The offset is constrained by side (1.2 internal accounting review, finding 2): a
+ * customer credit reduces revenue, so it takes an `income` account; a supplier credit
+ * reduces cost, so it takes an `expense` account. Until 1.2 the only refusals were a
+ * bank and an open-item control, which left equity, an owner's loan account and any
+ * ordinary expense account posting a revenue misstatement. A business that genuinely
+ * needs another account says so explicitly: `allow_other_offset_account` with an
+ * `offset_override_reason`, owner only, recorded on the command, hashed into the
+ * journal's source reference and written on the offset line itself. The alternatives
+ * considered, and why they were rejected, are in
+ * docs/accounting/ADVANCES-AND-REFUNDS.md section 5 (B53).
+ *
  * The AR *document* shape for such a credit note belongs to the trading-documents
  * module; what is fixed here is the accounting and the only service that may post it.
  */
@@ -252,8 +263,12 @@ function pl_recognize_unapplied_credit(int $actorId, int $companyId, int $bookId
 {
     $side = $input['side'] ?? null;
     if (!in_array($side, ['customer', 'supplier'], true)) { throw new DomainException('Choose customer or supplier unapplied credit.'); }
+    $override = $input['allow_other_offset_account'] ?? false;
+    if (!is_bool($override)) { throw new DomainException('An offset account outside the expected type must be chosen explicitly.'); }
     $data = ['action' => 'recognize_advance', 'side' => $side, 'party_id' => pl_oi_id($input, 'party_id'),
         'offset_account_id' => pl_oi_id($input, 'offset_account_id'),
+        'offset_override' => $override,
+        'offset_override_reason' => $override ? pl_ledger_text($input['offset_override_reason'] ?? null, 'Reason for this offset account', 300) : '',
         'advance_account_id' => isset($input['advance_account_id']) && $input['advance_account_id'] !== '' ? pl_oi_id($input, 'advance_account_id') : null,
         'currency' => pl_currency_code(pl_ledger_text($input['currency'] ?? null, 'Currency', 3)),
         'amount_fc' => pl_amount(pl_ledger_text($input['amount_fc'] ?? null, 'Credit amount', 30)),
@@ -269,10 +284,14 @@ function pl_recognize_unapplied_credit(int $actorId, int $companyId, int $bookId
             pl_require_module($actorId, $companyId, $bookId, $data['side'] === 'customer' ? 'ar' : 'ap');
             $party = pl_get_party($actorId, $companyId, $bookId, $data['party_id']);
             if (!(bool) ($party[$data['side'] === 'customer' ? 'is_customer' : 'is_vendor'] ?? false)) { throw new DomainException('The party must have the corresponding customer or vendor role.'); }
-            $offset = DB::queryFirstRow('SELECT * FROM pl_accounts WHERE id=%i AND company_id=%i AND book_id=%i AND is_active=1 FOR SHARE', $data['offset_account_id'], $companyId, $bookId);
-            if (!$offset || in_array($offset['role'], pl_open_item_control_roles(), true) || $offset['role'] === 'cash_bank') {
-                throw new DomainException('Choose an active offset account that is not a bank or a control account. A credit note without an original invoice belongs against sales returns or purchase returns.');
+            $offset = DB::queryFirstRow('SELECT * FROM pl_accounts WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', $data['offset_account_id'], $companyId, $bookId);
+            // Taking the credit outside its expected type is a reviewed exception, so it is the
+            // owner's call and it carries a reason — the same shape as every other deliberate
+            // exception in this application. The funnel checks the account again either way.
+            if ($data['offset_override'] && pl_require_company_access($actorId, $companyId, true)['role'] !== 'owner') {
+                throw new DomainException('Only the business owner can take a credit note to an account outside its expected type.');
             }
+            $offset = pl_advance_assert_offset_account($data['side'], $offset, $data['offset_override']);
             $control = pl_advance_control($actorId, $companyId, $bookId, $data['side'], $data['advance_account_id']);
             $book = pl_ledger_book($companyId, $bookId, true);
             $snapshot = pl_oi_rate($actorId, $companyId, $bookId, $data['currency'], $data['date'], $data['rate'], $data['rate_source_id'], 'spot');
@@ -284,10 +303,14 @@ function pl_recognize_unapplied_credit(int $actorId, int $companyId, int $bookId
                 'source_type' => 'open_item_advance', 'source_reference' => 'open-item-advance:' . hash('sha256', json_encode($data, JSON_THROW_ON_ERROR)),
                 'idempotency_key' => $journalKey, 'description' => $data['description'], 'lines' => [
                     pl_oi_line($control, $data['amount_fc'], $base, $debit, $snapshot, $data['description']),
-                    pl_oi_line((int) $offset['id'], $data['amount_fc'], $base, !$debit, $snapshot, $data['source_reference']),
-                ]], null, null, [0 => ['item_id' => $itemId, 'kind' => 'recognition']]);
+                    pl_oi_line((int) $offset['id'], $data['amount_fc'], $base, !$debit, $snapshot,
+                        $data['offset_override'] ? $data['source_reference'] . ' — reviewed offset override: ' . $data['offset_override_reason'] : $data['source_reference']),
+                ]], null, null, [0 => ['item_id' => $itemId, 'kind' => 'recognition',
+                    'offset_override' => $data['offset_override'], 'offset_override_reason' => $data['offset_override_reason']]]);
             return ['item_id' => $itemId, 'journal_id' => (int) $journal['id'], 'control_account_id' => $control,
-                'amount_fc' => $data['amount_fc'], 'amount_base' => $base, 'currency' => $data['currency'], 'side' => $data['side']];
+                'amount_fc' => $data['amount_fc'], 'amount_base' => $base, 'currency' => $data['currency'], 'side' => $data['side'],
+                'offset_account_id' => (int) $offset['id'], 'offset_override' => $data['offset_override'],
+                'offset_override_reason' => $data['offset_override_reason']];
         }));
 }
 
