@@ -61,6 +61,7 @@ $suites[] = 'document_series_test.php';
 // Translation groundwork and the pseudo-locale route sweep run last: the sweep starts its own
 // HTTP server and the helper tests restore English before any other suite could observe a locale.
 $suites[] = 'i18n_test.php';
+$suites[] = 'render_allowlist_test.php';
 $suites[] = 'account_code_test.php';
 $suites[] = 'report_tree_test.php';
 $suites[] = 'owner_test.php';
