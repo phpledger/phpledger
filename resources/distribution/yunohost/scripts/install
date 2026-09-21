@@ -1,0 +1,85 @@
+#!/bin/bash
+
+source /usr/share/yunohost/helpers
+
+#=================================================
+# RETRIEVE ARGUMENTS AND GENERATE THE ADMIN PASSWORD
+#=================================================
+
+admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
+admin_name=$(ynh_user_get_info --username=$admin --key=fullname)
+
+# The application's own administrator, not a YunoHost/LDAP account: PHP Ledger
+# has its own sign-in page (ldap=false, sso=false in the manifest). Generate a
+# password with the helper rather than a literal; it is never printed to logs.
+password=$(ynh_string_random --length=24)
+ynh_app_setting_set --key=password --value="$password"
+
+public_url="https://${domain}${path}"
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression "Setting up source files..."
+
+# The published release ZIP wraps everything in one top-level "phpledger/"
+# directory, so the default in_subdir=true (strip it) is correct here.
+ynh_setup_source --dest_dir="$install_dir"
+
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression "Adding system configurations related to $app..."
+
+ynh_config_add_phpfpm
+
+ynh_config_add_nginx
+
+#=================================================
+# APPLICATION CONFIGURATION
+#=================================================
+ynh_script_progression "Adding $app's configuration..."
+
+# Private config file: overrides the PL_DB_* environment variables the
+# container entrypoint would otherwise use. ynh_config_add's default chmod
+# (640, owner/group $app) already keeps this off-limits to other system users.
+ynh_config_add --template="config.local.php" --destination="$install_dir/www/phpledger/includes/config.local.php"
+
+# Private writable directory the bootstrap refuses every request without.
+# Must exist, mode 0700, before the first request or CLI install step.
+mkdir -p "$install_dir/www/phpledger/storage/installation"
+chmod 700 "$install_dir/www/phpledger/storage/installation"
+chown "$app:$app" "$install_dir/www/phpledger/storage/installation"
+
+#=================================================
+# RUN THE APPLICATION'S OWN COMMAND-LINE INSTALL SEQUENCE
+#=================================================
+ynh_script_progression "Running $app's database migrations..."
+
+ynh_exec_as_app php$php_version "$install_dir/www/phpledger/install/migrate.php"
+
+ynh_script_progression "Creating the administrator account..."
+
+# The password travels over stdin (--password-stdin), never as a command
+# argument. PL_ADMIN_PASSWORD is deliberately not used here: ynh_exec_as_app
+# runs the command through `sudo -u "$app" env ...`, and sudo's own
+# environment sanitization does not reliably forward an ad hoc exported
+# variable through to the sudo'd process, whereas a piped stdin survives
+# sudo/env transparently.
+printf '%s' "$password" | ynh_exec_as_app php$php_version "$install_dir/www/phpledger/install/create-admin.php" \
+    --email="$admin_mail" \
+    --name="$admin_name" \
+    --username="$admin" \
+    --password-stdin
+
+ynh_script_progression "Completing installation..."
+
+ynh_exec_as_app php$php_version "$install_dir/www/phpledger/install/complete.php"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Installation of $app completed"
+
+ynh_print_info "The PHP Ledger administrator account uses the email $admin_mail. A random password was generated; retrieve it with: yunohost app setting $app password"

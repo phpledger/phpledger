@@ -1,0 +1,42 @@
+#!/bin/bash
+
+source /usr/share/yunohost/helpers
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression "Upgrading source files..."
+
+# Keep the private config file and the private writable directory: they are
+# not shipped in the release ZIP and must survive a file replacement.
+ynh_setup_source --dest_dir="$install_dir" --full_replace \
+    --keep="www/phpledger/includes/config.local.php www/phpledger/storage"
+
+# In case an installation predating this fix is missing the directory.
+mkdir -p "$install_dir/www/phpledger/storage/installation"
+chmod 700 "$install_dir/www/phpledger/storage/installation"
+chown "$app:$app" "$install_dir/www/phpledger/storage/installation"
+
+#=================================================
+# REAPPLY SYSTEM CONFIGURATIONS
+#=================================================
+ynh_script_progression "Upgrading system configurations related to $app..."
+
+ynh_config_add_phpfpm
+
+ynh_config_add_nginx
+
+#=================================================
+# UPGRADE PHPLEDGER
+#=================================================
+ynh_script_progression "Running $app's database migrations..."
+
+# Per the application's own upgrade contract: replace files, then run
+# install/migrate.php again. No admin account or completion step is repeated.
+ynh_exec_as_app php$php_version "$install_dir/www/phpledger/install/migrate.php"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Upgrade of $app completed"

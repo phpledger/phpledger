@@ -1,0 +1,47 @@
+#!/bin/bash
+
+source /usr/share/yunohost/helpers
+
+#=================================================
+# RESTORE THE APP MAIN DIR
+#=================================================
+ynh_script_progression "Restoring the app main directory..."
+
+ynh_restore "$install_dir"
+
+# The private writable directory ships empty and is not archived by name, but
+# ynh_restore of $install_dir already recreates it with its contents; make
+# sure mode 0700 holds regardless of what the archive stored it as.
+chmod 700 "$install_dir/www/phpledger/storage/installation"
+chown "$app:$app" "$install_dir/www/phpledger/storage/installation"
+
+#=================================================
+# RESTORE THE MYSQL DATABASE
+#=================================================
+ynh_script_progression "Restoring the MySQL database..."
+
+ynh_mysql_db_shell < ./db.sql
+
+#=================================================
+# RESTORE THE PHP-FPM AND NGINX CONFIGURATIONS
+#=================================================
+ynh_script_progression "Restoring system configurations related to $app..."
+
+ynh_restore "/etc/php/$php_version/fpm/pool.d/$app.conf"
+
+ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
+
+#=================================================
+# RELOAD NGINX AND PHP-FPM
+#=================================================
+ynh_script_progression "Reloading NGINX web server and PHP-FPM..."
+
+ynh_systemctl --service="php$php_version-fpm" --action=reload
+
+ynh_systemctl --service=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Restoration completed for $app"
