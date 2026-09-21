@@ -1361,9 +1361,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28939,
-        "eager": 340369,
-        "total": 429074
+        "html": 28982,
+        "eager": 340412,
+        "total": 429117
       },
       "budgets": {
         "eager": null,
@@ -1396,7 +1396,7 @@
         },
         {
           "file": "for/software-houses/index.html",
-          "bytes": 28939
+          "bytes": 28982
         }
       ],
       "lazyAssets": [
