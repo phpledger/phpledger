@@ -536,7 +536,13 @@ function pl_save_role(int $actorId, int $companyId, array $input, ?int $roleId =
             $roleId = (int) DB::insertId();
             $before = null;
         }
-        DB::query('DELETE FROM pl_role_capabilities WHERE role_id = %i', $roleId);
+        // A role created a moment ago has no capability rows to clear, and the public demo's
+        // database account is deliberately SELECT/INSERT/UPDATE only. Clearing unconditionally
+        // made creating a custom role impossible there, with nothing wrong but the statement.
+        // Editing a role still clears, because that is how a capability is taken away.
+        if ($before !== null) {
+            DB::query('DELETE FROM pl_role_capabilities WHERE role_id = %i', $roleId);
+        }
         foreach ($wanted as $capabilityId) {
             DB::insert('pl_role_capabilities', ['role_id' => $roleId, 'capability_id' => $capabilityId, 'granted_by' => $actorId]);
         }

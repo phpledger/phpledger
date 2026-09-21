@@ -2,7 +2,7 @@
 
 Version 1.0.0 provides eleven country-neutral teaching companies: professional services, seasonal services, retail, wholesale/trader, distribution, restaurant/cafe, membership club, non-medicinal training inventory, jewelry studio, light manufacturing and service workshop. All people, entities, amounts and events are sample; selecting a currency does not activate tax or foreign-exchange accounting.
 
-Each pack contains 74 source records, three editable drafts, 2024–2025 history and an open 2026 practice period. There are 36 month-end checkpoints per company. The default demo limit is 250 source and operation records per sample company, including the pack's own history (85 to 105 records), so every pack leaves room for at least 100 new records; provisioning refuses limits below the history plus 20 practice records.
+Each pack contains 82 source records, three editable drafts, 2024–2025 history and an open 2026 practice period; the partnership sample carries two more, because capital and drawings are recorded per partner. There are 36 month-end checkpoints per company. The default demo limit is 250 source and operation records per sample company, including the pack's own history (85 to 115 records), so every pack leaves room for at least 100 new records; provisioning refuses limits below the history plus 20 practice records.
 
 `catalog.json` pins each file and SHA-256 digest. `python tools/build-demo-packs.py --check` verifies authored fixtures without changing them. Every sample is provisioned through existing account, document, journal, posting, reversal and period services; exact monthly trial balance, P&L and Balance Sheet checkpoints must reconcile before the company is assigned to a visitor. Chart and sample-import evidence is stored in append-only installation history, while the original chart snapshot remains unchanged. Existing books cannot be replaced. Catalogue status is either `released_demo_only` for the retained original histories or `preview_only` for newer authored vertical scenarios; neither status makes a pack eligible for real-company setup.
 
@@ -12,8 +12,34 @@ The operational contract is required to show a document trail, partial settlemen
 
 Each successor also embeds one profile from `resources/coa/industry-profiles-0.5.0.json`. The profile adds research-backed account vocabulary, illustrative codes, role labels, control distinctions and source links for that business. The profile improves the isolated sample chart display and does not install a national chart, enable tax, or imply a complete vertical module.
 
+## What the samples show of 1.2.0
+
+The pinned history is not only receipts and journals any more.
+
+- **The company profile is filled in** in every sample, so a printed invoice, receipt or statement carries a seller block instead of a bare company name. Every address, telephone number, mailbox and tax registration in it is invented: the country marker is `ZZ`, the numbers are in the reserved `555-01xx` range, `example.invalid` can never resolve, and the registration says on its face that it is not a real one.
+- **Numbering** is set per document type before a single document posts, so every document the sample issues carries a real series number.
+- **Contra accounts** are used, not merely present: a sales return and a purchase return post to the reserved contra groups and the statements show both as deductions, beside the accumulated depreciation and drawings that were already there.
+- **Owner transactions** are in every sample: capital introduced, an owner loan, its part repayment and drawings. Cedar Studio is the partnership, with two partners, a recorded 60/40 share, and a capital and a drawings account each; no account serves two partners or two roles.
+- **Trading documents** appear in four samples, between them covering both discount policies and both price modes: Corner Stationery (net, exclusive), Harbour Trade (net, inclusive), Harbor Supply (gross, exclusive) and Meadow Training Pharmacy (gross, inclusive). Each posts one invoice carrying a pack line entered as cases and loose units, a per-line discount, a free-goods line the customer is not billed for, the sales-staff and area dimensions, cash taken at the counter against a policy cap, and the warehouse the goods left from. The 17 per cent rate these use is a manually configured example, not a country tax rule.
+- **Stock documents** are Harbor Supply's driver day: goods received, a morning load onto a van, a sale out of the van, a sellable customer return back into it, a midday re-issue against the load, a gate pass that moves nothing and posts nothing, the unsold stock returned, a count adjustment in the warehouse, and a settlement reviewed by the owner and approved by someone else.
+- **Advances and refunds** are Harbour Trade's: money on account with the remainder held as unapplied credit in its own control account, that credit applied later with no bank line, a cash refund of what was left, a credit note with no original invoice, an advance paid to a supplier, and a batch posting one voucher per customer.
+- **Users and roles** are Harbor Supply's: a second person holding a custom role whose only authority beyond recording is approving a reconciled van day. It is a sample account with a random password that is never shown and a mailbox that can never receive mail.
+
+The showcase runs after the pinned contract has reconciled, so nothing it posts can be mistaken for part of that contract, and it refuses to finish unless the trial balance and balance sheet still balance.
+
+## Groundwork for 1.3, which is data and not a screen
+
+Every pack carries an `anticipated_1_3` block. Each part of it names the issue it anticipates, carries `"status": "future_feature_data_not_implemented"`, and says in its own words that no screen, register or scheduler produces it in 1.2.0. The history behind each one is ordinary journals, reconciled by the same monthly checkpoints as everything else.
+
+- **#93** names the accrual a reversing journal would reverse and the cash accounts a count would count.
+- **#94** an annual insurance premium released monthly, a staff bonus accrued at one year end and settled in the next, and an annual support plan collected in advance and released over its twelve months.
+- **#95** two assets on one cost account: one still in service, and one disposed mid-life with its cost and accumulated depreciation removed, proceeds banked, a loss recognised and the monthly charge reduced afterwards.
+- **#96** the term loan's full instalment schedule with principal and interest split; two instalments are posted and three are schedule data only.
+- **#97** a 2025 that can be closed, with the closing journal it would have to post, and the partner appropriation for the partnership.
+- **#98** one payroll month as totals per element, with a payable account per deduction, employer contributions, a staff advance recovered from net pay, and both settlements in the following month. The core keeps totals only and never an employee.
+
 The 2024 annual period and twelve 2025 monthly periods are closed after reconciliation. The 2026 annual period stays open; January has posted sample activity and February has three editable drafts. The private `/sample-guide` connects daily bank movements, December adjustments, cross-year settlement and separate quarterly/yearly comparisons to scoped sources.
 
-Manual staff, asset, depreciation, prepayment, loan, unpaid-document and stock schedules explain the general-ledger entries. They do not implement payroll, inventory or AR/AP subledgers. POS practice does not deduct stock or calculate cost of sales. Industry names do not imply pharmacy compliance, production planning, recipes, commodity accounting, membership administration or workshop job-card operations. Sample closure prevents backdated posting; it does not certify statutory statements or transfer profit automatically to retained earnings.
+Manual asset, depreciation, prepayment, deferral, loan, payroll, unpaid-document and stock schedules explain the general-ledger entries. They do not implement payroll, inventory or AR/AP subledgers. POS practice does not deduct stock or calculate cost of sales. Industry names do not imply pharmacy compliance, production planning, recipes, commodity accounting, membership administration or workshop job-card operations. Sample closure prevents backdated posting; it does not certify statutory statements or transfer profit automatically to retained earnings.
 
 Public visitors receive isolated sample companies. Their sessions and machine grants expire at the next hourly reset; reused numeric IDs never restore old access. Run migration `012_demo_history_periods` with web and scheduler stopped because its trigger DDL is not transactional. Existing assigned visitors remain prohibited from administering periods.

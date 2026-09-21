@@ -79,10 +79,19 @@ test('a custom role is per company, editable, and invisible to another company',
     ], $role['id'], 0), DomainException::class, 'changed');
     $updated = pl_save_role($one['actor_id'], $one['company_id'], [
         'name' => 'Counter staff', 'description' => 'Records sales and reads cost.',
-        'reason' => 'Sample capability change', 'capabilities' => ['company.read', 'company.write', 'cost.view'],
+        'reason' => 'Sample capability change', 'capabilities' => ['company.read', 'cost.view'],
     ], $role['id'], 1);
     assert_same(2, $updated['revision']);
     assert_true(in_array('cost.view', $updated['capabilities'], true));
+    // An edit takes a capability away as well as adding one: the rows are replaced, not
+    // added to, and the person holding the role loses what the edit dropped.
+    assert_true(!in_array('company.write', $updated['capabilities'], true), 'An edited role kept a capability the edit removed.');
+    assert_same(2, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_role_capabilities WHERE role_id = %i', $role['id']));
+    $restored = pl_save_role($one['actor_id'], $one['company_id'], [
+        'name' => 'Counter staff', 'description' => 'Records sales and reads cost.',
+        'reason' => 'Sample capability restore', 'capabilities' => ['company.read', 'company.write', 'cost.view'],
+    ], $role['id'], 2);
+    assert_true(in_array('company.write', $restored['capabilities'], true));
     assert_true((int) DB::queryFirstField('SELECT COUNT(*) FROM pl_user_audit WHERE entity_type = %s AND entity_id = %i', 'role', $role['id']) >= 2);
     // Every role reads the company it belongs to; dropping that is refused rather than silently added.
     assert_throws(fn () => pl_save_role($one['actor_id'], $one['company_id'], [

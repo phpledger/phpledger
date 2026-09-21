@@ -31,9 +31,14 @@ function pl_demo_pack(string $id): array
     $raw = str_replace("\r\n", "\n", $raw);
     if (!hash_equals($entry['sha256'], hash('sha256', $raw))) { throw new RuntimeException('The selected sample changed; restore its pinned fixture.'); }
     $pack = json_decode($raw, true, 64, JSON_THROW_ON_ERROR);
+    // The source count is cross-checked against the catalog rather than pinned to one
+    // number here: a partnership splits capital and drawings per partner, so the packs no
+    // longer all carry the same number of sources. The floor keeps a truncated pack out.
+    $sources = count($pack['events']) + count($pack['drafts']);
     if ($pack['id'] !== $id || $pack['version'] !== $entry['version'] || $pack['demo_only'] !== true || !in_array($pack['status'], ['released_demo_only', 'preview_only'], true)
-        || $pack['start_date'] !== '2024-01-01' || count($pack['events']) + count($pack['drafts']) !== 77
-        || count($pack['checkpoints']) !== 36) { throw new RuntimeException('The selected sample has an invalid contract.'); }
+        || $pack['start_date'] !== '2024-01-01' || $sources < 85 || $sources !== (int) $entry['source_count'] || $sources !== (int) $pack['source_count']
+        || count($pack['checkpoints']) !== 36 || !is_array($pack['company_profile'] ?? null) || !is_array($pack['partners'] ?? null)
+        || !is_array($pack['anticipated_1_3'] ?? null)) { throw new RuntimeException('The selected sample has an invalid contract.'); }
     $pack['digest'] = $entry['sha256'];
     return $pack;
 }
@@ -584,7 +589,397 @@ function pl_demo_operational_replay(int $actorId, int $companyId, int $bookId, a
         $receipts[] = $receipt;
     }
     $reconciledCount = pl_demo_operational_reconcile($companyId, $bookId, $events, $master, $receipts);
-    return ['status' => $staged === [] ? 'runtime_replayed' : 'runtime_replayed_with_staged_vertical_evidence', 'contract_digest' => hash('sha256', json_encode($events, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)), 'event_count' => count($events), 'replayed_count' => count(array_filter($receipts, static fn(array $row): bool => $row['status'] === 'replayed')), 'reconciled_count' => $reconciledCount, 'staged_count' => count($staged), 'opening_evidence' => 'retained_only_not_posted', 'receipts' => $receipts, 'staged' => $staged, 'account_ids' => $master['accounts'], 'party_ids' => $master['parties'], 'product_ids' => $master['products']];
+    // The contract above is what this business did; the showcase below is what 1.2.0 can
+    // do with it. It runs after the reconcile so a showcase posting can never be mistaken
+    // for part of the pinned contract, and it uses the same master data.
+    $showcase = pl_demo_showcase_1_2($actorId, $companyId, $bookId, $pack, $master, $prefix);
+    return ['status' => $staged === [] ? 'runtime_replayed' : 'runtime_replayed_with_staged_vertical_evidence', 'contract_digest' => hash('sha256', json_encode($events, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)), 'event_count' => count($events), 'replayed_count' => count(array_filter($receipts, static fn(array $row): bool => $row['status'] === 'replayed')), 'reconciled_count' => $reconciledCount, 'staged_count' => count($staged), 'opening_evidence' => 'retained_only_not_posted', 'receipts' => $receipts, 'staged' => $staged, 'account_ids' => $master['accounts'], 'party_ids' => $master['parties'], 'product_ids' => $master['products'], 'showcase_1_2' => $showcase];
+}
+
+/* ------------------------------------------------- the 1.2.0 sample showcase */
+
+/**
+ * What each sample demonstrates from 1.2.0, beyond its own pinned history.
+ *
+ * No pack shows everything: one that did would be a feature list rather than a business.
+ * The four trading packs between them cover both discount policies and both price modes,
+ * the distributor keeps the van day and the second person, and the trader keeps advances
+ * and refunds. Every one of these posts through the same service a screen calls.
+ */
+function pl_demo_showcase_plan(string $packId): array
+{
+    $trading = [
+        'retail-shop' => ['discount_posting' => 'net', 'price_mode' => 'exclusive', 'free_goods_output_tax' => 'none'],
+        'trader' => ['discount_posting' => 'net', 'price_mode' => 'inclusive', 'free_goods_output_tax' => 'none'],
+        'distributor' => ['discount_posting' => 'gross', 'price_mode' => 'exclusive', 'free_goods_output_tax' => 'open_market_value'],
+        'pharmacy' => ['discount_posting' => 'gross', 'price_mode' => 'inclusive', 'free_goods_output_tax' => 'open_market_value'],
+    ];
+    return [
+        'trading' => $trading[$packId] ?? null,
+        'van_day' => $packId === 'distributor',
+        'people' => $packId === 'distributor',
+        'advances' => $packId === 'trader',
+    ];
+}
+
+/**
+ * Give every sample its own numbering, before a single document posts.
+ *
+ * A book provisions the recommended default series on first use, so documents would carry
+ * a series number anyway. Setting them here makes the series a deliberate, visible choice
+ * with its own width and reset rule, which is what Admin > Numbering actually does.
+ *
+ * @return array<string,string> document type => the number its next document will take
+ */
+function pl_demo_showcase_numbering(int $actorId, int $companyId, int $bookId): array
+{
+    $numbers = [];
+    foreach (pl_document_series_types() as $type => $definition) {
+        $current = pl_document_series_view(pl_document_series_row($actorId, $companyId, $bookId, $type));
+        $series = pl_save_document_series($actorId, $companyId, $bookId, $type, [
+            'prefix' => $definition['prefix'], 'padding' => 5, 'year_segment' => true, 'reset_rule' => 'yearly',
+            'next_number' => max(1, (int) $current['next_number']), 'revision' => (int) $current['revision'],
+            'reason' => 'Sample numbering: one series per document type, five digits, reset every year.',
+        ]);
+        $numbers[$type] = (string) $series['example'];
+    }
+    return $numbers;
+}
+
+/** A showcase-only account, outside the operational role block, created once per sample. */
+function pl_demo_showcase_account(int $actorId, int $companyId, int $bookId, string $prefix, string $code, string $name, string $type): int
+{
+    return (int) pl_save_account($actorId, $companyId, $bookId, ['code' => $code, 'name' => $name, 'type' => $type,
+        'role' => null, 'is_active' => true, 'reason' => 'Sample account for the 1.2.0 showcase.',
+        'creation_key' => $prefix . 'showcase-account:' . $code])['id'];
+}
+
+function pl_demo_showcase_module(int $actorId, int $companyId, string $module, string $prefix): void
+{
+    $state = pl_module_state($companyId, $module);
+    if ($state['enabled']) { return; }
+    pl_set_company_module($actorId, $companyId, $module, true, (int) $state['revision'], pl_module_registry()[$module]['digest'],
+        'The sample includes this module so its 1.2.0 documents are the ones the application posts.', $prefix . 'showcase-module:' . $module);
+}
+
+/** The first stock product this sample's contract names, or null when it sells nothing. */
+function pl_demo_showcase_stock_product(array $pack, array $master): ?int
+{
+    foreach (($pack['source_material']['research_evidence']['products'] ?? []) as $product) {
+        if (is_array($product) && ($product['kind'] ?? '') === 'stock' && isset($master['products'][$product['id']])) {
+            return (int) $master['products'][$product['id']];
+        }
+    }
+    return null;
+}
+
+/**
+ * One trading invoice carrying the whole of the trading-documents module: a pack line
+ * entered as cases and loose units, a per-line discount, a free-goods line the customer is
+ * not billed for, the sales-staff and area dimensions, cash taken at the counter, and the
+ * warehouse the goods left from.
+ */
+function pl_demo_showcase_trading(int $actorId, int $companyId, int $bookId, array $pack, array $master, array $policy, string $prefix): array
+{
+    $productId = pl_demo_showcase_stock_product($pack, $master);
+    if ($productId === null) { return ['status' => 'skipped', 'reason' => 'The sample has no stock product to sell in packs.']; }
+    // Only optional modules are turned on here: `ar` is a required module and every book
+    // already has it, which is why the contract replay can post an invoice at all.
+    foreach (['inventory', 'inventory-locations', 'trading-documents'] as $module) {
+        pl_demo_showcase_module($actorId, $companyId, $module, $prefix);
+    }
+    $outputTax = pl_demo_showcase_account($actorId, $companyId, $bookId, $prefix, '2500', 'Sample output tax', 'liability');
+    $inputTax = pl_demo_showcase_account($actorId, $companyId, $bookId, $prefix, '1550', 'Sample input tax', 'asset');
+    $freeGoods = pl_demo_showcase_account($actorId, $companyId, $bookId, $prefix, '5850', 'Free goods and promotions (sample)', 'expense');
+    $tax = pl_create_tax_code($actorId, $companyId, $bookId, ['code' => 'DEMO17', 'name' => 'Sample example 17 percent',
+        'treatment' => 'standard', 'sales_account_id' => $outputTax, 'purchase_account_id' => $inputTax,
+        'reason' => 'Sample example rate. It is a manually configured demonstration rate, not a country tax rule.',
+        'idempotency_key' => $prefix . 'showcase-tax-code']);
+    pl_enter_tax_rate($actorId, $companyId, $bookId, ['tax_code_id' => (int) $tax['id'], 'effective_from' => '2026-01-01',
+        'percentage' => '17', 'reason' => 'Sample example rate. It is a manually configured demonstration rate, not a country tax rule.',
+        'idempotency_key' => $prefix . 'showcase-tax-rate']);
+    $settings = pl_tax_settings($actorId, $companyId, $bookId);
+    if ($settings['price_mode'] !== $policy['price_mode']) {
+        pl_set_tax_price_mode($actorId, $companyId, $bookId, $policy['price_mode'], (int) $settings['revision'],
+            'Sample price entry mode, so the discount and free-goods examples are read the way this book prices.',
+            $prefix . 'showcase-price-mode');
+    }
+    $discountAccount = $policy['discount_posting'] === 'gross'
+        ? (int) DB::queryFirstField('SELECT id FROM pl_accounts WHERE company_id=%i AND book_id=%i AND semantic_key=%s',
+            $companyId, $bookId, 'core.income.sales_returns')
+        : null;
+    $policies = pl_trading_policies($actorId, $companyId, $bookId);
+    pl_save_trading_policies($actorId, $companyId, $bookId, [
+        'discount_posting' => $policy['discount_posting'], 'discount_account_id' => $discountAccount,
+        'free_goods_account_id' => $freeGoods, 'free_goods_output_tax' => $policy['free_goods_output_tax'],
+        'cash_on_invoice_cap' => '500.0000', 'revision' => (int) $policies['revision'],
+        'reason' => 'Sample accounting policy for this sample\'s trading-document examples.',
+        'idempotency_key' => $prefix . 'showcase-trading-policy']);
+    $staff = pl_save_sales_staff($actorId, $companyId, $bookId, ['code' => 'SS01', 'name' => 'Sample sales representative',
+        'is_active' => true, 'reason' => 'Sample sales-staff dimension.']);
+    $area = pl_save_area($actorId, $companyId, $bookId, ['code' => 'NORTH', 'name' => 'Sample northern area',
+        'is_active' => true, 'reason' => 'Sample area dimension.']);
+    $productPack = pl_save_product_pack($actorId, $companyId, $bookId, ['product_id' => $productId, 'code' => 'CASE12',
+        'name' => 'Case of 12 (sample)', 'units_per_pack' => '12', 'is_active' => true, 'reason' => 'Sample product pack.']);
+    $warehouse = pl_inventory_default_warehouse($actorId, $companyId, $bookId);
+    $incomeAccount = (int) ($master['accounts']['sales_revenue'] ?? $master['accounts'][$master['first_income']]);
+    // Stock the sale from a receipt of its own, so the showcase never depends on whatever
+    // the contract replay happened to leave behind.
+    pl_inventory_receive($actorId, $companyId, $bookId, ['product_id' => $productId, 'quantity' => '60', 'amount_base' => '600.0000',
+        'date' => '2026-10-01', 'source_type' => 'sample_showcase_receipt', 'source_reference' => $prefix . 'showcase-receipt',
+        'offset_account_id' => (int) ($master['accounts']['grni'] ?? $master['accounts']['accounts_payable']),
+        'warehouse_id' => (int) $warehouse['id'], 'reason' => 'Sample goods received for the trading-document example.',
+        'idempotency_key' => $prefix . 'showcase-goods-received']);
+    $document = pl_save_ar_document($actorId, $companyId, $bookId, [
+        'kind' => 'invoice', 'date' => '2026-10-05', 'due_date' => '2026-11-04',
+        'currency' => pl_company_context($actorId, $companyId)['currency'],
+        'party_id' => pl_demo_operational_event_party([], $master),
+        'reference' => 'SAMPLE-TRADING-1', 'price_mode' => $policy['price_mode'],
+        'notes' => 'Sample trading invoice: cases and loose units, a line discount, a free-goods line, staff and area, cash at the counter.',
+        'sales_staff_id' => (int) $staff['id'], 'area_id' => (int) $area['id'], 'warehouse_id' => (int) $warehouse['id'],
+        'cash_received' => '100.0000', 'cash_account_id' => (int) ($master['accounts']['cash_on_hand'] ?? $master['accounts']['bank_current']),
+        'creation_key' => $prefix . 'showcase-trading-invoice',
+        'lines' => [
+            ['product_id' => $productId, 'account_id' => $incomeAccount, 'pack_id' => (int) $productPack['id'],
+             'pack_quantity' => '2', 'unit_quantity' => '3',
+             'unit_price' => '25.0000', 'discount_percent' => '10', 'tax_code_id' => (int) $tax['id'],
+             'description' => 'Two cases of twelve and three loose units, less a ten per cent line discount'],
+            ['product_id' => $productId, 'account_id' => $incomeAccount, 'quantity' => '2', 'unit_price' => '25.0000',
+             'is_free_goods' => true, 'tax_code_id' => (int) $tax['id'],
+             'description' => 'Two free with the order; the customer is not billed for them'],
+        ]]);
+    $posted = pl_post_ar_document($actorId, $companyId, $bookId, (int) $document['id'], (int) $document['revision']);
+    $read = pl_get_ar_document($actorId, $companyId, $bookId, (int) $posted['id']);
+    return ['status' => 'posted', 'document_id' => (int) $read['id'], 'document_number' => $read['document_number'],
+        'discount_posting' => $policy['discount_posting'], 'price_mode' => $policy['price_mode'],
+        'free_goods_output_tax' => $policy['free_goods_output_tax'],
+        'total_fc' => $read['total_fc'] ?? null, 'discount_total' => $read['discount_total'] ?? null,
+        'free_tax_total' => $read['free_tax_total'] ?? null, 'cash_received' => $read['cash_received'] ?? null,
+        'cash_settlement_journal_id' => $read['cash_settlement_journal_id'],
+        'sales_staff_id' => $read['sales_staff_id'], 'area_id' => $read['area_id'], 'warehouse_id' => $read['warehouse_id'],
+        'pack_id' => (int) $productPack['id'], 'units_per_pack' => '12.0000',
+        'billed_quantity' => (string) $read['lines'][0]['quantity'],
+        'free_line_is_free' => (bool) $read['lines'][1]['is_free_goods'],
+        'open_item_id' => $read['open_item_id']];
+}
+
+/**
+ * The distributor's driver day, end to end: load the van, sell from it, take a sellable
+ * customer return back into it, top it up at midday, raise a gate pass that moves nothing
+ * and posts nothing, bring the rest back, adjust what the warehouse count disagrees with,
+ * and settle the day under review.
+ */
+function pl_demo_showcase_van_day(int $actorId, int $companyId, int $bookId, array $pack, array $master, string $prefix, ?int $approverId): array
+{
+    $productId = pl_demo_showcase_stock_product($pack, $master);
+    if ($productId === null) { return ['status' => 'skipped', 'reason' => 'The sample has no stock to load onto a van.']; }
+    foreach (['inventory', 'inventory-locations'] as $module) { pl_demo_showcase_module($actorId, $companyId, $module, $prefix); }
+    $day = '2026-10-12';
+    $warehouse = pl_inventory_default_warehouse($actorId, $companyId, $bookId);
+    $van = pl_save_inventory_warehouse($actorId, $companyId, $bookId, ['code' => 'VAN01', 'name' => 'Sample route van',
+        'kind' => 'mobile', 'driver_name' => 'Sample driver', 'vehicle_reference' => 'SAMPLE-0001',
+        'route_name' => 'Sample northern route', 'is_active' => true, 'reason' => 'Sample van as a mobile stock location.',
+        'idempotency_key' => $prefix . 'showcase-van']);
+    pl_inventory_receive($actorId, $companyId, $bookId, ['product_id' => $productId, 'quantity' => '100', 'amount_base' => '1000.0000',
+        'date' => '2026-10-11', 'source_type' => 'sample_showcase_receipt', 'source_reference' => $prefix . 'showcase-van-receipt',
+        'offset_account_id' => (int) ($master['accounts']['grni'] ?? $master['accounts']['accounts_payable']),
+        'warehouse_id' => (int) $warehouse['id'], 'reason' => 'Sample goods received the day before the van day.',
+        'idempotency_key' => $prefix . 'showcase-van-goods-received']);
+    $load = pl_post_stock_document($actorId, $companyId, $bookId, ['kind' => 'stock_issue', 'date' => $day,
+        'from_warehouse_id' => (int) $warehouse['id'], 'to_warehouse_id' => (int) $van['id'],
+        'reference' => 'Morning load', 'reason' => 'Sample morning load onto the van.',
+        'lines' => [['product_id' => $productId, 'quantity' => '40']], 'idempotency_key' => $prefix . 'showcase-van-load']);
+    $gatePass = pl_issue_gate_pass($actorId, $companyId, $bookId, ['date' => $day, 'warehouse_id' => (int) $warehouse['id'],
+        'direction' => 'out', 'is_returnable' => true, 'expected_return_date' => $day, 'covers_document_id' => (int) $load['id'],
+        'party_name' => 'Sample carrier', 'vehicle_reference' => 'SAMPLE-0001', 'driver_name' => 'Sample driver',
+        'purpose' => 'Sample outward returnable pass covering the morning load',
+        'reason' => 'Sample gate pass: it moves no stock and posts nothing.', 'idempotency_key' => $prefix . 'showcase-gate-pass']);
+    $stamped = pl_stamp_gate_pass($actorId, $companyId, $bookId, (int) $gatePass['id'], 'out');
+    $sale = pl_inventory_issue($actorId, $companyId, $bookId, ['product_id' => $productId, 'quantity' => '22', 'date' => $day,
+        'warehouse_id' => (int) $van['id'], 'source_type' => 'sample_van_sale', 'source_reference' => $prefix . 'showcase-van-sale',
+        'reason' => 'Sample sale out of the van.', 'idempotency_key' => $prefix . 'showcase-van-sale']);
+    pl_inventory_return($actorId, $companyId, $bookId, ['original_movement_id' => (int) $sale['movement_id'], 'quantity' => '2',
+        'date' => $day, 'warehouse_id' => (int) $van['id'], 'source_type' => 'sample_van_return',
+        'source_reference' => $prefix . 'showcase-van-customer-return',
+        'reason' => 'Sample sellable customer return, straight back into van stock.',
+        'idempotency_key' => $prefix . 'showcase-van-customer-return']);
+    $reissue = pl_post_stock_document($actorId, $companyId, $bookId, ['kind' => 'stock_reissue', 'date' => $day,
+        'from_warehouse_id' => (int) $warehouse['id'], 'to_warehouse_id' => (int) $van['id'],
+        'original_document_id' => (int) $load['id'], 'reference' => 'Midday top-up',
+        'reason' => 'Sample re-issue against the morning load.',
+        'lines' => [['product_id' => $productId, 'quantity' => '10']], 'idempotency_key' => $prefix . 'showcase-van-reissue']);
+    $return = pl_post_stock_document($actorId, $companyId, $bookId, ['kind' => 'stock_return', 'date' => $day,
+        'from_warehouse_id' => (int) $van['id'], 'to_warehouse_id' => (int) $warehouse['id'],
+        'reference' => 'End of route', 'reason' => 'Sample return of unsold stock at the end of the route.',
+        'lines' => [['product_id' => $productId, 'quantity' => '30']], 'idempotency_key' => $prefix . 'showcase-van-return']);
+    // The warehouse count is one unit short of the book. Adjusting it is the only thing in
+    // this day that posts a journal, and it posts through the ordinary inventory service.
+    $warehouseBalance = pl_inventory_balance($actorId, $companyId, $bookId, $productId, $day, (int) $warehouse['id']);
+    $adjust = pl_inventory_adjust_count($actorId, $companyId, $bookId, ['product_id' => $productId,
+        'counted_quantity' => bcsub((string) $warehouseBalance['quantity'], '1', 4),
+        'expected_quantity' => (string) $warehouseBalance['quantity'],
+        'offset_account_id' => (int) ($master['accounts']['cost_of_goods_sold'] ?? $master['accounts'][$master['first_expense']]),
+        'date' => $day, 'warehouse_id' => (int) $warehouse['id'], 'source_type' => 'sample_stock_count',
+        'source_reference' => $prefix . 'showcase-stock-adjustment',
+        'reason' => 'Sample stock count: the warehouse is one unit short of the book.',
+        'idempotency_key' => $prefix . 'showcase-stock-adjustment']);
+    $sheet = pl_van_day($actorId, $companyId, $bookId, (int) $van['id'], $day);
+    $review = pl_review_van_settlement($actorId, $companyId, $bookId, (int) $van['id'], $day,
+        'Sample review of the driver\'s day before anyone approves it.', $prefix . 'showcase-van-review');
+    // Recording and approving are separate acts: the owner reviews, and the person holding
+    // the custom role that can approve a settlement is the one who approves it.
+    $approved = pl_approve_van_settlement($approverId ?? $actorId, $companyId, $bookId, (int) $review['id'],
+        'Sample approval of a reconciled driver day.', $prefix . 'showcase-van-approve');
+    return ['status' => 'posted', 'van_id' => (int) $van['id'], 'day' => $day,
+        'issue_number' => $load['document_number'], 'reissue_number' => $reissue['document_number'],
+        'return_number' => $return['document_number'], 'gate_pass_number' => $gatePass['document_number'],
+        'gate_pass_moves_stock' => (bool) $gatePass['moves_stock'],
+        'gate_pass_stamped_out' => $stamped['gate_pass']['security_out_at'] !== null,
+        'adjustment_movement_id' => (int) $adjust['movement_id'],
+        'totals' => $sheet['totals'], 'reconciles' => (bool) $review['reconciles'],
+        'settlement_id' => (int) $review['id'], 'settlement_status' => (string) $approved['status'],
+        'approved_by' => (int) $approved['approved_by'], 'reviewed_by_owner' => $actorId];
+}
+
+/**
+ * Advances and refunds, the whole of it in one sample: money on account with a remainder
+ * held as unapplied credit in its own control account, that credit applied later with no
+ * bank line, a cash refund of what is left, a credit note with no original invoice behind
+ * it, an advance paid to a supplier, and a batch that posts one voucher per customer.
+ */
+function pl_demo_showcase_advances(int $actorId, int $companyId, int $bookId, array $master, string $prefix): array
+{
+    $currency = (string) pl_company_context($actorId, $companyId)['currency'];
+    $bank = (int) ($master['accounts']['bank_current'] ?? $master['accounts']['cash_on_hand']);
+    $customerPool = $master['parties']['customer']; $vendorPool = $master['parties']['vendor'];
+    $customer = (int) reset($customerPool); $vendor = (int) reset($vendorPool);
+    $receivable = (int) $master['accounts']['accounts_receivable'];
+    $payable = (int) $master['accounts']['accounts_payable'];
+    // The replay's own invoices and bills normally activate both controls; a sample whose
+    // contract posted neither would otherwise have no open-item ledger to work in.
+    foreach ([$receivable, $payable] as $control) {
+        if (!DB::queryFirstField('SELECT account_id FROM pl_open_item_accounts WHERE account_id=%i FOR SHARE', $control)) {
+            pl_activate_open_item_account($actorId, $companyId, $bookId, $control, 'Sample open-item control for the advances and refunds examples.');
+        }
+    }
+    $customerAdvances = pl_advance_control($actorId, $companyId, $bookId, 'customer');
+    $supplierAdvances = pl_advance_control($actorId, $companyId, $bookId, 'supplier');
+    $income = (int) $master['accounts'][$master['first_income']];
+    $balance = pl_open_item_recognize($actorId, $companyId, $bookId, ['party_id' => $customer,
+        'control_account_id' => $receivable, 'offset_account_id' => $income, 'currency' => $currency,
+        'amount_fc' => '120.0000', 'date' => '2026-10-02', 'source_reference' => $prefix . 'showcase-advance-balance',
+        'description' => 'Sample customer balance the on-account receipt settles first.',
+        'idempotency_key' => $prefix . 'showcase-advance-balance']);
+    // 1. Money on account: part settles the balance and the rest is held as unapplied
+    //    credit in its own control account, not netted away inside receivables.
+    $onAccount = pl_settle_open_items($actorId, $companyId, $bookId, ['direction' => 'receivable', 'party_id' => $customer,
+        'bank_account_id' => $bank, 'amount_fc' => '200.0000', 'currency' => $currency, 'date' => '2026-10-20',
+        'description' => 'Sample on-account receipt; the remainder stays as unapplied credit.',
+        'advance_account_id' => $customerAdvances, 'idempotency_key' => $prefix . 'showcase-on-account',
+        'allocations' => [['item_id' => (int) $balance['item_id'], 'amount_fc' => '120.0000']]]);
+    // 2. The credit applied later, to a balance recognised after the receipt.
+    $later = pl_open_item_recognize($actorId, $companyId, $bookId, ['party_id' => $customer,
+        'control_account_id' => $receivable, 'offset_account_id' => $income, 'currency' => $currency,
+        'amount_fc' => '50.0000', 'date' => '2026-10-22', 'source_reference' => $prefix . 'showcase-later-balance',
+        'description' => 'Sample later balance, settled from credit the customer already holds.',
+        'idempotency_key' => $prefix . 'showcase-later-balance']);
+    $applied = pl_apply_unapplied_credit($actorId, $companyId, $bookId, ['advance_item_id' => (int) $onAccount['advance']['item_id'],
+        'date' => '2026-10-25', 'description' => 'Sample application of unapplied credit; no bank line.',
+        'idempotency_key' => $prefix . 'showcase-apply-credit',
+        'allocations' => [['item_id' => (int) $later['item_id'], 'amount_fc' => '50.0000']]]);
+    // 3. What is still unapplied is refunded in cash, out of its own control account.
+    $refund = pl_refund_unapplied_credit($actorId, $companyId, $bookId, ['item_id' => (int) $onAccount['advance']['item_id'],
+        'bank_account_id' => $bank, 'amount_fc' => '30.0000', 'date' => '2026-10-28',
+        'description' => 'Sample cash refund of the credit the customer never used.',
+        'idempotency_key' => $prefix . 'showcase-refund-credit']);
+    // 4. A credit note with no original invoice, offset to the reserved contra-income group.
+    $salesReturns = (int) DB::queryFirstField('SELECT id FROM pl_accounts WHERE company_id=%i AND book_id=%i AND semantic_key=%s',
+        $companyId, $bookId, 'core.income.sales_returns');
+    $orphan = pl_recognize_unapplied_credit($actorId, $companyId, $bookId, ['side' => 'customer', 'party_id' => $customer,
+        'offset_account_id' => $salesReturns, 'currency' => $currency, 'amount_fc' => '18.0000', 'date' => '2026-10-29',
+        'source_reference' => $prefix . 'showcase-orphan-credit',
+        'description' => 'Sample credit note with no original invoice behind it.',
+        'advance_account_id' => $customerAdvances, 'idempotency_key' => $prefix . 'showcase-orphan-credit']);
+    // 5. An advance paid to a supplier: the mirror of the customer side, held as an asset.
+    $supplierAdvance = pl_settle_open_items($actorId, $companyId, $bookId, ['direction' => 'payable', 'party_id' => $vendor,
+        'bank_account_id' => $bank, 'amount_fc' => '75.0000', 'currency' => $currency, 'date' => '2026-10-30',
+        'description' => 'Sample advance paid to a supplier before any bill arrives.',
+        'advance_account_id' => $supplierAdvances, 'idempotency_key' => $prefix . 'showcase-supplier-advance',
+        'allocations' => []]);
+    // 6. An end-of-day batch: one voucher per customer, each individually reversible.
+    $second = pl_save_party($actorId, $companyId, $bookId, ['legal_name' => 'Second sample counter customer (Sample)',
+        'entity_type' => 'private_company', 'country_code' => 'ZZ', 'is_customer' => true, 'is_vendor' => false,
+        'currency' => $currency, 'ar_account_id' => $receivable, 'notes' => 'Sample party for the batch-receipt example.',
+        'reason' => 'Sample batch-receipt party.', 'request_key' => $prefix . 'showcase-batch-party']);
+    $batch = pl_post_batch_receipts($actorId, $companyId, $bookId, ['direction' => 'receivable', 'bank_account_id' => $bank,
+        'date' => '2026-10-31', 'description' => 'Sample end-of-day collection, one voucher per customer.',
+        'idempotency_key' => $prefix . 'showcase-batch',
+        'rows' => [
+            ['party_id' => $customer, 'amount_fc' => '40.0000', 'currency' => $currency, 'advance_account_id' => $customerAdvances, 'allocations' => []],
+            ['party_id' => (int) $second['id'], 'amount_fc' => '25.0000', 'currency' => $currency, 'advance_account_id' => $customerAdvances, 'allocations' => []],
+        ]]);
+    $unapplied = pl_unapplied_credit($actorId, $companyId, $bookId, 'customer', '2026-12-31');
+    return ['status' => 'posted', 'payable_control_account_id' => $payable,
+        'on_account_remainder' => $onAccount['remainder_fc'], 'applied_fc' => $applied['applied_fc'],
+        'refund_side' => $refund['refund_side'], 'refund_journal_id' => (int) $refund['journal_id'],
+        'orphan_credit_item_id' => (int) $orphan['item_id'], 'orphan_offset_account_id' => (int) $orphan['offset_account_id'],
+        'orphan_offset_override' => (bool) $orphan['offset_override'],
+        'supplier_advance_remainder' => $supplierAdvance['remainder_fc'],
+        'batch_voucher_count' => (int) $batch['voucher_count'], 'batch_total_fc' => $batch['total_fc'],
+        'customer_advances_account_id' => $customerAdvances, 'supplier_advances_account_id' => $supplierAdvances,
+        'unapplied_customer_credit_base' => $unapplied['total_base'], 'unapplied_customer_items' => (int) $unapplied['count'],
+        'unapplied_reconciles_to_control' => (bool) $unapplied['reconciled']];
+}
+
+/**
+ * A second person and a custom role, so the capability system is something a visitor can
+ * see: the van day is reviewed by the owner and approved by someone whose only authority
+ * beyond reading is approving it.
+ */
+function pl_demo_showcase_people(int $actorId, int $companyId, string $prefix): array
+{
+    $email = 'route.supervisor.' . substr(hash('sha256', $prefix . (string) $companyId), 0, 16) . '@example.invalid';
+    $userId = pl_create_user($email, 'Sample route supervisor', bin2hex(random_bytes(16)));
+    // `company.write` is here because approving a settlement is a write on the company;
+    // what this role has that an ordinary recorder does not is `settlement.approve`.
+    $capabilities = ['company.read', 'company.write', 'cost.view', 'settlement.approve'];
+    $role = pl_save_role($actorId, $companyId, ['name' => 'Route supervisor (sample)',
+        'description' => 'Reads this company, records entries, sees cost and approves a reconciled van day. No administration of any kind.',
+        'capabilities' => $capabilities,
+        'reason' => 'Sample custom role, so the capability system is visible in the sample.']);
+    pl_assign_company_role($actorId, $companyId, $userId, (int) $role['id'], 'Sample second person for this sample company.');
+    return ['user_id' => $userId, 'role_id' => (int) $role['id'], 'role_name' => (string) $role['name'],
+        'capabilities' => $capabilities,
+        'note' => 'A sample account with a random password that is never shown and a mailbox at example.invalid that can never receive mail. It exists so a visitor can see a custom role doing something.'];
+}
+
+/** Post the parts of 1.2.0 this sample demonstrates, after its contract replay. */
+function pl_demo_showcase_1_2(int $actorId, int $companyId, int $bookId, array $pack, array $master, string $prefix): array
+{
+    $plan = pl_demo_showcase_plan((string) $pack['id']);
+    $receipt = ['plan' => $plan];
+    $approverId = null;
+    if ($plan['people']) {
+        $receipt['people'] = pl_demo_showcase_people($actorId, $companyId, $prefix);
+        $approverId = (int) $receipt['people']['user_id'];
+    }
+    if ($plan['trading'] !== null) {
+        $receipt['trading'] = pl_demo_showcase_trading($actorId, $companyId, $bookId, $pack, $master, $plan['trading'], $prefix);
+    }
+    if ($plan['van_day']) {
+        $receipt['van_day'] = pl_demo_showcase_van_day($actorId, $companyId, $bookId, $pack, $master, $prefix, $approverId);
+    }
+    if ($plan['advances']) {
+        $receipt['advances'] = pl_demo_showcase_advances($actorId, $companyId, $bookId, $master, $prefix);
+    }
+    $trial = pl_trial_balance($actorId, $companyId, $bookId, '2026-12-31');
+    $balance = pl_balance_sheet($actorId, $companyId, $bookId, '2026-12-31');
+    if (!$trial['balanced'] || !$balance['balanced']) {
+        throw new RuntimeException('The sample 1.2.0 showcase left the ledger unbalanced; setup was rolled back.');
+    }
+    $receipt['trial_balance_total_debit'] = $trial['total_debit'];
+    $receipt['reports_agree'] = true;
+    return $receipt;
 }
 
 /** New isolated company only; every source uses existing account/document/journal/period services. */
@@ -604,7 +999,10 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
             || DB::queryFirstField('SELECT user_id FROM pl_demo_visitors WHERE company_id = %i LIMIT 1', $companyId)) {
             throw new DomainException('A historical sample requires a new, empty, unassigned sample company starting in 2024. Existing books cannot be replaced.');
         }
-        if (pl_demo_enabled() && min(500, max(10, (int) (getenv('PL_DEMO_MAX_DOCUMENTS') ?: 100))) < $pack['source_count'] + 20) {
+        // The one shared limit, not a second copy of it: this check kept the pre-1.1.0
+        // default of 100 while the runtime ceiling moved to 250, so an 85-source pack was
+        // refused in the demo by a number no longer in force anywhere else.
+        if (pl_demo_enabled() && pl_demo_document_limit() < $pack['source_count'] + 20) {
             throw new PlDemoUnavailable('The sample needs room for its history and at least twenty practice records. Ask the demo operator to check its capacity setting.');
         }
         $prefix = 'sample:' . $pack['id'] . ':' . $pack['version'] . ':';
@@ -615,6 +1013,27 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
                 'creation_key' => $prefix . 'account:' . $definition['code'],
             ]);
             $mapping[$definition['code']] = $account['id'];
+        }
+        // B64: a printed invoice, receipt or statement carries the seller's own block, and
+        // an empty profile prints the bare company name. Every sample fills it in.
+        pl_save_company_profile($actorId, $companyId, $pack['company_profile'] + [
+            'revision' => pl_company_profile($actorId, $companyId)['revision'],
+            'reason' => 'Sample company profile so printed documents carry a complete, entirely fictional seller block.',
+            'idempotency_key' => $prefix . 'company-profile',
+        ]);
+        // B61: where the sample is a partnership, each partner keeps their own capital and
+        // drawings account and the recorded profit share, and their movements say whose they are.
+        // Numbering is set before a single document posts, so every document in the sample
+        // carries a real series number rather than a formatted id (B37/B55).
+        $numbering = pl_demo_showcase_numbering($actorId, $companyId, $bookId);
+        $partnerIds = [];
+        foreach ($pack['partners'] as $partner) {
+            $saved = pl_save_owner_partner($actorId, $companyId, $bookId, [
+                'name' => $partner['name'], 'profit_share' => $partner['profit_share'], 'is_active' => true,
+                'capital_account_id' => (int) $mapping[$partner['capital_code']],
+                'drawings_account_id' => (int) $mapping[$partner['drawings_code']],
+            ]);
+            $partnerIds[$partner['key']] = (int) $saved['id'];
         }
         for ($month = 1; $month <= 12; $month++) {
             $start = sprintf('2025-%02d-01', $month);
@@ -632,7 +1051,7 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
                     'kind' => $event['owner_kind'], 'date' => $event['date'], 'amount' => $event['amount'],
                     'cash_account_id' => $mapping[$event['money_code']], 'owner_account_id' => $mapping[$event['owner_code']],
                     'description' => $event['description'], 'creation_key' => $prefix . $event['key'],
-                ]);
+                ] + (isset($event['partner_key']) ? ['partner_id' => $partnerIds[$event['partner_key']]] : []));
             } elseif ($event['kind'] === 'receipt') {
                 $source = pl_save_document($actorId, $companyId, $bookId, [
                     'kind' => 'receipt', 'date' => $event['date'], 'amount' => $event['amount'],
@@ -665,6 +1084,7 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
         }
         $snapshot = json_encode(['sample_pack' => ['id' => $pack['id'], 'version' => $pack['version'], 'digest' => $pack['digest'],
             'date' => $pack['start_date'], 'currency' => $company['currency'], 'checkpoints' => 36,
+            'numbering' => $numbering, 'partner_ids' => $partnerIds,
             'operational_replay' => $operationalReplay]], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
         pl_record_installation_history($actorId, $companyId, $bookId, 'sample', pl_starter_template(), $snapshot);
         $manifest = pl_module_registry()['pos-showcase'];

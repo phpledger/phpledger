@@ -18,12 +18,26 @@ GRANT SELECT, INSERT, UPDATE ON phpledger_demo.* TO 'ledger_demo_test'@'%';
     $before = $query | & docker compose exec -T db_test sh -lc 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot --batch --skip-column-names'
     & docker compose @options -e PL_DB_USER=ledger_demo_test -e PL_DB_PASSWORD=local-demo-test-only test php tests/demo_smoke.php
     if ($LASTEXITCODE -ne 0) { throw 'Restricted demo smoke failed.' }
+    # The reset guard accepts a person a visitor's own sample created inside it (1.2.0 samples
+    # seed a second person so the capability system is visible). Prove it still refuses anyone
+    # else, before the reset that has to succeed with that person present.
+    $mysql = 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot'
+    "INSERT INTO phpledger_demo.pl_users (email, display_name, password_hash) VALUES ('stranger.none@example.invalid', 'Stranger', 'x');" | & docker compose exec -T db_test sh -lc $mysql
+    & docker compose @options -e PL_DB_USER=root -e PL_DB_PASSWORD=local-test-root-only -e PL_DEMO_RESET_MODE=1 test php tools/demo-reset.php --now
+    if ($LASTEXITCODE -eq 0) { throw 'The reset accepted a person with no company membership.' }
+    "INSERT INTO phpledger_demo.pl_companies (name, currency, start_date, fiscal_year_end, created_by, functional_currency, presentation_currency, is_sample) SELECT 'Company no visitor holds', 'USD', '2026-01-01', '12-31', u.id, 'USD', 'USD', 1 FROM phpledger_demo.pl_users u WHERE u.email = 'stranger.none@example.invalid';" | & docker compose exec -T db_test sh -lc $mysql
+    "INSERT INTO phpledger_demo.pl_company_members (company_id, user_id, role) SELECT c.id, u.id, 'owner' FROM phpledger_demo.pl_companies c, phpledger_demo.pl_users u WHERE c.name = 'Company no visitor holds' AND u.email = 'stranger.none@example.invalid';" | & docker compose exec -T db_test sh -lc $mysql
+    & docker compose @options -e PL_DB_USER=root -e PL_DB_PASSWORD=local-test-root-only -e PL_DEMO_RESET_MODE=1 test php tools/demo-reset.php --now
+    if ($LASTEXITCODE -eq 0) { throw 'The reset accepted a person in a company no isolated visitor holds.' }
+    "DELETE m FROM phpledger_demo.pl_company_members m JOIN phpledger_demo.pl_users u ON u.id = m.user_id WHERE u.email = 'stranger.none@example.invalid';" | & docker compose exec -T db_test sh -lc $mysql
+    "DELETE FROM phpledger_demo.pl_companies WHERE name = 'Company no visitor holds';" | & docker compose exec -T db_test sh -lc $mysql
+    "DELETE FROM phpledger_demo.pl_users WHERE email = 'stranger.none@example.invalid';" | & docker compose exec -T db_test sh -lc $mysql
     & docker compose @options -e PL_DB_USER=root -e PL_DB_PASSWORD=local-test-root-only -e PL_DEMO_RESET_MODE=1 test php tools/demo-reset.php --now
     if ($LASTEXITCODE -ne 0) { throw 'Second isolated demo reset failed.' }
     $after = $query | & docker compose exec -T db_test sh -lc 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot --batch --skip-column-names'
     $empty = 'SELECT COUNT(*) FROM phpledger_demo.pl_demo_visitors;' | & docker compose exec -T db_test sh -lc 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot --batch --skip-column-names'
     if ($before -eq $after -or [int] $empty -ne 0) { throw 'Demo reset failed to change generation or remove prior visitors.' }
-    Write-Output 'Demo reset verification passed: separate restricted web grants, real generation replacement and empty visitor state; only phpledger_demo in db_test was reset.'
+    Write-Output 'Demo reset verification passed: separate restricted web grants, two refused strangers, real generation replacement and empty visitor state; only phpledger_demo in db_test was reset.'
 } finally {
     Pop-Location
 }

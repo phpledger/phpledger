@@ -17,6 +17,13 @@ DEST = ROOT / "resources" / "demo-packs"
 PROFILE_CATALOG = json.loads((ROOT / "resources" / "coa" / "industry-profiles-0.5.0.json").read_text(encoding="utf-8"))
 D = Decimal
 
+# The one month every pack runs payroll by element rather than as a single salary line (#98).
+PAYROLL_MONTH = "2025-09"
+# The month the fictional display counter leaves the books (#95); monthly depreciation drops after it.
+DISPOSAL_DATE = "2025-10-31"
+# Deferred income is released a month at a time over the plan's coverage (#94).
+DEFERRED_MONTHS = ["2024-%02d" % m for m in range(7, 13)] + ["2025-%02d" % m for m in range(1, 7)]
+
 
 def money(value):
     return format(D(value), ".4f")
@@ -586,7 +593,34 @@ def authored_material(slug):
     }
 
 
-def build(slug, name, business, revenue, inventory, capability_note=None, status="released_demo_only"):
+def company_profile_for(slug, name):
+    """A complete, entirely fictional seller block so printed documents are not blank (B64).
+
+    Every address, telephone number, mailbox and registration below is invented. The
+    country marker ZZ is not assigned to any country, the telephone numbers are in the
+    reserved 555-01xx range, and `example.invalid` can never resolve.
+    """
+    streets = {
+        "service-agency": "12 Lantern Yard", "retail-shop": "3 Willow Corner",
+        "seasonal-business": "Sunrise Depot, Fern Lane", "distributor": "Unit 9, Harbor Reach Estate",
+        "trader": "Warehouse 4, Quayside Row", "restaurant": "18 Cedar Walk",
+        "membership-club": "Riverside Pavilion, Mill Path", "pharmacy": "27 Meadow Parade",
+        "jewelry-studio": "Studio 6, Finch Court", "light-manufacturing": "Bench Works, Maple Trading Estate",
+        "service-workshop": "5 Spoke Alley",
+    }
+    return {
+        "legal_name": f"{name} (Sample)",
+        "address_line1": streets[slug],
+        "address_line2": "Northbank, Sample County",
+        "address_line3": "ZZ-0001 (fictional address, country marker ZZ)",
+        "phone": "+99 555 0142",
+        "email": f"accounts@{slug}.example.invalid",
+        "tax_registrations": "Sample registration SAMPLE-TRN-0000000. Invented for this demonstration; it is not a real tax registration and no country tax rule is applied.",
+        "footer_terms": "Payment due 30 days from the invoice date. Goods remain the property of the seller until paid in full. Every figure, party and registration on this document belongs to a fictional demonstration company.",
+    }
+
+
+def build(slug, name, business, revenue, inventory, capability_note=None, status="released_demo_only", partners=None):
     accounts = [
         ("1010", "Reserve bank", "asset", "cash_bank"),
         ("1020", "Cash till", "asset", "cash_bank"),
@@ -594,18 +628,29 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
         ("1200", "Prepaid insurance", "asset", None),
         ("1300", "Equipment at cost", "asset", None),
         ("1390", "Accumulated depreciation", "asset", None, True),
+        ("1500", "Staff advances", "asset", None),
         ("2100", "Accrued staff bonus", "liability", None),
         ("2200", "Term loan", "liability", None),
+        ("2300", "Net salaries payable", "liability", None),
+        ("2310", "Withholding tax payable", "liability", None),
+        ("2320", "Social security payable", "liability", None),
+        ("2330", "Provident fund payable", "liability", None),
+        ("2400", "Deferred support income", "liability", None),
         ("5100", "Fictional staff salaries", "expense", "expense"),
+        ("5150", "Employer contributions", "expense", "expense"),
         ("5200", "Rent", "expense", "expense"),
         ("5300", "Utilities", "expense", "expense"),
         ("5400", "Insurance expense", "expense", "expense"),
         ("5500", "Depreciation expense", "expense", "expense"),
         ("5600", "Loan interest", "expense", "expense"),
+        ("5800", "Loss on asset disposal", "expense", "expense"),
     ]
     if inventory:
         accounts += [("1400", "Stock - manual support schedule", "asset", None),
                      ("5700", "Cost of sales - manual schedule", "expense", "expense")]
+    for partner in (partners or []):
+        accounts += [(partner["capital_code"], f"Partner capital - {partner['name']}", "equity", "owner_equity"),
+                     (partner["drawings_code"], f"Partner drawings - {partner['name']}", "equity", None, True)]
     definitions = [{"code": a[0], "name": a[1], "type": a[2], "role": a[3],
                     **({"is_contra": True} if len(a) > 4 and a[4] else {})} for a in accounts]
     # Starter-chart accounts keep the numbers they carried before the structured-code conversion
@@ -614,6 +659,10 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
     OWNER_LOAN, DRAWINGS = "2-110-10001-00", "3-900-10001-00"
     types = {"1000": "asset", "1100": "asset", "2000": "liability", "3000": "equity",
              "4000": "income", "5000": "expense",
+             # The advances controls (037) and the contra groups (B60) are in every starter
+             # chart, so a checkpoint has to name them even while they are still empty: the
+             # reconcile compares the whole trial balance, not the accounts this pack uses.
+             "1-120-10001-00": "asset", "2-120-10001-00": "liability",
              "1-900-10001-00": "asset", OWNER_LOAN: "liability", DRAWINGS: "equity",
              "4-900-10001-00": "income", "5-900-10001-00": "expense",
              **{a[0]: a[2] for a in accounts}}
@@ -626,21 +675,39 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
                        "reference": f"{slug}/{key}", "description": description,
                        "lines": rows, "reverse": reverse})
 
-    def owner(key, date, owner_kind, description, amount, money_code="1000"):
+    def owner(key, date, owner_kind, description, amount, money_code="1000", capital_code="3000",
+              drawings_code=DRAWINGS, partner=None):
         """An owner movement recorded through the owner-transactions service (B61)."""
-        plan = {"capital_introduced": (money_code, "3000"), "owner_loan_received": (money_code, OWNER_LOAN),
-                "owner_loan_repaid": (OWNER_LOAN, money_code), "drawings": (DRAWINGS, money_code)}
+        plan = {"capital_introduced": (money_code, capital_code), "owner_loan_received": (money_code, OWNER_LOAN),
+                "owner_loan_repaid": (OWNER_LOAN, money_code), "drawings": (drawings_code, money_code)}
         debit_code, credit_code = plan[owner_kind]
         owner_code = credit_code if debit_code == money_code else debit_code
-        events.append({"key": key, "kind": "owner_transaction", "owner_kind": owner_kind, "date": date,
-                       "reference": f"{slug}/{key}", "description": description, "amount": money(D(amount)),
-                       "money_code": money_code, "owner_code": owner_code,
-                       "lines": [line(debit_code, amount), line(credit_code, -D(amount))]})
+        event = {"key": key, "kind": "owner_transaction", "owner_kind": owner_kind, "date": date,
+                 "reference": f"{slug}/{key}", "description": description, "amount": money(D(amount)),
+                 "money_code": money_code, "owner_code": owner_code,
+                 "lines": [line(debit_code, amount), line(credit_code, -D(amount))]}
+        if partner is not None:
+            event["partner_key"] = partner
+        events.append(event)
 
-    owner("capital", "2024-01-01", "capital_introduced", "Fictional owner introduces starting capital", 25000)
-    owner("owner-loan", "2024-06-03", "owner_loan_received", "Fictional owner lends the business working capital, repayable", 3000)
-    owner("owner-loan-repayment", "2025-06-03", "owner_loan_repaid", "Repay part of the fictional owner's loan", 1000)
-    owner("drawings", "2025-11-25", "drawings", "Fictional owner withdraws cash for personal use", 800)
+    if partners:
+        # A partnership keeps a capital and a drawings account per partner (B61); no account
+        # may serve two partners or two roles, so each one is separate and named.
+        for partner in partners:
+            owner(f"capital-{partner['key']}", "2024-01-01",
+                  "capital_introduced", f"Fictional partner {partner['name']} introduces capital",
+                  partner["capital"], capital_code=partner["capital_code"], partner=partner["key"])
+        owner("owner-loan", "2024-06-03", "owner_loan_received", "Fictional partner lends the firm working capital, repayable", 3000)
+        owner("owner-loan-repayment", "2025-06-03", "owner_loan_repaid", "Repay part of the fictional partner's loan", 1000)
+        for partner in partners:
+            owner(f"drawings-{partner['key']}", "2025-11-25", "drawings",
+                  f"Fictional partner {partner['name']} withdraws cash for personal use",
+                  partner["drawings"], drawings_code=partner["drawings_code"], partner=partner["key"])
+    else:
+        owner("capital", "2024-01-01", "capital_introduced", "Fictional owner introduces starting capital", 25000)
+        owner("owner-loan", "2024-06-03", "owner_loan_received", "Fictional owner lends the business working capital, repayable", 3000)
+        owner("owner-loan-repayment", "2025-06-03", "owner_loan_repaid", "Repay part of the fictional owner's loan", 1000)
+        owner("drawings", "2025-11-25", "drawings", "Fictional owner withdraws cash for personal use", 800)
     journal("reserve-transfer", "2024-01-02", "Move funds between primary and reserve banks", [("1010", 12000), ("1000", -12000)])
     journal("cash-float", "2024-01-03", "Fund the cash till", [("1020", 600), ("1000", -600)])
     journal("petty-float", "2024-01-03", "Establish a separately counted petty cash float", [("1030", 500), ("1000", -500)])
@@ -660,6 +727,34 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
     journal("correct-cost", "2025-08-21", "Replacement for wrong-cost: correct maintenance cost 45, original and reversal retained", [("5000", 45), ("1000", -45)])
     for year, amount in ((2024, 2500), (2025, 3000)):
         journal(f"cash-deposit-{year}", f"{year}-12-30", "Deposit counted till cash into primary bank; transfer has no income effect", [("1000", amount), ("1020", -amount)])
+    # Contra presentation (B60): the reserved contra groups exist in every chart but no
+    # sample used to post to them, so sales returns and purchase returns read as ordinary
+    # income and expense. These two entries make the deduction visible on the statements.
+    journal("sales-return", "2025-03-18", "Fictional customer returns goods and is refunded in cash: recorded in sales returns and allowances, a deduction from income rather than an expense",
+            [("4-900-10001-00", 180, "Sales return, presented as a deduction from income"), ("1000", -180)])
+    journal("purchase-return", "2025-04-22", "Return faulty goods to a fictional supplier and receive a cash refund: recorded in purchase returns and allowances, a deduction from purchases rather than income",
+            [("1000", 120), ("5-900-10001-00", -120, "Purchase return, presented as a deduction from purchases")])
+    # Anticipates 1.3. Nothing below is produced by a schedule, register or close screen;
+    # each is an ordinary journal that gives the unbuilt feature something real to act on.
+    journal("support-plan-advance", "2024-07-01", "Annual support plan collected a year in advance: 1200 held as deferred income and released at 100 a month to June 2025. Anticipates the deferred-income schedule planned for 1.3 (issue #94); nothing releases it automatically today",
+            [("1000", 1200), ("2400", -1200, "Deferred income, released monthly by journal")])
+    journal("equipment-disposal", DISPOSAL_DATE, "Sell the fictional display counter: cost 600, accumulated depreciation 210 at disposal, proceeds 350 in cash, loss on disposal 40. Monthly depreciation falls from 40 to 30 afterwards. Anticipates the fixed-asset register planned for 1.3 (issue #95); there is no asset record behind this journal today",
+            [("1000", 350, "Disposal proceeds"), ("1390", 210, "Accumulated depreciation removed with the asset"),
+             ("5800", 40, "Loss on disposal"), ("1300", -600, "Cost of the disposed asset")])
+    journal("staff-advance-2025-09", "2025-09-05", "Advance 200 to fictional staff against September pay; recovered in full in the September payroll run",
+            [("1500", 200, "Staff advance, recovered from September net pay"), ("1000", -200)])
+    journal(f"payroll-{PAYROLL_MONTH}", f"{PAYROLL_MONTH}-30", "September payroll as totals per element: gross pay, employer contributions, each deduction on its own payable account and the net owed to staff. The core keeps totals only and never an employee. Anticipates the payroll journal type planned for 1.3 (issue #98)",
+            [("5100", 1500, "Gross salaries and wages for the period"),
+             ("5150", 120, "Employer contributions for the period"),
+             ("2310", -90, "Withholding tax deducted from pay"),
+             ("2320", -45, "Social security payable, employer share"),
+             ("2330", -150, "Provident fund payable, employee 75 and employer 75"),
+             ("1500", -200, "Staff advance recovered from net pay"),
+             ("2300", -1135, "Net salaries payable to staff")])
+    journal("payroll-net-payment-2025-10", "2025-10-05", "Pay the September net salaries; no second salary expense",
+            [("2300", 1135), ("1000", -1135)])
+    journal("payroll-deductions-2025-10", "2025-10-15", "Pay over the September payroll deductions and employer contributions element by element",
+            [("2310", 90), ("2320", 45), ("2330", 150), ("1000", -285)])
     monthly_schedule = []
     for year, month in [(y, m) for y in (2024, 2025) for m in range(1, 13)] + [(2026, 1)]:
         ym = f"{year}-{month:02d}"
@@ -669,11 +764,17 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
                        "reference": f"{slug}/receipts-{ym}", "description": f"{business}: monthly bank receipt summary; cash sales are in the separate operating schedule",
                        "amount": money(bank), "money_code": "1000", "category_code": "4000",
                        "counterparty": "Fictional monthly customer receipts"})
-        entries = [("1020", gross - bank, "Cash sales per manual daily summaries"), ("4000", bank - gross),
-                   ("5100", 600, "Mira Vale, fictional staff: illustrative salary"), ("5100", 900, "Noel Reed, fictional staff: illustrative salary"),
-                   ("1000", -1500), ("5200", 400), ("1010", -400), ("5300", 100),
-                   ("1000", -90), ("1030", -10), ("5400", 100), ("1200", -100)]
-        depreciation = 0 if ym == "2024-01" else 40
+        entries = [("1020", gross - bank, "Cash sales per manual daily summaries"), ("4000", bank - gross)]
+        # September 2025 pays its people through the payroll journal instead (#98).
+        if ym != PAYROLL_MONTH:
+            entries += [("5100", 600, "Mira Vale, fictional staff: illustrative salary"), ("5100", 900, "Noel Reed, fictional staff: illustrative salary"),
+                        ("1000", -1500)]
+        entries += [("5200", 400), ("1010", -400), ("5300", 100),
+                    ("1000", -90), ("1030", -10), ("5400", 100), ("1200", -100)]
+        release = 100 if ym in DEFERRED_MONTHS else 0
+        if release:
+            entries += [("2400", release, "Support plan earned this month"), ("4000", -release)]
+        depreciation = 0 if ym == "2024-01" else (30 if f"{ym}-01" > DISPOSAL_DATE else 40)
         if depreciation:
             entries += [("5500", depreciation), ("1390", -depreciation)]
         purchases, cost, units_in, units_out, unit_cost = inventory or (0, 0, 0, 0, 0)
@@ -685,6 +786,8 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
         monthly_schedule.append({"month": ym, "gross_receipts": money(gross), "bank_receipts": money(bank),
                                  "cash_receipts": money(gross-bank), "salaries": "1500.0000", "rent": "400.0000",
                                  "utilities": "100.0000", "insurance_release": "100.0000", "depreciation": money(depreciation),
+                                 "deferred_income_release": money(release),
+                                 "salary_source": "payroll_journal_by_element" if ym == PAYROLL_MONTH else "single_monthly_line",
                                  "stock_purchases": money(purchases), "cost_of_sales": money(cost),
                                  "units_in": units_in, "units_out": units_out, "unit_cost": money(unit_cost)})
     events.sort(key=lambda e: (e["date"], e["key"]))
@@ -719,7 +822,98 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
     drafts = [{"key": "practice-receipt", "kind": "receipt", "date": "2026-02-02", "amount": "225.0000", "counterparty": "Fictional new customer", "reference": "PRACTICE-RECEIPT", "memo": "Editable practice receipt. Review before posting."},
               {"key": "practice-expense", "kind": "expense", "date": "2026-02-03", "amount": "65.0000", "counterparty": "Harbor Office Supply", "reference": "PRACTICE-EXPENSE", "memo": "Editable practice expense. No effect on books until posted."},
               {"key": "practice-petty", "kind": "expense", "date": "2026-02-04", "amount": "12.5000", "money_code": "1030", "counterparty": "Fictional local stationery", "reference": "PRACTICE-PETTY", "memo": "Compare the petty cash statement before and after posting."}]
-    assert len(events) + len(drafts) == 77
+    # 85 sources for a sole trader; a partnership splits capital and drawings per partner.
+    assert len(events) + len(drafts) == 85 + len(partners or []), len(events) + len(drafts)
+    # Everything below anticipates a 1.3 feature that does not exist yet. Each block is
+    # derived from the same postings the checkpoints reconcile, so it can never drift from
+    # the ledger, and each one says in its own words that no screen produces it today.
+    year_totals = defaultdict(Decimal)
+    for date, rows in postings:
+        if date.startswith("2025-"):
+            for row in rows:
+                year_totals[row["code"]] += D(row["debit"]) - D(row["credit"])
+    year_income = -sum(v for c, v in year_totals.items() if types[c] == "income")
+    year_expense = sum(v for c, v in year_totals.items() if types[c] == "expense")
+    closing = [{"code": c, "type": types[c], "debit": money(max(-v, 0)), "credit": money(max(v, 0))}
+               for c, v in sorted(year_totals.items()) if types[c] in ("income", "expense") and v != 0]
+    appropriation = [{"partner": p["name"], "profit_share": p["profit_share"],
+                      "share_of_result": money((year_income - year_expense) * D(p["profit_share"]))}
+                     for p in (partners or [])]
+    anticipated = {
+        "notice": "Authored so the 1.3 features below have real history to act on the day they land. None of this is produced by a screen, a register or a scheduler in 1.2.0; every figure here was posted by an ordinary journal in the history above.",
+        "status": "future_feature_data_not_implemented",
+        "schedules": {"issue": "#94", "status": "future_feature_data_not_implemented",
+                      "prepaid": {"account": "1200", "instrument": "Annual insurance premium", "paid": "1200.0000",
+                                  "release_per_period": "100.0000", "periods": 12,
+                                  "starts": ["2024-01-01", "2025-01-01", "2026-01-01"]},
+                      "accrual": {"account": "2100", "instrument": "Staff bonus accrued at 2024 year end",
+                                  "accrued": "420.0000", "accrued_on": "2024-12-31", "settled_on": "2025-01-10"},
+                      "deferred_income": {"account": "2400", "instrument": "Annual support plan collected in advance",
+                                          "collected": "1200.0000", "collected_on": "2024-07-01",
+                                          "release_per_period": "100.0000", "periods": 12,
+                                          "first_release": "2024-07-31", "final_release": "2025-06-30"}},
+        "asset_register": {"issue": "#95", "status": "future_feature_data_not_implemented",
+                           "assets": [
+                               {"reference": "SAMPLE-ASSET-1", "description": "Fictional shop fittings and equipment",
+                                "cost_account": "1300", "accumulated_depreciation_account": "1390",
+                                "expense_account": "5500", "acquired_on": "2024-02-01", "cost": "1800.0000",
+                                "life_months": 60, "method": "straight_line", "monthly_charge": "30.0000",
+                                "status": "in_service"},
+                               {"reference": "SAMPLE-ASSET-2", "description": "Fictional display counter",
+                                "cost_account": "1300", "accumulated_depreciation_account": "1390",
+                                "expense_account": "5500", "acquired_on": "2024-02-01", "cost": "600.0000",
+                                "life_months": 60, "method": "straight_line", "monthly_charge": "10.0000",
+                                "disposed_on": DISPOSAL_DATE, "accumulated_at_disposal": "210.0000",
+                                "proceeds": "350.0000", "result_on_disposal": "-40.0000",
+                                "result_account": "5800", "status": "disposed"}]},
+        "loan_schedule": {"issue": "#96", "status": "future_feature_data_not_implemented",
+                          "liability_account": "2200", "interest_account": "5600", "bank_account": "1000",
+                          "principal": "6000.0000", "advanced_on": "2024-03-01", "method": "flat_rate",
+                          "instalments": [{"number": n, "due_on": f"{2024 + n - 1}-12-20", "principal": "1200.0000",
+                                           "interest": "300.0000", "total": "1500.0000",
+                                           "closing_balance": money(D(6000) - D(1200) * n),
+                                           "posted": n <= 2} for n in range(1, 6)],
+                          "note": "Two instalments are posted in the history. The remaining three are schedule data only; nothing generates them today."},
+        "payroll": {"issue": "#98", "status": "future_feature_data_not_implemented",
+                    "period": PAYROLL_MONTH, "posted_on": f"{PAYROLL_MONTH}-30", "detail_held": "totals_only_never_an_employee",
+                    "elements": [{"element": "Gross salaries and wages", "account": "5100", "debit": "1500.0000"},
+                                 {"element": "Employer contributions", "account": "5150", "debit": "120.0000"},
+                                 {"element": "Withholding tax payable", "account": "2310", "credit": "90.0000"},
+                                 {"element": "Social security payable", "account": "2320", "credit": "45.0000"},
+                                 {"element": "Provident fund payable", "account": "2330", "credit": "150.0000"},
+                                 {"element": "Staff advance recovered", "account": "1500", "credit": "200.0000"},
+                                 {"element": "Net salaries payable", "account": "2300", "credit": "1135.0000"}],
+                    "settlements": [{"date": "2025-10-05", "element": "Net salaries payable", "account": "2300", "amount": "1135.0000"},
+                                    {"date": "2025-10-15", "element": "Deductions and contributions", "accounts": ["2310", "2320", "2330"], "amount": "285.0000"}]},
+        "year_end": {"issue": "#97", "status": "future_feature_data_not_implemented",
+                     "fiscal_year": {"from": "2025-01-01", "to": "2025-12-31"},
+                     "year_state": "closeable_but_not_closed",
+                     "legal_form": "partnership" if partners else "sole_trader",
+                     "income": money(year_income), "expenses": money(year_expense),
+                     "net_result": money(year_income - year_expense),
+                     "closing_journal_preview": closing,
+                     "result_goes_to": ([{"partner": p["name"], "current_account": p["capital_code"],
+                                          "profit_share": p["profit_share"]} for p in partners]
+                                        if partners else [{"account": "3000", "basis": "sole trader capital"}]),
+                     "partner_appropriation": appropriation,
+                     "drawings_to_close": ([{"partner": p["name"], "account": p["drawings_code"], "amount": money(D(p["drawings"]))}
+                                            for p in partners]
+                                           if partners else [{"account": DRAWINGS, "amount": "800.0000"}]),
+                     "note": "The 2025 periods are closed, which blocks backdated posting. No closing journal has been posted and no year is locked: 1.2.0 has neither, and the balances above are what a year-end close would have to work from."},
+        "period_close": {"issue": "#93", "status": "future_feature_data_not_implemented",
+                         "reversing_journal_candidate": {"original": "bonus-accrual", "posted_on": "2024-12-31",
+                                                         "would_reverse_on": "2025-01-01",
+                                                         "settled_instead_by": "bonus-payment"},
+                         "cash_count_candidates": [{"account": "1020", "name": "Cash till"},
+                                                   {"account": "1030", "name": "Petty cash"}],
+                         "note": "There is no reverse-on flag and no cash-count document in 1.2.0; these name the history a close checklist would ask about."},
+    }
+    if partners:
+        anticipated["partners"] = [{"key": p["key"], "name": p["name"], "profit_share": p["profit_share"],
+                                    "capital_account": p["capital_code"], "drawings_account": p["drawings_code"],
+                                    "capital_introduced": money(D(p["capital"])), "drawings": money(D(p["drawings"]))}
+                                   for p in partners]
+        anticipated["partners_note"] = "The partner register and the per-partner capital and drawings accounts are real 1.2.0 features and are created by the loader. Only the appropriation of the year's result between them is future data."
     authored = authored_material(slug)
     profile = industry_profile_for(slug)
     runtime_note = "The pinned ledger history below is reconciled through the current supported general-journal and cash-document services. On isolated sample creation, the operational contract is replayed through the existing AR/AP, Purchasing, Inventory and general-journal services; unsupported vertical operations remain explicitly staged."
@@ -743,6 +937,12 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
             "notice": "Original sample general-ledger examples. Manual staff, loan, outstanding-item and stock schedules do not implement payroll, AR/AP, inventory or tax modules. Period closure blocks posting; it is not statutory financial-statement approval or an earnings-transfer journal.",
             "start_date": "2024-01-01", "history_end": "2025-12-31", "practice_end": "2026-12-31",
             "source_count": len(events) + len(drafts), "journal_count": len(postings), "draft_count": len(drafts),
+            "company_profile": company_profile_for(slug, name),
+            "partners": [{"key": p["key"], "name": p["name"], "profit_share": p["profit_share"],
+                          "capital_code": p["capital_code"], "drawings_code": p["drawings_code"],
+                          "capital_introduced": money(D(p["capital"])), "drawings": money(D(p["drawings"]))}
+                         for p in (partners or [])],
+            "anticipated_1_3": anticipated,
             "accounts": definitions, "events": events, "drafts": drafts, "monthly_support": monthly_schedule,
             "checkpoints": checkpoints}
 
@@ -751,7 +951,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    packs = [build("service-agency", "Cedar Studio", "Professional services / agency", 3000, None),
+    # Cedar Studio is the partnership: two partners, a recorded 60/40 profit share, and a
+    # separate capital and drawings account each (B61). Every other sample is a sole trader.
+    cedar_partners = [
+        {"key": "mira-vale", "name": "Mira Vale (Sample)", "profit_share": "0.600000",
+         "capital_code": "3100", "drawings_code": "3910", "capital": 15000, "drawings": 480},
+        {"key": "noel-reed", "name": "Noel Reed (Sample)", "profit_share": "0.400000",
+         "capital_code": "3110", "drawings_code": "3920", "capital": 10000, "drawings": 320},
+    ]
+    packs = [build("service-agency", "Cedar Studio", "Professional services / agency", 3000, None, partners=cedar_partners),
              build("retail-shop", "Willow Corner Shop", "Retail shop", 4500, (1050, 1000, 210, 200, 5)),
              build("seasonal-business", "Sunrise Garden Services", "Seasonal business", [1200, 1200, 2500, 4500, 5500, 6000, 6000, 5500, 4500, 2500, 1200, 1200], None),
              build("distributor", "Harbor Supply Company", "Distribution", 6000, (1700, 1600, 170, 160, 10)),
