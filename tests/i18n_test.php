@@ -291,7 +291,14 @@ test('every route renders under the pseudo-locale and the document language foll
     $routes = ['/login', '/', '/home', '/companies', '/accounts', '/transactions', '/transactions/new', '/general-journals',
         '/general-journals/new', '/reports', '/reports/trial-balance', '/reports/balance-sheet', '/reports/profit-loss',
         '/reports/cash-forecast', '/reports/ageing', '/periods', '/opening-balances', '/bank-reconciliation', '/parties',
-        '/ar', '/ap', '/inventory', '/purchasing', '/tax', '/modules', '/connections', '/help', '/pos', '/no-such-route'];
+        '/ar', '/ap', '/inventory', '/purchasing', '/tax', '/modules', '/connections', '/help', '/pos',
+        // The 1.2 screens. Every one of these was absent from this sweep until 21 September 2026,
+        // so nothing had ever requested them over HTTP. That is how two of them shipped unreachable:
+        // a screen missing from the pl_render() allowlist answers "Unknown template" as a 500, which
+        // this loop fails on, but only for a route it actually asks for. A new screen belongs here.
+        '/owner', '/numbering', '/accounting-policies', '/company-profile', '/contra-review',
+        '/reports/stock-by-location', '/tables', '/sample-guide',
+        '/no-such-route'];
     $rendered = 0;
     $translated = 0;
     $statuses = [];
