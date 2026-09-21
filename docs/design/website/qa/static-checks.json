@@ -1033,9 +1033,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30080,
-        "eager": 341510,
-        "total": 430215
+        "html": 31343,
+        "eager": 342773,
+        "total": 431478
       },
       "budgets": {
         "eager": null,
@@ -1068,7 +1068,89 @@
         },
         {
           "file": "for/accountants/index.html",
-          "bytes": 30080
+          "bytes": 31343
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "for/analysts/index.html": {
+      "path": "/for/analysts/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "PHP Ledger for analysts: what you can get out of it",
+      "descriptionLength": 160,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 18504,
+        "eager": 329934,
+        "total": 418639
+      },
+      "budgets": {
+        "eager": null,
+        "total": null
+      },
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "for/analysts/index.html",
+          "bytes": 18504
         }
       ],
       "lazyAssets": [
@@ -1115,9 +1197,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22001,
-        "eager": 333431,
-        "total": 422136
+        "html": 22169,
+        "eager": 333599,
+        "total": 422304
       },
       "budgets": {
         "eager": null,
@@ -1150,7 +1232,7 @@
         },
         {
           "file": "for/index.html",
-          "bytes": 22001
+          "bytes": 22169
         }
       ],
       "lazyAssets": [
@@ -1197,9 +1279,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28679,
-        "eager": 340109,
-        "total": 428814
+        "html": 29561,
+        "eager": 340991,
+        "total": 429696
       },
       "budgets": {
         "eager": null,
@@ -1232,7 +1314,7 @@
         },
         {
           "file": "for/small-businesses/index.html",
-          "bytes": 28679
+          "bytes": 29561
         }
       ],
       "lazyAssets": [
@@ -6298,7 +6380,7 @@
   "errors": [],
   "warnings": [],
   "summary": {
-    "pages": 74,
+    "pages": 75,
     "redirectStubs": 2,
     "errors": 0,
     "warnings": 0
