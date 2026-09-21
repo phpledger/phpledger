@@ -266,10 +266,17 @@ The capabilities this release registers:
 | `roles.manage` | company | new | Owner |
 | `reports.cost_settings.manage` | company | new | Owner |
 | `installation.admin` | installation | new (B44) | the first company's owner, seeded once |
+| `ownership.manage` | company | new (1.2 M8a, B63) | Owner |
+| `relatedparty.view` | company | new (1.2 M8a, B72/B74 under B58) | Owner |
+| `relatedparty.manage` | company | new (1.2 M8a, B72/B74) | Owner |
+
+The two related-party capabilities are separate on purpose. Reading a marker says that a named customer or supplier is a director, a director's spouse or a company a director controls, which is exactly the sensitive fact B58 keeps away from whoever manages customers; and the person who prepares the disclosure is usually not the person who decides who is key management personnel, so the read is grantable to a custom role without the write. `tests/ownership_test.php` builds exactly that role and proves it.
 
 Deliberately still on the old checks: `pl_require_company_access()` itself, which remains the membership boundary and the read/write gate that every capability check runs behind; `pl_can_write()`, the presentation helper over the same ENUM; and `pl_require_module()`'s manifest `permissions` list, which names roles because module contract 1 does — contract 2 in M8 is where that changes, and moving it earlier would change every bundled manifest's digest and force every company to re-review every module inside a Users-module milestone.
 
 Screens: `/users`, `/roles`, `/cost-visibility` (company-scoped, in Setup), `/profile` (yours, needs no company), and `/invitation` and `/reset-password`, which are reachable without a session because they are how an invited person and a reset password reach their first sign-in.
+
+1.2 M8a adds `/ownership` (the registers), `/reports/ownership` (the snapshot, book value per share, the partner capital account statement and, behind `relatedparty.view`, the related-party and director loan reports) and `/ownership/export` (the Open Cap Format download). Every one is in the `pl_render()` allowlist, the router's `$routes` table, the core manifest's `routes` and the route sweep in `tests/i18n_test.php`; the register's reference, with two-period worked examples, is [docs/accounting/OWNERSHIP-REGISTER.md](accounting/OWNERSHIP-REGISTER.md).
 
 Run the suite with `docker compose --profile test run --rm test php tests/run.php --suite=users`. Use your own Compose project name and a non-overlapping `PL_DOCKER_SUBNET` when another agent or worktree may be running: two stacks sharing the default project tear each other's database down.
 

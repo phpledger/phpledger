@@ -158,9 +158,18 @@ function pl_trading_policy_history(int $actorId, int $companyId): array
 
 /* ---------------------------------------------------------- company profile */
 
+/**
+ * The profile's free-text fields.
+ *
+ * 1.2 M8a adds the registration profile B63 asks for on top of B64's seller block: the legal
+ * form, the registration number and the authority that issued it. The registered address is
+ * already here as the three address lines, so it is not repeated. The incorporation date and
+ * the financial year end are structured rather than text and are handled beside this list.
+ */
 function pl_company_profile_fields(): array
 {
-    return ['legal_name', 'address_line1', 'address_line2', 'address_line3', 'phone', 'email', 'tax_registrations', 'footer_terms'];
+    return ['legal_name', 'legal_form', 'registration_number', 'registration_authority',
+        'address_line1', 'address_line2', 'address_line3', 'phone', 'email', 'tax_registrations', 'footer_terms'];
 }
 
 /** B64: per company, Admin-editable and empty by default. No field is ever invented. */
@@ -174,6 +183,15 @@ function pl_company_profile(int $actorId, int $companyId): array
     }
     $profile['revision'] = $row ? (int) $row['revision'] : 0;
     $profile['is_empty'] = implode('', array_map(static fn (string $f): string => $profile[$f], pl_company_profile_fields())) === '';
+    // The registration profile's structured half (B63). A legal form never selects an accounting
+    // framework: the framework is chosen, never inferred, and nothing reads these to decide a
+    // treatment. They are facts about the entity's registration that the letterhead prints.
+    $profile['incorporation_date'] = $row && $row['incorporation_date'] !== null ? (string) $row['incorporation_date'] : null;
+    $profile['financial_year_end_month'] = $row && $row['financial_year_end_month'] !== null ? (int) $row['financial_year_end_month'] : null;
+    $profile['financial_year_end_day'] = $row && $row['financial_year_end_day'] !== null ? (int) $row['financial_year_end_day'] : null;
+    $profile['financial_year_end'] = pl_financial_year_end_label($profile['financial_year_end_month'], $profile['financial_year_end_day']);
+    $profile['legal_form_label'] = pl_legal_forms()[$profile['legal_form']] ?? '';
+    $profile['is_empty'] = $profile['is_empty'] && $profile['incorporation_date'] === null && $profile['financial_year_end_month'] === null;
     return $profile;
 }
 
@@ -182,7 +200,8 @@ function pl_save_company_profile(int $actorId, int $companyId, array $input): ar
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($input['reason'] ?? null, 'Reason for this change', 500);
     $key = pl_request_key(pl_ledger_text($input['idempotency_key'] ?? null, 'Request key', 128));
-    $limits = ['legal_name' => 200, 'address_line1' => 200, 'address_line2' => 200, 'address_line3' => 200,
+    $limits = ['legal_name' => 200, 'legal_form' => 40, 'registration_number' => 80, 'registration_authority' => 160,
+        'address_line1' => 200, 'address_line2' => 200, 'address_line3' => 200,
         'phone' => 80, 'email' => 190, 'tax_registrations' => 300, 'footer_terms' => 2000];
     $data = [];
     foreach ($limits as $field => $limit) {
@@ -190,6 +209,25 @@ function pl_save_company_profile(int $actorId, int $companyId, array $input): ar
     }
     if ($data['email'] !== '' && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
         throw new DomainException('Enter a valid email address for the company profile, or leave it empty.');
+    }
+    // The registration profile (B63). Every part of it is optional, like the rest of B64.
+    if ($data['legal_form'] !== '' && !isset(pl_legal_forms()[$data['legal_form']])) {
+        throw new DomainException('Choose a legal form from the list, or leave it empty.');
+    }
+    $incorporation = pl_ledger_text($input['incorporation_date'] ?? '', 'Incorporation date', 10, false);
+    $data['incorporation_date'] = $incorporation === '' ? null : pl_ledger_date($incorporation);
+    $yearEnd = ['financial_year_end_month' => $input['financial_year_end_month'] ?? null,
+        'financial_year_end_day' => $input['financial_year_end_day'] ?? null];
+    foreach ($yearEnd as $field => $value) {
+        if ($value !== null && (!is_int($value) || $value < 1)) { throw new DomainException('Choose a financial year end, or leave it empty.'); }
+        $data[$field] = $value;
+    }
+    if (($data['financial_year_end_month'] === null) !== ($data['financial_year_end_day'] === null)) {
+        throw new DomainException('A financial year end needs both a month and a day, or neither.');
+    }
+    if ($data['financial_year_end_month'] !== null
+        && !pl_financial_year_end_valid((int) $data['financial_year_end_month'], (int) $data['financial_year_end_day'])) {
+        throw new DomainException('That is not a date that exists in every year. Choose a financial year end between 1 and the last day of the month, and not 29 February.');
     }
     $revision = $input['revision'] ?? null;
     if (!is_int($revision) || $revision < 0) { throw new DomainException('Reload the company profile before saving.'); }

@@ -72,6 +72,17 @@ function pl_read_catalog(): array
         'warehouses' => ['Read stock locations: warehouses and vans, with the van\'s driver, vehicle and route. Includes inactive locations so historical stock stays readable.', [], [], true],
         'stock_transfers' => ['Read stock transfers between locations as matched out/in pairs at carrying value, with the stock document number when one raised them. Transfers post no journal.', ['warehouse_id' => $id, 'from' => $date, 'to' => $date], [], true],
         'unapplied_credit' => ['Read unapplied customer or supplier credit (advances) at a date, with the advances control it reconciles to. Never netted against receivables or payables.', ['side' => ['type' => 'string', 'enum' => ['customer','supplier'], 'default' => 'customer'], 'as_of' => $date, 'party_id' => $id], [], true],
+        // The ownership register (B63, issue #92). These two are the read surface a country
+        // company-secretarial plugin needs to produce statutory forms and a filing calendar
+        // without carrying a second register.
+        //
+        // The related-party markers and the related-party and director loan reports are
+        // deliberately **absent** from this catalogue. Reading one takes the authority B58
+        // reserves for sensitive data, and a read connection is a token, not a person with a
+        // role: exposing a marker here would put "this customer is a director's wife" behind an
+        // API key. A plugin that needs it asks a signed-in person through the hook points.
+        'ownership_snapshot' => ['Read who owns the company at a date: share classes, holdings and percentages per holder, votes, fully diluted totals, the members register and the officers register.', ['as_of' => $date], ['as_of'], false],
+        'share_ledger' => ['Read the append-only share ledger: allotments, transfers, cancellations, bonus issues and re-designations, with their corrections. Transfers never carry a journal.', [], [], true],
     ];
     $catalog = [];
     foreach ($definitions as $name => [$description, $properties, $required, $paginated]) {
@@ -160,6 +171,39 @@ function pl_read_source(array $row, string $type, int $page, int $size): array
     return $result;
 }
 
+/**
+ * The ownership snapshot as an explicit DTO.
+ *
+ * The service returns the full register rows, which carry the recorder, the revision and the
+ * internal ids of every person; a read grant sees the ownership facts and nothing else. The
+ * related-party markers are not reachable from here at all — they are not in the catalogue.
+ *
+ * @return array<string,mixed>
+ */
+function pl_read_ownership_snapshot(int $actorId, int $companyId, string $asOf): array
+{
+    $snapshot = pl_ownership_snapshot($actorId, $companyId, $asOf);
+    $classes = array_map(static fn (array $class): array => pl_read_fields($class, ['id','code','name','class_type','currency','nominal_value','votes_per_share','authorised_shares','issued_shares','is_option_pool','is_active']), $snapshot['classes']);
+    $holdings = [];
+    foreach ($snapshot['holdings'] as $entry) {
+        $holdings[] = [
+            'stock_class' => pl_read_fields($entry['class'], ['id','code','name','class_type','issued_shares']),
+            'holders' => array_map(static fn (array $holder): array => pl_read_fields($holder, ['ownership_party_id','name','shares','percent_of_class','percent_outstanding','percent_fully_diluted','votes','percent_votes']), $entry['holders']),
+        ];
+    }
+    return [
+        'as_of' => $snapshot['as_of'],
+        'outstanding_shares' => $snapshot['outstanding_shares'],
+        'issued_shares' => $snapshot['issued_shares'],
+        'fully_diluted_shares' => $snapshot['fully_diluted_shares'],
+        'total_votes' => $snapshot['total_votes'],
+        'stock_classes' => $classes,
+        'holdings' => $holdings,
+        'members' => array_map(static fn (array $row): array => pl_read_fields($row, ['id','ownership_party_id','name','kind','effective_from','effective_to','profit_share']), $snapshot['members']),
+        'officers' => array_map(static fn (array $row): array => pl_read_fields($row, ['id','ownership_party_id','name','officer_role','role_label','role_title','appointed_on','resigned_on','has_significant_control','control_nature']), $snapshot['officers']),
+    ];
+}
+
 /** Report-only grants exclude transaction-level records and account statements. */
 function pl_connection_read_operations(array $connection): array
 {
@@ -210,6 +254,9 @@ function pl_read_operation(string $connectionId, string $operation, array $input
             'stock_transfers' => pl_read_page(array_map(static fn (array $row): array => pl_read_fields($row, ['out_movement_id','in_movement_id','movement_date','product_id','sku','product_name','quantity','value_base','from_warehouse_id','to_warehouse_id','document_id','document_kind','document_number']),
                 pl_list_stock_transfers($actor, $company, $book, array_diff_key($args, array_flip(['company_id','book_id','page','page_size'])))), $page, $size),
             'unapplied_credit' => pl_unapplied_credit($actor, $company, $book, $args['side'], $args['as_of'] ?? null, $args['party_id'] ?? null),
+            'ownership_snapshot' => pl_read_ownership_snapshot($actor, $company, $args['as_of']),
+            'share_ledger' => pl_read_page(array_map(static fn (array $row): array => pl_read_fields($row, ['id','effective_date','event_type','type_label','class_code','class_name','quantity','from_name','to_name','to_class_code','consideration_currency','consideration_amount','nominal_total','premium_total','certificate_reference','journal_id','reversal_of_id','status']),
+                pl_list_share_events($actor, $company, 1000)), $page, $size),
             default => throw new LogicException('Read operation is not implemented.'),
         };
         if ($operation === 'unapplied_credit') {

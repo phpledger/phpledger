@@ -78,6 +78,9 @@ $suites[] = 'users_test.php';
 // module and inventory suites because a skeleton turns real modules on, and its last test
 // starts its own HTTP server to walk the five wizard stages.
 $suites[] = 'onboarding_skeleton_test.php';
+// 1.2.1 M8a: the ownership register. After the Users suite, because every write in it is behind
+// a capability and the fixture grants them through the same role machinery.
+$suites[] = 'ownership_test.php';
 // 1.2 M8: the plugin runtime. It runs last because it writes packages into a temporary package
 // directory of its own and points PL_PLUGIN_DIRECTORY at it; the last test clears both, so no
 // other suite and no child process the sweep starts ever sees a fixture package.

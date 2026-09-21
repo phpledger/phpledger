@@ -29,6 +29,9 @@
             <?php $contact = trim(implode(' · ', array_filter([$letterhead['phone'] ?? '', $letterhead['email'] ?? '']))); ?>
             <?php if ($contact !== ''): ?><p class="print-company-meta"><?= pl_e($contact) ?></p><?php endif; ?>
             <?php if (($letterhead['registrations'] ?? '') !== ''): ?><p class="print-company-meta"><?= pl_e($letterhead['registrations']) ?></p><?php endif; ?>
+            <?php /* B63: the legal form and the registration several jurisdictions require on a business letter. Optional, like the rest of the profile. */ ?>
+            <?php $registered = trim(implode(' · ', array_filter([$letterhead['legal_form'] ?? '', $letterhead['incorporation'] ?? '']))); ?>
+            <?php if ($registered !== ''): ?><p class="print-company-meta"><?= pl_e($registered) ?></p><?php endif; ?>
             <p class="print-company-meta"><?= pl_e(trim($letterhead['book'] . ' · ' . $letterhead['currency'], ' ·')) ?></p>
         </div>
         <div class="print-doc-title">
