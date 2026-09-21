@@ -216,5 +216,10 @@ JOIN (SELECT 'stock_issue' AS document_type, 'ISS' AS prefix
 LEFT JOIN pl_document_series s ON s.book_id = b.id AND s.document_type = t.document_type
 WHERE s.id IS NULL
 SQL,
-    "ALTER TABLE pl_core_audit MODIFY entity_type ENUM('account','general_journal','product','warehouse','document_series','stock_document','gate_pass','van_settlement') NOT NULL",
+    "ALTER TABLE pl_core_audit MODIFY entity_type ENUM('account','general_journal','product','warehouse','document_series',"
+    // The trading-documents migration (037) widened this ENUM too. A MODIFY replaces the whole
+    // list, so this one must carry both sets or the earlier values are dropped and their audit
+    // rows truncate. Any later migration that touches it repeats the union.
+    . "'product_pack','sales_staff','area','company_profile','trading_policy',"
+    . "'stock_document','gate_pass','van_settlement') NOT NULL",
 ];

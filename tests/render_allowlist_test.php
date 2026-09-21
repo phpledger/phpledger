@@ -18,6 +18,9 @@ function render_allowlist(): array
     $start = strpos($source, 'function pl_render(');
     assert_true($start !== false, 'pl_render() is where the template allowlist lives.');
     $body = substr($source, (int) $start);
+    // Strip // comments first: the list carries explanatory lines, and a quoted word inside one
+    // would otherwise read as an allowed template name.
+    $body = (string) preg_replace('~//.*~', '', $body);
     assert_true((bool) preg_match('/\$allowed = \[(.*?)\];/s', $body, $match), 'pl_render() declares $allowed.');
     $names = [];
     foreach (explode(',', (string) preg_replace('/\s+/', ' ', $match[1])) as $entry) {
