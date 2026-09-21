@@ -1309,6 +1309,46 @@
     {
       "source": "www/phpledger/includes/functions/advance_functions.php",
       "destination": "www/phpledger/includes/functions/advance_functions.php"
+    },
+    {
+      "source": "resources/guidance/README.md",
+      "destination": "resources/guidance/README.md"
+    },
+    {
+      "source": "resources/guidance/concepts/contra-account.php",
+      "destination": "resources/guidance/concepts/contra-account.php"
+    },
+    {
+      "source": "resources/guidance/concepts/debit-and-credit.php",
+      "destination": "resources/guidance/concepts/debit-and-credit.php"
+    },
+    {
+      "source": "resources/guidance/concepts/drawings.php",
+      "destination": "resources/guidance/concepts/drawings.php"
+    },
+    {
+      "source": "resources/guidance/concepts/free-goods.php",
+      "destination": "resources/guidance/concepts/free-goods.php"
+    },
+    {
+      "source": "resources/guidance/concepts/owner-capital.php",
+      "destination": "resources/guidance/concepts/owner-capital.php"
+    },
+    {
+      "source": "resources/guidance/concepts/unapplied-credit.php",
+      "destination": "resources/guidance/concepts/unapplied-credit.php"
+    },
+    {
+      "source": "resources/guidance/jurisdictions/AE.php",
+      "destination": "resources/guidance/jurisdictions/AE.php"
+    },
+    {
+      "source": "resources/guidance/jurisdictions/PK.php",
+      "destination": "resources/guidance/jurisdictions/PK.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/guidance_functions.php",
+      "destination": "www/phpledger/includes/functions/guidance_functions.php"
     }
   ]
 }

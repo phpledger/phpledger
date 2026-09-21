@@ -673,6 +673,9 @@ function pl_render(string $view, array $data = []): never
     $title = $data['title'] ?? 'PHP Ledger';
     $company = $data['company'] ?? null;
     $user = $data['user'] ?? null;
+    // One place decides which jurisdiction the help bubbles on this page speak for (B67), so a
+    // template never has to pass a company to a bubble and no screen can pick a different one.
+    pl_guidance_use_company(is_array($company) ? $company : null);
     $regional = $_SESSION['regional_suggestion'] ?? [];
     $notice = $_SESSION['notice'] ?? '';
     unset($_SESSION['notice']);

@@ -144,6 +144,56 @@ function pl_ui_sheet(string $title,callable $body,bool $open=false,string $butto
     $body(); echo '</div></details>';
 }
 
+/**
+ * The in-app accounting guidance bubble (owner decisions B66 and B67).
+ *
+ * A question mark beside a label, a column heading or a total. Activating it opens a small bubble
+ * with the shared explanation of that concept, the line tying it to what this screen does, and —
+ * where the company's jurisdiction has a verified note — the local practice, labelled with the
+ * country so nobody reads the shared text as local law.
+ *
+ * Native <details>/<summary>, so it works with no JavaScript, is reachable and operable from the
+ * keyboard, announces its expanded state, and traps nothing. app.js adds Escape, click outside and
+ * closing the others; none of that is required for the bubble to be readable.
+ *
+ * $placement picks the edge the bubble hangs from, because the CSP forbids an inline style and
+ * therefore forbids positioning it from JavaScript: 'start' (default), 'end' for a trigger near
+ * the inline-end edge of the screen, and 'sheet' for a trigger inside a scrolling region such as
+ * .table-wrap, whose overflow would otherwise clip it.
+ *
+ * <details> is flow content: place the call beside a heading, a cell or a label, never inside a
+ * <p>, a <label> or an <h1>-<h6>, which accept phrasing content only.
+ */
+function pl_ui_help(string $concept, string $placement = 'start'): void
+{
+    $entry = pl_guidance_entry($concept);
+    $placement = in_array($placement, ['start', 'end', 'sheet'], true) ? $placement : 'start';
+    $title = pl_t($entry['title']);
+    echo '<details class="help" data-help><summary><span aria-hidden="true">?</span><span class="sr-only">'
+        . pl_e(pl_t('Explain {concept}', ['concept' => $title])) . '</span></summary>'
+        . '<div class="help-bubble help-bubble-' . $placement . '" role="note">'
+        . '<p class="help-title">' . pl_e($title) . '</p>'
+        . '<p class="help-text">' . pl_e(pl_t($entry['explanation'])) . '</p>';
+    if ($entry['here'] !== '') {
+        echo '<p class="help-text help-here">' . pl_e(pl_t($entry['here'])) . '</p>';
+    }
+    if ($entry['note'] !== null) {
+        echo '<div class="help-local"><p class="help-local-label">'
+            . pl_e(pl_t('In {country}', ['country' => $entry['note']['country_name']])) . '</p>'
+            . '<p class="help-text">' . pl_e(pl_t($entry['note']['note'])) . '</p>'
+            . '<p class="help-source">' . pl_e(pl_t('Source: {source}. Checked {date}.',
+                ['source' => $entry['note']['source'], 'date' => pl_date_label($entry['note']['checked_on'])])) . '</p></div>';
+    }
+    if ($entry['document'] !== null) {
+        echo '<a class="link" href="' . pl_e(pl_url($entry['document']['href'])) . '">'
+            . pl_e(pl_t($entry['document']['label'])) . '</a>';
+    }
+    if ($entry['review'] !== 'reviewed') {
+        echo '<p class="help-draft">' . pl_e(pl_t('Draft wording, pending the accounting guidance review.')) . '</p>';
+    }
+    echo '</div></details>';
+}
+
 function pl_ui_pagination(string $path, array $filters, int $page, int $pages): void
 {
     $url=static fn(array $query):string=>in_array($path,['/transactions','/general-journals','/ar','/ap','/purchasing'],true)?pl_workflow_url($path,$query):pl_url($path,$query);

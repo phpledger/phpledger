@@ -66,6 +66,7 @@ require_once __DIR__ . '/functions/setup_functions.php';
 require_once __DIR__ . '/functions/document_functions.php';
 require_once __DIR__ . '/functions/core_functions.php';
 require_once __DIR__ . '/functions/regional_functions.php';
+require_once __DIR__ . '/functions/guidance_functions.php';
 require_once __DIR__ . '/functions/report_functions.php';
 require_once __DIR__ . '/functions/owner_functions.php';
 require_once __DIR__ . '/functions/export_functions.php';

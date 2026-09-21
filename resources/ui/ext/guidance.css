@@ -1,0 +1,125 @@
+/* In-app accounting guidance — the help bubble (owner decisions B66 and B67).
+   ---------------------------------------------------------------------------
+   Rendered by pl_ui_help() as native <details>/<summary>, so the question mark opens and closes
+   with the keyboard and on a phone with no JavaScript at all. app.js only adds Escape, click
+   outside, and closing the other bubbles.
+
+   Three rules this file exists to keep:
+   1. Opening a bubble must not move the page. The bubble is taken out of flow (absolute, or fixed
+      on a phone), never expanded inline under the trigger the way a plain <details> would.
+   2. It must stay on screen at 390px. Under 30rem the bubble stops being anchored to the trigger
+      and becomes a sheet pinned to the bottom of the viewport, so it cannot run off either edge.
+   3. Logical properties only — Urdu and Arabic are coming, and a bubble that opens to the "right"
+      would open off-screen in RTL. inset-inline-start/-end flip with the writing direction. */
+
+@layer components {
+  /* <details> is flow content, so the trigger is the <details> itself rather than a wrapper span:
+     a <span> around it would be invalid markup. inline-block keeps it beside the label it explains
+     and gives the absolutely positioned bubble its containing block. */
+  .help {
+    display: inline-block;
+    position: relative;
+    vertical-align: text-bottom;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .help > summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.0625rem;
+    block-size: 1.0625rem;
+    margin-inline-start: .25rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-ink-muted);
+    font-size: .6875rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    list-style: none;
+  }
+  .help > summary::-webkit-details-marker { display: none; }
+  .help > summary:hover { color: var(--color-accent); border-color: var(--color-accent); }
+  .help > summary:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .help[open] > summary {
+    background: var(--color-selected);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .help-bubble {
+    position: absolute;
+    z-index: 70;
+    inset-block-start: calc(100% + .375rem);
+    inline-size: min(21rem, calc(100vw - 2rem));
+    display: flex;
+    flex-direction: column;
+    gap: .375rem;
+    padding: .75rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-popover);
+    color: var(--color-ink);
+    font-size: .8125rem;
+    line-height: 1.5;
+    text-align: start;
+    white-space: normal;
+  }
+  /* Which edge the bubble hangs from. The caller chooses, because nothing here may position with
+     JavaScript: an inline style attribute is forbidden by the application's CSP. */
+  .help-bubble-start { inset-inline-start: 0; }
+  .help-bubble-end { inset-inline-end: 0; }
+  /* For a trigger inside a scrolling region (.table-wrap has overflow-x:auto, which would clip an
+     absolutely positioned bubble): fixed positioning escapes the ancestor's overflow entirely. */
+  .help-bubble-sheet {
+    position: fixed;
+    inset-block: auto .75rem;
+    inset-inline: auto .75rem;
+    inline-size: min(21rem, calc(100vw - 1.5rem));
+    max-block-size: 70vh;
+    overflow-y: auto;
+  }
+
+  .help-title { font-weight: 600; font-size: .875rem; }
+  .help-text { margin: 0; }
+  .help-here { color: var(--color-ink-muted); }
+  .help-local {
+    display: flex;
+    flex-direction: column;
+    gap: .125rem;
+    padding-block-start: .375rem;
+    border-block-start: 1px solid var(--color-border);
+  }
+  .help-local-label {
+    font-size: var(--text-eyebrow);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--color-ink-muted);
+  }
+  .help-source { font-size: var(--text-eyebrow); color: var(--color-ink-muted); }
+  .help-draft { font-size: var(--text-eyebrow); color: var(--color-warning); }
+
+  /* A phone: the bubble stops chasing the trigger and pins itself to the bottom of the viewport,
+     full width less a gutter. At 390px this is the only placement that cannot run off an edge,
+     and being fixed it is also immune to any clipping ancestor. */
+  @media (max-width: 30rem) {
+    .help-bubble {
+      position: fixed;
+      inset-block: auto .75rem;
+      inset-inline: .75rem;
+      inline-size: auto;
+      max-block-size: 70vh;
+      overflow-y: auto;
+    }
+  }
+
+  /* Printing a report should print its figures, not the affordances over them. */
+  @media print {
+    .help { display: none; }
+  }
+}

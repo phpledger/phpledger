@@ -1,0 +1,63 @@
+# In-app accounting guidance — the help catalogue
+
+Owner decisions **B66** (the application teaches accounting where the work happens) and **B67**
+(the guidance is not Pakistan-only). This directory is the **interface copy** the help bubbles
+render. The research that copy is drawn from lives in `docs/accounting/guidance/`; this is not a
+second place to do research.
+
+```
+resources/guidance/
+  concepts/<concept-id>.php        one shared explanation per concept
+  jurisdictions/<CC>.php           local notes for one country, keyed by concept id
+```
+
+Both are plain `return [...]` PHP files with no logic, loaded on demand by
+`www/phpledger/includes/functions/guidance_functions.php`. A screen with ten bubbles loads ten
+small concept files and **one** jurisdiction file — the company's own. It never loads the other
+twelve jurisdictions.
+
+## A concept file
+
+`concepts/debit-and-credit.php`:
+
+```php
+return [
+    'title'       => 'Debit and credit',        // required, short
+    'explanation' => '…',                       // required, 40–70 words, plain language
+    'here'        => '…',                       // optional, ties it to what this screen does
+    'document'    => ['label' => '…', 'href' => '/help'],   // optional, an in-app path
+    'review'      => 'placeholder',             // 'placeholder' | 'reviewed'
+];
+```
+
+`review` is `placeholder` until the guidance review has passed the wording; the bubble says so on
+screen. Every string here is an English source string for `pl_t()` — the component translates it,
+so keep it a complete sentence and do not concatenate.
+
+## A jurisdiction file
+
+`jurisdictions/PK.php`, keyed by the same concept ids:
+
+```php
+return [
+    'unapplied-credit' => [
+        'note'       => '…',                 // required
+        'status'     => 'verified',          // 'verified' | 'unverified'
+        'source'     => '…',                 // required when verified: the authority and paragraph
+        'checked_on' => '2026-09-21',        // required when verified: YYYY-MM-DD
+    ],
+];
+```
+
+**Only `verified` notes with a source and a check date ever reach a screen.** The loader drops
+everything else, so an unfinished or unsourced note is invisible rather than wrong — B67's rule
+that an unsourced local claim is worse than none is enforced in code, not by review.
+
+The thirteen jurisdictions are the countries behind `pl_base_currency_options()` (US, EU, GB, PK,
+IN, MY, BD, LK, NP, SG) plus AE, SA and OM. `EU` is the euro area, which is not an ISO 3166
+country; it is used because the application offers the euro as a base currency.
+
+## Adding to it
+
+See `docs/DEVELOPMENT.md`, "Adding a help concept or a jurisdiction note". New files must also be
+added to `tools/package-files.json`, or they will not ship in the release archive.

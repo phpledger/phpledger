@@ -37,7 +37,7 @@ function pl_ui_commercial_lines(array $rows, array $options, bool $credit = fals
     <div class="table-wrap relative" tabindex="0" role="region" aria-label="<?= pl_e(pl_t('Document lines')) ?>">
     <table class="table doc-lines-table"><caption class="sr-only"><?= pl_e(pl_t('Document lines')) ?></caption><thead><tr>
     <?php foreach ($fields as $name => $label): ?><th scope="col" class="<?= $widths[$name] ?? '' ?><?= in_array($name, $numeric, true) ? ' text-end' : '' ?>"><?= pl_e($label) ?></th><?php endforeach; ?>
-    <?php if ($tradingOn): ?><th scope="col" class="w-[6%]"><?= pl_e(pl_t('Free')) ?></th><?php endif; ?>
+    <?php if ($tradingOn): ?><th scope="col" class="w-[6%]"><?= pl_e(pl_t('Free')) ?><?php pl_ui_help('free-goods', 'sheet'); ?></th><?php endif; ?>
     <th scope="col" class="text-end <?= $purchase ? 'w-[15%]' : ($tradingOn ? 'w-[10%]' : 'w-[10%]') ?>"><?= pl_e(pl_t('Entered amount')) ?></th><th scope="col" class="w-[4%]"><span class="sr-only"><?= pl_e(pl_t('Actions')) ?></span></th></tr></thead><tbody data-commercial-rows>
     <?php foreach ($rows as $index => $raw): $line = is_array($raw) ? $raw : []; $isFree = $tradingOn && (string) ($line['is_free_goods'] ?? '') === '1'; ?>
     <tr data-commercial-row<?= $isFree ? ' class="doc-line-free" data-commercial-free' : '' ?>>
