@@ -101,4 +101,7 @@ require_once __DIR__ . '/functions/stock_document_functions.php';
 require_once __DIR__ . '/functions/ar_ap_functions.php';
 require_once __DIR__ . '/functions/purchasing_functions.php';
 require_once __DIR__ . '/functions/opening_conversion_functions.php';
+// 1.2.1 M10 (B50): a sample company's structure, read separately from its history, so a new
+// business can start from it. Loaded after the services it composes.
+require_once __DIR__ . '/functions/sample_structure_functions.php';
 require_once __DIR__ . '/functions/branding_functions.php';

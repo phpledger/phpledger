@@ -402,6 +402,12 @@ test('every route renders under the pseudo-locale and the document language foll
         // 1.2 M11: the language switch. It is a POST, so a GET is a 405 carrying the shared
         // unavailable document — which is itself a page whose lang and dir this sweep checks.
         '/locale',
+        // 1.2.1 M10: the redesigned business wizard (B50) and the sample chooser beside it.
+        // Neither had ever been requested over HTTP by this sweep, which is the same hole that
+        // shipped two screens unreachable in 1.2. A later stage redirects to the stage the
+        // draft has actually reached, and the sweep follows no redirect, so /onboarding is what
+        // proves the screen renders; tests/onboarding_skeleton_test.php walks all five stages.
+        '/onboarding', '/onboarding?stage=start', '/sample-chooser',
         '/no-such-route'];
     $rendered = 0;
     $translated = 0;

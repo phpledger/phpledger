@@ -1,0 +1,307 @@
+{
+  "contract": 1,
+  "id": "distributor",
+  "version": "1.0.0",
+  "name": "Harbor Supply Company",
+  "business": "Distribution",
+  "source_digest": "e1b1456a63eb0b72ea763ccfd928e5683e26fbd9dd1e9ebb6fb9f340bf862338",
+  "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
+  "accounts": [
+    {
+      "code": "1010",
+      "name": "Reserve bank",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1020",
+      "name": "Cash till",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1030",
+      "name": "Petty cash",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1200",
+      "name": "Prepaid insurance",
+      "type": "asset"
+    },
+    {
+      "code": "1300",
+      "name": "Equipment at cost",
+      "type": "asset"
+    },
+    {
+      "code": "1390",
+      "name": "Accumulated depreciation",
+      "type": "asset",
+      "is_contra": true
+    },
+    {
+      "code": "1500",
+      "name": "Staff advances",
+      "type": "asset"
+    },
+    {
+      "code": "2100",
+      "name": "Accrued staff bonus",
+      "type": "liability"
+    },
+    {
+      "code": "2200",
+      "name": "Term loan",
+      "type": "liability"
+    },
+    {
+      "code": "2300",
+      "name": "Net salaries payable",
+      "type": "liability"
+    },
+    {
+      "code": "2310",
+      "name": "Withholding tax payable",
+      "type": "liability"
+    },
+    {
+      "code": "2320",
+      "name": "Social security payable",
+      "type": "liability"
+    },
+    {
+      "code": "2330",
+      "name": "Provident fund payable",
+      "type": "liability"
+    },
+    {
+      "code": "2400",
+      "name": "Deferred support income",
+      "type": "liability"
+    },
+    {
+      "code": "5100",
+      "name": "Fictional staff salaries",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5150",
+      "name": "Employer contributions",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5200",
+      "name": "Rent",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5300",
+      "name": "Utilities",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5400",
+      "name": "Insurance expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5500",
+      "name": "Depreciation expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5600",
+      "name": "Loan interest",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5800",
+      "name": "Loss on asset disposal",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "1400",
+      "name": "Stock - manual support schedule",
+      "type": "asset"
+    },
+    {
+      "code": "5700",
+      "name": "Cost of sales - manual schedule",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "1410",
+      "name": "FMCG distribution stock",
+      "type": "asset"
+    },
+    {
+      "code": "4100",
+      "name": "FMCG distribution income",
+      "type": "income"
+    },
+    {
+      "code": "5110",
+      "name": "FMCG distribution cost of sales",
+      "type": "expense",
+      "report_classification": "cost_of_sales"
+    },
+    {
+      "code": "5120",
+      "name": "Route and delivery costs",
+      "type": "expense"
+    },
+    {
+      "code": "1210",
+      "name": "Route collections awaiting deposit",
+      "type": "asset"
+    }
+  ],
+  "open_item_accounts": [
+    "1100",
+    "2000"
+  ],
+  "modules": [
+    "inventory",
+    "inventory-locations",
+    "purchasing",
+    "trading-documents"
+  ],
+  "packages": [],
+  "number_series": [
+    {
+      "type": "invoice",
+      "prefix": "INV",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "customer_credit",
+      "prefix": "CR",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "bill",
+      "prefix": "BILL",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "supplier_credit",
+      "prefix": "SC",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "stock_issue",
+      "prefix": "ISS",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "stock_reissue",
+      "prefix": "RISS",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "stock_return",
+      "prefix": "RTN",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "gate_pass",
+      "prefix": "GP",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    }
+  ],
+  "policies": {
+    "discount_posting": "net",
+    "free_goods_output_tax": "none",
+    "cash_on_invoice_cap": "0.0000"
+  },
+  "parties": [
+    {
+      "legal_name": "Demo Business Buyer (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1100",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Demo Counter Customer (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1100",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Demo Supply Partner (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2000",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Demo Premises Provider (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2000",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    }
+  ],
+  "products": [
+    {
+      "sku": "SNACK-CASE",
+      "name": "Packaged snack case (Sample)",
+      "kind": "stock",
+      "base_unit": "case",
+      "selling_price": "24.0000",
+      "sales_code": "4100",
+      "purchase_code": "5000",
+      "inventory_code": "1410",
+      "cogs_code": "5110"
+    },
+    {
+      "sku": "WATER-CASE",
+      "name": "Bottled water case (Sample)",
+      "kind": "stock",
+      "base_unit": "case",
+      "selling_price": "12.0000",
+      "sales_code": "4100",
+      "purchase_code": "5000",
+      "inventory_code": "1410",
+      "cogs_code": "5110"
+    }
+  ],
+  "tax_codes": []
+}

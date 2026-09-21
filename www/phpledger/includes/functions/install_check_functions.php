@@ -295,6 +295,7 @@ function pl_install_step_label(string $version): string
         '039_advances_and_refunds' => 'Adding customer and supplier advances',
         '040_contra_accounts_and_partner_identity' => 'Marking contra accounts and separating partner accounts',
         '041_users_and_roles' => 'Adding users, roles and permissions',
+        '043_sample_skeletons' => 'Recording businesses started from a sample structure',
     ];
     if (isset($labels[$version])) {
         return $labels[$version];

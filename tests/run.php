@@ -74,6 +74,10 @@ $suites[] = 'guidance_test.php';
 // module suites because the inert-grant test enables and disables a real module.
 $suites[] = 'capability_equivalence_test.php';
 $suites[] = 'users_test.php';
+// 1.2.1 M10 (B50): starting a business from a sample company's structure. It runs after the
+// module and inventory suites because a skeleton turns real modules on, and its last test
+// starts its own HTTP server to walk the five wizard stages.
+$suites[] = 'onboarding_skeleton_test.php';
 if (($argv[1] ?? '') === '--suite=ar-lists') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','ar_list_test.php','reconciliation_test.php','list_test.php','document_series_test.php'];
 }
@@ -139,6 +143,11 @@ if (($argv[1] ?? '') === '--suite=users') {
 }
 if (($argv[1] ?? '') === '--suite=modules') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'purchasing_test.php', 'pos_test.php', 'module_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=onboarding') {
+    $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php',
+        'module_test.php', 'inventory_test.php', 'purchasing_test.php', 'tax_test.php', 'document_series_test.php',
+        'onboarding_skeleton_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=owner') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'account_code_test.php', 'report_tree_test.php', 'owner_test.php'];

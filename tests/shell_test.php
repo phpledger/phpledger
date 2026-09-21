@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/www/phpledger/includes/functions/web_functions.php';
+// The wizard's controller is loaded by its route, not by the bootstrap, so the shape assertions
+// below have to ask for it themselves.
+require_once dirname(__DIR__) . '/www/phpledger/includes/functions/onboarding_web_functions.php';
 
 test('workspace shell preserves view data while rendering navigation', function (): void {
     if (session_status() !== PHP_SESSION_ACTIVE) { pl_session_start(false); }
@@ -41,31 +44,40 @@ test('shared shell exposes the candidate version and grouped navigation contract
     assert_true(is_string($guide) && str_contains($guide, 'industry_profile'), 'Sample guide does not expose the selected vertical profile.');
 });
 
-test('setup shell exposes six focused decisions and an explicit chart choice', function () use ($layout, $styles): void {
-    $onboarding = file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/onboarding.php');
-    $controller = file_get_contents(dirname(__DIR__) . '/www/phpledger/public/index.php');
-    $chooser = file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/sample-chooser.php');
-    // M11 externalised this label. It used to be built by concatenation, which is untranslatable
-    // and comes apart in a right-to-left locale, and it is now one pl_t() string with a {step}
-    // placeholder. The fact this assertion guards has not moved: the flow names six steps, and the
-    // preview is the fifth of them. The rendered English is byte-for-byte what it was.
-    assert_true(is_string($onboarding) && str_contains($onboarding, 'Step {step} of 6'), 'Onboarding is not a six-step flow.');
-    assert_true(is_string($onboarding) && str_contains($onboarding, "'step' => \$preview ? 5 : \$activeStep"), 'Onboarding preview is not the fifth of six steps.');
-    assert_true(is_string($onboarding) && str_contains($onboarding, 'name="chart_choice"'), 'Neutral/bring-your-own chart choice is missing.');
-    assert_true(is_string($onboarding) && str_contains($onboarding, 'data-fiscal-year-end-choice') && str_contains($onboarding, 'data-fiscal-custom-group'), 'Fiscal year-end choices do not provide the progressive disclosure hooks.');
-    assert_true(is_string($controller) && str_contains($controller, "if (\$action === 'next')"), 'Onboarding step transitions are not server handled.');
-    assert_true(is_string($controller) && str_contains($controller, "'/sample-chooser' => ['GET', 'POST']"), 'Local sample chooser route is missing.');
-    assert_true(is_string($controller) && str_contains($controller, "pl_demo_sample(\$sampleId)"), 'Sample selection does not resolve through the bundled catalogue.');
-    assert_true(is_string($chooser) && str_contains($chooser, 'name="sample_pack"') && str_contains($chooser, 'pl_demo_sample_choices()'), 'Sample chooser does not expose the bundled selection contract.');
-    // Same component, same step list, same active step; M11 put the labels through pl_t() on the
-    // way in, because pl_ui_stepper() escapes but does not translate.
-    assert_true(is_string($styles) && str_contains($styles, '.stepper-step') && str_contains($onboarding, "pl_ui_stepper(array_map('pl_t', \$steps), \$activeStep)"), 'Setup does not use the styled shared progress component.');
-    ob_start();
-    pl_ui_stepper(['Starting point','Business identity','Period and profile','Chart choice','Preview','Confirm'],5);
-    $progress=(string)ob_get_clean();
-    assert_same(6,substr_count($progress,'<li '));
-    assert_same(1,substr_count($progress,'aria-current="step"'));
-    assert_true(str_contains($progress,'stepper-label">Preview</span>'));
+/**
+ * The wizard was six linear steps until 1.2.1. Owner decision B50 replaced it with five named
+ * stages in the installer's own Workbench language, and added the Source stage, which is where
+ * a new business chooses between a blank chart, a sample company's structure and a full sample.
+ * These assertions describe that shape; the behaviour is proved in onboarding_skeleton_test.php.
+ */
+test('setup shell is five Workbench stages with an explicit source choice', function () use ($layout, $styles): void {
+    $onboarding = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/onboarding.php');
+    $controller = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/public/index.php');
+    $wizard = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/includes/functions/onboarding_web_functions.php');
+    $chooser = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/sample-chooser.php');
+    assert_same(['start' => 'Start', 'business' => 'Business', 'source' => 'Source', 'review' => 'Review', 'ready' => 'Ready'],
+        pl_onboarding_stages(), 'The wizard is not the five named stages B50 asked for.');
+    // The same tray, slot states and manifest card the installer uses, not a second vocabulary.
+    foreach (['bench-tray', 'tray-slot', 'is-current', 'is-done', 'is-pending', 'bench-head', 'bench-body', 'bench-actions', 'manifest-card'] as $shared) {
+        assert_true(str_contains($onboarding, $shared), 'The wizard does not use the installer component ' . $shared . '.');
+    }
+    assert_true(str_contains($styles, '.tray-slot') && str_contains($styles, '.bench-tray.is-labelled'),
+        'The labelled tray the wizard needs is not in the stylesheet.');
+    assert_true(str_contains($onboarding, 'name="source"') && str_contains($onboarding, 'value="skeleton"') && str_contains($onboarding, 'value="full"'),
+        'The Source stage does not offer blank, skeleton and full.');
+    assert_true(str_contains($onboarding, 'name="sample_pack"'), 'The Source stage cannot choose a sample company.');
+    assert_true(str_contains($onboarding, 'name="chart_choice"'), 'Neutral/bring-your-own chart choice is missing.');
+    assert_true(str_contains($onboarding, 'data-fiscal-year-end-choice') && str_contains($onboarding, 'data-fiscal-custom-group'),
+        'Fiscal year-end choices do not provide the progressive disclosure hooks.');
+    assert_true(str_contains($wizard, "if (\$action === 'next')"), 'Onboarding stage transitions are not server handled.');
+    assert_true(str_contains($wizard, 'pl_sample_structure_activate_packages'), 'The wizard does not reach the package seam.');
+    assert_true(str_contains($controller, "'/sample-chooser' => ['GET', 'POST']"), 'Local sample chooser route is missing.');
+    assert_true(str_contains($controller, 'pl_web_onboarding($actorId, $user, $method)'), 'The wizard route does not reach its controller.');
+    assert_true(str_contains($chooser, 'name="sample_pack"') && str_contains($chooser, 'pl_demo_sample_choices()'),
+        'Sample chooser does not expose the bundled selection contract.');
+    // Nothing is created before the Review stage is confirmed, and the Review stage says so.
+    assert_true(str_contains($onboarding, 'Not created yet') && str_contains($onboarding, 'value="confirm"'),
+        'The Review stage does not hold the single point of creation.');
 });
 
 test('sample import has a bounded operational replay path', function (): void {

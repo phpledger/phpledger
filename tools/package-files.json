@@ -1425,6 +1425,66 @@
     {
       "source": "resources/lang/ur.php",
       "destination": "resources/lang/ur.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/sample_structure_functions.php",
+      "destination": "www/phpledger/includes/functions/sample_structure_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/onboarding_web_functions.php",
+      "destination": "www/phpledger/includes/functions/onboarding_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/043_sample_skeletons.php",
+      "destination": "www/phpledger/install/migrations/043_sample_skeletons.php"
+    },
+    {
+      "source": "resources/sample-structures/accounting-starter-1.0.0.json",
+      "destination": "resources/sample-structures/accounting-starter-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/distributor-1.0.0.json",
+      "destination": "resources/sample-structures/distributor-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/jewelry-studio-1.0.0.json",
+      "destination": "resources/sample-structures/jewelry-studio-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/light-manufacturing-1.0.0.json",
+      "destination": "resources/sample-structures/light-manufacturing-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/membership-club-1.0.0.json",
+      "destination": "resources/sample-structures/membership-club-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/pharmacy-1.0.0.json",
+      "destination": "resources/sample-structures/pharmacy-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/restaurant-1.0.0.json",
+      "destination": "resources/sample-structures/restaurant-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/retail-shop-1.0.0.json",
+      "destination": "resources/sample-structures/retail-shop-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/seasonal-business-1.0.0.json",
+      "destination": "resources/sample-structures/seasonal-business-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/service-agency-1.0.0.json",
+      "destination": "resources/sample-structures/service-agency-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/service-workshop-1.0.0.json",
+      "destination": "resources/sample-structures/service-workshop-1.0.0.json"
+    },
+    {
+      "source": "resources/sample-structures/trader-1.0.0.json",
+      "destination": "resources/sample-structures/trader-1.0.0.json"
     }
   ]
 }
