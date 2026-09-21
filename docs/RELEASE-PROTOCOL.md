@@ -46,7 +46,15 @@ Updated at the 1.1.2 patch. The rows record what is live now; the 19 September w
 
 `npm` carries no application package, and that is deliberate: npm cannot install a PHP application, and a package claiming to would misrepresent the channel. The npm packages are a scaffolder and an API client. They follow the same version but are not an installation channel.
 
-**`create-phpledger`** is built and lives in `clients/js/create-phpledger`. It reads the current stable version from the feed, then writes a `compose.yaml` pinned to that release, a `.env` with generated database and administrator passwords, and a `.gitignore` that excludes it. It starts nothing. `tests/create-phpledger-test.py` covers it and needs neither Docker nor the network. Not yet published to npm: that needs the owner's account and a publish step on tag, mirroring the container workflow. The API client is still planned.
+**`create-phpledger`** is built and lives in `clients/js/create-phpledger`. It reads the current stable version from the feed, then writes a `compose.yaml` pinned to that release, a `.env` with generated database and administrator passwords, and a `.gitignore` that excludes it. It starts nothing. `tests/create-phpledger-test.py` covers it and needs neither Docker nor the network. `.github/workflows/npm-publish.yml` publishes it when a GitHub Release is published, with `--provenance` so the tarball carries a signed attestation linking it to that workflow run. A manual run defaults to a dry run.
+
+**It authenticates with an npm granular access token in the `NPM_TOKEN` repository secret, never an account password.** Create the token on npm with publish rights to `create-phpledger` only, then set it with:
+
+```
+gh secret set NPM_TOKEN
+```
+
+`gh secret set` prompts for the value, so the token never reaches a command line, a shell history or a transcript. Decision B86 records why that rule exists. Without the secret the job fails with a clear message rather than skipping silently. The package name `create-phpledger` must stay unscoped for `npm create phpledger` to resolve to it; the `@phpledger` organisation is for the planned API client. The API client is still planned.
 
 Bitnami is a request to a curated catalogue and follows the container path if accepted.
 
