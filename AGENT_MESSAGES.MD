@@ -807,3 +807,33 @@ Migration number is assigned at merge in landing order (B62); the chain currentl
 
 **From:** Claude. **To:** Codex and other sessions. Owner decisions **B66** and **B67**: the application teaches accounting through question-mark bubbles beside fields, columns and totals, not through long text blocks, and the guidance covers the Middle East and Asia as well as Pakistan, at least for every currency the application offers plus the Gulf states in the A7 order. Two branches: `m2b/help-bubbles` for the component, the content catalogue and its jurisdiction dimension; and a research branch for the sourced content per jurisdiction. Content is interface text, so it goes through `pl_t()` and counts in the i18n backlog. Unsourced local rules are stated as unknown rather than guessed.
 
+
+## 2026-09-21 - Claude: internal-review finding 1, free-goods output tax under inclusive pricing (scope)
+
+**From:** Claude (worktree `.claude/worktrees/agent-a25fa33b836e3ee78`), branch `fix/free-goods-inclusive-tax` off `master` `baa2939`. **To:** Codex and other sessions.
+
+**Scope, one finding only.** Finding 1 of `docs/accounting/INTERNAL-REVIEW-1.2.md` (material): with `free_goods_output_tax = open_market_value` the free line's open-market value was passed to `pl_tax_amount()`, which treats its argument as tax-exclusive, even in a book whose `price_mode` is `inclusive`. Every valued line in the same document is split through `pl_tax_split(..., 'inclusive')`; the free line was the only one that was not, so output tax payable and promotional expense were each overstated by the rate in a control account reconciled to a filed return.
+
+**Files I own on this branch:** `www/phpledger/includes/functions/ar_ap_functions.php` (the two free-goods tax sites, in `pl_ar_price_document()` and `pl_ar_posting_plan()`) and `tests/trading_documents_test.php` (two new tests plus one new fixture helper). Nothing else. No migration, no schema change, no policy change, no screen change, no documentation rewrite, and the other four material findings are left for their own branches.
+
+**Out of scope and deliberately untouched:** findings 2 to 5 (orphan credit-note offset account, owner-transaction default account, shared drawings account, migration 036 contra conversion); `INTERNAL-REVIEW-1.2.md` itself, which is untracked on `master` and is not mine to commit.
+
+Docker verification runs under its own Compose project `phpledger-fixfree` with `PL_DOCKER_SUBNET=10.203.91.0/24`, torn down with `down -v` afterwards, so no other session's database is touched. Not pushed, not merged.
+
+## 2026-09-21 - Claude: internal-review finding 1 fixed on `fix/free-goods-inclusive-tax` (result)
+
+**Status:** one commit on `fix/free-goods-inclusive-tax` from `master` `baa2939`. **Not pushed, not merged, nothing deployed.**
+
+**The defect.** `pl_tax_amount()` treats its argument as tax-exclusive. The free line's open-market value is `quantity x unit_price` off the line itself, so in a book whose `price_mode` is `inclusive` that value already contained its own tax and was then taxed again at the full rate. The two sites agreed with each other, which is why the frozen `free_tax_total` guard never fired and the suite stayed green: both were wrong in the same way.
+
+**The fix, in two places that must agree.** `pl_ar_price_document()` takes `pl_tax_split($openMarket, $rate, 'inclusive')['net']` as the base when the document price mode is `inclusive`; `pl_ar_posting_plan()` does the same and reads the price mode from `$repriced` rather than re-reading it, so the plan's figure is derived from exactly the value the frozen total was. Money stays in 4-decimal bcmath strings; no floats, no schema change, no policy change, no screen change.
+
+**Worked example, 17%, prices entered inclusive, free line of open-market value 50.00:** free tax was **8.5000** (17% of a tax-inclusive 50.00), is now **7.2650** (the tax contained in it, base 42.7350). Output tax payable and promotional expense were each overstated by the rate in a control account reconciled to a filed sales-tax return.
+
+**Tests** in `tests/trading_documents_test.php` (`--suite=trading`): the same economic free-goods supply posted under both price modes must bear the same output tax (25.00 a unit exclusive against 29.25 a unit inclusive at 17%, both 8.5000), and the inclusive case asserts its exact recognition journal - receivables 250.0000 Dr, sales 213.6752 Cr, output tax 36.3248 Cr, output tax 7.2650 Cr, promotional goods 7.2650 Dr. **Both fail on the unfixed code** (8.5000 against 7.2650), verified by reverting only the source file and rerunning.
+
+**Evidence:** `PL_DOCKER_SUBNET=10.203.91.0/24 docker compose -p phpledger-fixfree --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` on MySQL 8.4, exit 0: `PHP lint: 286 files, 0 failures.`, PHPStan `[OK] No errors`, `Sample data valid: {"packs":7,"events":77,"documents":42,"items":16}.`, **`420 tests, 0 failures.`** (418 on `master` plus the two added here). Own Compose project and own subnet throughout, removed with `down -v`; no other session's database was touched. No HTTP or browser check was run - this change has no screen.
+
+**Also changed:** `docs/accounting/examples/trading-document-policies.md` now states that the taxable base is the open-market value excluding the tax itself and gives the inclusive-price equivalent of its own worked example. **The Admin > Accounting policies help text was deliberately left alone** - it is not wrong, and editing it would add an interface string to the i18n backlog for no accounting gain.
+
+**Out of scope, still open:** findings 2 to 5 of `docs/accounting/INTERNAL-REVIEW-1.2.md` (orphan credit-note offset account, owner-transaction default account, shared drawings account, migration 036 contra conversion). That review file is untracked on `master` and was not committed here.

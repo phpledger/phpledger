@@ -206,6 +206,92 @@ test('the open-market-value policy charges output tax on free goods to the busin
     assert_same('9.0000', trading_account_movement($f, $f['promotion_account_id']));
 });
 
+/** The two tax accounts, a standard code and one rate, for the open-market-value free-goods tests. */
+function trading_output_tax(array $f, string $percentage): array
+{
+    $output = pl_save_account($f['actor_id'], $f['company_id'], $f['book_id'], ['code' => '2150', 'name' => 'Sample output tax', 'type' => 'liability',
+        'role' => null, 'is_active' => true, 'reason' => 'Sample tax accounts', 'creation_key' => bin2hex(random_bytes(16))]);
+    $input = pl_save_account($f['actor_id'], $f['company_id'], $f['book_id'], ['code' => '1350', 'name' => 'Sample input tax', 'type' => 'asset',
+        'role' => null, 'is_active' => true, 'reason' => 'Sample tax accounts', 'creation_key' => bin2hex(random_bytes(16))]);
+    $code = pl_create_tax_code($f['actor_id'], $f['company_id'], $f['book_id'], ['code' => 'GST', 'name' => 'Sample GST',
+        'treatment' => 'standard', 'sales_account_id' => $output['id'], 'purchase_account_id' => $input['id'],
+        'reason' => 'Sample tax code', 'idempotency_key' => bin2hex(random_bytes(16))]);
+    pl_enter_tax_rate($f['actor_id'], $f['company_id'], $f['book_id'], ['tax_code_id' => $code['id'], 'effective_from' => '2026-01-01',
+        'percentage' => $percentage, 'reason' => 'Sample rate', 'idempotency_key' => bin2hex(random_bytes(16))]);
+    return ['code_id' => (int) $code['id'], 'output_account_id' => (int) $output['id'], 'input_account_id' => (int) $input['id']];
+}
+
+test('the same free-goods supply bears the same output tax whether the book prices exclusive or inclusive of tax', function (): void {
+    // One economic supply, entered two ways. The bonus is two units whose open-market value is
+    // 50.00 before 17% tax: a book pricing exclusive of tax enters 25.00 a unit, a book pricing
+    // inclusive enters 29.25, the same value with the tax already inside it. The taxable base of a
+    // supply is the consideration excluding the tax, so both must bear the same 8.5000. Taxing an
+    // inclusive price as though it were exclusive overstated the output tax and the promotional
+    // expense by the rate, in a control account that is reconciled to a filed return.
+    $results = [];
+    foreach (['exclusive' => '25', 'inclusive' => '29.25'] as $mode => $price) {
+        $f = trading_fixture();
+        $tax = trading_output_tax($f, '17');
+        trading_set_policies($f, ['free_goods_account_id' => $f['promotion_account_id'], 'free_goods_output_tax' => 'open_market_value']);
+        $document = trading_post($f, trading_invoice_input($f, ['price_mode' => $mode], [
+            ['description' => 'Sample paid sale', 'quantity' => '10', 'unit_price' => $price, 'tax_code_id' => $tax['code_id'],
+                'account_id' => $f['accounts']['4000'], 'product_id' => $f['product_id']],
+            ['description' => 'Sample bonus', 'quantity' => '2', 'unit_price' => $price, 'is_free_goods' => true,
+                'tax_code_id' => $tax['code_id'], 'account_id' => $f['accounts']['4000'], 'product_id' => $f['product_id']],
+        ]));
+        $results[$mode] = ['free_tax_total' => $document['free_tax_total'], 'subtotal' => $document['subtotal'],
+            'tax_total' => $document['tax_total'], 'total' => $document['total'],
+            'output_tax' => trading_account_movement($f, $tax['output_account_id']),
+            'promotion' => trading_account_movement($f, $f['promotion_account_id'])];
+        assert_true(pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id'])['balanced']);
+    }
+    assert_same('8.5000', $results['exclusive']['free_tax_total']);
+    assert_same($results['exclusive'], $results['inclusive'], 'The same free-goods supply was taxed differently because of how its price was typed.');
+    // 250.00 earned, 42.50 of tax charged to the customer, 8.50 borne by the business, and the
+    // promotional account carrying that 8.50 beside the 4.00 carrying value of the units given away.
+    assert_same('250.0000', $results['inclusive']['subtotal']);
+    assert_same('42.5000', $results['inclusive']['tax_total']);
+    assert_same('292.5000', $results['inclusive']['total']);
+    assert_same('-51.0000', $results['inclusive']['output_tax']);
+    assert_same('12.5000', $results['inclusive']['promotion']);
+});
+
+test('an inclusively priced free line is taxed on the value contained in its open-market price, and posts that exact journal', function (): void {
+    $f = trading_fixture();
+    $tax = trading_output_tax($f, '17');
+    trading_set_policies($f, ['free_goods_account_id' => $f['promotion_account_id'], 'free_goods_output_tax' => 'open_market_value']);
+    // Ten units sold and two given away at 25.00 each, prices entered inclusive of 17%. The bonus
+    // is worth 50.00 including its own tax, so the base is 42.7350 and the tax borne 7.2650, not
+    // the 8.5000 that charging the rate on a tax-inclusive figure would produce.
+    $document = trading_post($f, trading_invoice_input($f, ['price_mode' => 'inclusive'], [
+        ['description' => 'Sample paid sale', 'quantity' => '10', 'unit_price' => '25', 'tax_code_id' => $tax['code_id'],
+            'account_id' => $f['accounts']['4000'], 'product_id' => $f['product_id']],
+        ['description' => 'Sample bonus', 'quantity' => '2', 'unit_price' => '25', 'is_free_goods' => true,
+            'tax_code_id' => $tax['code_id'], 'account_id' => $f['accounts']['4000'], 'product_id' => $f['product_id']],
+    ]));
+    assert_same('inclusive', $document['price_mode']);
+    assert_same('50.0000', $document['lines'][1]['gross_amount']);
+    assert_same('213.6752', $document['subtotal']);
+    assert_same('36.3248', $document['tax_total']);
+    assert_same('250.0000', $document['total'], 'An inclusive price must leave the customer owing exactly what was entered.');
+    assert_same('7.2650', $document['free_tax_total']);
+    $journal = pl_get_journal($f['actor_id'], $f['company_id'], $f['book_id'], (int) $document['journal_id']);
+    // Named rather than numbered: the bundled chart carries structured codes (B56) while the
+    // accounts this fixture adds keep the numbers it gave them.
+    $named = [(int) $f['accounts']['1100'] => 'receivables', (int) $f['accounts']['4000'] => 'sales',
+        $tax['output_account_id'] => 'output tax', (int) $f['promotion_account_id'] => 'promotional goods'];
+    $entry = array_map(static fn (array $line): array => [$named[(int) $line['account_id']] ?? $line['code'], $line['debit'], $line['credit']], $journal['lines']);
+    assert_same([
+        ['receivables', '250.0000', '0.0000'],
+        ['sales', '0.0000', '213.6752'],
+        ['output tax', '0.0000', '36.3248'],
+        ['output tax', '0.0000', '7.2650'],
+        ['promotional goods', '7.2650', '0.0000'],
+    ], $entry, 'The recognition journal for an inclusively priced free-goods invoice changed.');
+    assert_true(str_contains((string) $journal['lines'][3]['description'], 'free goods at open-market value'));
+    assert_true(pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id'])['balanced']);
+});
+
 test('every policy value is a per-company setting with one revision at a time and an audit trail', function (): void {
     $f = trading_fixture();
     $defaults = pl_trading_policies($f['actor_id'], $f['company_id'], $f['book_id']);

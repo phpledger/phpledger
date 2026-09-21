@@ -68,7 +68,7 @@ No output tax arises on the free supply. The customer's invoice total is unchang
 
 ### Output tax, value `open_market_value`
 
-Where a tax authority treats a free supply as taxable, the tax is calculated on the **open-market value** entered on the free line and **borne by the business**, never billed to the customer. With an open-market value of 25.00 per unit and a 10% rate:
+Where a tax authority treats a free supply as taxable, the tax is calculated on the **open-market value** entered on the free line and **borne by the business**, never billed to the customer. The taxable base is that value **excluding the tax itself**: where the book prices inclusive of tax the entered open-market value already contains its own tax, so the free line is split exactly as every valued line on the same document is before the tax borne is worked out. With an open-market value of 25.00 per unit and a 10% rate, prices entered exclusive of tax:
 
 | Account | Debit | Credit |
 |---|---:|---:|
@@ -76,6 +76,8 @@ Where a tax authority treats a free supply as taxable, the tax is calculated on 
 | Output tax | | 5.00 |
 
 The customer's invoice total stays 275.00 (250.00 plus their own 25.00 of tax). The output tax account carries 30.00 in all: 25.00 charged to the customer, 5.00 the business bears. The promotional account carries 9.00: the 4.00 carrying value plus this 5.00.
+
+The same supply priced inclusive of tax reaches the same figures. Two bonus units entered at 27.50 each in a book pricing inclusive of 10% have an open-market value of 55.00 that contains 5.00 of tax, so the base is the same 50.00 and the business bears the same 5.00. The tax borne is a property of the supply, not of how the price was typed.
 
 **Why the recommendation.** `none` is correct wherever a free supply is not a taxable supply, which is the common case for the businesses 1.2 targets, and it is the value that requires no judgement about what an open-market value is. `open_market_value` is available for the jurisdictions that require it and should be turned on only on advice.
 

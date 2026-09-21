@@ -312,8 +312,16 @@ function pl_ar_price_document(int $actorId, int $companyId, int $bookId, array $
             // The tax code is resolved so the rate, account and label are frozen with the
             // document; whether any output tax is actually charged is the B37 policy's answer.
             $tax = pl_tax_calculate($actorId, $companyId, $bookId, $line['tax_code_id'], $data['document_date'], $openMarket, 'sale');
+            // The taxable base of a supply is the consideration EXCLUDING the tax itself, and where
+            // open-market value is substituted it stands in for that exclusive value. In a book that
+            // prices inclusive of tax the entered unit price already contains the tax, so the free
+            // line is split exactly as every valued line below it is before the tax the business
+            // bears is worked out. Taxing the gross would overstate both the tax control account
+            // and the promotional expense by the rate.
+            $freeTaxBase = $data['price_mode'] === 'inclusive'
+                ? pl_tax_split($openMarket, $tax['tax_rate'], 'inclusive')['net'] : $openMarket;
             $freeTax = $policies['free_goods_output_tax'] === 'open_market_value' && bccomp($openMarket, '0', 4) > 0
-                ? pl_tax_amount($openMarket, $tax['tax_rate']) : '0.0000';
+                ? pl_tax_amount($freeTaxBase, $tax['tax_rate']) : '0.0000';
             $freeTaxTotal = pl_amount(bcadd($freeTaxTotal, $freeTax, 4));
             $line = array_replace($line, $tax, ['line_total' => '0.0000', 'tax_amount' => '0.0000',
                 'gross_amount' => $openMarket, 'discount_amount' => $openMarket,
@@ -497,8 +505,16 @@ function pl_ar_posting_plan(int $actorId, int $companyId, int $bookId, array $do
         // is earned. Its carrying value leaves stock at posting, to the account the B37 policy
         // names, and the only entry it can produce here is open-market-value output tax.
         if ((bool) ($sourceLine['is_free_goods'] ?? false)) {
+            // The same base pricing derived, for the same reason: in an inclusive book the
+            // open-market value carries its own tax, so only the tax contained in it is borne. The
+            // price mode is taken from the repricing rather than re-read, because the frozen
+            // free_tax_total checked above was produced by exactly that value and the two figures
+            // must agree or posting refuses with a mismatch.
+            $freeTaxBase = $repriced['price_mode'] === 'inclusive'
+                ? pl_tax_split((string) $sourceLine['gross_amount'], (string) $sourceLine['tax_rate'], 'inclusive')['net']
+                : pl_amount((string) $sourceLine['gross_amount']);
             $freeTax = $policies['free_goods_output_tax'] === 'open_market_value' && bccomp((string) $sourceLine['gross_amount'], '0', 4) > 0
-                ? pl_tax_amount((string) $sourceLine['gross_amount'], (string) $sourceLine['tax_rate']) : '0.0000';
+                ? pl_tax_amount($freeTaxBase, (string) $sourceLine['tax_rate']) : '0.0000';
             if (bccomp($freeTax, '0', 4) > 0) {
                 $freeBase = pl_fx_convert($freeTax, $snapshot['rate']);
                 $taxLines[] = pl_oi_line((int) $sourceLine['tax_account_id'], $freeTax, $freeBase, !$controlDebit, $snapshot, $sourceLine['tax_label'] . ' · free goods at open-market value');
