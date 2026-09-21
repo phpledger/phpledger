@@ -85,3 +85,12 @@ Inferred, not confirmed:
 
 - The `/app/data` ownership/chown behaviour described above.
 - Exact icon and `mediaLinks` dimension requirements (see above).
+
+## Tracked
+
+The addon/binary-logging mismatch above is [issue
+#103](https://github.com/phpledger/phpledger/issues/103): declare the routines the
+migrations create with their real data access so MySQL stops needing
+`--log-bin-trust-function-creators=1` at all. **Do not submit this package until that
+lands.** The same constraint will apply to any managed or shared MySQL, including the
+cloud database tiers decision P4 anticipates.
