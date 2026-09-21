@@ -97,6 +97,25 @@ pinned instead through the template's own `PL_VERSION` default. A structural cha
 `compose.production.yaml` on `master` therefore reaches existing template users
 immediately, which is worth remembering when editing that file.
 
+**Two manifests deliberately do not validate on their own.** Coolify's declares named
+volumes without a top-level `volumes:` block, so `docker compose config` rejects it;
+Coolify adds that block when it parses the template, and upstream's own
+`wordpress-with-mariadb.yaml` omits it the same way. Supply the block yourself to test
+it locally. Umbrel's is the same story for a different reason, below.
+
+**CasaOS bind-mounts root-owned host directories.** The image runs as its baked-in
+`www-data` (uid 33) with no PUID/PGID setting, so the entrypoint's `mkdir` fails and the
+container restart-loops before Apache starts. **This was a real defect, found by running
+the manifest rather than reading it**, and is fixed here with a one-shot
+`init-permissions` service that chowns the private directory and exits, keeping the
+`/DATA/AppData` layout CasaOS expects for backups. Umbrel hits the same problem and
+solves it in its `hooks/pre-start`.
+
+A related trap when testing CasaOS locally: those bind mounts live at a fixed host path,
+so `docker compose down -v` does not remove them. A second run reuses the first run's
+MySQL data directory, whose credentials no longer match, and the app waits forever for a
+database it cannot authenticate against. Clear the directory between runs.
+
 **Umbrel's compose does not validate on its own**, and should not. `app_proxy` has no
 image until umbrelOS patches the file at install time, so `docker compose config` fails
 with "neither an image nor a build context". Upstream's own shipped apps behave
@@ -210,5 +229,17 @@ whether PikaPods accepts a bundled database service given their one-HTTPS-port r
 Umbrel port 8773's uniqueness across their catalogue; and data-directory ownership
 assumptions on Cloudron and Umbrel.
 
-No package here has been installed on its real platform. They validate, and they follow
-formats read from those platforms' own repositories, which is not the same thing.
+**Verified by actually running them**, on 21 September 2026: CasaOS and Coolify each
+reach `/health` returning `{"status":"ok"}` and a real `Sign in · PHP Ledger` page,
+after applying 43 migrations, creating the administrator from the environment and marking
+installation complete, running as `www-data` rather than root. CasaOS was verified from
+the committed file after the permissions fix above.
+
+The rest have not been run. CapRover, Elestio and PikaPods use the same named-volume
+shape as `compose.production.yaml`, which the container tests already exercise, so the
+risk is lower, but lower is not none: the CasaOS defect was invisible until it ran.
+Portainer, Umbrel, YunoHost, Softaculous and Installatron each need their own platform to
+test properly, and Cloudron is blocked on #103 regardless.
+
+No package here has been installed through its real platform's own installer. Running the
+compose file is a strong check, and it is not the same thing.

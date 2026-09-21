@@ -1,5 +1,20 @@
 name: phpledger
 services:
+  # CasaOS bind-mounts /DATA/AppData so users can back their data up, and creates
+  # those directories owned by root. The image runs as its baked-in www-data (uid
+  # 33) and has no PUID/PGID setting, so its entrypoint's mkdir fails with
+  # "Permission denied" and the container restart-loops before Apache ever starts.
+  # Confirmed by running this file: without this step /health never answers.
+  # One short-lived container fixes ownership and exits; web waits for it.
+  init-permissions:
+    image: busybox:1.37
+    restart: "no"
+    command: ["sh", "-c", "mkdir -p /private && chown -R 33:33 /private"]
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/private
+        target: /private
+
   web:
     image: ghcr.io/phpledger/phpledger:1.2.1
     container_name: phpledger
@@ -7,6 +22,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      init-permissions:
+        condition: service_completed_successfully
     ports:
       - target: 8080
         published: "8080"
