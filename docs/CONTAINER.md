@@ -1,10 +1,23 @@
 # Container image
 
-Status: built in 1.2 M12 (B42, `docs/strategy/RELEASE-PLAN-1.2.md`). The image ships from `1.2.1` on `ghcr.io/phpledger/phpledger` and, once the owner has supplied a Docker Hub account and token, on Docker Hub too. See [release protocol](RELEASE-PROTOCOL.md) for how this channel fits alongside the ZIP and Composer channels, and [decision register](strategy/DECISION-REGISTER.md) B42.
+Status: built in 1.2 M12 (B42, `docs/strategy/RELEASE-PLAN-1.2.md`). The image ships from `1.2.1` on `ghcr.io/phpledger/phpledger`, which is the only container channel (decision B86; Docker Hub was dropped). See [release protocol](RELEASE-PROTOCOL.md) for how this channel fits alongside the ZIP and Composer channels, and [decision register](strategy/DECISION-REGISTER.md) B42.
 
 The image is built from the published release ZIP, never from the working tree (`docker/release/Dockerfile`): it is the same file set the ZIP and Composer channels install, repackaged, not a separately built application (release protocol principle 2). It runs a single `php:8.3-apache` base as a non-root process on port 8080.
 
 ## Install
+
+### The quick way
+
+```
+npm create phpledger@latest
+```
+
+[`create-phpledger`](../clients/js/create-phpledger/README.md) writes the compose file and a `.env`
+for you, pinned to the current stable release rather than to `latest`, with the database and
+administrator passwords generated rather than chosen. It starts nothing and installs nothing itself;
+it prints the `docker compose up -d` line to run next. Node 20 or newer.
+
+### By hand
 
 ```
 mkdir phpledger && cd phpledger

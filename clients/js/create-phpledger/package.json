@@ -1,0 +1,29 @@
+{
+  "name": "create-phpledger",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Scaffolds a Docker Compose deployment of PHP Ledger. Installs nothing itself.",
+  "type": "module",
+  "license": "AGPL-3.0-or-later",
+  "bin": {
+    "create-phpledger": "bin/create-phpledger.mjs"
+  },
+  "files": [
+    "bin",
+    "templates",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phpledger/phpledger.git",
+    "directory": "clients/js/create-phpledger"
+  },
+  "homepage": "https://github.com/phpledger/phpledger#readme",
+  "bugs": {
+    "url": "https://github.com/phpledger/phpledger/issues"
+  },
+  "dependencies": {}
+}
