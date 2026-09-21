@@ -71,6 +71,7 @@ function pl_read_catalog(): array
         // available whether or not the optional locations module is currently enabled.
         'warehouses' => ['Read stock locations: warehouses and vans, with the van\'s driver, vehicle and route. Includes inactive locations so historical stock stays readable.', [], [], true],
         'stock_transfers' => ['Read stock transfers between locations as matched out/in pairs at carrying value, with the stock document number when one raised them. Transfers post no journal.', ['warehouse_id' => $id, 'from' => $date, 'to' => $date], [], true],
+        'unapplied_credit' => ['Read unapplied customer or supplier credit (advances) at a date, with the advances control it reconciles to. Never netted against receivables or payables.', ['side' => ['type' => 'string', 'enum' => ['customer','supplier'], 'default' => 'customer'], 'as_of' => $date, 'party_id' => $id], [], true],
     ];
     $catalog = [];
     foreach ($definitions as $name => [$description, $properties, $required, $paginated]) {
@@ -208,9 +209,14 @@ function pl_read_operation(string $connectionId, string $operation, array $input
                 pl_list_inventory_warehouses($actor, $company, $book)), $page, $size),
             'stock_transfers' => pl_read_page(array_map(static fn (array $row): array => pl_read_fields($row, ['out_movement_id','in_movement_id','movement_date','product_id','sku','product_name','quantity','value_base','from_warehouse_id','to_warehouse_id','document_id','document_kind','document_number']),
                 pl_list_stock_transfers($actor, $company, $book, array_diff_key($args, array_flip(['company_id','book_id','page','page_size'])))), $page, $size),
+            'unapplied_credit' => pl_unapplied_credit($actor, $company, $book, $args['side'], $args['as_of'] ?? null, $args['party_id'] ?? null),
             default => throw new LogicException('Read operation is not implemented.'),
         };
-        foreach (match ($operation) { 'trial_balance' => ['accounts'], 'profit_loss' => ['income','cost_of_sales','expenses'], 'balance_sheet' => ['assets','liabilities','equity'], default => [] } as $field) {
+        if ($operation === 'unapplied_credit') {
+            // Explicit DTO: an open-item row carries service internals a read grant never shows.
+            $data['items'] = array_map(static fn (array $row): array => pl_read_fields($row, ['id','party_id','legal_name','control_account_id','currency','number','received_date','age_days','remaining_fc','remaining_base']), $data['items']);
+        }
+        foreach (match ($operation) { 'trial_balance' => ['accounts'], 'profit_loss' => ['income','cost_of_sales','expenses'], 'balance_sheet' => ['assets','liabilities','equity'], 'unapplied_credit' => ['items'], default => [] } as $field) {
             $data[$field] = pl_read_page($data[$field], $page, $size);
             // The collapsible class/group tree (issue #77) is a presentation of these same rows.
             $data = array_diff_key($data, array_flip(['tree', 'trees', 'equity_movements']));

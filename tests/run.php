@@ -53,6 +53,7 @@ $suites[] = 'list_test.php';
 $suites[] = 'home_test.php';
 $suites[] = 'editor_test.php';
 $suites[] = 'settlement_test.php';
+$suites[] = 'advance_test.php';
 $suites[] = 'stock_preview_test.php';
 $suites[] = 'ar_preview_test.php';
 $suites[] = 'ar_list_test.php';
@@ -80,7 +81,10 @@ if (($argv[1] ?? '') === '--suite=stock-previews') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','inventory_test.php','purchasing_test.php','stock_preview_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=settlements') {
-    $suites = ['ledger_test.php','concurrency_test.php','open_item_test.php','settlement_test.php'];
+    $suites = ['ledger_test.php','concurrency_test.php','open_item_test.php','settlement_test.php','advance_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=advances') {
+    $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','open_item_test.php','settlement_test.php','advance_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=print') {
     $suites = ['ledger_test.php','concurrency_test.php','open_item_test.php','settlement_test.php','print_test.php'];

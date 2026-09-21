@@ -825,7 +825,12 @@ document.querySelectorAll('[data-settlement-form]').forEach(form => {
             return;
         }
         const total = allocations.reduce((sum, value) => sum + value, 0n);
-        output.textContent = `Allocated ${format(total)} · Unallocated ${format(payment - total)}`;
+        const remainder = payment - total;
+        // A remainder is not an error since 1.2: it is held as unapplied credit. Only
+        // over-allocation is refused, and the server checks both again at posting.
+        output.textContent = remainder < 0n
+            ? `Allocated ${format(total)} · Over-allocated by ${format(-remainder)} — reduce an amount`
+            : `Allocated ${format(total)} · Held on account ${format(remainder)}`;
     };
     form.addEventListener('input', event => {
         update();

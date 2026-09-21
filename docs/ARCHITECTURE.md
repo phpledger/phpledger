@@ -360,7 +360,52 @@ for the accountant's review (owner decision B30). See the
 
 The bundled chart is `resources/coa/core-starter-1.1.0.json`: structured codes,
 each pre-1.2 account's old number recorded, and the owner-capital, owner-loan,
-drawings and contra accounts present so every sample and demo shows them.
+drawings, contra and advances control accounts present so every sample and demo
+shows them.
+
+### Advances, refunds and orphan credit notes (1.2)
+
+Money a customer pays beyond their open invoices is **unapplied credit**, and it
+is held as an advance received from that customer: an ordinary liability on the
+`customer_advances` control, tracked as its own open item. It is never a credit
+balance inside receivables and never a suspense account (B59). The supplier
+mirror, `supplier_advances`, is an asset. Migration
+**039_advances_and_refunds** adds the two account roles with their monetary
+mapping, the `pl_advance_accounts` registry of registered controls,
+`pl_open_items.nature` (`document` or `advance`, null meaning document for every
+row written before it), the `application` and `application_reversal` entry
+kinds, and the two control accounts in every book that lacks them. `direction`
+is deliberately not extended: it is read arithmetically everywhere, so a
+customer advance is a credit-normal `payable` item and a supplier advance a
+debit-normal `receivable` item. A CHECK plus a foreign key require an advance to
+sit on a registered advances control; the reverse implication — a document item
+never sits on one — cannot be expressed as a CHECK, because it has to read
+another table, so it is a `BEFORE INSERT` trigger.
+
+`pl_oldest_first_allocation()` is a pure function: given open items, an amount
+and a date it returns the plan, ordering by due date then id, giving the last
+item the exact residual and skipping any item whose latest activity is later
+than the payment. `pl_plan_settlement_allocation()` reads a party's items and
+calls it; the plan is then editable and still goes through the existing preview,
+review hash and confirmation. A receipt with a remainder posts **one** journal
+with **one** bank line, the remainder recognising the advance item in the same
+journal. `pl_apply_unapplied_credit()` later moves the credit between the two
+controls with no bank line at all, realising the difference between the two
+frozen rates when they differ. `pl_refund_unapplied_credit()` is the ordinary
+single-item settlement of an advance against the bank, and
+`pl_recognize_unapplied_credit()` posts a credit note that has no original
+invoice against a contra-income account. `pl_post_batch_receipts()` posts one
+voucher per party row (B57) inside one transaction with one batch receipt, so a
+row can be reversed without touching another's. B7's reversal rules hold
+throughout: a whole receipt can no longer be reversed once its remainder has
+been applied, an application reverses on its own, and a reversed advance is
+never usable again. `pl_unapplied_credit()` is the read behind the ageing
+report's own section and the statement's Unapplied rows; it reconciles each
+advances control's posted balance to the advances outstanding on it, and
+`pl_ar_ap_open_items()` excludes advance items so nothing is counted twice. The
+same read is an authorised API/MCP operation, `unapplied_credit`, on full-access
+connections only. See the
+[advances and refunds worked examples](accounting/ADVANCES-AND-REFUNDS.md).
 
 ### Core accounts and general journals (0.1.2-preview)
 

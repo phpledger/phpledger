@@ -1301,6 +1301,14 @@
     {
       "source": "www/phpledger/templates/print/gate-pass-a4.php",
       "destination": "www/phpledger/templates/print/gate-pass-a4.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/039_advances_and_refunds.php",
+      "destination": "www/phpledger/install/migrations/039_advances_and_refunds.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/advance_functions.php",
+      "destination": "www/phpledger/includes/functions/advance_functions.php"
     }
   ]
 }

@@ -22,6 +22,14 @@
       "role": "receivables"
     },
     {
+      "code": "1-120-10001-00",
+      "name": "Supplier advances (prepayments)",
+      "type": "asset",
+      "semantic_key": "core.asset.supplier_advances",
+      "role": "supplier_advances",
+      "is_monetary": true
+    },
+    {
       "code": "1-900-10001-00",
       "name": "Accumulated depreciation",
       "type": "asset",
@@ -44,6 +52,14 @@
       "type": "liability",
       "semantic_key": "core.liability.owner_loan",
       "role": null,
+      "is_monetary": true
+    },
+    {
+      "code": "2-120-10001-00",
+      "name": "Customer advances (unapplied credit)",
+      "type": "liability",
+      "semantic_key": "core.liability.customer_advances",
+      "role": "customer_advances",
       "is_monetary": true
     },
     {

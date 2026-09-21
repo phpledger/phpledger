@@ -81,6 +81,7 @@ require_once __DIR__ . '/functions/outbound_functions.php';
 require_once __DIR__ . '/functions/party_functions.php';
 require_once __DIR__ . '/functions/open_item_functions.php';
 require_once __DIR__ . '/functions/settlement_functions.php';
+require_once __DIR__ . '/functions/advance_functions.php';
 require_once __DIR__ . '/functions/correction_functions.php';
 require_once __DIR__ . '/functions/module_visibility_functions.php';
 require_once __DIR__ . '/functions/inventory_functions.php';
