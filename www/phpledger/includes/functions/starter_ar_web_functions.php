@@ -137,21 +137,75 @@ function pl_web_settlement_input(array $input,string $direction): array
         'amount_fc'=>pl_web_text($input,'amount_fc'),'bank_account_id'=>pl_web_id($input,'bank_account_id'),
         'gain_account_id'=>pl_web_id($input,'gain_account_id')?:null,'loss_account_id'=>pl_web_id($input,'loss_account_id')?:null,
         'actual_rate'=>pl_web_text($input,'actual_rate')?:null,'description'=>pl_web_text($input,'description'),
+        // The remainder is never guessed: the screen states the control it is to be held on.
+        'advance_account_id'=>pl_web_id($input,'advance_account_id')?:null,'currency'=>pl_web_text($input,'currency'),
         'idempotency_key'=>pl_web_text($input,'request_key'),'allocations'=>$allocations];
+}
+
+/** One batch row per party: party, amount and the control its remainder is held on (B57). */
+function pl_web_batch_receipt_input(array $input,string $direction): array
+{
+    $rows=$input['rows']??[];
+    if (!is_array($rows) || count($rows)>100) { throw new DomainException('Enter up to 100 party rows.'); }
+    $normalized=[];
+    foreach ($rows as $row) {
+        if (!is_array($row)) { throw new DomainException('Choose valid batch rows.'); }
+        $amount=pl_web_text($row,'amount_fc');
+        if ($amount==='' || bccomp(pl_amount($amount),'0',4)===0) { continue; }
+        $normalized[]=['party_id'=>pl_web_id($row,'party_id'),'amount_fc'=>$amount,'currency'=>pl_web_text($row,'currency'),
+            'advance_account_id'=>pl_web_id($input,'advance_account_id')?:null,'allocations'=>[]];
+    }
+    return ['direction'=>$direction,'bank_account_id'=>pl_web_id($input,'bank_account_id'),'date'=>pl_web_text($input,'date'),
+        'description'=>pl_web_text($input,'description'),'idempotency_key'=>pl_web_text($input,'request_key'),'rows'=>$normalized];
+}
+
+/**
+ * Plan each batch row oldest-first before posting.
+ *
+ * The grid takes one amount per party; the split across that party's open documents is the
+ * same planner the single receipt uses, so a batch and a one-by-one entry of the same money
+ * produce the same allocations. Whatever a row does not cover becomes that party's own
+ * unapplied credit — never another party's.
+ */
+function pl_web_batch_receipt_plan(int $actorId,int $companyId,int $bookId,array $batch): array
+{
+    foreach ($batch['rows'] as &$row) {
+        $plan=pl_plan_settlement_allocation($actorId,$companyId,$bookId,$batch['direction'],$row['party_id'],$row['currency'],$row['amount_fc'],$batch['date']);
+        $row['allocations']=$plan['allocations'];
+        $row['remainder_fc']=$plan['remainder_fc'];
+        $row['outstanding_before']=array_reduce($plan['items'],static fn(string $sum,array $item):string=>bcadd($sum,$item['remaining_fc'],4),'0.0000');
+    }
+    unset($row);
+    return $batch;
 }
 
 function pl_web_settlement(int $actorId,int $companyId,int $bookId,array $user,array $company,string $path,string $method): never
 {
     $direction=$path==='/ar'?'receivable':'payable';
-    $return=pl_workflow_url($path,['settle'=>'1']);
+    $batchMode=pl_web_text($_GET,'batch')!=='' || in_array(pl_web_text($_POST,'action'),['preview_batch','post_batch'],true);
+    $return=pl_workflow_url($path,['settle'=>'1']+($batchMode?['batch'=>'1']:[]));
+    if ($batchMode) { pl_web_batch_receipts($actorId,$companyId,$bookId,$user,$company,$path,$method,$direction,$return); }
     if ($method==='POST') {
         try {
             $input=pl_web_settlement_input($_POST,$direction);
+            // Decision 21: the oldest-first plan fills the grid, and every amount stays editable
+            // before posting. Planning is a read; nothing is posted until the preview is confirmed.
+            if (pl_web_text($_POST,'action')==='plan_settlement') {
+                $plan=pl_plan_settlement_allocation($actorId,$companyId,$bookId,$direction,$input['party_id'],
+                    pl_web_text($_POST,'currency',$company['currency']),$input['amount_fc'],$input['date']);
+                $values=$_POST; $values['allocations']=[];
+                foreach ($plan['allocations'] as $index=>$row) { $values['allocations'][$index]=['item_id'=>(string)$row['item_id'],'amount_fc'=>$row['amount_fc']]; }
+                $_SESSION['settlement_review']=[];
+                pl_form_failure($return,$values,$plan['skipped']===[]?'':'Some open items were skipped because they have activity after this payment date.',200);
+            }
             if (pl_web_text($_POST,'action')==='confirm_settlement') {
                 $review=$_SESSION['settlement_review']??[];
                 $hash=is_array($review) && ($review['company_id']??null)===$companyId && ($review['book_id']??null)===$bookId && ($review['key']??null)===$input['idempotency_key'] ? ($review['hash']??'') : '';
                 $result=pl_confirm_settlement($actorId,$companyId,$bookId,$input,is_string($hash)?$hash:'');
-                pl_notice('Payment posted across '.count($result['allocations']).' open items. No amount was left unallocated.');
+                pl_notice('Payment posted across '.count($result['allocations']).' open items'
+                    .(bccomp($result['remainder_fc'],'0',4)>0
+                        ? ', with '.$result['currency'].' '.$result['remainder_fc'].' held on account as unapplied credit.'
+                        : '. No amount was left unallocated.'));
                 pl_redirect(pl_workflow_url('/journals/detail',['id'=>$result['journal_id']]));
             }
             $preview=pl_preview_settlement($actorId,$companyId,$bookId,$input);
@@ -167,8 +221,52 @@ function pl_web_settlement(int $actorId,int $companyId,int $bookId,array $user,a
     $report=pl_ar_ap_open_items($actorId,$companyId,$bookId,$direction);
     $partyId=pl_web_id($input,'party_id'); $currency=$preview['currency']??pl_web_text($input,'currency',$company['currency']);
     $items=array_values(array_filter($report['items'],static fn(array $item):bool=>(int)$item['party_id']===$partyId && $item['currency']===$currency));
+    $side=pl_advance_side_for_direction($direction);
     pl_render('settlement',['title'=>$direction==='receivable'?'Record receipt':'Record payment','user'=>$user,'company'=>$company,'path'=>$path,'direction'=>$direction,
-        'input'=>$input,'form'=>$form,'preview'=>$preview,'items'=>$items,'partyId'=>$partyId,'currency'=>$currency,
+        'input'=>$input,'form'=>$form,'preview'=>$preview,'items'=>$items,'partyId'=>$partyId,'currency'=>$currency,'batch'=>null,'side'=>$side,
+        'advanceRole'=>pl_advance_role_contract($side)['role'],
+        'unapplied'=>$partyId?pl_unapplied_credit($actorId,$companyId,$bookId,$side,null,$partyId):['items'=>[],'count'=>0,'total_base'=>'0.0000','side'=>$side],
         'parties'=>pl_starter_parties($actorId,$companyId,$bookId),'accounts'=>pl_starter_accounts($actorId,$companyId,$bookId),
         'currencies'=>array_values(array_unique(array_merge([$company['currency']],array_column($report['items'],'currency'))))]);
+}
+
+/**
+ * The batch-receipts grid (B57, design decision 23).
+ *
+ * The grid is entry convenience only: one voucher per party row, each individually
+ * reversible. Nothing on this screen shows an unposted figure as a ledger balance —
+ * "outstanding before" is read from the posted open items, and the closing figure is
+ * what the planner would leave, not a number the screen invents.
+ */
+function pl_web_batch_receipts(int $actorId,int $companyId,int $bookId,array $user,array $company,string $path,string $method,string $direction,string $return): never
+{
+    $side=pl_advance_side_for_direction($direction);
+    if ($method==='POST') {
+        try {
+            $batch=pl_web_batch_receipt_plan($actorId,$companyId,$bookId,pl_web_batch_receipt_input($_POST,$direction));
+            if (pl_web_text($_POST,'action')==='post_batch') {
+                $review=$_SESSION['batch_review']??[];
+                $expected=is_array($review) && ($review['company_id']??null)===$companyId && ($review['book_id']??null)===$bookId && ($review['key']??null)===$batch['idempotency_key'] ? ($review['hash']??'') : '';
+                if (!is_string($expected) || !hash_equals($expected,hash('sha256',json_encode($batch,JSON_THROW_ON_ERROR)))) {
+                    throw new DomainException('The batch or its balances changed. Update the preview before posting.');
+                }
+                $result=pl_post_batch_receipts($actorId,$companyId,$bookId,$batch);
+                unset($_SESSION['batch_review']);
+                pl_notice($result['voucher_count'].' vouchers posted, one for each party row. Each can be reversed on its own.');
+                pl_redirect(pl_workflow_url('/journals/detail',['id'=>$result['receipts'][0]['journal_id']]));
+            }
+            $_SESSION['batch_review']=['company_id'=>$companyId,'book_id'=>$bookId,'key'=>$batch['idempotency_key'],'hash'=>hash('sha256',json_encode($batch,JSON_THROW_ON_ERROR))];
+            pl_form_failure($return,$_POST,'',200);
+        } catch (DomainException $error) { pl_form_failure($return,$_POST,$error->getMessage()); }
+    }
+    $form=pl_form_state($return); $input=$form['input']?:$_GET; $batch=null;
+    if ($form['input']) {
+        try { $batch=pl_web_batch_receipt_plan($actorId,$companyId,$bookId,pl_web_batch_receipt_input($input,$direction)); }
+        catch (DomainException $error) { if ($form['message']==='') { $form['message']=$error->getMessage(); } }
+    }
+    pl_render('settlement',['title'=>$direction==='receivable'?'Batch receipts':'Batch payments','user'=>$user,'company'=>$company,'path'=>$path,'direction'=>$direction,
+        'input'=>$input,'form'=>$form,'preview'=>null,'items'=>[],'partyId'=>0,'currency'=>$company['currency'],'batch'=>$batch,'side'=>$side,
+        'advanceRole'=>pl_advance_role_contract($side)['role'],'unapplied'=>['items'=>[],'count'=>0,'total_base'=>'0.0000','side'=>$side],
+        'parties'=>pl_starter_parties($actorId,$companyId,$bookId),'accounts'=>pl_starter_accounts($actorId,$companyId,$bookId),
+        'currencies'=>[$company['currency']]]);
 }

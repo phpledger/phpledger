@@ -2,7 +2,7 @@
 declare(strict_types=1);
 $canManage = pl_can_write($company) && !pl_demo_enabled();
 $types = ['asset' => 'Asset', 'liability' => 'Liability', 'equity' => 'Equity', 'income' => 'Income', 'expense' => 'Expense'];
-$roles = ['' => 'No operational purpose', 'cash_bank' => 'Cash / bank — Asset', 'receivables' => 'Receivables — Asset', 'payables' => 'Payables — Liability', 'owner_equity' => 'Owner equity — Equity', 'income' => 'Income — Income', 'expense' => 'Expense — Expense'];
+$roles = ['' => 'No operational purpose', 'cash_bank' => 'Cash / bank — Asset', 'receivables' => 'Receivables — Asset', 'payables' => 'Payables — Liability', 'customer_advances' => 'Customer advances — Liability', 'supplier_advances' => 'Supplier advances — Asset', 'owner_equity' => 'Owner equity — Equity', 'income' => 'Income — Income', 'expense' => 'Expense — Expense'];
 $hasFailure = pl_web_text($form, 'message') !== '';
 $isActive = $hasFailure ? pl_web_text($input, 'is_active') === '1' : (bool) ($input['is_active'] ?? true);
 $isContra = $hasFailure ? pl_web_text($input, 'is_contra') === '1' : (bool) ($input['is_contra'] ?? false);

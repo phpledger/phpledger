@@ -447,7 +447,7 @@ test('standalone STDIO bridge discovers tools reads both protocols and reports r
         assert_same('2025-11-25', $initialized['result']['protocolVersion'] ?? null);
         fwrite($pipes[0], json_encode(['jsonrpc' => '2.0', 'method' => 'notifications/initialized']) . "\n");
         $listed = $call(['jsonrpc' => '2.0', 'id' => 2, 'method' => 'tools/list']);
-        assert_same(11, count($listed['result']['tools'] ?? []));
+        assert_same(12, count($listed['result']['tools'] ?? []));
         $scope = ['company_id' => $f['company_id'], 'book_id' => $f['book_id'], 'as_of' => '2026-09-15'];
         $read = $call(['jsonrpc' => '2.0', 'id' => 3, 'method' => 'tools/call', 'params' => ['name' => 'ledger_trial_balance', 'arguments' => $scope]]);
         assert_same(true, $read['result']['structuredContent']['data']['balanced'] ?? null);

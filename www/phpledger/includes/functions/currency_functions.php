@@ -36,7 +36,9 @@ function pl_fx_convert(string $amount, string $rate): string
 function pl_currency_account_properties(array $input, ?array $existing = null): array
 {
     $role = $input['role'] ?? ($existing['role'] ?? null);
-    $default = in_array($role, ['cash_bank','receivables','payables'], true) ? true : (in_array($role, ['owner_equity','income','expense'], true) ? false : null);
+    // The role-driven mapping migration 013 established; migration 037 adds the advances
+    // controls, which are monetary: a fixed number of currency units, owed or claimed.
+    $default = in_array($role, ['cash_bank','receivables','payables','customer_advances','supplier_advances'], true) ? true : (in_array($role, ['owner_equity','income','expense'], true) ? false : null);
     $monetary = $input['is_monetary'] ?? ($existing !== null ? ($existing['is_monetary'] === null ? null : (bool) $existing['is_monetary']) : $default);
     if ($monetary !== null && !is_bool($monetary)) { throw new DomainException('Monetary classification must be true, false or unknown.'); }
     $currency = array_key_exists('currency', $input) ? $input['currency'] : ($existing['currency'] ?? null);

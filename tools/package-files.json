@@ -1225,6 +1225,14 @@
     {
       "source": "resources/coa/core-starter-1.1.0.json",
       "destination": "resources/coa/core-starter-1.1.0.json"
+    },
+    {
+      "source": "www/phpledger/install/migrations/037_advances_and_refunds.php",
+      "destination": "www/phpledger/install/migrations/037_advances_and_refunds.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/advance_functions.php",
+      "destination": "www/phpledger/includes/functions/advance_functions.php"
     }
   ]
 }

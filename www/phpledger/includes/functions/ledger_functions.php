@@ -295,7 +295,7 @@ function pl_post_journal(int $actorId, int $companyId, int $bookId, array $paylo
     if ($payload['source_type'] === 'reversal') {
         throw new DomainException('Use the linked reversal action to reverse a posted journal.');
     }
-    if (in_array($payload['source_type'], ['open_item_recognition','open_item_settlement','open_item_batch_settlement'], true)) { throw new DomainException('Use the authoritative open-item posting service.'); }
+    if (in_array($payload['source_type'], pl_open_item_source_types(), true)) { throw new DomainException('Use the authoritative open-item posting service.'); }
     if ($payload['source_type'] === 'opening_balance') {
         throw new DomainException('Use the opening preview and confirmation service for opening balances.');
     }

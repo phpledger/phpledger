@@ -67,6 +67,7 @@ function pl_read_catalog(): array
         'profit_loss' => ['Read posted income, expenses and net profit for an inclusive period. Totals cover all pages.', ['from' => $date, 'to' => $date], ['from','to'], true],
         'balance_sheet' => ['Read assets, liabilities and equity at a date, with unclosed earnings shown separately. Totals cover all pages.', ['as_of' => $date], ['as_of'], true],
         'account_statement' => ['Read opening, debit, credit, running and closing balances with journal/source links. Running balances follow canonical date/journal/line order before pagination.', ['account_id' => $id, 'from' => $date, 'as_of' => $date], ['account_id','from','as_of'], true],
+        'unapplied_credit' => ['Read unapplied customer or supplier credit (advances) at a date, with the advances control it reconciles to. Never netted against receivables or payables.', ['side' => ['type' => 'string', 'enum' => ['customer','supplier'], 'default' => 'customer'], 'as_of' => $date, 'party_id' => $id], [], true],
     ];
     $catalog = [];
     foreach ($definitions as $name => [$description, $properties, $required, $paginated]) {
@@ -200,9 +201,14 @@ function pl_read_operation(string $connectionId, string $operation, array $input
             'transactions' => pl_list_documents($actor, $company, $book, array_diff_key($args, array_flip(['company_id','book_id']))),
             'general_journals' => pl_list_general_drafts($actor, $company, $book, $page, ['page_size' => $size]),
             'account_statement' => pl_account_activity($actor, $company, $book, $args['account_id'], $args['as_of'], $page, $args['from'], ['page_size' => $size]),
+            'unapplied_credit' => pl_unapplied_credit($actor, $company, $book, $args['side'], $args['as_of'] ?? null, $args['party_id'] ?? null),
             default => throw new LogicException('Read operation is not implemented.'),
         };
-        foreach (match ($operation) { 'trial_balance' => ['accounts'], 'profit_loss' => ['income','cost_of_sales','expenses'], 'balance_sheet' => ['assets','liabilities','equity'], default => [] } as $field) {
+        if ($operation === 'unapplied_credit') {
+            // Explicit DTO: an open-item row carries service internals a read grant never shows.
+            $data['items'] = array_map(static fn (array $row): array => pl_read_fields($row, ['id','party_id','legal_name','control_account_id','currency','number','received_date','age_days','remaining_fc','remaining_base']), $data['items']);
+        }
+        foreach (match ($operation) { 'trial_balance' => ['accounts'], 'profit_loss' => ['income','cost_of_sales','expenses'], 'balance_sheet' => ['assets','liabilities','equity'], 'unapplied_credit' => ['items'], default => [] } as $field) {
             $data[$field] = pl_read_page($data[$field], $page, $size);
             // The collapsible class/group tree (issue #77) is a presentation of these same rows.
             $data = array_diff_key($data, array_flip(['tree', 'trees', 'equity_movements']));

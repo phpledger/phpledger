@@ -44,11 +44,15 @@ try {
             if (!($input['allow_domain_failure'] ?? false)) { throw $error; }
             $journal = ['id' => 0];
         }
-    } elseif (in_array($input['mode'], ['open_item_settle','open_items_settle'], true)) {
+    } elseif (in_array($input['mode'], ['open_item_settle','open_items_settle','batch_receipts','advance_apply'], true)) {
         try {
-            $result = $input['mode']==='open_items_settle'
-                ? pl_settle_open_items($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], $input['settlement_input'])
-                : pl_settle_open_item($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], $input['settlement_input']);
+            $result = match ($input['mode']) {
+                'open_items_settle' => pl_settle_open_items($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], $input['settlement_input']),
+                // One voucher per customer row (B57): the batch result reports each of them.
+                'batch_receipts' => ['journal_id' => (int) pl_post_batch_receipts($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], $input['settlement_input'])['receipts'][0]['journal_id']],
+                'advance_apply' => pl_apply_unapplied_credit($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], $input['settlement_input']),
+                default => pl_settle_open_item($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], $input['settlement_input']),
+            };
             $journal = ['id' => $result['journal_id']];
         } catch (DomainException $error) {
             if (!($input['allow_domain_failure'] ?? false)) { throw $error; }

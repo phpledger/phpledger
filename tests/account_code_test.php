@@ -92,7 +92,7 @@ test('a new book is born numbered and keeps each account reachable by its 1.0.0 
     $accounts = DB::query('SELECT id, code, legacy_code FROM pl_accounts WHERE company_id = %i ORDER BY code', $f['company_id']);
     $mapping = pl_account_code_mapping($accounts);
     assert_same($mapping['1-100-10001-00'], $mapping['1000']);
-    assert_same(17, count($mapping));
+    assert_same(19, count($mapping));
     foreach ($accounts as $row) {
         assert_same(true, pl_account_code_is_valid((string) $row['code']));
     }

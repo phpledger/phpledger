@@ -78,7 +78,9 @@ function pl_save_account(int $actorId, int $companyId, int $bookId, array $input
     }
     $heading = $structured && pl_account_code_is_heading($code);
     $role = $input['role'] ?? null;
-    $roleTypes = ['cash_bank' => 'asset', 'receivables' => 'asset', 'payables' => 'liability', 'owner_equity' => 'equity', 'income' => 'income', 'expense' => 'expense'];
+    // `customer_advances` and `supplier_advances` arrived with migration 037: unapplied
+    // credit is an obligation to a customer, a prepayment to a supplier is an asset.
+    $roleTypes = ['cash_bank' => 'asset', 'receivables' => 'asset', 'payables' => 'liability', 'owner_equity' => 'equity', 'income' => 'income', 'expense' => 'expense', 'customer_advances' => 'liability', 'supplier_advances' => 'asset'];
     if ($role !== null && (!is_string($role) || !isset($roleTypes[$role]) || $roleTypes[$role] !== $type)) {
         throw new DomainException('The account purpose must match its classification.');
     }

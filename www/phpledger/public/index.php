@@ -616,7 +616,10 @@ try {
         $direction = pl_web_text($_GET, 'direction', 'receivable');
         $asOf = pl_web_text($_GET, 'as_of', gmdate('Y-m-d'));
         $report = pl_ar_ap_open_items($actorId, $companyId, $bookId, $direction, $asOf);
-        pl_render('ageing', ['title'=>'Receivables & payables ageing','user'=>$user,'company'=>$company,'report'=>$report]);
+        // Unapplied credit is read separately and shown as its own section: it sits on the
+        // advances control, not inside receivables, so the two are never netted (B59).
+        $unapplied = pl_unapplied_credit($actorId, $companyId, $bookId, pl_advance_side_for_direction($direction), $asOf);
+        pl_render('ageing', ['title'=>'Receivables & payables ageing','user'=>$user,'company'=>$company,'report'=>$report,'unapplied'=>$unapplied]);
     }
     if ($path === '/reports/balance-sheet') {
         $asOf = pl_web_text($_GET, 'as_of', gmdate('Y-m-d'));

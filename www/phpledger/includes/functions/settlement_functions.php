@@ -1,11 +1,31 @@
 <?php
 declare(strict_types=1);
 
-/** One payment has one party/currency/direction and no unallocated remainder. */
+/**
+ * How many open items one voucher may allocate to.
+ *
+ * The 1.1 contract was thirty and exact; 1.2 raises it to a hundred because a
+ * distributor's monthly recovery routinely covers more (release plan, M5). Beyond a
+ * hundred the answer is more vouchers, not a bigger one: the cap keeps a single journal
+ * reviewable and keeps the locked section short.
+ */
+function pl_settlement_allocation_cap(): int
+{
+    return 100;
+}
+
+/**
+ * One payment has one party, one currency and one direction.
+ *
+ * Since 1.2 (B39) it may leave an unallocated remainder. The remainder is not
+ * guessed: the caller states the payment total, states each allocation, and names the
+ * advances control the remainder is to be held on, so the difference is a reviewed
+ * figure rather than a rounding artefact. Over-allocation is still refused.
+ */
 function pl_normalize_settlement(array $input): array
 {
     $rows=$input['allocations'] ?? null;
-    if (!is_array($rows) || count($rows)<1 || count($rows)>30) { throw new DomainException('Allocate the payment to between one and thirty open items.'); }
+    if (!is_array($rows) || count($rows)>pl_settlement_allocation_cap()) { throw new DomainException('Allocate the payment to at most '.pl_settlement_allocation_cap().' open items. Split a larger recovery into several receipts.'); }
     $allocations=[]; $sum='0.0000';
     foreach ($rows as $row) {
         if (!is_array($row)) { throw new DomainException('Choose valid allocation rows.'); }
@@ -17,11 +37,19 @@ function pl_normalize_settlement(array $input): array
     }
     ksort($allocations,SORT_NUMERIC);
     $total=pl_amount(pl_ledger_text($input['amount_fc']??null,'Payment amount',30));
-    if (bccomp($total,$sum,4)!==0) { throw new DomainException('Allocations must equal the payment exactly. Unallocated money and over-allocation are not accepted.'); }
+    if (bccomp($total,'0',4)<=0) { throw new DomainException('A receipt or payment needs a positive amount.'); }
+    $remainder=bcsub($total,$sum,4);
+    if (bccomp($remainder,'0',4)<0) { throw new DomainException('Allocations cannot exceed the payment. Reduce an allocated amount.'); }
+    $advance=isset($input['advance_account_id']) && $input['advance_account_id']!=='' ? pl_oi_id($input,'advance_account_id') : null;
+    if (bccomp($remainder,'0',4)>0 && $advance===null) { throw new DomainException('Name the advances control account that will hold the unallocated remainder, or allocate the whole payment.'); }
+    if (bccomp($remainder,'0',4)===0) { $advance=null; }
+    if ($allocations===[] && bccomp($remainder,'0',4)<=0) { throw new DomainException('Allocate the payment to at least one open item or leave a remainder on account.'); }
     $direction=$input['direction']??null;
     if (!in_array($direction,['receivable','payable'],true)) { throw new DomainException('Choose a receipt or a payment.'); }
     return ['action'=>'settle_batch','party_id'=>pl_oi_id($input,'party_id'),'direction'=>$direction,
         'bank_account_id'=>pl_oi_id($input,'bank_account_id'),'amount_fc'=>$total,'allocations'=>array_values($allocations),
+        'remainder_fc'=>$remainder,'advance_account_id'=>$advance,
+        'currency'=>isset($input['currency']) && $input['currency']!=='' ? pl_currency_code(pl_ledger_text($input['currency'],'Currency',3)) : null,
         'date'=>pl_ledger_date(pl_ledger_text($input['date']??null,'Payment date',10)),
         'description'=>pl_ledger_text($input['description']??null,'Payment reference',500),
         'actual_rate'=>isset($input['actual_rate']) && $input['actual_rate']!=='' ? pl_fx_rate(pl_ledger_text($input['actual_rate'],'Actual rate',40)) : null,
@@ -50,12 +78,30 @@ function pl_settlement_plan(int $actorId,int $companyId,int $bookId,array $data,
         $historical=array_intersect_key($item['recognition'],array_flip(['currency','rate','rate_type','rate_source_id','rate_is_stale','ic_counterparty_entity_id']));
         foreach (['rate_source_id','ic_counterparty_entity_id'] as $field) { $historical[$field]=$historical[$field]===null?null:(int)$historical[$field]; }
         $historical['rate_is_stale']=(bool)$historical['rate_is_stale'];
-        $map[count($lines)]=$allocation['item_id'];
+        if ($item['nature']!=='document') { throw new DomainException('Unapplied credit is applied or refunded, not allocated as if it were an invoice.'); }
+        $map[count($lines)]=['item_id'=>$allocation['item_id'],'kind'=>'allocation'];
         $lines[]=pl_oi_line((int)$item['control_account_id'],$allocation['amount_fc'],$base,!$receipt,$historical,'Historic open-item carrying value');
         $allocated[]=$allocation+['allocated_base'=>$base,'source_reference'=>$item['source_reference'],'remaining_fc'=>$item['remaining_fc'],'remaining_base'=>$item['remaining_base']];
         $carrying=bcadd($carrying,$base,4);
     }
+    $currency ??= $data['currency'];
+    if ($currency===null) { throw new DomainException('Name the currency of a receipt that is entirely on account.'); }
+    if ($data['currency']!==null && $data['currency']!==$currency) { throw new DomainException('The stated currency must match the selected open items.'); }
     $snapshot=pl_oi_rate($actorId,$companyId,$bookId,$currency,$data['date'],$data['actual_rate'],$data['rate_source_id'],'actual');
+    // The unallocated remainder. It is new money arriving now, so it is measured at this
+    // payment's own rate, not at any document's historic rate, and it becomes its own
+    // advance open item on the advances control — never a credit balance inside
+    // receivables and never a suspense account (B59).
+    $advance=null; $remainderBase='0.0000';
+    if (bccomp($data['remainder_fc'],'0',4)>0) {
+        $side=pl_advance_side_for_direction($data['direction']);
+        $advance=pl_advance_control($actorId,$companyId,$bookId,$side,$data['advance_account_id'],$posting);
+        $remainderBase=pl_fx_convert($data['remainder_fc'],$snapshot['rate']);
+        $advance=['account_id'=>$advance,'side'=>$side,'direction'=>pl_advance_role_contract($side)['direction'],
+            'amount_fc'=>$data['remainder_fc'],'amount_base'=>$remainderBase,'snapshot'=>$snapshot,'line_index'=>count($lines)];
+        $lines[]=pl_oi_line($advance['account_id'],$data['remainder_fc'],$remainderBase,!$receipt,$snapshot,'Unapplied '.($receipt?'receipt':'payment').' held on account');
+        $carrying=bcadd($carrying,$remainderBase,4);
+    }
     $settlementBase=pl_fx_convert($data['amount_fc'],$snapshot['rate']);
     $bankCurrency=$bank['currency']??$book['currency'];
     if (!in_array($bankCurrency,[$book['currency'],$currency],true)) { throw new DomainException('A third-currency bank conversion requires a separate conversion transaction.'); }
@@ -71,6 +117,7 @@ function pl_settlement_plan(int $actorId,int $companyId,int $bookId,array $data,
         if ($valid) { $amount=ltrim($difference,'-'); $lines[]=pl_oi_line($account,$amount,$amount,!$gain,$domestic,'Realised FX '.$fxKind); }
     }
     return ['currency'=>$currency,'functional_currency'=>$book['currency'],'amount_fc'=>$data['amount_fc'],'allocated_base'=>$carrying,'settlement_base'=>$settlementBase,
+        'remainder_fc'=>$data['remainder_fc'],'remainder_base'=>$remainderBase,'advance'=>$advance,
         'fx_kind'=>$fxKind,'fx_amount'=>ltrim($difference,'-'),'settlement_rate'=>$snapshot['rate'],'rate_snapshot'=>$snapshot,'allocations'=>$allocated,'line_items'=>$map,'lines'=>$lines];
 }
 
@@ -89,9 +136,19 @@ function pl_settle_open_items(int $actorId,int $companyId,int $bookId,array $inp
     return pl_ar_canonical_result(pl_oi_command($actorId,$companyId,$bookId,pl_ledger_text($input['idempotency_key']??null,'Payment identity',128),$data,
         function (string $journalKey) use ($actorId,$companyId,$bookId,$data): array {
             $plan=pl_settlement_plan($actorId,$companyId,$bookId,$data,true);
+            $map=$plan['line_items'];
+            if ($plan['advance']!==null) {
+                // The advance item exists before the journal so the posting funnel can validate
+                // the remainder line against it; the whole command is one transaction, so a
+                // refused posting leaves no orphan item behind.
+                $map[$plan['advance']['line_index']]=['item_id'=>pl_advance_open_item($actorId,$companyId,$bookId,$data['party_id'],
+                    $plan['advance']['account_id'],$plan['advance']['direction'],$plan['currency'],'advance:'.$journalKey),'kind'=>'recognition'];
+                ksort($map,SORT_NUMERIC);
+            }
             $journal=pl_post_journal_locked($actorId,$companyId,$bookId,['date'=>$data['date'],'currency'=>$plan['functional_currency'],
                 'source_type'=>'open_item_batch_settlement','source_reference'=>'open-item-batch:'.hash('sha256',json_encode($data,JSON_THROW_ON_ERROR)),
-                'idempotency_key'=>$journalKey,'description'=>$data['description'],'lines'=>$plan['lines']],null,null,$plan['line_items']);
+                'idempotency_key'=>$journalKey,'description'=>$data['description'],'lines'=>$plan['lines']],null,null,$map);
+            if ($plan['advance']!==null) { $plan['advance']['item_id']=$map[$plan['advance']['line_index']]['item_id']; }
             unset($plan['lines'],$plan['line_items']);
             return ['journal_id'=>(int)$journal['id']]+$plan;
         }));
@@ -131,27 +188,34 @@ function pl_settlement_receipt(int $actorId,int $companyId,int $bookId,int $jour
     if (!in_array($journal['source_type'],['open_item_settlement','open_item_batch_settlement'],true)) {
         throw new DomainException('This journal is not a customer receipt or supplier payment.');
     }
-    $allocations=DB::query('SELECT i.id AS item_id,i.source_reference,i.currency,i.direction,i.party_id,l.amount_fc,l.amount_base '
+    // A receipt entirely on account has no allocation at all, so the advance recognition of
+    // its remainder is read with it; the receipt then shows what was applied and what is
+    // held on account, which is what the customer's copy has to say.
+    $allocations=DB::query("SELECT i.id AS item_id,i.source_reference,i.currency,i.direction,i.party_id,e.kind,COALESCE(i.nature,'document') AS nature,l.amount_fc,l.amount_base "
         .'FROM pl_open_item_entries e JOIN pl_journal_lines l ON l.id=e.journal_line_id '
         .'JOIN pl_open_items i ON i.id=e.item_id AND i.company_id=e.company_id AND i.book_id=e.book_id '
-        .'WHERE l.journal_id=%i AND e.company_id=%i AND e.book_id=%i AND e.kind=%s ORDER BY e.id',
-        $journalId,$companyId,$bookId,'allocation');
+        .'WHERE l.journal_id=%i AND e.company_id=%i AND e.book_id=%i AND e.kind IN %ls ORDER BY e.id',
+        $journalId,$companyId,$bookId,['allocation','recognition']);
     if ($allocations===[]) { throw new DomainException('This payment has no allocated open item to receipt.'); }
-    $allocated='0.0000';
-    foreach ($allocations as &$allocation) {
-        $allocation['item_id']=(int)$allocation['item_id'];
-        $allocation['party_id']=(int)$allocation['party_id'];
-        $allocated=bcadd($allocated,(string)$allocation['amount_fc'],4);
+    $allocated='0.0000'; $remainder='0.0000'; $held=[]; $applied=[];
+    foreach ($allocations as $row) {
+        $row['item_id']=(int)$row['item_id'];
+        $row['party_id']=(int)$row['party_id'];
+        if ($row['nature']==='advance') { $remainder=bcadd($remainder,(string)$row['amount_fc'],4); $held[]=$row; }
+        else { $allocated=bcadd($allocated,(string)$row['amount_fc'],4); $applied[]=$row; }
     }
-    unset($allocation);
+    $allocations=$applied;
     $bankAccounts=array_map('intval',array_column(DB::query('SELECT id FROM pl_accounts WHERE company_id=%i AND book_id=%i AND role=%s',$companyId,$bookId,'cash_bank'),'id'));
     $bank=null;
     foreach ($journal['lines'] as $line) {
         if ($bank===null && in_array((int)$line['account_id'],$bankAccounts,true)) { $bank=$line; }
     }
-    return ['journal'=>$journal,'direction'=>(string)$allocations[0]['direction'],'currency'=>(string)$allocations[0]['currency'],
-        'party'=>pl_get_party($actorId,$companyId,$bookId,(int)$allocations[0]['party_id']),
-        'allocations'=>$allocations,'allocated_fc'=>$allocated,
+    $first=$allocations[0]??$held[0];
+    // An advance is held on the opposite side of the payment it came from.
+    $direction=$allocations===[] ? ($first['direction']==='payable'?'receivable':'payable') : (string)$first['direction'];
+    return ['journal'=>$journal,'direction'=>$direction,'currency'=>(string)$first['currency'],
+        'party'=>pl_get_party($actorId,$companyId,$bookId,(int)$first['party_id']),
+        'allocations'=>$allocations,'allocated_fc'=>$allocated,'held_on_account'=>$held,'remainder_fc'=>$remainder,
         'bank'=>$bank===null?null:['code'=>(string)$bank['code'],'name'=>(string)$bank['name'],'amount_fc'=>(string)$bank['amount_fc'],
             'amount_base'=>(string)$bank['amount_base'],'currency'=>(string)$bank['currency']],
         'reversed'=>(bool)DB::queryFirstField('SELECT id FROM pl_journals WHERE reversal_of_id=%i AND company_id=%i AND book_id=%i',$journalId,$companyId,$bookId),

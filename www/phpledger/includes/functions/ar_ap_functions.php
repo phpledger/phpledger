@@ -611,7 +611,7 @@ WITH effective AS (
  WHERE d.company_id=%i AND d.book_id=%i AND d.kind IN %ls
 ), registry AS (
  SELECT effective.*,v.id AS reversed,
- (SELECT COALESCE(SUM(CASE WHEN e.kind IN ('recognition','allocation_reversal') THEN COALESCE(e.allocated_amount_fc,l.amount_fc) ELSE -COALESCE(e.allocated_amount_fc,l.amount_fc) END),0)
+ (SELECT COALESCE(SUM(CASE WHEN e.kind IN ('recognition','allocation_reversal','application_reversal') THEN COALESCE(e.allocated_amount_fc,l.amount_fc) ELSE -COALESCE(e.allocated_amount_fc,l.amount_fc) END),0)
  FROM pl_open_item_entries e JOIN pl_journal_lines l ON l.id=e.journal_line_id AND l.company_id=e.company_id AND l.book_id=e.book_id
  WHERE e.company_id=%i AND e.book_id=%i AND e.item_id=effective.current_item) AS remaining
  FROM effective LEFT JOIN pl_journals v ON v.reversal_of_id=effective.current_journal
@@ -644,14 +644,18 @@ function pl_ar_ap_open_items(int $actorId, int $companyId, int $bookId, string $
     $asOf = pl_ledger_date($asOf ?? gmdate('Y-m-d'));
     return pl_ledger_transaction(function () use ($actorId,$companyId,$bookId,$direction,$asOf): array {
         pl_require_company_access($actorId, $companyId); pl_ledger_book($companyId, $bookId);
-        $rows = DB::query('SELECT i.*,p.legal_name FROM pl_open_items i JOIN pl_parties p ON p.id=i.party_id AND p.company_id=i.company_id WHERE i.company_id=%i AND i.book_id=%i AND i.direction=%s ORDER BY i.id FOR SHARE', $companyId, $bookId, $direction);
+        // Advance items (migration 037) are unapplied credit on their own control, not trade
+        // debt: a customer advance is credit-normal and would otherwise appear in the payables
+        // ageing. They are reported by pl_unapplied_credit() instead.
+        $rows = DB::query("SELECT i.*,p.legal_name FROM pl_open_items i JOIN pl_parties p ON p.id=i.party_id AND p.company_id=i.company_id WHERE i.company_id=%i AND i.book_id=%i AND i.direction=%s AND COALESCE(i.nature,'document')='document' ORDER BY i.id FOR SHARE", $companyId, $bookId, $direction);
         $items = []; $total = '0.0000'; $overdue = '0.0000'; $byControl = []; $currencyTotals = [];
         $buckets = array_fill_keys(['not_due','1_30','31_60','61_90','over_90'], '0.0000'); $oldest = null;
         foreach ($rows as $row) {
             $state = pl_open_item_state($companyId, $bookId, (int) $row['id']); $fc = '0.0000'; $base = '0.0000'; $date = null; $due = null;
             foreach ($state['entries'] as $entry) {
                 if ($entry['journal_date'] > $asOf) { continue; }
-                $positive = in_array($entry['kind'], ['recognition','allocation_reversal'], true);
+                // Shared with pl_open_item_state(); migration 037 added the application kinds.
+                $positive = in_array($entry['kind'], pl_open_item_increasing_kinds(), true);
                 $fc = $positive ? bcadd($fc, $entry['amount_fc'], 4) : bcsub($fc, $entry['amount_fc'], 4);
                 $base = $positive ? bcadd($base, $entry['amount_base'], 4) : bcsub($base, $entry['amount_base'], 4);
                 if ($entry['kind'] === 'recognition') { $date = $entry['opening_document_date'] ?? $entry['journal_date']; $due = $entry['opening_due_date'] ?? $date; }
