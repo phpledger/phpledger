@@ -367,6 +367,25 @@ each pre-1.2 account's old number recorded, and the owner-capital, owner-loan,
 drawings, contra and advances control accounts present so every sample and demo
 shows them.
 
+Migration **040_contra_accounts_and_partner_identity** completes the conversion
+036 left half-finished. 036 added `is_contra` with `DEFAULT 0` and never set it,
+so a book born on 1.2 carried the bundled chart's contra marking and a book
+upgraded to 1.2 carried none: no drawings account existed, the chart's own
+drawings account appeared among the capital candidates, and every deduction
+presentation was lost. 040 sets `is_contra` from `semantic_key` — written only
+by the starter template at company creation and by `pl_confirm_existing_setup()`,
+so the four contra purposes mean exactly what the bundled chart says — and for
+every keyless account it asks instead of guessing. `pl_contra_confirmations`
+holds one row per **converted** book (a book with `pl_account_code_map` rows),
+`pl_contra_require_confirmed()` refuses the owner services and `/owner` while it
+is `pending`, and `pl_confirm_contra_accounts()` records the reviewed answer and
+writes the ordinary `pl_core_audit` row per account it marks. Nothing is derived
+from an account's name. The same migration makes a partner's drawings and loan
+accounts unique per book, as the capital account already was;
+`pl_owner_require_own_accounts()` carries the cross-role half of that rule, which
+spans three columns and every row and so cannot be a constraint. Every rejected
+alternative and the exact reversal SQL are in the migration's header.
+
 ### Advances, refunds and orphan credit notes (1.2)
 
 Money a customer pays beyond their open invoices is **unapplied credit**, and it

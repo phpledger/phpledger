@@ -67,6 +67,7 @@ $routes = [
     '/sample-guide' => ['GET'], '/help' => ['GET'], '/modules' => ['GET', 'POST'], '/connections' => ['GET','POST'], '/oauth/authorize' => ['GET','POST'], '/tables' => ['GET'],
     '/accounts' => ['GET'], '/accounts/save' => ['POST'], '/logo' => ['GET'],
     '/owner' => ['GET'], '/owner/post' => ['POST'], '/owner/reverse' => ['POST'],
+    '/contra-review' => ['GET'], '/contra-review/confirm' => ['POST'],
     '/general-journals' => ['GET'], '/general-journals/new' => ['GET'], '/general-journals/edit' => ['GET'],
     '/general-journals/detail' => ['GET'], '/general-journals/save' => ['POST'], '/general-journals/post' => ['POST'], '/general-journals/reverse' => ['POST'],
 ];
@@ -415,7 +416,31 @@ try {
             pl_redirect(pl_url('/owner'));
         } catch (DomainException $error) { pl_form_failure(pl_url('/owner'), $_POST, $error->getMessage()); }
     }
+    // The upgrade step a converted chart has to answer before the owner screens open
+    // (internal review finding 5). A book born on 1.2 has no pending step and never sees it.
+    if ($path === '/contra-review/confirm') {
+        try {
+            pl_web_assert_scope($company, $_POST);
+            $chosen = $_POST['contra_account_ids'] ?? [];
+            if (!is_array($chosen)) { throw new DomainException('Choose the contra accounts from the list on this screen.'); }
+            $ids = [];
+            foreach (array_values($chosen) as $value) {
+                if (!is_scalar($value) || !ctype_digit((string) $value)) { throw new DomainException('Choose the contra accounts from the list on this screen.'); }
+                $ids[] = (int) $value;
+            }
+            pl_confirm_contra_accounts($actorId, $companyId, $bookId, $ids, pl_web_text($_POST, 'reason'), pl_web_text($_POST, 'creation_key'));
+            pl_notice('Contra accounts confirmed. The marking changes presentation only; no posted entry moved.');
+            pl_redirect(pl_url('/contra-review'));
+        } catch (DomainException $error) { pl_form_failure(pl_url('/contra-review'), $_POST, $error->getMessage()); }
+    }
+    if ($path === '/contra-review') {
+        $form = pl_form_state(pl_url('/contra-review'));
+        pl_render('contra-review', ['title' => 'Confirm your contra accounts', 'user' => $user, 'company' => $company,
+            'review' => pl_contra_review($actorId, $companyId, $bookId),
+            'form' => $form, 'input' => $form['input'] ?: ['creation_key' => bin2hex(random_bytes(16))]]);
+    }
     if ($path === '/owner') {
+        if (pl_contra_review_pending($companyId, $bookId)) { pl_redirect(pl_url('/contra-review')); }
         $asOf = pl_web_text($_GET, 'as_of', gmdate('Y-m-d'));
         pl_ledger_date($asOf);
         $form = pl_form_state(pl_url('/owner'));

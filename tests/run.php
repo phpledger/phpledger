@@ -133,6 +133,9 @@ if (($argv[1] ?? '') === '--suite=i18n') {
 if (($argv[1] ?? '') === '--suite=modules') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'purchasing_test.php', 'pos_test.php', 'module_test.php'];
 }
+if (($argv[1] ?? '') === '--suite=owner') {
+    $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'account_code_test.php', 'report_tree_test.php', 'owner_test.php'];
+}
 if (($argv[1] ?? '') === '--suite=stock-documents') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'stock_document_test.php'];
 }
