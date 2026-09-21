@@ -495,6 +495,75 @@ function pl_party_statement(int $actorId, int $companyId, int $bookId, int $part
     });
 }
 
+/**
+ * The stock and balance readout strip above a document editor's lines.
+ *
+ * Adopted from the Awan prototype (B54) and frame decision 6: a read-only display beside the
+ * lines showing what the person entering the document would otherwise have to look up — the
+ * customer's balance to date, and the stock of the line's product in the chosen warehouse and
+ * across the whole book. It is a display, never a posting input, and it reads only through
+ * existing services: the party statement for the balance and pl_inventory_balance() for stock.
+ *
+ * Van stock per salesman is deliberately absent: a van is a warehouse kind that M4 introduces,
+ * and there is no salesman-to-van link in the schema yet, so the strip states the warehouse it
+ * can actually name rather than inventing one.
+ *
+ * @return array{party_balance:?string, currency:string, product:?array, warehouse:?array,
+ *                warehouse_stock:?array, book_stock:?array, van_stock:null}
+ */
+function pl_trading_editor_readout(int $actorId, int $companyId, int $bookId, ?int $partyId, ?int $productId, ?int $warehouseId): array
+{
+    pl_require_company_access($actorId, $companyId);
+    $book = pl_ledger_book($companyId, $bookId);
+    $readout = ['party_balance' => null, 'currency' => (string) $book['currency'], 'product' => null,
+        'warehouse' => null, 'warehouse_stock' => null, 'book_stock' => null, 'van_stock' => null];
+    if ($partyId !== null) {
+        try { $readout['party_balance'] = pl_party_statement($actorId, $companyId, $bookId, $partyId, '1000-01-01')['closing_balance']; }
+        catch (DomainException) { $readout['party_balance'] = null; }
+    }
+    if ($productId === null) { return $readout; }
+    try { $product = pl_get_inventory_product($actorId, $companyId, $bookId, $productId); }
+    catch (DomainException) { return $readout; }
+    if ($product['kind'] !== 'stock') { return $readout; }
+    $readout['product'] = ['id' => (int) $product['id'], 'name' => (string) $product['name'], 'base_unit' => (string) $product['base_unit']];
+    $readout['book_stock'] = pl_inventory_balance($actorId, $companyId, $bookId, (int) $product['id']);
+    try {
+        $warehouse = $warehouseId === null
+            ? pl_inventory_default_warehouse($actorId, $companyId, $bookId)
+            : pl_get_inventory_warehouse($actorId, $companyId, $bookId, $warehouseId);
+        $readout['warehouse'] = ['id' => (int) $warehouse['id'], 'code' => (string) $warehouse['code'], 'name' => (string) $warehouse['name']];
+        $readout['warehouse_stock'] = pl_inventory_balance($actorId, $companyId, $bookId, (int) $product['id'], null, (int) $warehouse['id']);
+    } catch (DomainException) {
+        $readout['warehouse'] = null;
+    }
+    return $readout;
+}
+
+/**
+ * The pack, sales-staff, area, warehouse and policy data one AR editor render needs.
+ *
+ * Returns empty lists and the default policies when the trading module is not enabled for this
+ * company, so the editor renders exactly the 1.1 screen and nothing new is offered that the
+ * services would then refuse.
+ */
+function pl_trading_editor_context(int $actorId, int $companyId, int $bookId): array
+{
+    $enabled = pl_module_available($actorId, $companyId, $bookId, 'trading-documents');
+    $context = ['enabled' => $enabled, 'packs' => [], 'packs_by_product' => [], 'sales_staff' => [],
+        'areas' => [], 'warehouses' => [], 'policies' => pl_trading_policy_defaults() + ['revision' => 0]];
+    if (!$enabled) { return $context; }
+    $context['policies'] = pl_trading_policies($actorId, $companyId, $bookId);
+    $context['sales_staff'] = array_values(array_filter(pl_list_sales_staff($actorId, $companyId, $bookId), static fn (array $row): bool => $row['is_active']));
+    $context['areas'] = array_values(array_filter(pl_list_areas($actorId, $companyId, $bookId), static fn (array $row): bool => $row['is_active']));
+    $context['warehouses'] = array_values(array_filter(pl_list_inventory_warehouses($actorId, $companyId, $bookId), static fn (array $row): bool => $row['is_active']));
+    foreach (pl_list_product_packs($actorId, $companyId, $bookId) as $pack) {
+        if (!$pack['is_active']) { continue; }
+        $context['packs'][] = $pack;
+        $context['packs_by_product'][$pack['product_id']][] = $pack;
+    }
+    return $context;
+}
+
 /** Print loader for /print/statement/<party id>. Read-only, in the record screen's scope. */
 function pl_trading_statement_print(int $actorId, int $companyId, int $bookId, int $partyId): array
 {

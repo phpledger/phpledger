@@ -34,11 +34,18 @@ function pl_ui_strip(string $message, string $kind = 'info', ?callable $action =
     echo '</div>';
 }
 
-function pl_ui_totals(array $rows): void
+/**
+ * @param array<string,string> $rows  label => amount
+ * @param array<string,string> $keys  label => row key, for the rows a live recalculation owns
+ *                                    ("net", "tax", "total") and the rows that belong to the
+ *                                    last server preview and go stale the moment it is edited.
+ */
+function pl_ui_totals(array $rows, array $keys = []): void
 {
     echo '<dl class="doc-totals" data-fold="totals">';
     foreach ($rows as $label => $amount) {
-        echo '<div class="doc-totals-row"><dt>' . pl_e((string)$label) . '</dt><dd class="amount">' . pl_e((string)$amount) . '</dd></div>';
+        $key = $keys[$label] ?? '';
+        echo '<div class="doc-totals-row"' . ($key === '' ? '' : ' data-total="' . pl_e($key) . '"') . '><dt>' . pl_e((string)$label) . '</dt><dd class="amount">' . pl_e((string)$amount) . '</dd></div>';
     }
     echo '</dl>';
 }

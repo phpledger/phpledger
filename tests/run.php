@@ -84,7 +84,7 @@ if (($argv[1] ?? '') === '--suite=print') {
     $suites = ['ledger_test.php','concurrency_test.php','open_item_test.php','settlement_test.php','print_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=trading') {
-    $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','inventory_test.php','tax_test.php','settlement_test.php','print_test.php','trading_documents_test.php'];
+    $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','inventory_test.php','tax_test.php','open_item_test.php','settlement_test.php','print_test.php','trading_documents_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=editors') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'editor_test.php'];

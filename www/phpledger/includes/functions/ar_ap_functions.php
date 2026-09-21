@@ -47,6 +47,9 @@ function pl_ar_line_amount(string $quantity, string $unitPrice): string
  */
 function pl_normalize_ar_document(array $input, array $packSizes = []): array
 {
+    // A browser form submits an untouched optional number as an empty string, which means
+    // "none" and not "invalid"; every other caller passes the value or omits the key.
+    $number = static fn (mixed $value, string $fallback = '0'): string => is_string($value) && trim($value) !== '' ? trim($value) : $fallback;
     $kind = $input['kind'] ?? null;
     if (!in_array($kind, ['invoice', 'bill', 'customer_credit', 'supplier_credit'], true)) { throw new DomainException('Choose an invoice, bill, customer credit or supplier credit.'); }
     $date = pl_ledger_date(pl_ledger_text($input['date'] ?? null, 'Document date', 10));
@@ -68,18 +71,18 @@ function pl_normalize_ar_document(array $input, array $packSizes = []): array
         $packQuantity = '0.0000'; $unitQuantity = '0.0000';
         if ($packId !== null) {
             if (!isset($packSizes[$packId])) { throw new DomainException('Resolve every pack through the trading-documents service before saving this document.'); }
-            $packQuantity = pl_amount(pl_ledger_text((string) ($line['pack_quantity'] ?? '0'), 'Pack quantity', 30));
-            $unitQuantity = pl_amount(pl_ledger_text((string) ($line['unit_quantity'] ?? '0'), 'Loose units', 30));
+            $packQuantity = pl_amount(pl_ledger_text($number($line['pack_quantity'] ?? null), 'Pack quantity', 30));
+            $unitQuantity = pl_amount(pl_ledger_text($number($line['unit_quantity'] ?? null), 'Loose units', 30));
             $quantity = pl_trading_pack_quantity($packQuantity, $unitQuantity, $packSizes[$packId]);
         } else {
             $quantity = pl_amount(pl_ledger_text($line['quantity'] ?? null, 'Line quantity', 30));
         }
-        $percent = pl_trading_discount_percent(pl_ledger_text((string) ($line['discount_percent'] ?? '0'), 'Line discount', 12));
+        $percent = pl_trading_discount_percent(pl_ledger_text($number($line['discount_percent'] ?? null), 'Line discount', 12));
         if ($free) {
             // Decision 3: a separate zero-value line. Its unit price, when one is given, is the
             // open-market value the B37 free-goods tax policy may charge output tax on; the
             // customer is never billed for it, so the line's own value is always zero.
-            $unitPrice = pl_amount(pl_ledger_text((string) ($line['unit_price'] ?? '0'), 'Open-market unit value', 30));
+            $unitPrice = pl_amount(pl_ledger_text($number($line['unit_price'] ?? null), 'Open-market unit value', 30));
             if (bccomp($quantity, '0', 4) <= 0) { throw new DomainException('A free-goods line needs a positive quantity.'); }
             $gross = bccomp($unitPrice, '0', 4) === 0 ? '0.0000' : pl_amount(bcadd(bcmul($quantity, $unitPrice, 8), '0.00005', 4));
             $discount = $gross; $lineTotal = '0.0000';
@@ -119,7 +122,7 @@ function pl_normalize_ar_document(array $input, array $packSizes = []): array
     $optional = static fn (string $field): ?int => isset($input[$field]) && $input[$field] !== '' ? pl_oi_id($input, $field) : null;
     // Cash taken on the document itself: a counter or van sale paid on delivery. The recognition
     // and the settlement of this portion are one atomic action at posting (see pl_post_ar_document).
-    $cashReceived = pl_amount(pl_ledger_text((string) ($input['cash_received'] ?? '0'), 'Cash received', 30));
+    $cashReceived = pl_amount(pl_ledger_text($number($input['cash_received'] ?? null), 'Cash received', 30));
     $cashAccountId = $optional('cash_account_id');
     if (bccomp($cashReceived, '0', 4) > 0) {
         if ($kind !== 'invoice') { throw new DomainException('Cash can only be recorded on a customer invoice.'); }
@@ -301,7 +304,7 @@ function pl_ar_price_document(int $actorId, int $companyId, int $bookId, array $
         // percentage on every repricing, exactly as the untouched amount always was, so
         // pricing stays idempotent and a review hash cannot drift.
         $free = (bool) ($line['is_free_goods'] ?? false);
-        $percent = pl_trading_discount_percent((string) ($line['discount_percent'] ?? '0'));
+        $percent = pl_trading_discount_percent(trim((string) ($line['discount_percent'] ?? '0')) !== '' ? trim((string) $line['discount_percent']) : '0');
         if ($free) {
             $openMarket = bccomp(pl_amount((string) $line['unit_price']), '0', 4) === 0 ? '0.0000'
                 : pl_amount(bcadd(bcmul(pl_amount((string) $line['quantity']), pl_amount((string) $line['unit_price']), 8), '0.00005', 4));

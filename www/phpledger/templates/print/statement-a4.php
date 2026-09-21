@@ -30,6 +30,7 @@ $receivable = $statement['direction'] === 'receivable';
         </dl>
     </div>
 </section>
+<div class="print-lines-scroll">
 <table class="print-lines">
     <caption>Activity <?= pl_e(pl_date_label((string) $statement['from'])) ?> to <?= pl_e(pl_date_label((string) $statement['to'])) ?></caption>
     <thead><tr>
@@ -53,6 +54,7 @@ $receivable = $statement['direction'] === 'receivable';
         <tr><th scope="row" colspan="5">Closing balance, <?= pl_e(pl_date_label((string) $statement['to'])) ?><?= bccomp((string) $statement['unapplied'], '0', 4) > 0 ? ' · includes ' . pl_e(pl_money((string) $statement['unapplied'])) . ' held as an unapplied advance' : '' ?></th><td class="print-num"><?= pl_e(pl_money((string) $statement['closing_balance'])) ?></td></tr>
     </tfoot>
 </table>
+</div>
 <section class="print-totals">
     <div class="print-total-row"><span>Opening balance</span><span class="print-num"><?= pl_e(pl_money((string) $statement['opening_balance'])) ?></span></div>
     <div class="print-total-row"><span><?= $receivable ? 'Invoiced this period' : 'Billed this period' ?></span><span class="print-num"><?= pl_e(pl_money((string) $statement['invoiced'])) ?></span></div>

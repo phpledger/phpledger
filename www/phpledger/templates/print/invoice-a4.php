@@ -36,6 +36,7 @@ $isCredit = (bool) $invoice['is_credit'];
 <?php if ($invoice['payment_status'] === 'reversed'): ?>
 <p class="print-notice">This document has been reversed by a linked entry. It is kept for the record.</p>
 <?php endif; ?>
+<div class="print-lines-scroll">
 <table class="print-lines">
     <caption><?= $isCredit ? 'Credited items' : 'Items invoiced' ?></caption>
     <thead><tr>
@@ -61,6 +62,7 @@ $isCredit = (bool) $invoice['is_credit'];
     <?php endforeach; ?>
     </tbody>
 </table>
+</div>
 <?php if ($document['tax_summary'] !== []): ?>
 <table class="print-lines">
     <caption>Tax summary by rate</caption>

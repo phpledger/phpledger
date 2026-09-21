@@ -159,6 +159,15 @@ with, so nothing here is mistaken for more than it is:
   changed pack size would silently restate stock history. A different size is a different pack.
 - **Policies are not retrospective.** A B37 policy change applies to documents posted after it;
   it never restates a document already posted. The immutable policy history records both states.
+- **The readout strip names the warehouse, not a van.** Frame decision 6 wants a van figure per
+  salesman. A van is a warehouse kind M4 introduces and no salesman-to-van link exists, so the
+  strip shows the chosen warehouse and the whole book and says plainly that van stock is not
+  available yet, rather than inventing a number.
+- **A printed statement covers the current month to date.** `/print/<type>/<id>` carries only a
+  document id, which is M2's route contract, so the frame's From/To controls are not wired to the
+  print. The on-screen service `pl_party_statement()` takes a range; only the print does not.
+- **The trading columns are customer-document only.** A supplier bill and the purchase editors
+  keep the columns they had.
 
 ## Shop and restaurant dependencies
 

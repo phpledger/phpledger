@@ -424,3 +424,150 @@ test('the trading module manifest declares its dependencies and its one migratio
     assert_same(['037_trading_documents'], $manifest['migrations']);
     assert_true(is_file(dirname(__DIR__) . '/www/phpledger/install/migrations/037_trading_documents.php'), 'Migration 037 is missing.');
 });
+
+/*
+ * Screen-path tests. These drive the same adapters the browser posts into —
+ * pl_starter_lines(), pl_web_ar_editor_input() and pl_web_ar_editor_preview() — so the
+ * controls added to the editor are proved to reach the services, not just the services.
+ */
+require_once dirname(__DIR__) . '/www/phpledger/includes/functions/starter_web_functions.php';
+require_once dirname(__DIR__) . '/www/phpledger/includes/functions/starter_ar_web_functions.php';
+require_once dirname(__DIR__) . '/www/phpledger/templates/partials/ui/components.php';
+require_once dirname(__DIR__) . '/www/phpledger/templates/partials/ui/commercial-lines.php';
+
+/** One POST body exactly as the invoice editor submits it. */
+function trading_editor_post(array $f, array $header = [], array $lines = []): array
+{
+    return array_replace([
+        'action' => 'save', 'kind' => 'invoice', 'party_id' => (string) $f['party_id'],
+        'date' => '2026-01-10', 'due_date' => '2026-02-10', 'currency' => 'USD',
+        'reference' => 'Sample screen reference', 'terms' => '', 'notes' => '',
+        'price_mode' => 'exclusive', 'rounding_account_id' => '', 'rate' => '',
+        'request_key' => bin2hex(random_bytes(16)),
+        'lines' => $lines === [] ? [['description' => 'Sample screen sale', 'quantity' => '10', 'unit_price' => '25',
+            'account_id' => (string) $f['accounts']['4000'], 'product_id' => (string) $f['product_id']]] : $lines,
+    ], $header);
+}
+
+test('the editor screen path carries a pack line through to a resolved base quantity', function (): void {
+    $f = trading_fixture();
+    $post = trading_editor_post($f, [], [[
+        'description' => 'Sample cartons', 'pack_id' => (string) $f['pack_id'], 'pack_quantity' => '5', 'unit_quantity' => '3',
+        'quantity' => '', 'unit_price' => '2.5', 'account_id' => (string) $f['accounts']['4000'], 'product_id' => (string) $f['product_id'],
+    ]]);
+    $line = pl_starter_lines($post)[0];
+    assert_same($f['pack_id'], $line['pack_id'], 'The pack selection did not survive the screen adapter.');
+    assert_same('5', $line['pack_quantity']);
+    assert_same('3', $line['unit_quantity']);
+    $input = pl_web_ar_editor_input($post, 'invoice');
+    $document = trading_post($f, $input);
+    assert_same('63.0000', $document['lines'][0]['quantity'], '5 cartons of 12 plus 3 loose units is 63 base units.');
+    assert_same('157.5000', $document['total']);
+});
+
+test('the editor screen path carries a line discount and shows the amount it computes', function (): void {
+    $f = trading_fixture();
+    $post = trading_editor_post($f, [], [[
+        'description' => 'Sample discounted sale', 'quantity' => '10', 'unit_price' => '25', 'discount_percent' => '10',
+        'account_id' => (string) $f['accounts']['4000'], 'product_id' => (string) $f['product_id'],
+    ]]);
+    assert_same('10', pl_starter_lines($post)[0]['discount_percent']);
+    $document = trading_post($f, pl_web_ar_editor_input($post, 'invoice'));
+    assert_same('25.0000', $document['discount_total']);
+    assert_same('225.0000', $document['total']);
+    ob_start();
+    pl_ui_commercial_lines([['description' => 'Sample discounted sale', 'quantity' => '10', 'unit_price' => '25', 'discount_percent' => '10']],
+        [], false, false, [], ['enabled' => true, 'packs' => [], 'policies' => pl_trading_policy_defaults()]);
+    $html = (string) ob_get_clean();
+    assert_true(str_contains($html, 'name="lines[0][discount_percent]"'), 'The editor has no line discount control.');
+    assert_true(str_contains($html, '225.00'), 'The row does not show the net amount the line will post.');
+    assert_true(str_contains($html, '25.00'), 'The row does not show the discount amount it computed.');
+});
+
+test('the editor screen path marks a free-goods line and keeps it out of the money columns', function (): void {
+    $f = trading_fixture();
+    trading_set_policies($f, ['free_goods_account_id' => $f['promotion_account_id']]);
+    $post = trading_editor_post($f, [], [
+        ['description' => 'Sample paid sale', 'quantity' => '10', 'unit_price' => '25', 'account_id' => (string) $f['accounts']['4000'], 'product_id' => (string) $f['product_id']],
+        ['description' => 'Sample bonus', 'quantity' => '2', 'unit_price' => '', 'is_free_goods' => '1', 'account_id' => (string) $f['accounts']['4000'], 'product_id' => (string) $f['product_id']],
+    ]);
+    $lines = pl_starter_lines($post);
+    assert_same(false, $lines[0]['is_free_goods']);
+    assert_same(true, $lines[1]['is_free_goods'], 'The free-goods checkbox did not survive the screen adapter.');
+    $document = trading_post($f, pl_web_ar_editor_input($post, 'invoice'));
+    assert_same('250.0000', $document['total'], 'The bonus line was charged to the customer.');
+    assert_same('4.0000', trading_account_movement($f, $f['promotion_account_id']));
+    ob_start();
+    pl_ui_commercial_lines([['description' => 'Sample bonus', 'quantity' => '2', 'is_free_goods' => '1']],
+        [], false, false, [], ['enabled' => true, 'packs' => [], 'policies' => pl_trading_policy_defaults()]);
+    $html = (string) ob_get_clean();
+    assert_true(str_contains($html, 'doc-line-free'), 'A free-goods row is not marked as one.');
+    assert_true(str_contains($html, 'Bonus, not charged'), 'The free row does not say why its amount is nothing.');
+    assert_true(str_contains($html, 'name="lines[0][is_free_goods]"'), 'The editor has no free-goods control.');
+});
+
+test('the screen refuses a free-goods line on a credit note and cash above the cap', function (): void {
+    $f = trading_fixture();
+    $invoice = trading_post($f, trading_invoice_input($f));
+    $creditPost = trading_editor_post($f, ['kind' => 'customer_credit', 'original_document_id' => (string) $invoice['id'],
+        'date' => '2026-02-01', 'due_date' => '2026-02-01'], [
+        ['description' => 'Sample returned bonus', 'quantity' => '1', 'unit_price' => '', 'is_free_goods' => '1',
+            'account_id' => (string) $f['accounts']['4000'], 'product_id' => (string) $f['product_id'], 'original_line_number' => '1'],
+    ]);
+    $creditInput = pl_web_ar_editor_input($creditPost, 'customer_credit');
+    assert_throws(fn() => pl_save_ar_document($f['actor_id'], $f['company_id'], $f['book_id'], $creditInput), DomainException::class, 'accompany a customer invoice');
+    trading_set_policies($f, ['cash_on_invoice_cap' => '50']);
+    $cashPost = trading_editor_post($f, ['cash_received' => '100', 'cash_account_id' => (string) $f['accounts']['1000']]);
+    $cashInput = pl_web_ar_editor_input($cashPost, 'invoice');
+    assert_same('100', $cashInput['cash_received'], 'Cash received did not survive the screen adapter.');
+    assert_same($f['accounts']['1000'], $cashInput['cash_account_id']);
+    assert_throws(fn() => pl_save_ar_document($f['actor_id'], $f['company_id'], $f['book_id'], $cashInput), DomainException::class, 'cash-on-invoice cap');
+    assert_throws(fn() => pl_web_ar_editor_preview($f['actor_id'], $f['company_id'], $f['book_id'], 0, $cashPost, 'invoice'), DomainException::class, 'cash-on-invoice cap');
+    assert_same('0.0000', trading_account_movement($f, $f['accounts']['1000']));
+    trading_set_policies($f, ['cash_on_invoice_cap' => '500']);
+    $preview = pl_web_ar_editor_preview($f['actor_id'], $f['company_id'], $f['book_id'], 0, $cashPost, 'invoice');
+    assert_same('100.0000', (string) $preview['document']['cash_received']);
+    $posted = trading_post($f, pl_web_ar_editor_input($cashPost, 'invoice'));
+    assert_true($posted['cash_settlement_journal_id'] !== null, 'The screen path did not settle the cash it recorded.');
+    assert_same('150.0000', $posted['outstanding_fc']);
+});
+
+test('the editor screen carries the dimensions and offers only what the policies allow', function (): void {
+    $f = trading_fixture();
+    $post = trading_editor_post($f, ['sales_staff_id' => (string) $f['staff_id'], 'area_id' => (string) $f['area_id']]);
+    $input = pl_web_ar_editor_input($post, 'invoice');
+    assert_same($f['staff_id'], $input['sales_staff_id'], 'The sales-staff selector did not survive the screen adapter.');
+    assert_same($f['area_id'], $input['area_id']);
+    $document = trading_post($f, $input);
+    assert_same($f['staff_id'], $document['sales_staff_id']);
+    $context = pl_trading_editor_context($f['actor_id'], $f['company_id'], $f['book_id']);
+    assert_same(true, $context['enabled']);
+    assert_same(1, count($context['sales_staff']));
+    assert_same(1, count($context['areas']));
+    assert_same(1, count($context['packs']));
+    assert_same('0.0000', $context['policies']['cash_on_invoice_cap'], 'The cash panel would be offered without a cap.');
+    $manifest = pl_module_registry()['trading-documents'];
+    pl_set_company_module($f['actor_id'], $f['company_id'], 'trading-documents', false, 1, $manifest['digest'], 'Retire trading entry', bin2hex(random_bytes(16)));
+    $off = pl_trading_editor_context($f['actor_id'], $f['company_id'], $f['book_id']);
+    assert_same(false, $off['enabled']);
+    assert_same([], $off['packs']);
+    assert_same([], $off['sales_staff']);
+    assert_same('net', $off['policies']['discount_posting']);
+});
+
+test('the readout strip reads the customer balance and stock without posting anything', function (): void {
+    $f = trading_fixture();
+    $invoice = trading_post($f, trading_invoice_input($f));
+    $before = (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE book_id=%i', $f['book_id']);
+    $readout = pl_trading_editor_readout($f['actor_id'], $f['company_id'], $f['book_id'], $f['party_id'], $f['product_id'], null);
+    assert_same('250.0000', $readout['party_balance'], 'The strip does not show what the customer owes.');
+    assert_same('190.0000', $readout['book_stock']['quantity']);
+    assert_same('190.0000', $readout['warehouse_stock']['quantity']);
+    assert_same('Sample stock item', $readout['product']['name']);
+    assert_same(null, $readout['van_stock'], 'Van stock is not available until vans are a warehouse kind.');
+    assert_same($before, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE book_id=%i', $f['book_id']), 'The readout strip posted something.');
+    $empty = pl_trading_editor_readout($f['actor_id'], $f['company_id'], $f['book_id'], null, null, null);
+    assert_same(null, $empty['party_balance']);
+    assert_same(null, $empty['book_stock']);
+    assert_same((string) $invoice['currency'], $empty['currency']);
+});

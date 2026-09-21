@@ -1336,7 +1336,16 @@ a {
      only engages under 1024px, so the fix above for 1024×768 itself is untouched. */
   @media (max-width: 1023px) {
     .doc-lines-table { min-width: 46rem; }
+    /* The 1.2 M3 trading columns (pack, packs, units, discount, free) add five narrow columns to
+       the same row, so the sideways-scrolling minimum widens with them rather than squeezing the
+       existing ones. Above 1024px the fluid percentages above still do the work. */
+    .doc-lines-table:has(.doc-line-free), .doc-lines-table:has([data-commercial-field="pack_id"]) { min-width: 64rem; }
   }
+  /* A free-goods line is a real line that is deliberately worth nothing: it is tinted so the row
+     reads as different from a sale at a glance, and its amount cell says why rather than showing
+     a zero the reader has to interpret. Tokens and logical properties only. */
+  .doc-line-free > td { background: var(--surface-subtle); }
+  .doc-line-free > td:first-child { border-inline-start: 2px solid var(--border-strong); }
   .doc-totals {
     border-block-start: 1px solid var(--border-strong);
     padding-block-start: .875rem;
@@ -1730,7 +1739,20 @@ a {
   .print-issuer { flex: 1; min-inline-size: 0; }
   .print-company { font-size: 1.0625rem; font-weight: 600; color: var(--brand-navy); }
   .print-company-meta, .print-doc-title .print-kind { font-size: .6875rem; color: var(--ink-muted); }
-  .print-doc-title { text-align: end; flex: none; }
+  /* `flex: none` keeps a short document number on one line, but a reference that is a party
+     name and a date range (the account statement) would otherwise push the letterhead past the
+     sheet. Let it shrink and wrap instead; the printed A4 sheet is wide enough that it never
+     does there. */
+  .print-doc-title { text-align: end; flex: 0 1 auto; min-inline-size: 0; }
+  .print-reference, .print-doc-title .print-kind { overflow-wrap: anywhere; }
+  /* On a phone-width screen an A4 letterhead has no room for two columns: the issuer block
+     and the document title stack instead of squeezing each other to one word per line. The
+     printed sheet keeps the two-column letterhead, since A4 has the width for it. */
+  @media screen and (max-width: 30rem) {
+    .paper-a4 .print-letterhead { flex-wrap: wrap; }
+    .paper-a4 .print-issuer { flex-basis: 100%; }
+    .paper-a4 .print-doc-title { text-align: start; }
+  }
   .print-doc-title .print-kind { text-transform: uppercase; letter-spacing: .05em; }
   .print-reference { font-size: .9375rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .paper-80mm .print-letterhead { display: block; text-align: center; border-block-end: 1px dashed var(--border-strong); }
@@ -1746,6 +1768,11 @@ a {
   .print-facts dt { color: var(--ink-muted); }
   .print-notice { border: 1px solid var(--warning); background: var(--warning-bg); color: var(--warning); padding: .5rem .625rem; border-radius: var(--radius-control); margin-block: .75rem; font-size: .75rem; }
   .print-lines { inline-size: 100%; border-collapse: collapse; margin-block: 1rem; }
+  /* A trading invoice's line table carries more columns than a payment receipt's, so on a
+     narrow screen it is the table that scrolls sideways and never the page. The printed sheet
+     is unaffected: the override below restores the table to its full A4 width for @media print,
+     which is the only place these columns actually have to fit. */
+  .print-lines-scroll { overflow-x: auto; max-inline-size: 100%; }
   .print-lines caption { text-align: start; font-size: .6875rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-muted); padding-block-end: .375rem; }
   .print-lines th, .print-lines td { padding: .375rem .5rem; border-block-end: 1px solid var(--border); text-align: start; vertical-align: top; }
   .print-lines thead th { font-size: .6875rem; color: var(--ink-muted); background: var(--surface-subtle); }
@@ -1781,6 +1808,7 @@ a {
     .paper-a4 { font-size: 10pt; }
     .paper-80mm { inline-size: 80mm; max-inline-size: 80mm; font-size: 9pt; }
     .print-controls { display: none !important; }
+    .print-lines-scroll { overflow-x: visible; max-inline-size: none; }
     .print-lines { page-break-inside: auto; }
     .print-lines tr { page-break-inside: avoid; }
     .print-lines thead { display: table-header-group; }

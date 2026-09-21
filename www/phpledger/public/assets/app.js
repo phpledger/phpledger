@@ -665,11 +665,15 @@ document.querySelectorAll('[data-commercial-form]').forEach(form => {
     };
     const format = value => `${value / 10000n}.${(value % 10000n).toString().padStart(4, '0')}`;
     const taxContext = form.dataset.taxContext ? JSON.parse(form.dataset.taxContext) : null;
+    // Pack id => units per pack, in ledger units (x10000). Frozen at pack creation, so this map
+    // can never disagree with the base quantity the server resolves from the same selection.
+    const packSizes = Object.fromEntries(Object.entries(form.dataset.packSizes ? JSON.parse(form.dataset.packSizes) : {})
+        .map(([id, size]) => [id, BigInt(String(size).replace('.', '').padEnd(String(size).split('.')[0].length + 4, '0'))]));
     const roundedRatio = (numerator, denominator) => (numerator * 2n + denominator) / (denominator * 2n);
     let dirty = false;
     const update = () => {
         let total = 0n, valid = true;
-        let netTotal = 0n, taxTotal = 0n, taxValid = true;
+        let netTotal = 0n, taxTotal = 0n, taxValid = true, grossTotal = 0n, discountTotal = 0n;
         const inclusive = form.elements.namedItem('price_mode')?.value === 'inclusive';
         const date = form.elements.namedItem('date')?.value || '';
         const remaining = Object.fromEntries(Object.entries(taxContext?.sources || {}).map(([key, source]) => [key, {...source, net: parse(source.net), tax: parse(source.tax)}]));
@@ -684,13 +688,37 @@ document.querySelectorAll('[data-commercial-form]').forEach(form => {
             });
             const remove = row.querySelector('[data-remove-commercial-row]');
             remove.value = index; remove.setAttribute('aria-label', `Remove line ${index + 1}`);
-            const quantity = parse(row.querySelector('[data-commercial-field=quantity]').value);
-            const price = parse(row.querySelector('[data-commercial-field=unit_price]').value);
-            const empty = [...row.querySelectorAll('[data-commercial-field]')].every(control => control.value === '');
-            const amount = quantity === null || price === null ? null : (quantity * price + 5000n) / 10000n;
-            row.querySelector('[data-commercial-amount]').textContent = amount === null ? '—' : format(amount);
+            const packSelect = row.querySelector('[data-commercial-field=pack_id]');
+            const packSize = packSelect && packSelect.value ? packSizes[packSelect.value] : null;
+            let quantity = parse(row.querySelector('[data-commercial-field=quantity]').value);
+            if (packSize) {
+                const packs = parse(row.querySelector('[data-commercial-field=pack_quantity]').value || '0');
+                const units = parse(row.querySelector('[data-commercial-field=unit_quantity]').value || '0');
+                quantity = packs === null || units === null ? null : (packs * packSize) / 10000n + units;
+            }
+            const free = row.querySelector('[data-commercial-flag]')?.checked === true;
+            const price = free ? 0n : parse(row.querySelector('[data-commercial-field=unit_price]').value);
+            const empty = [...row.querySelectorAll('[data-commercial-field]')].every(control => control.type === 'checkbox' ? !control.checked : control.value === '');
+            let amount = quantity === null || price === null ? null : (quantity * price + 5000n) / 10000n;
+            let discount = 0n;
+            if (amount !== null && !free) {
+                const percent = parse(row.querySelector('[data-commercial-field=discount_percent]')?.value || '0');
+                if (percent === null) amount = null;
+                else if (percent > 0n) { discount = (amount * percent + 500000n) / 1000000n; if (discount > amount) discount = amount; amount -= discount; }
+            }
+            if (free) { amount = 0n; }
+            if (amount !== null && !free) { grossTotal += amount + discount; discountTotal += discount; }
+            const amountCell = row.querySelector('[data-commercial-amount]');
+            amountCell.textContent = amount === null ? '—' : format(amount);
+            row.classList.toggle('doc-line-free', free);
+            if (free || discount > 0n) {
+                const note = document.createElement('span');
+                note.className = 'row-sub';
+                note.textContent = free ? 'Bonus, not charged' : `less ${format(discount)}`;
+                amountCell.append(note);
+            }
             if (amount !== null) total += amount; else if (!empty) valid = false;
-            if (taxContext && amount !== null) {
+            if (taxContext && amount !== null && !free) {
                 const code = row.querySelector('[data-commercial-field=tax_code_id]').value;
                 let net = amount, tax = 0n;
                 if (taxContext.credit) {
@@ -726,9 +754,18 @@ document.querySelectorAll('[data-commercial-form]').forEach(form => {
         if (label) label.textContent = `Total order value (${form.elements.namedItem('currency').value.toUpperCase()})`;
         const taxTotals = form.querySelector('[data-commercial-tax-totals]');
         if (taxTotals) {
-            const amounts = [netTotal, taxTotal, netTotal + taxTotal];
-            taxTotals.querySelectorAll('dd').forEach((amount, index) => { amount.textContent = valid && taxValid ? format(amounts[index]) : '—'; });
-            taxTotals.querySelector('div.doc-totals-row:last-child dt').textContent = `Total (${form.elements.namedItem('currency').value.toUpperCase()})`;
+            // Only the three rows this recalculation actually owns are written, by name. The
+            // other rows come from the last server preview and are removed on edit, never
+            // overwritten with a number this script did not compute.
+            const amounts = {net: grossTotal, discount: discountTotal, tax: taxTotal, total: netTotal + taxTotal};
+            Object.entries(amounts).forEach(([key, value]) => {
+                const cell = taxTotals.querySelector(`[data-total="${key}"] dd`);
+                if (!cell) return;
+                const negative = key === 'discount';
+                cell.textContent = valid && taxValid ? (negative && value > 0n ? `−${format(value)}` : format(value)) : '—';
+            });
+            const totalLabel = taxTotals.querySelector('[data-total="total"] dt');
+            if (totalLabel) totalLabel.textContent = `Total (${form.elements.namedItem('currency').value.toUpperCase()})`;
             if (!taxValid) message.textContent = 'Update the posting preview to resolve the tax date, original line or remaining credit amount.';
             else if (valid) message.textContent = 'Display totals use the selected date and tax mode. The server recomputes them when you preview or save.';
         }
@@ -745,12 +782,18 @@ document.querySelectorAll('[data-commercial-form]').forEach(form => {
             const row = template.cloneNode(true);
             row.querySelectorAll('.field-error-text').forEach(error => error.remove());
             row.querySelectorAll('[aria-invalid]').forEach(control => { control.removeAttribute('aria-invalid'); control.removeAttribute('aria-describedby'); });
-            row.querySelectorAll('input,select').forEach(control => { control.value = ''; });
+            row.querySelectorAll('input,select').forEach(control => { if (control.type === 'checkbox') control.checked = false; else control.value = ''; });
+            row.classList.remove('doc-line-free');
             body.append(row); update(); row.querySelector('input,select').focus();
         } else { update(); (body.children[Math.min(Number(remove.value), body.children.length - 1)].querySelector('input,select')).focus(); }
         dirty = true;
     });
-    form.addEventListener('input', () => { dirty = true; update(); });
+    form.addEventListener('input', () => {
+        dirty = true;
+        // A preview-only total describes the reviewed document, not the one being typed.
+        form.querySelectorAll('[data-commercial-tax-totals] [data-total="preview"]').forEach(row => row.remove());
+        update();
+    });
     form.addEventListener('submit', () => { dirty = false; });
     window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
     update();

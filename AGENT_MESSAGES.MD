@@ -695,3 +695,37 @@ Migration numbers are assigned at merge in landing order (B62). File ownership b
 **Decisions taken, with alternatives and reversal paths (B53):** recorded in `docs/accounting/examples/trading-document-policies.md` for the accountant (B30) and summarised in `docs/MODULE-ROADMAP.md`. The three that constrain other milestones: free goods are invoice-only (a returned bonus is a reviewed stock adjustment, not a credit line — widening it needs M5's credit residual model); a posted cash invoice is corrected by reversal rather than in place (the in-place path asserts no outstanding allocation, and the cash is exactly such an allocation); and the cash-on-invoice cap is a per-invoice amount with a recommended default of zero, not an authorisation model.
 
 **Evidence:** `docker compose --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` green, and `python tests/package-builder-test.py` green. Verbatim results are in the session handoff.
+
+### Addendum — M3 editor surface finished on the same branch
+
+The first M3 commit left the services complete and the invoice editor still rendering its 1.1 line
+row. That gap is now closed on `m3/trading-documents`, on files this branch owns.
+
+**Screen controls added.** `templates/partials/ui/commercial-lines.php` gains pack selection with
+pack-and-unit entry, a per-line discount percentage with the computed amount shown beside the row
+total, and a free-goods checkbox whose row is tinted and reads "Bonus, not charged"; the columns
+appear only for a customer document with the module enabled, so the bill and purchase editors are
+untouched. `ar-document-editor.php` gains the warehouse, sales-staff and area selectors, the cash
+panel (only when the owner has set a positive cap), the stock-and-balance readout strip of frame
+decision 6, and totals rows for line discounts, cash received and the balance receivable. Every
+new string goes through `pl_t()`.
+
+**Shared files touched beyond the first commit, for merge awareness:** `public/assets/app.js` (row
+renumbering, live pack/discount/free arithmetic, named totals rows), `resources/ui/app.css` plus
+the rebuilt `public/assets/app.css` (`npm run build:css` — the new arbitrary widths only exist if
+the stylesheet is rebuilt), `templates/partials/ui/components.php` (`pl_ui_totals()` takes an
+optional row-key map; every existing caller is unchanged), and `tests/starter_browser_fixture.php`
+(a `--trading` mode).
+
+**The browser check found five real defects, all fixed here.** Three in the editor: a checkbox
+nested inside its label broke `app.js`'s row renumbering so every added line stayed `lines[0]`; the
+totals block was written by counting `<dd>` elements and corrupted the new rows; and the live row
+amount ignored packs, discounts and the free flag. Two in the prints: the seven-column invoice
+table forced a page-level horizontal scroll at 390, and the statement's long reference pushed the
+letterhead past the sheet. Full detail and the per-width results are in
+`docs/design/1.2-2026-09/forms-and-reports/M3-BROWSER-CHECK.md`.
+
+**Still not reachable from the screen, and why:** van stock per salesman (a van is M4's warehouse
+kind and no salesman-to-van link exists), and a date range on the printed statement (the print
+route carries only a document id, which is M2's contract). Both are recorded as limits in
+`docs/MODULE-ROADMAP.md` and stated on the screen itself rather than faked.

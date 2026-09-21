@@ -100,7 +100,30 @@ function pl_web_starter_ar(int $actorId,int $companyId,int $bookId,array $user,a
         'recordJournal'=>$document && $document['journal_id']?pl_get_journal($actorId,$companyId,$bookId,$document['journal_id']):null,
         'selectionJournal'=>$selection && $selection['journal_id']?pl_get_journal($actorId,$companyId,$bookId,$selection['journal_id']):null,
         'accounts'=>pl_starter_accounts($actorId,$companyId,$bookId),'parties'=>pl_starter_parties($actorId,$companyId,$bookId),
+        // Trading context (1.2 M3): packs, dimensions and the B37 policies the editor may offer,
+        // plus the read-only stock and balance strip. Empty and default when the module is off,
+        // so the screen is exactly the 1.1 screen and offers nothing the services would refuse.
+        'trading'=>$receivable?pl_trading_editor_context($actorId,$companyId,$bookId):['enabled'=>false,'packs'=>[],'packs_by_product'=>[],'sales_staff'=>[],'areas'=>[],'warehouses'=>[],'policies'=>pl_trading_policy_defaults()+['revision'=>0]],
+        'tradingReadout'=>$receivable&&$editing?pl_trading_editor_readout($actorId,$companyId,$bookId,
+            pl_web_id($form['input'],'party_id')?:(($original['party_id']??null)?:($document['party_id']??null)),
+            pl_web_readout_product($form['input'],$document),pl_web_id($form['input'],'warehouse_id')?:($document['warehouse_id']??null)):null,
         'priceMode'=>pl_tax_price_mode($actorId,$companyId,$bookId),'products'=>pl_list_inventory_products($actorId,$companyId,$bookId),'taxCodes'=>pl_list_tax_codes($actorId,$companyId,$bookId),'settlements'=>$settlements]);
+}
+
+/**
+ * The product the readout strip describes: the last line the person actually named, which is
+ * "the current line" of frame decision 6 without any client-side state.
+ */
+function pl_web_readout_product(array $input,?array $document): ?int
+{
+    $rows=is_array($input['lines']??null)?$input['lines']:($document['lines']??[]);
+    $productId=null;
+    foreach (is_array($rows)?$rows:[] as $row) {
+        if (!is_array($row)) { continue; }
+        $candidate=pl_web_id($row,'product_id');
+        if ($candidate>0) { $productId=$candidate; }
+    }
+    return $productId;
 }
 
 function pl_web_ar_editor_preview(int $actorId,int $companyId,int $bookId,int $id,array $values,string $kind): array
