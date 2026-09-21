@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+
+  app_proxy:
+    environment:
+      APP_HOST: phpledger_web_1
+      APP_PORT: 8080
+
+  web:
+    image: ghcr.io/phpledger/phpledger:1.2.1@sha256:b41acde7d846055ce3b7d19ccf4ec2fbc09b698be25022ac6a0c946466f753a8
+    restart: on-failure
+    depends_on:
+      - db
+    environment:
+      PL_DB_HOST: phpledger_db_1
+      PL_DB_PORT: "3306"
+      PL_DB_NAME: phpledger
+      PL_DB_USER: phpledger
+      PL_DB_PASSWORD: ${APP_PHPLEDGER_DB_PASSWORD}
+      PL_PUBLIC_URL: http://${DEVICE_DOMAIN_NAME}:${APP_PROXY_PORT}
+      PL_AUTO_MIGRATE: "0"
+      # The owner account this image installs on first start (docs/CONTAINER.md). The
+      # password is Umbrel's own per-install derived value, which deterministicPassword
+      # in umbrel-app.yml then displays back to the user as this app's password.
+      PL_ADMIN_EMAIL: umbrel@umbrel.local
+      PL_ADMIN_NAME: Umbrel
+      PL_ADMIN_USERNAME: ""
+      PL_ADMIN_PASSWORD: ${APP_PASSWORD}
+      PL_SETUP_KEY: ""
+      PL_ALLOWED_ORIGINS: ""
+    volumes:
+      - ${APP_DATA_DIR}/data/private:/var/lib/phpledger
+
+  db:
+    image: mysql:8.4@sha256:85b9bf2e29cf836ecb8c2a15a935d4ba0c606631dff1dd79531a11983c638f2a
+    restart: on-failure
+    # Simplifies trigger/function creation for the single account this compose file
+    # grants every privilege to, matching compose.production.yaml (see docs/INSTALLER.md
+    # for a narrower-privilege alternative).
+    command: ["--log-bin-trust-function-creators=1"]
+    environment:
+      MYSQL_DATABASE: phpledger
+      MYSQL_USER: phpledger
+      MYSQL_PASSWORD: ${APP_PHPLEDGER_DB_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - ${APP_DATA_DIR}/data/db:/var/lib/mysql

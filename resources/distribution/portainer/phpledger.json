@@ -1,0 +1,79 @@
+{
+  "version": "3",
+  "templates": [
+    {
+      "id": 1,
+      "type": 3,
+      "title": "PHP Ledger",
+      "description": "Self-hosted double-entry accounting: invoices, expenses, point of sale and a full general ledger, installed non-interactively with its own MySQL 8.4 database. Deploys the same compose.production.yaml this repository publishes at the root (docs/CONTAINER.md).",
+      "note": "Set PL_DB_PASSWORD and PL_DB_ROOT_PASSWORD before deploying; there is no default. Leave every PL_ADMIN_* variable blank to finish setup in the browser at /install instead of from the environment. After deploying, enable HTTPS in front of this stack and set PL_PUBLIC_URL to the real address before exposing it beyond your own machine.",
+      "categories": ["Finance"],
+      "platform": "linux",
+      "logo": "https://raw.githubusercontent.com/phpledger/phpledger/master/www/website/public/assets/brand/icon-512.png",
+      "repository": {
+        "url": "https://github.com/phpledger/phpledger",
+        "stackfile": "compose.production.yaml"
+      },
+      "env": [
+        {
+          "name": "PL_DB_PASSWORD",
+          "label": "Database password",
+          "description": "Required. A strong password for the phpledger MySQL user; shared by the web and db services."
+        },
+        {
+          "name": "PL_DB_ROOT_PASSWORD",
+          "label": "Database root password",
+          "description": "Required. A separate strong password for the MySQL root account."
+        },
+        {
+          "name": "PL_PUBLIC_URL",
+          "label": "Public URL",
+          "default": "http://127.0.0.1:8080",
+          "description": "This installation's own address, shown on-screen and used for links. Set to the real https:// address before exposing this beyond your own machine."
+        },
+        {
+          "name": "PL_ADMIN_EMAIL",
+          "label": "Admin email (optional)",
+          "default": "",
+          "description": "Set together with Admin name and Admin password to create the owner account on first start. Leave all three blank to finish setup in the browser at /install instead."
+        },
+        {
+          "name": "PL_ADMIN_NAME",
+          "label": "Admin name (optional)",
+          "default": "",
+          "description": "See Admin email."
+        },
+        {
+          "name": "PL_ADMIN_USERNAME",
+          "label": "Admin username (optional)",
+          "default": "",
+          "description": "Login username. Defaults from Admin email when left blank."
+        },
+        {
+          "name": "PL_ADMIN_PASSWORD",
+          "label": "Admin password (optional)",
+          "default": "",
+          "description": "Required only when installing the owner account from the environment (see Admin email). Never shared or logged; read directly from the environment by install/create-admin.php."
+        },
+        {
+          "name": "PL_AUTO_MIGRATE",
+          "label": "Apply pending migrations on start",
+          "default": "0",
+          "description": "Set to 1 for one restart after pulling a newer image tag, so pending migrations apply before the new code serves traffic (docs/CONTAINER.md, \"Upgrade\"). Safe to leave at 0 or 1 otherwise."
+        },
+        {
+          "name": "PL_VERSION",
+          "label": "Image tag",
+          "default": "1.2.1",
+          "description": "The published ghcr.io/phpledger/phpledger tag to deploy. Always a concrete version, never latest."
+        },
+        {
+          "name": "PL_WEB_PORT",
+          "label": "Host port",
+          "default": "8080",
+          "description": "The host port the web service publishes."
+        }
+      ]
+    }
+  ]
+}

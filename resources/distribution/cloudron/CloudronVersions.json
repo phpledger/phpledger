@@ -1,0 +1,45 @@
+{
+  "stable": false,
+  "versions": {
+    "1.2.1": {
+      "creationDate": "Mon, 21 Sep 2026 00:00:00 GMT",
+      "ts": "Mon, 21 Sep 2026 00:00:00 GMT",
+      "publishState": "testing",
+      "manifest": {
+        "id": "com.phpledger.cloudronapp",
+        "title": "PHP Ledger",
+        "author": "PHP Ledger",
+        "description": "Complete double-entry accounting that runs on your own PHP hosting: invoices, expenses, a point-of-sale flow, and a full general ledger with balanced journal entries behind every transaction. This package wraps the published PHP Ledger image (docs/CONTAINER.md) and uses Cloudron's mysql addon as its database instead of the second `db` service compose.production.yaml runs. See NOTES.md in this directory for one contract mismatch that causes.",
+        "tagline": "Self-hosted double-entry accounting that runs on your own PHP hosting.",
+        "version": "1.2.1",
+        "healthCheckPath": "/health",
+        "httpPort": 8080,
+        "manifestVersion": 2,
+        "website": "https://phpledger.com",
+        "packagerName": "PHP Ledger",
+        "packagerUrl": "https://phpledger.com",
+        "documentationUrl": "https://github.com/phpledger/phpledger/blob/master/docs/CONTAINER.md",
+        "changelog": "https://github.com/phpledger/phpledger/releases",
+        "iconUrl": "https://raw.githubusercontent.com/phpledger/phpledger/master/www/website/public/assets/brand/icon-512.png",
+        "mediaLinks": [
+          "https://raw.githubusercontent.com/phpledger/phpledger/master/docs/repository/assets/owner-overview-preview.webp",
+          "https://raw.githubusercontent.com/phpledger/phpledger/master/docs/repository/assets/expense-to-journal-preview.webp",
+          "https://raw.githubusercontent.com/phpledger/phpledger/master/docs/repository/assets/cash-pos-click-preview.png"
+        ],
+        "tags": [
+          "accounting",
+          "finance",
+          "invoicing",
+          "ledger",
+          "point-of-sale",
+          "php"
+        ],
+        "postInstallMessage": "Open this app's URL and finish setup at /install: PHP Ledger's own browser installer runs there, the same way it does for the ZIP and Composer channels (docs/INSTALLER.md). To install the owner account from the environment instead, edit resources/distribution/cloudron/start.sh to set PL_ADMIN_EMAIL, PL_ADMIN_NAME and PL_ADMIN_PASSWORD before building this package - Cloudron has no per-install operator-variable prompt to collect them at install time.",
+        "addons": {
+          "mysql": {}
+        },
+        "dockerImage": "ghcr.io/phpledger/phpledger-cloudron:1.2.1"
+      }
+    }
+  }
+}
