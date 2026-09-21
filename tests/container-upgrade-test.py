@@ -111,6 +111,9 @@ def main() -> int:
         check(status_after == "applied", f"PL_AUTO_MIGRATE=1 applied the previously pending migration (status {status_after!r})")
     finally:
         support.cleanup()
+        # Reclaim before the image is removed: the reclaim runs in that image.
+        if build_dir.exists():
+            support.reclaim(build_dir)
         support.remove_test_image()
         if build_dir.exists():
             shutil.rmtree(build_dir)

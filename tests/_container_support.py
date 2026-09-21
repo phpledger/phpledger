@@ -60,6 +60,23 @@ def cleanup() -> None:
     try_run(["docker", "volume", "rm", "-f", PRIVATE_VOLUME])
 
 
+def reclaim(path) -> None:
+    """Hand a container-written directory back to this user so it can be deleted.
+
+    The disposable vendor build runs as root inside a container, so on Linux the
+    files it leaves are root-owned and shutil.rmtree() fails with EACCES. CI hit
+    exactly that: every check passed and the job still failed, in the teardown.
+    Windows does not see it, because Docker Desktop maps ownership to the caller.
+
+    Deliberately not ignore_errors=True on the rmtree: that would hide this and
+    leave a root-owned tree on the runner for the next job to trip over.
+    """
+    if os.name == "nt":
+        return
+    run(["docker", "run", "--rm", "-v", f"{path}:/reclaim", IMAGE_TAG,
+         "chown", "-R", f"{os.getuid()}:{os.getgid()}", "/reclaim"], check=False)
+
+
 def remove_test_image() -> None:
     try_run(["docker", "rmi", "-f", IMAGE_TAG])
 
