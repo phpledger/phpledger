@@ -220,6 +220,23 @@ Distinguish connection failures from release guards. `Configured baseline change
 
 ### Website: build, prepare, review and publish
 
+> **Correction, 21 September 2026. The source named below is no longer what is live, and publishing from it would regress the public site.** Verify before trusting any of the following paragraphs.
+>
+> Checked against the running site on 21 September:
+>
+> | | Live site | `.cache/website-redesign-live` | main checkout `www/website` |
+> |---|---|---|---|
+> | Hero headline | "PHP Ledger: self-hosted double-entry accounting software" | "Complete double-entry accounting that runs on your own PHP hosting" | matches live |
+> | Download page offers | 1.1.3 | **1.0.0** | 1.1.3 |
+> | `src/releases.json` | served | **absent entirely** | present |
+>
+> The live site was published from the **main checkout**, not from the redesign checkout. The redesign checkout also carries around 86 uncommitted modified files, so its state exists nowhere in Git history and cannot be identified by a commit.
+>
+> Publishing from the redesign checkout as written below would roll the download page back to 1.0.0, change the homepage headline, and **remove `releases.json`**, which is the feed every installation reads to discover an update. That last one would silently break the in-app updater for every user.
+>
+> Before any website deployment, re-run the identification rather than trusting this file: fetch the live homepage and download page, compare the headline and the advertised version against each candidate checkout, and confirm which one carries a release feed. The rule that a version number alone does not identify a design still holds; it simply now cuts the other way.
+
+
 Only the selected website checkout's `www/website/public` is the deployable static document root. First identify the requested design from relevant branches/worktrees, recent website history, its homepage and screenshots, and its route set. Version `1.0.0` alone does not identify the design: `record-demo-cutover` at `def47d1` contains the older site, while `master` at `86a1eef35fd497c7f5f708a47af227657fd4a2ee` includes rebuild `ac8fca3`. The rebuilt design has the headline **Complete double-entry accounting that runs on your own PHP hosting**, desktop/phone hero captures, and `/pricing/` and `/community/`. Its checked-out source is `.cache/website-redesign-live`; the earlier `.claude/worktrees/festive-elgamal-8a1d61` directory is empty and is not a source checkout.
 
 For that reviewed product-site rebuild, run these commands from the main repository root. For a later design, first select its actual source and configure the reviewed publisher to use it; never infer the intended source from the current directory alone.
