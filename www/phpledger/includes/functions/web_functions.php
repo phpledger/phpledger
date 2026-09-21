@@ -786,6 +786,8 @@ function pl_render(string $view, array $data = []): never
         'bank-reconciliation', 'connections', 'oauth-consent', 'sample-guide', 'numbering', 'owner',
         // 1.2 M4: the stock document family and its report.
         'stock-documents', 'stock-document', 'van-settlement', 'stock-by-location',
+        // 1.2 M9: the counter till over real stock, and the sale it records read back.
+        'counter', 'counter-receipt',
         // 1.2 M3: the trading-document policy and company-profile screens.
         'accounting-policies', 'company-profile',
         // 1.2: the upgrade step that asks a converted chart which accounts are contra accounts.

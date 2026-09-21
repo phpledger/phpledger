@@ -335,14 +335,21 @@ function pl_list_stock_documents(int $actorId, int $companyId, int $bookId, arra
 }
 
 /**
- * The driver's day for one van, from the movements themselves.
+ * The driver's day for one van, from the movements themselves — the unmasked figures.
  *
  * Opening plus loaded plus sellable customer returns, less sold and less returned to the
  * warehouse, is the expected closing stock. A difference means something moved that these
  * documents do not explain — a stock count or adjustment case, never something the
  * settlement absorbs silently (DOCUMENT-MODEL.md §3.6).
+ *
+ * This form carries carrying value for every reader, and is therefore internal. It exists
+ * because the reviewed settlement stores these figures and the approval compares them: if the
+ * stored sheet depended on whether the person who reviewed it could see cost (owner decision
+ * B58), then a reviewer without `cost.view` and an approver with it would disagree about a day
+ * that had not moved. pl_van_day() is the read every screen and every API caller uses, and it
+ * withholds cost from whoever may not see it.
  */
-function pl_van_day(int $actorId, int $companyId, int $bookId, int $warehouseId, string $date): array
+function pl_van_day_figures(int $actorId, int $companyId, int $bookId, int $warehouseId, string $date): array
 {
     pl_require_company_access($actorId, $companyId); pl_ledger_book($companyId, $bookId);
     $date = pl_ledger_date($date);
@@ -385,9 +392,53 @@ function pl_van_day(int $actorId, int $companyId, int $bookId, int $warehouseId,
     unset($product);
     ksort($products);
     return ['warehouse' => $van, 'date' => $date, 'products' => array_values($products), 'totals' => $totals, 'reconciles' => $reconciles,
-        // The cash and credit side of the day belongs to the sale documents the van raised.
-        // Those are AR/POS documents with their own posting; this sheet reconciles the goods.
+        // The goods side. The cash and credit side of the day belongs to the sale documents the
+        // van raised; pl_van_day() reads those through pl_van_day_sales() and never posts them.
         'basis' => 'stock movements'];
+}
+
+/** The cost fields of a driver's day, for the two places that withhold them together. */
+function pl_van_day_cost_fields(): array
+{
+    return ['loaded_cost', 'sold_cost', 'returned_cost'];
+}
+
+/**
+ * Withhold carrying value from a driver's-day summary that a reader may not see (B58).
+ *
+ * The shape is kept: a withheld figure becomes null rather than disappearing, so a template or
+ * a machine reader sees "not shown to you" instead of "zero", which is the one confusion a
+ * cost-bearing report must never cause.
+ */
+function pl_van_day_mask_cost(array $summary): array
+{
+    foreach ($summary['products'] ?? [] as $index => $product) {
+        foreach (pl_van_day_cost_fields() as $field) {
+            if (array_key_exists($field, $product)) { $summary['products'][$index][$field] = null; }
+        }
+    }
+    foreach (pl_van_day_cost_fields() as $field) {
+        if (array_key_exists($field, $summary['totals'] ?? [])) { $summary['totals'][$field] = null; }
+    }
+    return $summary;
+}
+
+/**
+ * The driver's day as every screen and every API read sees it: the goods, the money and the
+ * credit check, with carrying value withheld from a reader without `cost.view`.
+ *
+ * The money side is deliberately a read of posted sale documents (distribution_functions.php).
+ * This sheet still posts nothing: a van sale is an ordinary invoice that posted when it was
+ * raised, and settlement reviews it rather than re-posting it.
+ */
+function pl_van_day(int $actorId, int $companyId, int $bookId, int $warehouseId, string $date): array
+{
+    $day = pl_van_day_figures($actorId, $companyId, $bookId, $warehouseId, $date);
+    $sales = pl_van_day_sales($actorId, $companyId, $bookId, $warehouseId, $day['date']);
+    $day['sales'] = $sales;
+    $day['credit'] = pl_van_credit_check($companyId, $bookId, $sales);
+    $day['cost_visible'] = pl_stock_cost_visible($actorId, $companyId, $bookId, 'van-settlement');
+    return $day['cost_visible'] ? $day : pl_van_day_mask_cost($day);
 }
 
 /**
@@ -402,6 +453,23 @@ function pl_stock_canonical(mixed $value): mixed
     return $result;
 }
 
+/**
+ * What a reviewed settlement stores, and what its approval compares against.
+ *
+ * Goods, money and the credit check, all unmasked: see pl_van_day_figures(). Because this is
+ * what an approval is held to, a receipt that clears a broken credit limit — or any other
+ * posting that moves the day — makes the stored sheet stale and forces a fresh review, which
+ * is the behaviour the approval contract already had for the goods.
+ */
+function pl_van_settlement_summary(int $actorId, int $companyId, int $bookId, int $warehouseId, string $date): array
+{
+    $day = pl_van_day_figures($actorId, $companyId, $bookId, $warehouseId, $date);
+    $sales = pl_van_day_sales($actorId, $companyId, $bookId, $warehouseId, $day['date']);
+    return ['products' => $day['products'], 'totals' => $day['totals'],
+        'sales' => ['documents' => $sales['documents'], 'totals' => $sales['totals']],
+        'credit' => pl_van_credit_check($companyId, $bookId, $sales)] + ['reconciles' => $day['reconciles']];
+}
+
 /** The reviewed settlement sheet for one van and day. Reviewing posts nothing. */
 function pl_review_van_settlement(int $actorId, int $companyId, int $bookId, int $warehouseId, string $date, string $reason, string $key): array
 {
@@ -409,10 +477,10 @@ function pl_review_van_settlement(int $actorId, int $companyId, int $bookId, int
     return pl_inventory_command($actorId, $companyId, $bookId, $key, ['van_settlement_review', $warehouseId, $date, $reason],
         function () use ($actorId, $companyId, $bookId, $warehouseId, $date, $reason): array {
             pl_require_module($actorId, $companyId, $bookId, 'inventory-locations');
-            $day = pl_van_day($actorId, $companyId, $bookId, $warehouseId, $date);
+            $day = pl_van_day_figures($actorId, $companyId, $bookId, $warehouseId, $date);
             $existing = DB::queryFirstRow('SELECT id,status FROM pl_van_settlements WHERE book_id=%i AND warehouse_id=%i AND settlement_date=%s FOR UPDATE', $bookId, $warehouseId, $day['date']);
             if ($existing && $existing['status'] === 'approved') { throw new DomainException('This van day is already approved. Review the next day or record a correcting document.'); }
-            $summary = json_encode(['products' => $day['products'], 'totals' => $day['totals']], JSON_THROW_ON_ERROR);
+            $summary = json_encode(pl_van_settlement_summary($actorId, $companyId, $bookId, $warehouseId, $day['date']), JSON_THROW_ON_ERROR);
             if ($existing) {
                 DB::update('pl_van_settlements', ['reconciles' => $day['reconciles'] ? 1 : 0, 'summary_json' => $summary, 'reason' => $reason], 'id=%i', (int) $existing['id']);
                 $id = (int) $existing['id'];
@@ -460,11 +528,19 @@ function pl_approve_van_settlement(int $actorId, int $companyId, int $bookId, in
             pl_require_module($actorId, $companyId, $bookId, 'inventory-locations');
             $before = pl_get_van_settlement($actorId, $companyId, $bookId, $id);
             if ($before['status'] === 'approved') { throw new DomainException('This settlement is already approved.'); }
-            $day = pl_van_day($actorId, $companyId, $bookId, $before['warehouse_id'], $before['settlement_date']);
-            if (!$day['reconciles']) { throw new DomainException('This van day does not reconcile. Record the stock count or adjustment that explains the difference before approving.'); }
+            $summary = pl_van_settlement_summary($actorId, $companyId, $bookId, $before['warehouse_id'], $before['settlement_date']);
+            if (!$summary['reconciles']) { throw new DomainException('This van day does not reconcile. Record the stock count or adjustment that explains the difference before approving.'); }
+            // Credit on the road is allowed up to a limit and the limit is checked here rather
+            // than on the device, which may have been offline when the driver extended it
+            // (research decision 4). A breach is not absorbed into the approval: the receipt,
+            // the credit note or the changed limit comes first, and then the day is reviewed again.
+            if (!$summary['credit']['within_limits']) { throw new DomainException(pl_van_credit_breach_message($summary['credit'])); }
             // The stored JSON is compared as data: a JSON column reorders object keys on
-            // the way back, so both sides are canonicalised and only the values decide.
-            if (pl_stock_canonical($before['summary']) !== pl_stock_canonical(['products' => $day['products'], 'totals' => $day['totals']])) {
+            // the way back, so both sides are canonicalised and only the values decide. The
+            // stored sheet is the unmasked one, so the comparison cannot turn on whether the
+            // reviewer or the approver holds `cost.view`.
+            $stored = json_decode((string) DB::queryFirstField('SELECT summary_json FROM pl_van_settlements WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', $id, $companyId, $bookId), true, 64, JSON_THROW_ON_ERROR);
+            if (pl_stock_canonical($stored) !== pl_stock_canonical($summary)) {
                 throw new DomainException('The van day changed since it was reviewed. Review it again before approving.');
             }
             DB::update('pl_van_settlements', ['status' => 'approved', 'approved_by' => $actorId, 'approved_at' => gmdate('Y-m-d H:i:s'), 'reason' => $reason], 'id=%i AND company_id=%i AND book_id=%i', $id, $companyId, $bookId);
@@ -482,7 +558,12 @@ function pl_get_van_settlement(int $actorId, int $companyId, int $bookId, int $i
     foreach (['id','company_id','book_id','warehouse_id','reviewed_by'] as $field) { $row[$field] = (int) $row[$field]; }
     $row['approved_by'] = $row['approved_by'] === null ? null : (int) $row['approved_by'];
     $row['reconciles'] = (bool) $row['reconciles'];
-    $row['summary'] = json_decode((string) $row['summary_json'], true, 64, JSON_THROW_ON_ERROR);
+    $stored = json_decode((string) $row['summary_json'], true, 64, JSON_THROW_ON_ERROR);
+    // The reader's copy withholds carrying value from anyone without `cost.view` (B58). The
+    // approval compares the unmasked stored JSON, which it reads for itself, so what an
+    // approver is allowed to see can never decide whether a day that stood still still matches.
+    $row['cost_visible'] = pl_stock_cost_visible($actorId, $companyId, $bookId, 'van-settlement');
+    $row['summary'] = $row['cost_visible'] ? $stored : pl_van_day_mask_cost($stored);
     $row['warehouse'] = pl_get_inventory_warehouse($actorId, $companyId, $bookId, $row['warehouse_id']);
     return $row;
 }

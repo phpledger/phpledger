@@ -631,6 +631,11 @@ function pl_report_cost_reports(): array
     return [
         'stock-by-location' => ['label' => 'Stock and value by location', 'cost' => 'Carrying value, average cost and the control-account reconciliation, per location and in total.', 'margin' => false],
         'stock-documents' => ['label' => 'Stock issues, returns and gate passes', 'cost' => 'Carrying value on each document line and its total. Quantities and movements are always shown.', 'margin' => false],
+        // 1.2 M9. The settlement's cost totals were the one cost-bearing surface M7 left
+        // outside B58, because they feed the approval comparison; they are inside it now, and
+        // the approval compares the stored, unmasked sheet instead of the reader's copy.
+        'van-settlement' => ['label' => 'Van settlement sheet', 'cost' => 'Cost of the stock loaded, sold and returned on the driver\'s day. Quantities, the reconciliation and the money the driver collected are always shown.', 'margin' => false],
+        'counter-pos' => ['label' => 'Counter point of sale', 'cost' => 'Carrying value of the stock on hand and of the sale being rung up. The price, the tender and the change are always shown.', 'margin' => true],
     ];
 }
 

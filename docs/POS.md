@@ -1,3 +1,28 @@
+# Points of sale
+
+PHP Ledger has two. They are different things and the difference matters.
+
+| | Route | What it sells | What it posts |
+|---|---|---|---|
+| **Counter point of sale** (1.2) | `/counter` | the stock the selected location is actually holding | an ordinary customer invoice: recognition, the stock issue at carrying value, cost of sales, and — for a cash sale — the receipt that settles it, all in one action |
+| **General-shop POS showcase** (0.1) | `/pos` | six bundled sample products | one cash receipt document and its journal. **No stock moves and no cost of sales is recorded.** |
+
+The showcase is a demonstration of the checkout journey and is documented below, unchanged. Everything that follows this section is about that screen, not about the counter till.
+
+## Counter point of sale
+
+Owner decision **B34** asks for a counter-sales POS over real stock; research decision 8
+([DECISIONS.md](design/1.2-2026-09/distribution-research/DECISIONS.md)) says in terms that this is not the sample cart. It is a till, not a second accounting system: there is no counter-sale table, no counter-sale journal and no counter-sale number series, because a counter sale **is** an invoice that names a warehouse and took cash, and history reads it as one for ever.
+
+- **Interfaces.** `GET/POST /counter` and `GET /counter/receipt?id=<document-id>`. `pl_counter_pos_catalogue()` reads what the chosen location holds; `pl_counter_sale_input()` normalises a cart without touching the database; `pl_review_counter_sale()` returns the ordinary invoice preview plus the till's own readout; `pl_post_counter_sale()` posts through `pl_save_and_post_ar_document()`; `pl_counter_sale_receipt()` reads the sale back. The printed receipt is the existing `invoice` print template at 80 mm (research decision 7).
+- **Pack-and-unit entry.** A line is entered as packs plus loose units — "three cartons and four bottles" — and resolves to one base quantity through `pl_trading_pack_quantity()` before pricing, tax and the stock issue, using the size frozen when the pack was created. The till and the invoice editor therefore cannot disagree about what a carton is.
+- **Cash or credit per sale** (research decision 3). A cash sale records the invoice total as `cash_received`, settled inside the posting action, so nothing stands outstanding against money in the drawer; the tender and the change are the drawer's arithmetic and are never posted, because the change never entered the business. A tender is held to whole notes and coins by `pl_cash_amount()`, and a total finer than the smallest coin is refused rather than silently rounded ([issue #88](https://github.com/phpledger/phpledger/issues/88)). Cash on an invoice needs the cash-on-invoice cap set in Admin › Accounting policies (owner decision B37); until it is, the screen says so and only credit sales are possible.
+- **Credit limits.** A credit sale from a **fixed** location is checked against the customer's recorded limit immediately and refused if it breaks it — the server is present at a counter. A sale from a **van** is recorded and the limit is checked at settlement instead, because the device may have been offline (research decision 4). A customer with no recorded limit is not enforced; a recorded limit of zero is a real limit.
+- **The same till serves a van.** The warehouse on the sale decides. A salesman ringing a sale up against a van's stock puts it in that van's `sold` bucket for the day's settlement, which is what makes the driver's day of [DOCUMENT-MODEL.md](design/1.2-2026-09/distribution-research/DOCUMENT-MODEL.md) §3 recordable.
+- **Every line posts to its product's own income account.** A cashier is never asked to choose a general-ledger account — that is what the product master's `sales_account_id` is for — so the till refuses by name a product that has none rather than guessing an account or defaulting into a misclassification of revenue. Set the sales account on the product before selling it over the counter.
+- **Cost.** Carrying value and margin follow owner decision B58: the reader must hold `cost.view` and the `counter-pos` report must be set to show cost in Admin › Cost visibility. The withholding is in the read, so an API client is refused what the screen hides. Prices, tenders and change are never withheld.
+- **Not included.** No offline device queue (that stays on its own track), no payment hardware, no fiscal-device compliance, no barcode scanner integration beyond ordinary keyboard input, and no till float or shift reconciliation.
+
 # General-shop POS showcase
 
 The user added POS to the current showcase scope during Sprint 02. This is a working cash-sale journey for a small sample shop catalog, backed by the existing accounting services. It is not an inventory, tax, payment-processing, or production retail release. The same six illustrative prices are expressed in the selected company's base currency; this is not exchange-rate conversion.

@@ -70,6 +70,8 @@ $routes = [
     '/fixed-assets' => ['GET', 'POST'], '/fixed-assets/detail' => ['GET', 'POST'], '/fixed-assets/depreciation' => ['GET', 'POST'],
     '/reports/asset-register' => ['GET'],
     '/pos' => ['GET'], '/pos/review' => ['GET', 'POST'], '/pos/edit' => ['POST'], '/pos/checkout' => ['POST'], '/pos/retry' => ['POST'], '/pos/receipt' => ['GET'],
+    // 1.2 M9: the counter till over real stock. /pos above stays the illustrative sample cart.
+    '/counter' => ['GET', 'POST'], '/counter/receipt' => ['GET'],
     // 1.2 M7: the Users module. /invitation and /reset-password are reachable without a session,
     // because they are how an invited person and a reset password get their first sign-in.
     '/users' => ['GET', 'POST'], '/roles' => ['GET', 'POST'], '/profile' => ['GET', 'POST'],
@@ -314,6 +316,10 @@ try {
     if (in_array($path, ['/ar','/ap','/parties','/inventory','/purchasing','/opening-conversion','/tax'], true)) {
         require_once dirname(__DIR__) . '/includes/functions/starter_web_functions.php';
         pl_web_starter($actorId,$companyId,$bookId,$user,$company,$path,$method);
+    }
+    if (str_starts_with($path, '/counter')) {
+        require_once dirname(__DIR__) . '/includes/functions/counter_pos_web_functions.php';
+        pl_web_counter($actorId, $companyId, $bookId, $user, $company, $path, $method);
     }
     if (str_starts_with($path, '/stock-documents')) {
         require_once dirname(__DIR__) . '/includes/functions/stock_document_web_functions.php';
