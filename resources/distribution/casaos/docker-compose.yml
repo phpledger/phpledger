@@ -1,0 +1,125 @@
+name: phpledger
+services:
+  web:
+    image: ghcr.io/phpledger/phpledger:1.2.1
+    container_name: phpledger
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - target: 8080
+        published: "8080"
+        protocol: tcp
+    environment:
+      PL_DB_HOST: db
+      PL_DB_PORT: "3306"
+      PL_DB_NAME: phpledger
+      PL_DB_USER: phpledger
+      PL_DB_PASSWORD: ""
+      PL_PUBLIC_URL: "http://$DOMAIN:8080"
+      PL_AUTO_MIGRATE: "0"
+      PL_ADMIN_EMAIL: ""
+      PL_ADMIN_NAME: ""
+      PL_ADMIN_USERNAME: ""
+      PL_ADMIN_PASSWORD: ""
+      PL_SETUP_KEY: ""
+      PL_ALLOWED_ORIGINS: ""
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/private
+        target: /var/lib/phpledger
+    x-casaos:
+      ports:
+        - container: "8080"
+          description:
+            en_US: PHP Ledger web interface port
+      volumes:
+        - container: /var/lib/phpledger
+          description:
+            en_US: Private application state - installation receipt, setup key file, OAuth keys.
+      envs:
+        - container: PL_DB_PASSWORD
+          description:
+            en_US: Required. Set a strong database password before starting the app, and use the same value below for MYSQL_PASSWORD on the db service.
+        - container: PL_PUBLIC_URL
+          description:
+            en_US: This installation's own address. Set to the real http(s) address before exposing this beyond your own machine.
+        - container: PL_ADMIN_EMAIL
+          description:
+            en_US: Optional. Set together with PL_ADMIN_NAME and PL_ADMIN_PASSWORD to create the owner account on first start. Leave all three blank to finish setup at /install instead.
+        - container: PL_ADMIN_NAME
+          description:
+            en_US: Optional. See PL_ADMIN_EMAIL.
+        - container: PL_ADMIN_USERNAME
+          description:
+            en_US: Optional login username. Defaults from PL_ADMIN_EMAIL when left blank.
+        - container: PL_ADMIN_PASSWORD
+          description:
+            en_US: Optional. Required only when installing the owner account from the environment (see PL_ADMIN_EMAIL). Never share or commit this value.
+        - container: PL_SETUP_KEY
+          description:
+            en_US: Optional. A private key the browser installer demands before /install opens, recommended once this app is reachable from the public internet.
+  db:
+    image: mysql:8.4
+    container_name: phpledger-db
+    restart: unless-stopped
+    command: ["--log-bin-trust-function-creators=1"]
+    environment:
+      MYSQL_DATABASE: phpledger
+      MYSQL_USER: phpledger
+      MYSQL_PASSWORD: ""
+      MYSQL_ROOT_PASSWORD: ""
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/db
+        target: /var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root --password=\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    x-casaos:
+      volumes:
+        - container: /var/lib/mysql
+          description:
+            en_US: MySQL data directory for PHP Ledger's database.
+      envs:
+        - container: MYSQL_PASSWORD
+          description:
+            en_US: Required. Must match PL_DB_PASSWORD on the web service.
+        - container: MYSQL_ROOT_PASSWORD
+          description:
+            en_US: Required. A separate strong password for the MySQL root account.
+x-casaos:
+  id: com.phpledger.phpledger
+  architectures:
+    - amd64
+    - arm64
+  main: web
+  category: Finance
+  developer: PHP Ledger
+  author: PHP Ledger
+  tagline:
+    en_US: Self-hosted double-entry accounting that runs on your own PHP hosting.
+  description:
+    en_US: |
+      PHP Ledger is complete double-entry accounting you install on your own server: invoices, expenses, a point-of-sale flow, and a full general ledger with balanced journal entries behind every transaction.
+
+      This app starts the published PHP Ledger image (ghcr.io/phpledger/phpledger) with its own MySQL 8.4 database. Finish setup either from the environment variables above (set PL_ADMIN_EMAIL, PL_ADMIN_NAME and PL_ADMIN_PASSWORD before the first start) or in the browser at /install (leave those blank).
+  title:
+    en_US: PHP Ledger
+  # TODO(resources/distribution): CasaOS expects the icon and screenshots to live
+  # alongside this compose file in the app's own folder inside the CasaOS-AppStore
+  # repository (Apps/PHPLedger/icon.png, screenshot-1.png, ...), served back via
+  # https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/PHPLedger/...
+  # Until that PR exists, this points at real assets already published in this repo.
+  icon: https://raw.githubusercontent.com/phpledger/phpledger/master/www/website/public/assets/brand/icon-512.png
+  screenshot_link:
+    - https://raw.githubusercontent.com/phpledger/phpledger/master/docs/repository/assets/owner-overview-preview.webp
+    - https://raw.githubusercontent.com/phpledger/phpledger/master/docs/repository/assets/expense-to-journal-preview.webp
+    - https://raw.githubusercontent.com/phpledger/phpledger/master/docs/repository/assets/cash-pos-click-preview.png
+  thumbnail: ""
+  scheme: http
+  port_map: "8080"
+  index: /

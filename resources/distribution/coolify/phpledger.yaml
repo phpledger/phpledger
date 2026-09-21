@@ -1,0 +1,52 @@
+# documentation: https://github.com/phpledger/phpledger/blob/master/docs/CONTAINER.md
+# slogan: Complete double-entry accounting that runs on your own PHP hosting.
+# category: finance
+# tags: accounting,ledger,invoicing,php,mysql,finance
+# logo: svgs/phpledger.svg
+# port: 8080
+#
+# Submitted to https://github.com/coollabsio/coolify as templates/compose/phpledger.yaml,
+# with an entry added to templates/compose/service-templates.json. See
+# resources/distribution/README.md for what is and is not confirmed about this format.
+
+services:
+  phpledger:
+    image: ghcr.io/phpledger/phpledger:1.2.1
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SERVICE_URL_PHPLEDGER_8080
+      - PL_DB_HOST=db
+      - PL_DB_PORT=3306
+      - PL_DB_NAME=phpledger
+      - PL_DB_USER=$SERVICE_USER_PHPLEDGER
+      - PL_DB_PASSWORD=$SERVICE_PASSWORD_PHPLEDGER
+      - PL_PUBLIC_URL=$SERVICE_URL_PHPLEDGER
+      - PL_AUTO_MIGRATE=0
+      - PL_ADMIN_EMAIL=${PL_ADMIN_EMAIL:-}
+      - PL_ADMIN_NAME=${PL_ADMIN_NAME:-}
+      - PL_ADMIN_USERNAME=${PL_ADMIN_USERNAME:-}
+      - PL_ADMIN_PASSWORD=${PL_ADMIN_PASSWORD:-}
+      - PL_SETUP_KEY=${PL_SETUP_KEY:-}
+      - PL_ALLOWED_ORIGINS=${PL_ALLOWED_ORIGINS:-}
+    volumes:
+      - phpledger-private:/var/lib/phpledger
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command: ["--log-bin-trust-function-creators=1"]
+    environment:
+      - MYSQL_DATABASE=phpledger
+      - MYSQL_USER=$SERVICE_USER_PHPLEDGER
+      - MYSQL_PASSWORD=$SERVICE_PASSWORD_PHPLEDGER
+      - MYSQL_ROOT_PASSWORD=$SERVICE_PASSWORD_ROOT
+    volumes:
+      - phpledger-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root --password=\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30

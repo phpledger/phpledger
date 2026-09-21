@@ -1,0 +1,91 @@
+# Submitted to https://github.com/CapRover/one-click-apps as public/v4/apps/phpledger.yml.
+# See resources/distribution/README.md for the real directory/filename convention this follows.
+captainVersion: 4
+services:
+    $$cap_appname:
+        image: ghcr.io/phpledger/phpledger:$$cap_phpledger_version
+        restart: unless-stopped
+        depends_on:
+            - $$cap_appname-db
+        environment:
+            PL_DB_HOST: srv-captain--$$cap_appname-db
+            PL_DB_PORT: "3306"
+            PL_DB_NAME: phpledger
+            PL_DB_USER: phpledger
+            PL_DB_PASSWORD: $$cap_db_password
+            PL_PUBLIC_URL: https://$$cap_appname.$$cap_root_domain
+            PL_AUTO_MIGRATE: "0"
+            PL_ADMIN_EMAIL: $$cap_admin_email
+            PL_ADMIN_NAME: $$cap_admin_name
+            PL_ADMIN_USERNAME: ""
+            PL_ADMIN_PASSWORD: $$cap_admin_password
+            PL_SETUP_KEY: ""
+            PL_ALLOWED_ORIGINS: ""
+        volumes:
+            - $$cap_appname-private:/var/lib/phpledger
+        caproverExtra:
+            containerHttpPort: "8080"
+    $$cap_appname-db:
+        image: mysql:8.4
+        restart: unless-stopped
+        command: ["--log-bin-trust-function-creators=1"]
+        environment:
+            MYSQL_DATABASE: phpledger
+            MYSQL_USER: phpledger
+            MYSQL_PASSWORD: $$cap_db_password
+            MYSQL_ROOT_PASSWORD: $$cap_db_root_password
+        volumes:
+            - $$cap_appname-db-data:/var/lib/mysql
+        caproverExtra:
+            notExposeAsWebApp: "true"
+caproverOneClickApp:
+    variables:
+        - id: $$cap_phpledger_version
+          label: PHP Ledger Version
+          defaultValue: "1.2.1"
+          description: The image tag to deploy. Pinned to a specific release; see https://github.com/phpledger/phpledger/pkgs/container/phpledger for available tags. Bumped on each release per docs/RELEASE-PROTOCOL.md step 10.
+        - id: $$cap_db_password
+          label: Database Password
+          description: A strong password for the phpledger MySQL user. Used by both services; do not reuse elsewhere.
+        - id: $$cap_db_root_password
+          label: Database Root Password
+          description: A strong, separate password for the MySQL root account.
+        - id: $$cap_admin_email
+          label: Admin Email
+          description: The email address for the owner account PHP Ledger creates on first start.
+        - id: $$cap_admin_name
+          label: Admin Name
+          description: The display name for the owner account PHP Ledger creates on first start.
+        - id: $$cap_admin_password
+          label: Admin Password
+          description: The password for the owner account PHP Ledger creates on first start. Never shared or logged; read directly from the environment by install/create-admin.php.
+    instructions:
+        start: >-
+            PHP Ledger is complete double-entry accounting that runs on your own PHP hosting:
+            invoices, expenses, a point-of-sale flow, and a full general ledger with balanced
+            journal entries behind every transaction. This one-click app starts the published
+            image (ghcr.io/phpledger/phpledger) with its own MySQL 8.4 database and installs the
+            owner account you name below on first start.
+        end: >-
+            Enable HTTPS and force HTTPS from the HTTP Settings tab for this app.
+            Then visit https://$$cap_appname.$$cap_root_domain and sign in with the admin email
+            and password you set above.
+
+            To upgrade later, raise the PHP Ledger Version app variable to the new tag, back up
+            both volumes first, and set PL_AUTO_MIGRATE=1 for one restart so pending migrations
+            apply against the existing database (docs/CONTAINER.md, "Upgrade").
+    displayName: "PHP Ledger"
+    isOfficial: false
+    description: >-
+        Self-hosted double-entry accounting: invoices, expenses, point of sale and a full
+        general ledger, installed non-interactively with a MySQL 8.4 database.
+    documentation: >-
+        Taken from https://github.com/phpledger/phpledger/blob/master/docs/CONTAINER.md and
+        https://github.com/phpledger/phpledger/blob/master/compose.production.yaml. This is not
+        an "official" base-image app (CapRover's official badge wants official upstream images;
+        PHP Ledger's image is built on php:8.3-apache, not an official CapRover-maintained base).
+    # TODO(resources/distribution): CapRover one-click-apps expects a square logo referenced by
+    # a URL, conventionally hosted in this repo's PR alongside the app entry (their contributing
+    # guide has contributors add it under their own img/ path). Real candidate:
+    # https://raw.githubusercontent.com/phpledger/phpledger/master/www/website/public/assets/brand/icon-512.png
+    logoUrl: https://raw.githubusercontent.com/phpledger/phpledger/master/www/website/public/assets/brand/icon-512.png
