@@ -72,8 +72,13 @@ def build_release_zip(build_dir: Path) -> Path:
             "The worktree has uncommitted changes; tools/build-package.py packages only a clean "
             "git tree. Commit first, then run this test."
         )
-    vendor = build_dir / "vendor"
-    vendor.mkdir(parents=True)
+    # composer install runs with composer.json at the mounted root and writes its own
+    # vendor/ subfolder there (tools/build-release.py's build_vendor() does the same);
+    # build-package.py's --vendor wants that inner folder, not the mounted root itself.
+    vendor_root = build_dir / "vendor"
+    vendor_root.mkdir(parents=True)
+    (vendor_root / "composer.json").write_bytes((ROOT / "composer.json").read_bytes())
+    (vendor_root / "composer.lock").write_bytes((ROOT / "composer.lock").read_bytes())
     env = {**os.environ, "PL_DB_PASSWORD": "unused-vendor-build", "PL_DB_ROOT_PASSWORD": "unused-vendor-build"}
     if COMPOSE_SUBNET:
         env["PL_DOCKER_SUBNET"] = COMPOSE_SUBNET
@@ -81,11 +86,12 @@ def build_release_zip(build_dir: Path) -> Path:
     run(
         [
             "docker", "compose", "-p", COMPOSE_PROJECT, "--profile", "test", "run", "--rm", "--no-deps",
-            "-v", f"{vendor}:/build", "-w", "/build", "test",
+            "-v", f"{vendor_root}:/build", "-w", "/build", "test",
             "composer", "install", "--no-dev", "--prefer-dist", "--no-interaction", "--no-scripts",
         ],
         cwd=ROOT, env=env,
     )
+    vendor = vendor_root / "vendor"
     if not (vendor / "autoload.php").is_file():
         raise ContainerTestError("Vendor build did not produce vendor/autoload.php")
     version = (ROOT / "www/phpledger/VERSION").read_text(encoding="ascii").strip()
