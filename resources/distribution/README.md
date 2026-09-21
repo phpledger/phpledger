@@ -247,9 +247,15 @@ after applying 43 migrations, creating the administrator from the environment an
 installation complete, running as `www-data` rather than root. CasaOS was verified from
 the committed file after the permissions fix above.
 
-The rest have not been run. CapRover, Elestio and PikaPods use the same named-volume
-shape as `compose.production.yaml`, which the container tests already exercise, so the
-risk is lower, but lower is not none: the CasaOS defect was invisible until it ran.
+**CapRover, Elestio and PikaPods were run the same way on the same date and all three
+pass**, reaching `/health` and the sign-in page after 43 migrations, an administrator
+created from the environment, and installation marked complete. Five of the eleven are
+now verified this way: CasaOS, Coolify, CapRover, Elestio and PikaPods.
+
+Two more platform-only behaviours surfaced while testing those three, neither a defect.
+CapRover's manifest carries a `caproverExtra` key that plain Compose rejects, and it
+addresses its database as `srv-captain--<appname>-db`, which only CapRover's own DNS
+resolves. Strip the key and add that network alias to run it locally.
 Portainer, Umbrel, YunoHost, Softaculous and Installatron each need their own platform to
 test properly, and Cloudron is blocked on #103 regardless.
 
