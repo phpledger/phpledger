@@ -134,9 +134,15 @@ test('machine reads match browser money and continue exact running balances acro
     $f = connection_fixture();
     for ($i = 0; $i < 32; ++$i) { pl_post_journal($f['actor_id'], $f['company_id'], $f['book_id'], ledger_payload($f, '0.0001')); }
     $scope = ['company_id' => $f['company_id'], 'book_id' => $f['book_id']];
-    $trial = pl_read_operation($f['connection']['id'], 'trial_balance', $scope + ['as_of' => '2026-09-15']);
+    // A book's chart is thirty-two rows now — thirteen postable accounts and the chart's nineteen
+    // class and group headings — so the whole report needs more than one default page. The machine
+    // read stays the flat, paginated report it was: the headings are rows in it like any other,
+    // and they carry zero, so a consumer that sums a column is unaffected by them.
+    $trial = pl_read_operation($f['connection']['id'], 'trial_balance', $scope + ['as_of' => '2026-09-15', 'page_size' => 100]);
     $browser = pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id'], '2026-09-15');
     assert_same($browser['accounts'], $trial['data']['accounts']['rows']);
+    assert_same(count($browser['accounts']), $trial['data']['accounts']['pagination']['total']);
+    assert_same(2, pl_read_operation($f['connection']['id'], 'trial_balance', $scope + ['as_of' => '2026-09-15'])['data']['accounts']['pagination']['pages']);
     assert_true(!array_key_exists('tree', $trial['data']));
     assert_same($browser['total_debit'], $trial['data']['total_debit']);
     foreach (['profit_loss','balance_sheet'] as $operation) {

@@ -54,8 +54,29 @@ function pl_ui_report_tree_node(array $node, array $columns, array $options): vo
         echo '<span class="num">' . pl_e(pl_money((string) ($node[$column['key']] ?? '0.0000'))) . '</span>';
     }
     echo '</summary>';
+    pl_ui_report_tree_note($node);
     foreach ($children as $child) { pl_ui_report_tree_node($child, $columns, $options); }
     echo '</details>';
+}
+
+/**
+ * The plain-words explanation of one class or group, under the heading it explains.
+ *
+ * A heading now carries a name — "Cash and Cash Equivalents", not "Group 1-100" — and this is the
+ * line that says what that name is supposed to hold, for a reader who has never done bookkeeping.
+ * It is skipped silently for a heading the catalogue has no words for, so a group an owner added
+ * reads exactly as it did before.
+ */
+function pl_ui_report_tree_note(array $node): void
+{
+    $code = (string) ($node['code'] ?? '');
+    $concept = pl_account_heading_concept($code);
+    if ($concept === null || pl_guidance_concept($concept) === null) { return; }
+    echo '<div class="report-tree-note"><span>'
+        . pl_e(pl_t('What belongs in {group}', ['group' => (string) ($node['label'] ?? $node['name'] ?? '')]))
+        . '</span>';
+    pl_ui_help($concept);
+    echo '</div>';
 }
 
 function pl_ui_report_tree_row(array $node, array $columns, array $options): void
@@ -78,4 +99,7 @@ function pl_ui_report_tree_row(array $node, array $columns, array $options): voi
         echo '<span class="num">' . pl_e(pl_money((string) ($node[$column['key']] ?? '0.0000'))) . '</span>';
     }
     echo '</div>';
+    // A heading reaches this function when the depth control has cut its children off. It is still
+    // the heading of a group, so it still gets the line that says what belongs in it.
+    if ($isHeading) { pl_ui_report_tree_note($node); }
 }

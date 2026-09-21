@@ -408,10 +408,52 @@ capital and drawings, and the treatment of losses are accounting decisions left
 for the accountant's review (owner decision B30). See the
 [owner-transaction worked examples](accounting/OWNER-TRANSACTIONS.md).
 
-The bundled chart is `resources/coa/core-starter-1.1.0.json`: structured codes,
+The bundled chart is `resources/coa/core-starter-1.2.0.json`: structured codes,
 each pre-1.2 account's old number recorded, and the owner-capital, owner-loan,
 drawings, contra and advances control accounts present so every sample and demo
-shows them.
+shows them. It has two lists. `accounts` are the thirteen postable accounts,
+each with a `semantic_key`; `headings` are the nineteen class and group names
+(`X-000-00000-00`, `X-GGG-00000-00`), which take no posting and which are what
+`pl_report_tree()` uses so a report reads "Cash and Cash Equivalents" rather
+than "Group 1-100".
+
+A heading carries a `semantic_key` of its own in the `core.class.*` /
+`core.group.<class>.*` namespace — `core.group.asset.ppe`,
+`core.group.equity.drawings` — and `pl_account_heading_by_key()` is the one
+resolver a module uses to find a group. Never the name, which is translated and
+which an owner may edit; never the number, which migration 036 allocated from
+each chart's own groups and which therefore means different things in different
+books. The namespace is separate from the leaf keys because
+`uq_account_semantic (book_id, semantic_key)` is one account per key per book:
+`core.group.equity.drawings` and the leaf `core.equity.drawings` are two rows,
+and a lookup meant to find somewhere to post can never land on a heading. The
+resolver falls back on the bundled chart's own code for a chart that predates
+the keys, reports which of the two matched, and answers null for a book that has
+no such group — the caller then asks the owner rather than refusing to work. A
+heading carries no `role`: a role names where a posting goes, `pl_save_account()`
+refuses one on a heading code, and a second active account holding
+`receivables`, `payables` or an advances role would leave `pl_ar_control()` and
+`pl_advance_control()` with no unambiguous default. `core-starter-1.1.0.json` and
+`core-starter-1.0.0.json` still ship byte-identical: a book records the digest
+of the chart it was installed from, so a chart's bytes are never rewritten under
+a version number that is already recorded somewhere.
+
+Migration **045_chart_headings** is the same names for a book that already
+exists. It writes heading rows only — no UPDATE, no DELETE, no posting account
+touched — names the classes from the class digit, names a group from the
+`semantic_key` of the single starter purpose in it, and leaves a group holding
+two purposes for its owner to name. Each row it writes carries the heading's own
+`core.group.*` key, guarded by its own `NOT EXISTS` so an upgrade can never die
+on `uq_account_semantic`. It adds `1-200 Property, Plant and Equipment` only to
+a book with no conversion receipt whose cash account still sits at the bundled
+`1-100-10001-00`, where that number provably means it. Every row it writes
+carries `creation_key = 'migration-045-<code>'`, which is the exact reversal.
+
+An **empty group is deliberately absent from a report**: the tree is built from
+the accounts that can hold a figure, so `1-200 Property, Plant and Equipment` in
+a book that has bought nothing has no node and no zero line. It is visible, and
+usable, on the chart of accounts screen, which states what the book may hold
+rather than what it does.
 
 Migration **040_contra_accounts_and_partner_identity** completes the conversion
 036 left half-finished. 036 added `is_contra` with `DEFAULT 0` and never set it,

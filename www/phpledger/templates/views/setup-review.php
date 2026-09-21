@@ -27,7 +27,8 @@ $roleInput = is_array($reviewInput['roles'] ?? null) ? $reviewInput['roles'] : [
                     <select class="select" id="<?= pl_e($fieldId) ?>" name="roles[<?= pl_e((string) $definition['semantic_key']) ?>]" required>
                         <option value=""><?= pl_e(pl_t('Choose an existing account')) ?></option>
                         <?php foreach ($company['accounts'] as $available): ?>
-                            <?php if (!$available['is_active'] || $available['type'] !== $definition['type']) { continue; } ?>
+                            <?php /* A class or group heading is a name, not a place to post: it can never serve a starter purpose. */ ?>
+                            <?php if (!$available['is_active'] || !$available['is_postable'] || $available['type'] !== $definition['type']) { continue; } ?>
                             <option value="<?= pl_e((string) $available['id']) ?>"<?= pl_web_id($roleInput, (string) $definition['semantic_key']) === (int) $available['id'] ? ' selected' : '' ?>><?= pl_e($available['code'] . ' — ' . $available['name']) ?></option>
                         <?php endforeach; ?>
                     </select>

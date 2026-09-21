@@ -152,7 +152,10 @@ test('a skeleton gives a real business its structure and not one unit of money',
         assert_true(in_array($definition['code'], $codes, true) || in_array($definition['code'], $legacy, true),
             'The skeleton did not create account ' . $definition['code'] . '.');
     }
-    assert_same(count(pl_starter_template()['accounts']) + count($structure['accounts']), count($company['accounts']),
+    // The bundled chart's posting accounts, its class and group headings, and the structure's own
+    // accounts: a skeleton adds the sample's chart and nothing else.
+    assert_same(count(pl_starter_template()['accounts']) + count(pl_starter_template()['headings']) + count($structure['accounts']),
+        count($company['accounts']),
         'The skeleton created accounts its structure does not declare, or missed some it does.');
     // A structure never ships a chart of disabled accounts.
     foreach ($company['accounts'] as $account) { assert_true($account['is_active'], 'Account ' . $account['code'] . ' arrived inactive.'); }

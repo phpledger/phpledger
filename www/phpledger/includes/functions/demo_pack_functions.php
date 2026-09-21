@@ -166,6 +166,10 @@ function pl_demo_pack_reconcile(int $actorId, int $companyId, int $bookId, array
         $trial = pl_trial_balance($actorId, $companyId, $bookId, $checkpoint['to']);
         $actual = [];
         foreach ($trial['accounts'] as $row) {
+            // A class or group heading is a name on the chart, not a balance: it takes no posting,
+            // so an authored checkpoint has nothing to say about it and an exact comparison must
+            // not demand one. Every account that can carry a figure is still compared.
+            if (in_array((string) ($row['level'] ?? 'account'), ['class', 'group'], true)) { continue; }
             $actual[(string) (($row['legacy_code'] ?? '') !== '' ? $row['legacy_code'] : $row['code'])] = $row['balance'];
         }
         $expected = $checkpoint['balances'];

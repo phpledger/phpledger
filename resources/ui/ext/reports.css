@@ -59,6 +59,23 @@
   .report-tree-code { color: var(--color-ink-muted); font-size: .75rem; }
   .report-tree-row { font-size: .8125rem; padding-inline-start: 2rem; }
   .report-tree-row-empty { color: var(--color-ink-muted); }
+  /* "What belongs in Cash and Cash Equivalents?" with the help bubble beside it, under the
+     heading it explains. It is a line of its own rather than part of the <summary> above it
+     because <summary> takes phrasing content and a help bubble is a <details>, which is flow
+     content: nesting the two is invalid markup, and a click on the inner trigger would also
+     toggle the branch it sits in. Inside the branch, so a collapsed group carries no question
+     mark; hidden in print, where the bubble is already hidden and the line would be left
+     asking a question a reader on paper cannot open. */
+  .report-tree-note {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    padding-block: .25rem;
+    padding-inline: 2rem .625rem;
+    font-size: .75rem;
+    color: var(--color-ink-muted);
+  }
+  @media print { .report-tree-note { display: none; } }
   .report-tree-contra-tag { color: var(--color-ink-muted); font-style: italic; }
   .report-tree .num { text-align: end; }
   /* A phone reads the codes under the names rather than scrolling sideways. */

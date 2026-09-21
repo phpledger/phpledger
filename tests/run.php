@@ -67,6 +67,10 @@ $suites[] = 'render_allowlist_test.php';
 $suites[] = 'account_code_test.php';
 $suites[] = 'report_tree_test.php';
 $suites[] = 'owner_test.php';
+// 1.3 M15: the chart's class and group names, and the guard that no report node falls back to
+// "Group 1-100" again. It replays migration 045's statements, so it runs after the suites whose
+// own fixtures create books, and it removes the rows it wrote.
+$suites[] = 'chart_headings_test.php';
 $suites[] = 'stock_document_test.php';
 // Reads the catalogue and the templates, then starts its own server for the rendered bubble.
 $suites[] = 'guidance_test.php';
@@ -117,7 +121,7 @@ if (($argv[1] ?? '') === '--suite=pos') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'pos_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=reports') {
-    $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'report_test.php', 'account_code_test.php', 'report_tree_test.php', 'owner_test.php'];
+    $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'report_test.php', 'account_code_test.php', 'report_tree_test.php', 'owner_test.php', 'chart_headings_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=home') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'document_test.php', 'reconciliation_test.php', 'home_test.php'];

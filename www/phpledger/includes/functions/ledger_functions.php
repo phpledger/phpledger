@@ -151,6 +151,26 @@ function pl_create_company(int $actorId, string $name, string $currency, string 
             }
             $mapping[$definition['semantic_key']] = $accountId;
         }
+        // The class and group names. A heading is an ordinary chart row with a heading code, so
+        // `pl_account_is_postable()` already refuses a posting to it and `pl_report_tree()` uses
+        // its name for the node it names instead of falling back on "Group 1-100".
+        //
+        // It carries its own `semantic_key`, which is how a module finds the group it needs —
+        // `pl_account_heading_by_key()` — rather than by a name a translation changes or a number
+        // migration 036 allocated per chart. It carries no `role`: a role names where a posting
+        // goes, and a second active account holding `receivables`, `payables` or an advances role
+        // would leave `pl_ar_control()` and `pl_advance_control()` with no unambiguous default.
+        //
+        // The heading keys stay out of `$mapping`, which is the starter-purpose map the chart
+        // snapshot and the prior-foundation review are built from: a heading is not one of the
+        // purposes the owner is asked to map onto an existing account.
+        foreach ($template['headings'] as $heading) {
+            DB::insert('pl_accounts', ['company_id' => $companyId, 'book_id' => $bookId,
+                'code' => $heading['code'], 'name' => $heading['name'], 'type' => $heading['type'],
+                'semantic_key' => $heading['semantic_key'], 'role' => null, 'is_active' => 1, 'is_contra' => 0]
+                + pl_currency_account_properties([]));
+            $accounts[$heading['code']] = (int) DB::insertId();
+        }
         pl_install_template_snapshot($actorId, $companyId, $bookId, $template, $mapping);
         // B44: the owner of the FIRST company on this installation becomes its administrator.
         // A no-op once anybody holds installation.admin, so the second company changes nothing.

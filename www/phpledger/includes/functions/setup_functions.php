@@ -1,16 +1,126 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * The bundled chart every new book is created from.
+ *
+ * A chart package has two lists and they are not interchangeable. `accounts`
+ * are the postable accounts: each carries a `semantic_key`, so the setup review
+ * can map a starter purpose onto an existing account and `pl_owner_accounts()`
+ * can find capital and drawings. `headings` are the class and group names —
+ * `X-000-00000-00` and `X-GGG-00000-00` — which receive no posting and exist so
+ * a report says "Cash and Cash Equivalents" where it used to say "Group 1-100".
+ * Keeping the two lists apart is what stops a heading appearing among the
+ * thirteen purposes the prior-foundation review asks the owner to map.
+ *
+ * A heading carries a `semantic_key` of its own (`core.group.asset.ppe`), which
+ * is how a module finds the group it needs — never by the heading's name, which
+ * a translation or a rename changes, and never by its number, which migration
+ * 036 allocated from each chart's own groups and which therefore differs book by
+ * book. `pl_account_heading_by_key()` is the one resolver, and it says how it
+ * found what it returned. A heading carries no `role`: a role names where a
+ * posting goes, `pl_save_account()` refuses one on a heading code, and a second
+ * active account with `receivables`, `payables` or an advances role would make
+ * `pl_ar_control()` and `pl_advance_control()` refuse every document for want of
+ * "one unambiguous default".
+ *
+ * `core-starter-1.1.0.json` and `core-starter-1.0.0.json` are left byte for byte
+ * as they shipped: a book records the digest of the chart it was installed from,
+ * so a chart's bytes are never rewritten under a version number that is already
+ * in someone's `pl_template_installations`. Headings therefore arrive as a new
+ * chart version for a new book, and as migration 045 for an existing one.
+ */
 function pl_starter_template(): array
 {
-    $file = PL_ROOT . '/resources/coa/core-starter-1.1.0.json';
+    $file = PL_ROOT . '/resources/coa/core-starter-1.2.0.json';
     $source = file_get_contents($file);
     if ($source === false) {
         throw new RuntimeException('The bundled starter chart is unavailable.');
     }
     $template = json_decode($source, true, 512, JSON_THROW_ON_ERROR);
+    $template['headings'] = pl_starter_template_headings($template);
     $template['digest'] = hash('sha256', $source);
     return $template;
+}
+
+/**
+ * The chart package's heading rows, checked to be what they claim to be.
+ *
+ * A heading that is not a heading code, or whose class digit disagrees with its
+ * classification, would be installed as an ordinary account and could then be
+ * posted to. That is a chart-package defect, so it stops here rather than
+ * reaching a book.
+ *
+ * @param array<string, mixed> $template
+ * @return array<int, array{code: string, name: string, type: string, semantic_key: string}>
+ */
+function pl_starter_template_headings(array $template): array
+{
+    $headings = [];
+    $keys = array_column($template['accounts'] ?? [], 'semantic_key');
+    foreach ($template['headings'] ?? [] as $definition) {
+        $code = (string) ($definition['code'] ?? '');
+        $name = trim((string) ($definition['name'] ?? ''));
+        $type = (string) ($definition['type'] ?? '');
+        $key = (string) ($definition['semantic_key'] ?? '');
+        if (!pl_account_code_is_valid($code) || !pl_account_code_is_heading($code)) {
+            throw new RuntimeException('The bundled chart lists ' . $code . ' as a heading, but it is not a class or group code.');
+        }
+        if ($name === '' || !pl_account_code_matches_type($code, $type)) {
+            throw new RuntimeException('The bundled chart heading ' . $code . ' needs a name and a matching classification.');
+        }
+        // Without a key the heading is invisible to every module that looks for its group, and
+        // `uq_account_semantic (book_id, semantic_key)` means a key used twice cannot be installed
+        // at all. Both are chart-package defects, so they stop here rather than reaching a book.
+        if ($key === '' || in_array($key, $keys, true)) {
+            throw new RuntimeException('The bundled chart heading ' . $code . ' needs a semantic key of its own; a module finds a group by that key, never by its name or its number.');
+        }
+        if (($definition['role'] ?? null) !== null) {
+            throw new RuntimeException('The bundled chart heading ' . $code . ' carries an operational role. A role names where a posting goes, and a heading takes none.');
+        }
+        $keys[] = $key;
+        $headings[] = ['code' => $code, 'name' => $name, 'type' => $type, 'semantic_key' => $key];
+    }
+    return $headings;
+}
+
+/**
+ * The class or group heading one module is looking for, or null, saying how it was found.
+ *
+ * The recognition mechanism is `semantic_key`, because it is the only one that survives what
+ * actually happens to a chart: a name is translated or edited by its owner, and a group *number*
+ * was allocated by migration 036 from each chart's own groups, so `1-200` means Property, Plant
+ * and Equipment in a book born on the bundled chart and something else entirely in a converted one.
+ *
+ * It falls back rather than refusing, because a chart may legitimately have no keyed heading: one
+ * built by hand, one from a package older than these keys, or one whose group migration 045 would
+ * not name because two starter purposes shared it. The fallback is the code the *bundled* chart
+ * uses for that key, which is right for a book created from it and is skipped for anything else —
+ * and `matched_by` says which of the two happened, so a caller can tell the owner what it assumed
+ * instead of assuming it silently. A caller that gets null asks the owner to name the group; it
+ * does not stop working.
+ *
+ * @return array{id: int, code: string, name: string, matched_by: string}|null
+ */
+function pl_account_heading_by_key(int $companyId, int $bookId, string $semanticKey): ?array
+{
+    $row = DB::queryFirstRow('SELECT id, code, name FROM pl_accounts WHERE company_id = %i AND book_id = %i AND semantic_key = %s',
+        $companyId, $bookId, $semanticKey);
+    $matchedBy = 'semantic_key';
+    if (!$row) {
+        $bundled = null;
+        foreach (pl_starter_template()['headings'] as $heading) {
+            if ($heading['semantic_key'] === $semanticKey) { $bundled = $heading['code']; break; }
+        }
+        if ($bundled === null) { return null; }
+        $row = DB::queryFirstRow('SELECT id, code, name FROM pl_accounts WHERE company_id = %i AND book_id = %i AND code = %s AND semantic_key IS NULL',
+            $companyId, $bookId, $bundled);
+        $matchedBy = 'bundled_code';
+    }
+    if (!$row || !pl_account_code_is_valid((string) $row['code']) || !pl_account_code_is_heading((string) $row['code'])) {
+        return null;
+    }
+    return ['id' => (int) $row['id'], 'code' => (string) $row['code'], 'name' => (string) $row['name'], 'matched_by' => $matchedBy];
 }
 
 /** Entity choices guide setup copy only; they do not enable regional tax rules. */
@@ -104,11 +214,16 @@ function pl_company_context(int $actorId, int $companyId): array
     $installed = DB::queryFirstRow('SELECT template_id AS id, template_version AS version, template_digest AS digest FROM pl_template_installations WHERE company_id = %i', $companyId);
     $company['template'] = $installed ?: null;
     $company['accounts'] = DB::query('SELECT id, code, legacy_code, name, type, semantic_key, role, is_active, is_contra FROM pl_accounts WHERE company_id = %i AND book_id = %i ORDER BY code', $companyId, $company['book_id']);
+    // A chart now carries its class and group headings, which are names rather than places to post.
+    // `pl_post_journal()` refuses one in the central funnel; `is_postable` is what lets a screen
+    // leave it out of an account picker instead of offering a choice the server will reject.
+    $postable = pl_account_code_postable_map(array_map(static fn (array $row): string => (string) $row['code'], $company['accounts']));
     foreach ($company['accounts'] as &$account) {
         $account['id'] = (int) $account['id'];
         $account['is_active'] = (bool) $account['is_active'];
         $account['is_contra'] = (bool) $account['is_contra'];
         $account['level'] = pl_account_code_is_valid((string) $account['code']) ? pl_account_code_level((string) $account['code']) : 'account';
+        $account['is_postable'] = $postable[(string) $account['code']] ?? true;
     }
     unset($account);
     return $company;

@@ -22,7 +22,9 @@ test('setup pins one chart and rejects stale previews and changed requests', fun
     assert_same(false, $company['is_sample']);
     assert_same('core-starter', $company['template']['id']);
     assert_same(pl_starter_template()['digest'], $company['template']['digest']);
-    assert_same(13, count($company['accounts']));
+    // Thirteen postable accounts and the chart's nineteen class and group headings.
+    assert_same(13 + 19, count($company['accounts']));
+    assert_same(13, count(array_filter($company['accounts'], static fn (array $row): bool => $row['is_postable'])));
     assert_same($company['id'], pl_setup_company($f['actor_id'], $input, $key)['id']);
     $changed = $input;
     $changed['name'] .= ' changed';
@@ -62,7 +64,10 @@ test('prior company review preserves renamed accounts and posted history', funct
     assert_throws(fn () => pl_confirm_existing_setup($f['actor_id'], $f['company_id'], $f['book_id'], $mapping, false), DomainException::class);
     $reviewed = pl_confirm_existing_setup($f['actor_id'], $f['company_id'], $f['book_id'], $mapping, true);
     assert_same('ready', $reviewed['setup_status']);
-    assert_same('My renamed operating bank', $reviewed['accounts'][0]['name']);
+    // By code, not by position: the chart's class and group headings sort before the first
+    // posting account, and this assertion is about the mapped bank account keeping its own name.
+    $bank = array_values(array_filter($reviewed['accounts'], static fn (array $row): bool => (int) $row['id'] === $f['accounts']['1000']));
+    assert_same('My renamed operating bank', $bank[0]['name']);
     assert_same($journal['id'], pl_get_journal($f['actor_id'], $f['company_id'], $f['book_id'], $journal['id'])['id']);
     assert_same('12.3400', pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id'])['total_debit']);
 });
