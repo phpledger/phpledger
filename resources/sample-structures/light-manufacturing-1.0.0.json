@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Maple Bench Works",
   "business": "Light manufacturing",
-  "source_digest": "e4be6d3a2b8825d8079f2e5c0dd804477137fafdc39547976efeaaddd6329d5d",
+  "source_digest": "6beef422ad37528f88000cab351ae09c9b9641ec5c3815887eedf31b9dea63fa",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {
@@ -124,10 +124,9 @@
       "role": "expense"
     },
     {
-      "code": "5800",
-      "name": "Loss on asset disposal",
-      "type": "expense",
-      "role": "expense"
+      "code": "4800",
+      "name": "Gain or loss on asset disposal",
+      "type": "income"
     },
     {
       "code": "1400",

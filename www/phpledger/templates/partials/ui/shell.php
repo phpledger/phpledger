@@ -23,6 +23,11 @@ $navGroups = [
         ['/stock-documents/settlement', pl_t('Van settlement'), 'calendar', ['van-settlement'], $moduleVisible('inventory-locations')],
         ['/reports/stock-by-location', pl_t('Stock by location'), 'book', ['stock-by-location'], $moduleVisible('inventory')],
     ],
+    'Fixed assets' => [
+        ['/fixed-assets', pl_t('Asset register'), 'list', ['assets','asset-detail'], $moduleVisible('fixed-assets')],
+        ['/fixed-assets/depreciation', pl_t('Depreciation run'), 'calendar', ['asset-depreciation'], $moduleVisible('fixed-assets')],
+        ['/reports/asset-register', pl_t('Fixed-asset register'), 'book', ['asset-register'], $moduleVisible('fixed-assets')],
+    ],
     'Banking' => [['/bank-reconciliation', pl_t('Bank reconciliation'), 'building', ['bank-reconciliation'], !pl_demo_enabled()]],
     'Reports' => [
         ['/reports', pl_t('All reports'), 'book', ['reports'], true],

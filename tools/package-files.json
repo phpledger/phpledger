@@ -1613,6 +1613,38 @@
     {
       "source": "www/phpledger/install/migrations/045_chart_headings.php",
       "destination": "www/phpledger/install/migrations/045_chart_headings.php"
+    },
+    {
+      "source": "resources/modules/fixed-assets.json",
+      "destination": "resources/modules/fixed-assets.json"
+    },
+    {
+      "source": "www/phpledger/install/migrations/046_fixed_assets.php",
+      "destination": "www/phpledger/install/migrations/046_fixed_assets.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/asset_functions.php",
+      "destination": "www/phpledger/includes/functions/asset_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/asset_web_functions.php",
+      "destination": "www/phpledger/includes/functions/asset_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/assets.php",
+      "destination": "www/phpledger/templates/views/assets.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/asset-detail.php",
+      "destination": "www/phpledger/templates/views/asset-detail.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/asset-depreciation.php",
+      "destination": "www/phpledger/templates/views/asset-depreciation.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/asset-register.php",
+      "destination": "www/phpledger/templates/views/asset-register.php"
     }
   ]
 }

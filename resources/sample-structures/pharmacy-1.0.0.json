@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Meadow Training Pharmacy",
   "business": "Non-medicinal training inventory",
-  "source_digest": "167e6b12542d369ce5a3d4caed08cf80923224892420d30cf07de347b6696489",
+  "source_digest": "4168593a26aada2644e9f5294cd63d3761c184a393b6f9ba7413f0e6801795a1",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {
@@ -124,10 +124,9 @@
       "role": "expense"
     },
     {
-      "code": "5800",
-      "name": "Loss on asset disposal",
-      "type": "expense",
-      "role": "expense"
+      "code": "4800",
+      "name": "Gain or loss on asset disposal",
+      "type": "income"
     },
     {
       "code": "1400",

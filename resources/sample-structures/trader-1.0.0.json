@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Harbour Trade",
   "business": "Wholesale / trader",
-  "source_digest": "dbe274c89b8c1e466cb9b8f2970ca338e7c01e0a744a166320ea74f379c42fb8",
+  "source_digest": "12b6af5bd7a3e03bc8dccb86358c7b5ec82ef27025d7dcf29ebc36158db645fc",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {
@@ -124,10 +124,9 @@
       "role": "expense"
     },
     {
-      "code": "5800",
-      "name": "Loss on asset disposal",
-      "type": "expense",
-      "role": "expense"
+      "code": "4800",
+      "name": "Gain or loss on asset disposal",
+      "type": "income"
     },
     {
       "code": "1400",

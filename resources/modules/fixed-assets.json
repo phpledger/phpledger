@@ -1,0 +1,35 @@
+{
+  "id": "fixed-assets",
+  "name": "Fixed assets",
+  "version": "1.0.0",
+  "contract": 1,
+  "optional": true,
+  "requires": {
+    "core": "1.0.0"
+  },
+  "capabilities": [
+    "assets.register",
+    "assets.depreciation",
+    "assets.disposal"
+  ],
+  "migrations": [
+    "046_fixed_assets"
+  ],
+  "routes": [
+    "/fixed-assets",
+    "/fixed-assets/detail",
+    "/fixed-assets/depreciation",
+    "/reports/asset-register"
+  ],
+  "permissions": [
+    "owner",
+    "accountant"
+  ],
+  "settings": [],
+  "reports": [
+    "asset-register"
+  ],
+  "api_operations": [],
+  "mcp_operations": [],
+  "history": "1.3 adds the fixed-asset register as a subsidiary ledger: asset classes carrying the depreciation policy and the four accounts a class posts to, the assets themselves, a depreciation run per accounting period, and disposal by sale or scrap with the gain or loss computed and posted. Every figure the register reports is the sum of its own event rows, and every event row is backed by one journal posted through the central posting service, so the register reconciles to its control accounts rather than restating them. Accumulated depreciation uses the contra mechanism and the reserved 1-900 contra group the chart already carries. Straight-line and reducing-balance depreciation are computed; units of production, sum-of-the-years-digits and a separate tax-depreciation basis are not. Historical assets, events, runs and the register report stay readable when the module is disabled; only new writes are refused."
+}

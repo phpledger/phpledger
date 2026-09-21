@@ -21,6 +21,11 @@ $groups = [
         ['/stock-documents','Stock issues & returns','Numbered stock issues, re-issues, returns from a van and gate passes.','file-text'],
         ['/stock-documents/settlement','Van settlement','One driver’s day: loaded, sold, returned, and whether it reconciles.','calendar'],
     ],
+    'Fixed assets' => [
+        ['/reports/asset-register','Fixed-asset register','Cost, accumulated depreciation and net book value per class, reconciled to the control accounts.','book'],
+        ['/fixed-assets','Asset register','What was bought, when it entered service, what it has been written down by and what happened when it left.','list'],
+        ['/fixed-assets/depreciation','Depreciation run','One reviewed entry per accounting period, per asset class.','calendar'],
+    ],
     'Cash' => [
         ['/reports/cash-forecast','Cash forecast','Explore cash needs using your own expected money in and out. Scenario only; no posting.','arrow-right'],
         ['/bank-reconciliation','Bank reconciliation','Compare a bank statement with your posted entries.','building'],

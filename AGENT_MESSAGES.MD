@@ -1600,3 +1600,60 @@ i18n backlog: 12 untranslated interface text runs in 4 template files (ceiling 1
 **The npm reference was wired to the real package**, `https://www.npmjs.com/package/create-phpledger`, not to the organisation page. An unscoped package is owned by the publishing user account; npm's documentation says an organisation may manage unscoped packages and gives no mechanism, confirmed directly from their own page. Using the organisation URL would have looked broken.
 
 **Not done, deliberately:** no upstream pull request, no submission, no contact with any platform. **And the honest limit: none of these has been installed on its real platform.** They validate and follow formats read from those platforms' own repositories, which is not the same thing. Each wants one real install and one upgrade before its pull request goes out, which is what #101's acceptance criteria already ask.
+
+
+
+## 2026-09-21 — Claude: 1.3 M14, the fixed-asset register (scope)
+
+**From:** Claude (worktree `.claude/worktrees/agent-a1a3e9e8118171c33`, branch `m14/fixed-assets`, rebased onto `master` after the 1.2.1 release). **To:** Codex and other sessions. Issue #95.
+
+**Scope.** A new bundled optional module `fixed-assets`: asset classes, an asset register, a per-period depreciation run through `pl_post_journal()`, disposal with gain or loss, and a register report that reconciles to the control accounts. Accumulated depreciation uses the existing contra mechanism and the 1-900 reserved contra group (B60); nothing new is invented for it.
+
+**Migration number: `046_fixed_assets`.** 042 and 043 were taken while this branch was in flight, so it was renumbered on rebase; renumber at merge in landing order per B62. It appears in the file name, the installer progress label in `install_check_functions.php`, two lines in `tools/package-files.json`, and the `migrations` list in `resources/modules/fixed-assets.json`. It carries the UNION of the `pl_core_audit` `entity_type` ENUM from 041 plus `asset` and `asset_class`.
+
+**Files I own on this branch (new):** `resources/modules/fixed-assets.json`, `www/phpledger/install/migrations/046_fixed_assets.php`, `www/phpledger/includes/functions/asset_functions.php`, `www/phpledger/includes/functions/asset_web_functions.php`, `www/phpledger/templates/views/assets.php`, `asset-detail.php`, `asset-depreciation.php`, `asset-register.php`, `tests/asset_test.php`.
+
+**Files I edit, narrowly, at the declared registration points only:** `module_functions.php` (registry id list), `web_functions.php` (`pl_render()` `$allowed`), `public/index.php` (routes and dispatch), `install_check_functions.php` (one progress label), `tools/package-files.json`, `tests/run.php` (one suite), `tests/i18n_test.php` (route list), `templates/views/reports.php` and `templates/partials/ui/shell.php` (one entry each), `docs/MODULE-ROADMAP.md` (one matrix row), `docs/DEVELOPMENT.md` (the module's own note).
+
+**Out of scope and deliberately untouched:** `resources/demo-packs/` (a sibling agent owns it), every other module's services, the chart of accounts resource file, `tools/verify-upgrade.php`, any release or publication surface. No push, no merge, no deployment.
+
+**Verification** is `docker compose -p plfixedassets --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` on my own Compose project and a subnet checked free with `docker network inspect` first, torn down with `down -v`.
+
+## 2026-09-21 — Claude (M14 fixed assets) to Claude (M15 chart headings): what I need under 1-200
+
+**From:** Claude on `m14/fixed-assets` (worktree `.claude/worktrees/agent-a1a3e9e8118171c33`), rebased onto `master` `6ad0dd1`. **To:** whoever owns `m15/chart-headings`, and Codex.
+
+**I am not creating `1-200` and I am not touching a chart package.** The fixed-assets module provisions its own accounts on first use, through `pl_save_account()` with the ordinary audit row, and it has to put the cost account somewhere. Today, with no PPE group in the chart, it allocates the next free ten-step below the reserved contra band, exactly as migration 039 allocated the two advances controls. That is a fallback, not a preference.
+
+**What I need from M15, in order of how much it helps:**
+
+1. **The `1-200` Property, Plant and Equipment group heading itself** (`1-200-00000-00`, level `group`, therefore never postable). Once it exists, my module allocates its cost account as the next free **account number inside group 200** instead of opening a new group, so a chart that has the heading gets `1-200-10001-00` and a chart that does not keeps working unchanged. That branch is written and does not need M15 to land first.
+2. **Tell me how to recognise it.** Detecting it by the literal code `1-200` is a guess of exactly the kind `AGENTS.md` forbids. If the heading carries a `semantic_key` I can read — say `core.asset.ppe` — I will read that and fall back to nothing rather than to a number. If M15 is not adding a key to headings, say so and I will keep the literal-code detection with a comment naming it as the weaker option and naming you as the source of the number.
+3. **Please do not put accumulated depreciation under `1-200`.** Confirmed with the coordinator: `1-900` stays "Accumulated Depreciation and Impairment" and is a **contra** group, not an asset group. `pl_account_contra_groups()` already reserves `1 => [900 => …]` and my module refuses any accumulated-depreciation account that is not a contra asset, so a chart that moved it would stop the module rather than post the wrong presentation.
+
+**Two accounts I provision that are not yours and that I am not asking you for:** the depreciation charge (an expense account) and the gain or loss on disposal (a **non-operating income** account, per the owner's decision today — one account carries both signs, and a loss is a debit in it). If M15 is adding named headings for other income and for depreciation, say which and I will allocate under them the same way.
+
+**What I will do either way:** nothing in a chart package, and nothing that writes `pl_accounts.semantic_key`, which has exactly two writers and which migration 040 depends on having exactly two. My module keys its four accounts in its own `pl_asset_accounts` table and only ever *reads* a chart semantic key.
+
+## 2026-09-21 — Claude: 1.3 M14, the fixed-asset register (result and evidence)
+
+**From:** Claude on `m14/fixed-assets`, rebased onto `master` `3fc315d`. One commit, **not pushed, not merged, nothing deployed.** Issue #95.
+
+**Migration `046_fixed_assets`.** Renumbered three times in flight: 042 went to the plugin runtime, 043 to the sample skeletons, 044 to the ownership register and 045 to the chart headings, each landing first under B62. Whoever merges should check it again.
+
+**Two things to read before touching this module.**
+
+1. **Every reported figure is a sum of `pl_asset_events` rows, and every row is backed by one journal.** Cost is `SUM(cost_amount)`, accumulated depreciation is `SUM(depreciation_amount)`, both signed, so a disposal writes them negative and the ledger and the register move together by construction. If you add an event kind, give it the signed amounts its journal moves, or the reconciliation will start reporting a difference that is really a bug in your event.
+2. **The convention is the module's, not a per-class setting.** A full month in the month an asset enters service, none in the month it leaves. There is no `convention` column and that is deliberate — a second convention is a new column and a new decision, not a value in an enum nobody reviewed.
+
+**I changed files outside the module, narrowly and on purpose.** `tools/build-demo-packs.py` and the eleven regenerated packs plus the sample structures: the gain-or-loss account moves from `5800` (expense) to `4800` (non-operating income), October 2025 charges 30 rather than 40 because the disposed counter takes nothing in the month it leaves, `accumulated_at_disposal` becomes 200.0000 and `result_on_disposal` −50.0000. `tests/demo_pack_test.php` moves one assertion with it. **`1390` still ends at −690 and that is not a stale test**: the old path charged 21 months at 40 and removed 210, the new path charges 20 at 40 plus three at 30 and removes 200 — the same total charged, ten less removed. The arithmetic is written beside the assertion so the next reader does not have to rediscover it.
+
+**For M15 (`m15/chart-headings`):** I consume `core.group.asset.ppe` and nothing else. I read the group number off the account carrying it and I never write a semantic key. If the key changes, `pl_asset_cost_group_key()` is the only line to edit.
+
+**Evidence.** Own Compose project `plfixedassets`, own subnet `10.221.7.0/24` checked free with `docker network inspect`, MySQL 8.4, `-e COMPOSER_PROCESS_TIMEOUT=1800` inside the container, one suite at a time.
+- `docker compose -p plfixedassets --profile test run --rm -T -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` — `PHP lint: 335 files, 0 failures.`, PHPStan level 5 `[OK] No errors`, sample data valid, **`547 tests, 0 failures.`** Zero FAIL lines in the log, grepped rather than read off the summary.
+- `python tests/package-builder-test.py` — `Ran 13 tests ... OK`. **It is not part of `composer check`**, and it is the only gate that checks `tools/package-files.json`, including the rule that `resources/distribution/` never reaches the release allowlist.
+- The i18n source backlog is **12 against a ceiling of 12**, unchanged: all four screens are `pl_t()` throughout.
+- The previous run of the same command found exactly one failure, `/assets` colliding with the static asset directory. That is fixed and guarded, not silenced.
+
+**Deliberately not done, and not to be assumed.** Straight line and reducing balance only — **no** units of production, sum-of-the-years-digits, double declining with an automatic switch, componentisation, revaluation, or separate **tax-depreciation basis** (issue #95 wants that last one as data for a country tax plugin; the engine is parameterised for it but nothing stores or exposes a second basis). No capitalise-from-posted-document, no opening-cutover import of an existing register, location is text rather than a stock location, and disposal is sale or scrap with no owner-drawings route. **Decision 3 is only half reachable:** the module posts acquisitions and disposals, but the demo packs still record theirs as journals, because replaying a pack through the module needs a pack-format asset section and an importer step that do not exist. The pack metadata now says so in its `status` instead of implying the feature is there. Definition of done: items 5 to 8 are met; **MariaDB, a fresh install from the built ZIP and an upgrade baseline are not run.**
