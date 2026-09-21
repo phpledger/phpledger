@@ -162,6 +162,26 @@ function pl_update_target(string $root, string $relative): string
 }
 
 /** The key is host-pinned, never taken from the archive or signed message. */
+/**
+ * A version string in a form PHP's version_compare() orders correctly.
+ *
+ * version_compare() knows dev, alpha, beta, RC and pl, and sorts each of them below the plain
+ * release. It sorts a word it does NOT know ABOVE the plain release, and "preview" is such a word:
+ * version_compare('1.2.0-preview.1', '1.2.0', '>') returns true. The updater compared raw strings,
+ * so an installation already on 1.2.0 with the preview channel selected would have been offered
+ * 1.2.0-preview.1 as an upgrade - older code over a database whose migrations had already run.
+ * "1.2.0-rc.1 > 1.2.0" and "1.2.0-beta > 1.2.0" were both correctly false, so only the word this
+ * project actually uses was affected.
+ *
+ * Rewriting the word to one version_compare() knows fixes the ordering without changing anything
+ * published: this is used only to compare, never to display, store, sign or match, so every
+ * existing signed envelope keeps its version exactly as it was signed.
+ */
+function pl_update_version_rank(string $version): string
+{
+    return str_ireplace('-preview', '-rc', $version);
+}
+
 function pl_update_verify_metadata(string $envelope, string $publicKey, string $channel, string $current): array
 {
     if (strlen($envelope) > 4000000 || !in_array($channel, ['stable', 'preview'], true)) { throw new DomainException('Invalid update metadata or channel.'); }
@@ -182,7 +202,7 @@ function pl_update_verify_metadata(string $envelope, string $publicKey, string $
     $version = $metadata['version'] ?? '';
     if (($metadata['schema'] ?? null) !== 1 || !is_string($version) || !preg_match('/^\d+\.\d+\.\d+(?:-(?:preview|beta|rc)(?:\.[0-9]+)?)?$/D', $version)
         || ($metadata['channel'] ?? '') !== $channel || (($channel === 'stable') === str_contains($version, '-'))
-        || !version_compare($version, $current, '>') || !is_string($metadata['min_php'] ?? null)
+        || !version_compare(pl_update_version_rank($version), pl_update_version_rank($current), '>') || !is_string($metadata['min_php'] ?? null)
         || version_compare(PHP_VERSION, $metadata['min_php'], '<')) {
         throw new DomainException('Choose a newer compatible release in the selected channel.');
     }
