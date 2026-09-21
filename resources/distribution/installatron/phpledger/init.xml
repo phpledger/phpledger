@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PHP Ledger - Installatron application package, installer-level init.xml.
+
+  Layout and this file's own <info id="..." value="..."/> elements are
+  confirmed from Installatron's public Application Packaging SDK docs:
+  https://www.installatron.com/developer/apps
+  https://www.installatron.com/developer/apps/definitions
+  (fetched 2026-09-21; both state no login is required to read them).
+
+  This directory (resources/distribution/installatron/phpledger/) mirrors
+  Installatron's own documented package path,
+  /var/installatron/installers/_installerid_/init.xml, with "phpledger" as
+  the installer id - a name chosen here, since ids are assigned inside the
+  hosted "Installatron Installer Editor" in real use (see NOTES.md: the
+  editor tool itself, not just this file, is how packages are normally
+  registered).
+-->
+<installer xmlns="http://www.installatron.com">
+  <info id="id" value="phpledger"/>
+  <info id="build" value="1"/>
+  <info id="status" value="disabled"/>
+  <!-- "disabled" until an Installatron account holder actually registers
+       this through the Installer Editor and reviews it there; see
+       NOTES.md. -->
+  <info id="name" value="PHP Ledger"/>
+  <info id="type" value="php"/>
+  <info id="category" value="Accounting &amp; Finance"/>
+  <!-- TODO: Installatron's own category taxonomy (the exact allowed
+       category strings) was not shown in the fetched docs; confirm the
+       exact spelling/casing expected once inside the Installer Editor. -->
+  <info id="created" value="2026-09-21"/>
+  <info id="description" value="Self-hosted double-entry accounting: sales, purchases, cash and the general ledger, on plain PHP and MySQL."/>
+  <info id="authordescription" value="PHP Ledger is built and maintained by the phpledger project (AGPL-3.0-or-later); source at https://github.com/phpledger/phpledger."/>
+
+  <!--
+    <links> at the installer level is documented only in prose as "Optional
+    references to site, documentation, FAQ, support, and demo URLs" - no
+    verbatim tag example was shown for this specific section (the version-
+    level <links> element IS shown verbatim, as <link id="admin"
+    value="..."/> etc.). The <link id="..." value="..."/> shape below
+    follows that confirmed sibling pattern; the exact set of "id" values
+    Installatron recognizes at the installer level (site/documentation/
+    faq/support/demo) is inferred from the docs' prose list, not quoted
+    verbatim, and should be checked in the Installer Editor before
+    submission. See NOTES.md.
+  -->
+  <links>
+    <link id="site" value="https://phpledger.com/"/>
+    <link id="documentation" value="https://github.com/phpledger/phpledger#readme"/>
+    <link id="support" value="https://github.com/phpledger/phpledger/issues"/>
+    <link id="demo" value="https://phpledger.com/demo/"/>
+  </links>
+
+  <!--
+    TODO: the "Versions" section ("Branches containing version entries with
+    upgrade/install attributes") has no verbatim tag example in the fetched
+    docs - only that prose description. Rather than invent a <branch>/
+    <version> element schema with made-up attribute names, this file omits
+    it; the actual version content lives, per Installatron's own documented
+    directory convention, in phpledger/1.2.1/init.xml alongside this file.
+    Confirm the exact top-level "Versions" wiring against the Installer
+    Editor (or direct contact with Installatron) before submission.
+  -->
+</installer>

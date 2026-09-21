@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PHP Ledger - Softaculous install form definition ("softinstall" mode:
+  Softaculous unzips the package itself, then calls install.php's
+  __install()). Spec:
+  https://www.softaculous.com/docs/developers/making-custom-package/
+
+  Field "name" attributes are arbitrary developer-chosen identifiers (per the
+  docs: <handle> is an OPTIONAL vendor-defined post-processing function, not
+  a required binding), so this package uses the admin_username / admin_pass
+  / admin_email spelling shown in Softaculous's own documented example,
+  plus an admin_name field this application also requires that the example
+  does not cover.
+
+  Softaculous itself provisions the database and supplies its coordinates in
+  $__settings (softdb, softdbuser, softdbhost, softdbpass) - the docs do not
+  list a softdbport key, so the port is collected here as its own field,
+  defaulted to 3306. See NOTES.md.
+-->
+<softinstall xmlns="http://www.softaculous.com">
+  <settings>
+    <group>
+      <heading>{{admin_settings}}</heading>
+
+      <input type="text" name="admin_email" size="40" value="">
+        <head>{{admin_email}}</head>
+        <exp>{{admin_email_exp}}</exp>
+      </input>
+
+      <input type="text" name="admin_name" size="40" value="">
+        <head>{{admin_name}}</head>
+        <exp>{{admin_name_exp}}</exp>
+      </input>
+
+      <input type="text" name="admin_username" size="40" value="">
+        <head>{{admin_username}}</head>
+        <exp>{{admin_username_exp}}</exp>
+      </input>
+
+      <!-- TODO: Softaculous's fetched docs enumerate input types as
+           text/checkbox/select/textarea/hidden with no dedicated masked
+           "password" type. Using "text" here is the documented type, not an
+           assumption about masking; confirm with Softaculous support
+           whether a masked variant exists before wide release. -->
+      <input type="text" name="admin_pass" size="40" value="">
+        <head>{{admin_pass}}</head>
+        <exp>{{admin_pass_exp}}</exp>
+      </input>
+
+      <input type="text" name="db_port" size="10" value="3306">
+        <head>{{db_port}}</head>
+        <exp>{{db_port_exp}}</exp>
+      </input>
+    </group>
+  </settings>
+
+  <!-- Tells Softaculous to provision a MySQL database and populate
+       softdb/softdbuser/softdbhost/softdbpass before __install() runs. -->
+  <db>mysql</db>
+
+  <!--
+    <datadir> is documented only as "Data directory specification" with no
+    example of its semantics (e.g. whether Softaculous pre-creates it, what
+    mode it gets, or whether it is preserved across an upgrade's re-unzip).
+    Given the application's hard requirement that
+    www/phpledger/storage/installation exist as mode 0700 BEFORE the first
+    request, install.php creates and chmods that directory itself with the
+    documented smkdir()/schmod() helpers instead of relying on an
+    under-specified tag. See NOTES.md.
+  -->
+</softinstall>

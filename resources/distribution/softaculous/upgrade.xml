@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PHP Ledger - Softaculous upgrade form definition.
+  Spec: https://www.softaculous.com/docs/developers/making-custom-package/
+  ("upgrade.xml is similar to install.xml but uses <softupgrade> ... <db> is
+  prohibited here").
+
+  No new input is collected for an upgrade: the application has no upgrade
+  wizard of its own (issue #100 - there is no install/upgrade.php in the
+  release), so this package's own upgrade.php simply re-runs
+  install/migrate.php against the already-configured installation once
+  Softaculous has replaced the files with the new version, per the
+  application's documented upgrade path (see NOTES.md and issue #100).
+-->
+<softupgrade xmlns="http://www.softaculous.com">
+  <settings>
+    <!-- Intentionally empty: config.local.php from the original install is
+         reused as-is; nothing here needs re-entering. -->
+  </settings>
+</softupgrade>
