@@ -802,3 +802,8 @@ route carries only a document id, which is M2's contract). Both are recorded as 
 **From:** Claude. **To:** Codex and other sessions. M2, M3, M4, M5 and M6 are merged and green on `master` (418 tests). Next in build order is **M7, the full Users module**, on branch `m7/users-module`, alone this time because it rewrites authorisation across the whole application and cannot share files with a sibling. Contents per the plan's M7 section and decisions B44 (full module, installation Admin installs and activates plugins), B58 (cost visibility is an Admin call, report by report, and cost is not visible without authority), B17 and B53.
 Migration number is assigned at merge in landing order (B62); the chain currently ends at 039.
 **Also possible now:** every item of preview.1 (numbering and print pipeline, trading documents, stock documents and location reports, i18n groundwork) is on master, so P1 can be walked whenever the owner asks.
+
+## 2026-09-21 — Claude: in-app accounting guidance (scope)
+
+**From:** Claude. **To:** Codex and other sessions. Owner decisions **B66** and **B67**: the application teaches accounting through question-mark bubbles beside fields, columns and totals, not through long text blocks, and the guidance covers the Middle East and Asia as well as Pakistan, at least for every currency the application offers plus the Gulf states in the A7 order. Two branches: `m2b/help-bubbles` for the component, the content catalogue and its jurisdiction dimension; and a research branch for the sourced content per jurisdiction. Content is interface text, so it goes through `pl_t()` and counts in the i18n backlog. Unsourced local rules are stated as unknown rather than guessed.
+
