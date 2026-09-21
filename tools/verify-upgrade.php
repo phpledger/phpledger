@@ -10,8 +10,8 @@ if (PHP_SAPI !== 'cli' || getenv('PL_ENV') !== 'test' || getenv('PL_DB_HOST') !=
 require dirname(__DIR__) . '/www/phpledger/includes/bootstrap.php';
 require dirname(__DIR__) . '/www/phpledger/install/migrate.php';
 $baseline = $argv[1] ?? 'foundation';
-if (!in_array($baseline, ['foundation', 'core-0.1.2', 'opening-local', 'preview-0.2.1', 'preview-0.5.0', 'stable-1.1.1', 'fresh'], true)) {
-    throw new DomainException('Choose foundation, core-0.1.2, opening-local, preview-0.2.1, preview-0.5.0, stable-1.1.1 or fresh.');
+if (!in_array($baseline, ['foundation', 'core-0.1.2', 'opening-local', 'preview-0.2.1', 'preview-0.5.0', 'stable-1.1.1', 'converted-chart', 'fresh'], true)) {
+    throw new DomainException('Choose foundation, core-0.1.2, opening-local, preview-0.2.1, preview-0.5.0, stable-1.1.1, converted-chart or fresh.');
 }
 $allFiles = glob(PL_APP . '/install/migrations/*.php') ?: [];
 sort($allFiles, SORT_STRING);
@@ -23,6 +23,9 @@ $baseVersions = match ($baseline) {
     'preview-0.2.1' => array_values(array_filter($allVersions, static fn(string $v): bool => $v <= '012_demo_history_periods')),
     'preview-0.5.0' => array_values(array_filter($allVersions, static fn(string $v): bool => $v <= '028_ar_ap_upgrade_completion')),
     'stable-1.1.1' => array_values(array_filter($allVersions, static fn(string $v): bool => $v <= '034_inventory_locations')),
+    // The last migration before the chart conversion: this baseline starts with a chart that
+    // still uses its own account numbers, which is what 036 converts.
+    'converted-chart' => array_values(array_filter($allVersions, static fn(string $v): bool => $v <= '035_document_series')),
     'fresh' => [],
 };
 $upgradeDatabase = 'phpledger_upgrade_verify_' . bin2hex(random_bytes(12));
@@ -129,6 +132,132 @@ try {
             throw new RuntimeException('1.1.1 upgrade changed historical stock, warehouses, module state or reconciliation.');
         }
         echo "Upgrade passed: 1.1.1 schema through 034, preserved warehouse balances/valuation, one default warehouse, enabled locations module, reconciled report and replay.\n";
+        return;
+    }
+    if ($baseline === 'converted-chart') {
+        // Internal accounting review of 1.2, finding 5. Migration 036 renumbers an existing chart
+        // and adds `is_contra DEFAULT 0` without ever setting it, so a book upgraded to 1.2 has no
+        // drawings account and loses every deduction presentation. Migration 040 sets what the
+        // chart's own `semantic_key` values determine, and asks about the rest.
+        //
+        // The chart below is seeded the way a pre-036 installation actually holds one: its own
+        // account numbers, `legacy_code` and `is_contra` not yet existing as columns. Two accounts
+        // carry a contra purpose, which is what `pl_confirm_existing_setup()` writes when an owner
+        // maps their chart onto the starter purposes; the rest carry no key at all, which is what
+        // an ordinary upgraded chart looks like. Nothing may be deduced from an account's name,
+        // and "Partner drawings", "Sales returns" and "Purchase returns" are here to prove it.
+        DB::insert('pl_companies', ['name' => 'Sample converted-chart company', 'currency' => 'USD', 'functional_currency' => 'USD',
+            'presentation_currency' => 'USD', 'start_date' => '2026-01-01', 'fiscal_year_end' => '12-31', 'created_by' => $actor, 'setup_status' => 'ready']);
+        $company = (int) DB::insertId();
+        DB::insert('pl_company_members', ['company_id' => $company, 'user_id' => $actor, 'role' => 'owner']);
+        DB::insert('pl_books', ['company_id' => $company, 'name' => 'Primary book', 'functional_currency' => 'USD', 'presentation_currency' => 'USD']);
+        $book = (int) DB::insertId();
+        DB::insert('pl_periods', ['company_id' => $company, 'book_id' => $book, 'start_date' => '2026-01-01', 'end_date' => '2026-12-31', 'status' => 'open']);
+        $period = (int) DB::insertId();
+        $legacy = [];
+        foreach ([
+            ['1000', 'Cash and bank', 'asset', 'cash_bank', 'core.cash_bank'],
+            ['1100', 'Accounts receivable', 'asset', 'receivables', 'core.receivables.trade'],
+            ['1500', 'Accumulated depreciation', 'asset', null, 'core.asset.accumulated_depreciation'],
+            ['1600', 'Motor vehicles', 'asset', null, null],
+            ['2000', 'Accounts payable', 'liability', 'payables', 'core.payables.trade'],
+            ['2100', 'Owner loan account', 'liability', null, 'core.liability.owner_loan'],
+            ['3000', 'Owner equity', 'equity', 'owner_equity', 'core.equity.owner'],
+            ['3500', 'Drawings', 'equity', null, 'core.equity.drawings'],
+            ['3600', 'Partner drawings', 'equity', null, null],
+            ['4000', 'Sales and service income', 'income', 'income', 'core.income.sales'],
+            ['4500', 'Sales returns', 'income', null, null],
+            ['5000', 'General expenses', 'expense', 'expense', 'core.expense.general'],
+            ['5500', 'Purchase returns', 'expense', null, null],
+        ] as [$code, $name, $type, $role, $key]) {
+            $monetary = in_array($role, ['cash_bank', 'receivables', 'payables'], true) ? 1
+                : (in_array($role, ['owner_equity', 'income', 'expense'], true) ? 0 : null);
+            DB::insert('pl_accounts', ['company_id' => $company, 'book_id' => $book, 'code' => $code, 'name' => $name,
+                'type' => $type, 'role' => $role, 'semantic_key' => $key, 'is_active' => 1, 'is_monetary' => $monetary]);
+            $legacy[$code] = (int) DB::insertId();
+        }
+        DB::insert('pl_journals', ['company_id' => $company, 'book_id' => $book, 'period_id' => $period, 'journal_date' => '2026-03-01',
+            'currency' => 'USD', 'description' => 'Prior sample receipt', 'source_type' => 'receipt', 'source_reference' => 'converted-chart',
+            'idempotency_key' => 'converted-chart', 'payload_hash' => hash('sha256', 'sample-converted-chart'), 'posted_by' => $actor]);
+        $journal = (int) DB::insertId();
+        foreach ([[$legacy['1000'], '250.0000', '0.0000'], [$legacy['4000'], '0.0000', '250.0000']] as $index => [$accountId, $debit, $credit]) {
+            DB::insert('pl_journal_lines', ['journal_id' => $journal, 'company_id' => $company, 'book_id' => $book,
+                'line_number' => $index + 1, 'account_id' => $accountId, 'description' => 'Prior sample line',
+                'debit' => $debit, 'credit' => $credit, 'currency' => 'USD', 'amount_fc' => bcadd($debit, $credit, 4),
+                'amount_base' => bcadd($debit, $credit, 4), 'rate' => '1.000000000000', 'rate_type' => 'spot', 'rate_is_stale' => 0]);
+        }
+        $beforeHeader = DB::queryFirstRow('SELECT * FROM pl_journals WHERE id = %i', $journal);
+        $beforeLines = DB::query('SELECT * FROM pl_journal_lines WHERE journal_id = %i ORDER BY line_number', $journal);
+        $seededIds = array_values($legacy);
+        $beforeNames = DB::query('SELECT id, name, type, role, semantic_key FROM pl_accounts WHERE id IN %li ORDER BY id', $seededIds);
+
+        $migration = pl_migrate();
+        if ($migration['applied'] !== array_values(array_diff($allVersions, $baseVersions)) || $migration['skipped'] !== $baseVersions) {
+            throw new RuntimeException('Unexpected upgrade migration receipt.');
+        }
+
+        // 1. Every seeded account was renumbered and its old number kept twice. Accounts a later
+        //    migration adds to the book (039's two advances controls) are born numbered and
+        //    correctly carry no conversion record.
+        foreach ($legacy as $oldCode => $accountId) {
+            $row = DB::queryFirstRow('SELECT code, legacy_code FROM pl_accounts WHERE id = %i', $accountId);
+            if (!pl_account_code_is_valid((string) $row['code']) || (string) $row['legacy_code'] !== (string) $oldCode
+                || (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_account_code_map WHERE account_id = %i AND legacy_code = %s', $accountId, (string) $oldCode) !== 1) {
+                throw new RuntimeException('The chart conversion did not record the old number of account ' . $oldCode . '.');
+            }
+        }
+        // 2. Exactly the accounts whose semantic key is a contra purpose are marked, and nothing
+        //    was deduced from a name: "Partner drawings", "Sales returns" and "Purchase returns"
+        //    have no key and are untouched.
+        $contra = DB::queryFirstColumn('SELECT legacy_code FROM pl_accounts WHERE book_id = %i AND is_contra = 1 ORDER BY legacy_code', $book);
+        if (array_map('strval', $contra) !== ['1500', '3500']) {
+            throw new RuntimeException('Migration 040 marked the wrong accounts contra: ' . implode(', ', $contra) . '.');
+        }
+        // 3. Historical records are unchanged apart from the account code the conversion rewrote.
+        $lineFields = array_fill_keys(array_keys($beforeLines[0]), true);
+        if ($beforeHeader !== array_intersect_key(DB::queryFirstRow('SELECT * FROM pl_journals WHERE id = %i', $journal), $beforeHeader)
+            || $beforeLines !== array_map(static fn(array $line): array => array_intersect_key($line, $lineFields), DB::query('SELECT * FROM pl_journal_lines WHERE journal_id = %i ORDER BY line_number', $journal))
+            || $beforeNames !== DB::query('SELECT id, name, type, role, semantic_key FROM pl_accounts WHERE id IN %li ORDER BY id', $seededIds)) {
+            throw new RuntimeException('The upgrade changed prior accounting records.');
+        }
+        // 4. The confirm step exists, is pending, and holds the owner screens shut.
+        $state = pl_contra_confirmation($company, $book);
+        if ($state === null || $state['status'] !== 'pending' || $state['derived_contra_count'] !== 2 || $state['candidate_count'] !== 4) {
+            throw new RuntimeException('The contra confirmation step was not created as expected.');
+        }
+        $refused = null;
+        try {
+            pl_post_owner_transaction($actor, $company, $book, ['kind' => 'drawings', 'date' => '2026-06-01', 'amount' => '100.0000',
+                'description' => 'Sample drawings', 'creation_key' => 'converted-chart-blocked']);
+        } catch (DomainException $error) { $refused = $error->getMessage(); }
+        if ($refused === null || !str_contains($refused, 'Confirm which accounts are contra accounts')) {
+            throw new RuntimeException('The owner screens were not held shut by the unanswered confirm step.');
+        }
+        // 5. The step offers exactly the keyless accounts, and marks exactly what it is told to.
+        $review = pl_contra_review($actor, $company, $book);
+        $offered = [];
+        foreach ($review['candidates'] as $candidate) { $offered[] = (string) $candidate['legacy_code']; }
+        sort($offered);
+        if ($offered !== ['1600', '3600', '4500', '5500'] || count($review['derived']) !== 2) {
+            throw new RuntimeException('The confirm step offered the wrong accounts: ' . implode(', ', $offered) . '.');
+        }
+        pl_confirm_contra_accounts($actor, $company, $book, [$legacy['4500'], $legacy['5500']],
+            'Reviewed against the prior chart with the accountant.', 'converted-chart-confirm');
+        $after = DB::queryFirstColumn('SELECT legacy_code FROM pl_accounts WHERE book_id = %i AND is_contra = 1 ORDER BY legacy_code', $book);
+        if (array_map('strval', $after) !== ['1500', '3500', '4500', '5500']
+            || (int) DB::queryFirstField('SELECT is_contra FROM pl_accounts WHERE id = %i', $legacy['3600']) !== 0) {
+            throw new RuntimeException('The reviewed answer did not mark exactly the accounts it named.');
+        }
+        // 6. The owner screens work again, and drawings reach the chart's own drawings account.
+        $drawings = pl_post_owner_transaction($actor, $company, $book, ['kind' => 'drawings', 'date' => '2026-06-01',
+            'amount' => '100.0000', 'description' => 'Sample drawings', 'creation_key' => 'converted-chart-drawings']);
+        if ((int) $drawings['lines'][0]['account_id'] !== $legacy['3500']
+            || (int) $drawings['lines'][1]['account_id'] !== $legacy['1000']
+            || !pl_trial_balance($actor, $company, $book, '2026-06-01')['balanced']
+            || pl_migrate()['applied'] !== []) {
+            throw new RuntimeException('Owner transactions, reconciliation or replay failed after the confirm step.');
+        }
+        echo "Upgrade passed: chart converted by 036 renumbered with its old numbers kept; 040 marked only the two accounts whose semantic key is a contra purpose (1500, 3500) and guessed nothing from a name; the confirm step offered the four keyless accounts (1600, 3600, 4500, 5500), refused the owner screens until answered, marked exactly the two it was told to, and drawings then posted to the chart's own drawings account with a balanced trial balance and a no-op replay.\n";
         return;
     }
     DB::insert('pl_companies', ['name' => 'Prior foundation sample company', 'currency' => 'USD', 'start_date' => '2026-01-01', 'fiscal_year_end' => '12-31', 'created_by' => $actor]);

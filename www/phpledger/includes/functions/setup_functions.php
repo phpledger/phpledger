@@ -214,7 +214,12 @@ function pl_confirm_existing_setup(int $actorId, int $companyId, int $bookId, ar
             $mapping[$definition['semantic_key']] = $id;
         }
         foreach ($template['accounts'] as $definition) {
-            DB::update('pl_accounts', ['semantic_key' => $definition['semantic_key'], 'role' => $definition['role']], 'id = %i', $mapping[$definition['semantic_key']]);
+            // A starter purpose carries its presentation with it: an account mapped onto a contra
+            // purpose is a contra account. Without this, mapping an existing chart leaves a
+            // drawings account that `pl_owner_accounts()` cannot see, which is the same defect
+            // migration 040 repairs for a converted chart (internal review finding 5).
+            DB::update('pl_accounts', ['semantic_key' => $definition['semantic_key'], 'role' => $definition['role'],
+                'is_contra' => ($definition['is_contra'] ?? false) === true], 'id = %i', $mapping[$definition['semantic_key']]);
         }
         pl_install_template_snapshot($actorId, $companyId, $bookId, $template, $mapping);
         DB::update('pl_companies', ['setup_status' => 'ready'], 'id = %i', $companyId);

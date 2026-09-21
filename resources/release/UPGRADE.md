@@ -30,11 +30,32 @@ Use the backup/maintenance procedure below and run migrations before reopening t
 
 ## From 1.1.3 to 1.2.0-preview.1
 
-**This is a preview, for disposable copies only.** It applies migrations `035` through `039`, and none of them can be reverted. Do not install it over a real installation's data; rehearse it on a copy you can discard.
+**This is a preview, for disposable copies only.** It applies migrations `035` through `040`, and none of them can be reverted. Do not install it over a real installation's data; rehearse it on a copy you can discard.
 
 Install it from `/maintenance.php`, choosing the **Preview** channel, with the publisher key pinned; or replace the files and run `php www/phpledger/install/migrate.php` once. Either way, take a full backup first, per the manual procedure below.
 
 A preview installation is offered the next preview by the update feed. A stable installation is not offered previews at all; it only ever sees stable releases such as 1.1.3.
+
+### Your account numbers change, and your chart starts with no contra accounts
+
+Migration `036` renumbers every account into the `X-XXX-XXXXX-XX` shape, keeping each old number on the account and in a mapping table that can never be edited. It groups your accounts by the groups they already use, so accounts that shared a group still share one.
+
+**A converted chart starts with no contra accounts marked.** A contra account is one presented as a deduction rather than as a balance of its own — accumulated depreciation, drawings, sales returns, purchase returns. The attribute is new in 1.2 and `036` could not fill it in for accounts it knows nothing about, so on an upgraded book: drawings could not be recorded at all, your existing Drawings account appeared in the list of capital accounts, and accumulated depreciation and returns stopped being shown as deductions on the balance sheet and the profit and loss.
+
+Migration `040` fixes what it can determine and asks about the rest.
+
+* **Determined.** An account you mapped to one of the chart's own purposes — accumulated depreciation, drawings, sales returns or purchase returns — is marked automatically. That comes from the purpose recorded on the account, never from its name.
+* **Asked.** Every other account is listed on a new **Confirm your contra accounts** step at `/contra-review`. Tick the ones that are contra accounts, give a reason, and confirm. Ticking nothing is a valid answer and records that none of them is.
+
+**Until that step is answered, Owner and partners is closed** and owner transactions and partner records are refused with a message saying so. Nothing else is blocked: invoices, bills, receipts, payments and every report keep working. A book created on 1.2 was never converted, is never given the step, and never sees the screen.
+
+Marking an account contra changes presentation only. No journal line, balance or open item moves, and clearing the mark in the chart of accounts restores the earlier presentation exactly. Every account the step marks gets the same audit record a chart edit gets, with your reason on it.
+
+### One account per partner, per role
+
+Migration `040` also makes a partner's drawings account and loan account unique within a book, as the capital account already was, and refuses an account that already belongs to another partner or to another role. Two partners sharing one account were each shown the whole of its balance on the partners' statement.
+
+If your database already has two partners sharing an account, the migration stops with a duplicate-key error naming `uq_owner_partner_drawings` or `uq_owner_partner_loan`. That is deliberate: which partner owns that account is your decision, not the software's. Give each partner their own account, point each partner record at it, and run the migration again. No released version of PHP Ledger could have produced this state — the partner register arrives with 1.2.
 
 ## From 1.1.2 to 1.1.3
 

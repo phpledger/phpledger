@@ -208,3 +208,60 @@ known liability) is an ordinary liability, not a contra account; the application
 refuses to mark a liability as contra. The trial balance is unaffected: a contra
 account keeps its natural debit or credit balance, so debits and credits still
 agree.
+
+## 9. What the application refuses to decide for you
+
+Three refusals were added after the internal accounting review of 1.2 (findings
+3, 4 and 5). Each replaces a silent choice with a question.
+
+### An owner transaction names its account, or is refused
+
+When more than one account could take a side of an owner movement and none was
+named, the posting is **refused** with the candidates listed, rather than the
+first one by account code being used. A book with a revaluation reserve numbered
+`3-050` and owner equity at `3-100` had 500,000 of capital introduced credited to
+the **reserve**, because that code sorts first, with nothing warned and nothing
+refused. Where the book has exactly one candidate, that one is used: one
+candidate is not a choice. Where partners are on record, capital and drawings
+must name the partner or the account, because a partner's capital account under
+the Partnership Act 1932 is personal to that partner and is not a pool the
+software may pick from.
+
+### One account per partner, per role
+
+No chart account may be two partners' account, or two roles of one partner.
+`drawings_account_id` and `loan_account_id` are unique per book in the schema
+alongside `capital_account_id`, and the service refuses a duplicate first, with
+a readable message. A partner position is read from the account balance, so a
+shared account was reported **in full against every partner naming it**: two
+partners sharing one drawings account carrying 40,000 were each shown 40,000,
+and the partners' statement showed 80,000 against 40,000 posted. The ledger and
+the balance sheet were unaffected — the equity total was right — but the
+partner-level figure is what a partner relies on for settlement between them
+(Partnership Act 1932 s.13, and s.4).
+
+### A converted chart confirms its contra accounts
+
+Migration 036 added `is_contra` with `DEFAULT 0` and never set it for an existing
+row, so a book **born** on 1.2 was right and a book **upgraded** to 1.2 was not:
+it had no drawings account at all, drawings could not be recorded, its own
+"Drawings" account appeared among the capital candidates instead, and accumulated
+depreciation, sales returns and purchase returns lost their deduction
+presentation on every report.
+
+Migration 040 does two things. It sets `is_contra` from each account's
+`semantic_key`, which is deterministic: a semantic key is written only by the
+starter template at company creation and by the existing-books review, so those
+four purposes — accumulated depreciation, drawings, sales returns and purchase
+returns — mean exactly what the bundled chart says they mean. For every other
+account it asks. `/contra-review` lists the accounts that carry no purpose, the
+owner or accountant marks the ones that are contra accounts and records why, and
+the owner screens stay closed until that is answered. An empty answer is a valid
+answer.
+
+Nothing is deduced from an account's **name**. The three alternatives considered
+and rejected, per owner decision B53, are recorded in the header of
+`www/phpledger/install/migrations/040_contra_accounts_and_partner_identity.php`
+together with the exact SQL that reverses every part of it. Marking an account
+contra changes presentation only: no journal line, balance or open item moves,
+and clearing the mark restores the earlier presentation exactly.

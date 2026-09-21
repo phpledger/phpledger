@@ -1309,6 +1309,14 @@
     {
       "source": "www/phpledger/includes/functions/advance_functions.php",
       "destination": "www/phpledger/includes/functions/advance_functions.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/040_contra_accounts_and_partner_identity.php",
+      "destination": "www/phpledger/install/migrations/040_contra_accounts_and_partner_identity.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/contra-review.php",
+      "destination": "www/phpledger/templates/views/contra-review.php"
     }
   ]
 }

@@ -293,6 +293,7 @@ function pl_install_step_label(string $version): string
         '036_structured_account_codes' => 'Renumbering the chart of accounts',
         '038_stock_documents' => 'Adding stock documents, vans and gate passes',
         '039_advances_and_refunds' => 'Adding customer and supplier advances',
+        '040_contra_accounts_and_partner_identity' => 'Marking contra accounts and separating partner accounts',
     ];
     if (isset($labels[$version])) {
         return $labels[$version];
