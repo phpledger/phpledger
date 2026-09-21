@@ -3,6 +3,22 @@
   "note": "Source for https://phpledger.com/releases/index.json (docs/RELEASE-PROTOCOL.md, step 8). Newest first. The stable entry must agree with site.json release. update_json stays null until signed metadata exists; image stays null until a container image is pushed.",
   "releases": [
     {
+      "version": "1.2.0",
+      "published_at": "2026-09-21",
+      "notes": "https://github.com/phpledger/phpledger/releases/tag/v1.2.0",
+      "zip": "https://github.com/phpledger/phpledger/releases/download/v1.2.0/phpledger-1.2.0.zip",
+      "sha256": "2bcb9207e5d6be01a640436f129a8e0471922b8ca62eec3fc1753e99a9dfbc88",
+      "update_json": "https://phpledger.com/releases/1.2.0.update.json",
+      "min_php": "8.2.0",
+      "databases": [
+        "mysql:8.4",
+        "mariadb:10.4",
+        "mariadb:10.11"
+      ],
+      "image": null,
+      "min_client": null
+    },
+    {
       "version": "1.1.3",
       "published_at": "2026-09-20",
       "notes": "https://github.com/phpledger/phpledger/releases/tag/v1.1.3",
