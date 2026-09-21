@@ -38,7 +38,8 @@ function pl_web_starter_inventory(int $actorId,int $companyId,int $bookId,array 
             } elseif ($action==='opening_preview') {
                 unset($_SESSION['starter_inventory_preview']);
                 if (pl_web_text($_POST,'editor_action')==='add_line' || isset($_POST['remove_line'])) {
-                    if (pl_require_company_access($actorId,$companyId,true)['role']!=='owner') { throw new DomainException('Only the owner can prepare opening stock.'); }
+                    pl_require_company_access($actorId,$companyId,true);
+                    if (!pl_user_can($actorId,$companyId,'opening.manage')) { throw new DomainException('Your role cannot prepare opening stock.'); }
                     pl_require_module($actorId,$companyId,$bookId,'inventory');
                     pl_form_failure(pl_url($path,$filters),pl_web_line_action($_POST,500),'',200);
                 }

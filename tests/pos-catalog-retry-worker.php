@@ -9,6 +9,8 @@ $includes = $mirror . '/www/phpledger/includes';
 mkdir($includes, 0700, true);
 symlink($source . '/vendor', $mirror . '/vendor');
 symlink($source . '/www/phpledger/includes/functions', $includes . '/functions');
+// 1.2 M7 added includes/models to the bootstrap, so the mirror carries it too.
+symlink($source . '/www/phpledger/includes/models', $includes . '/models');
 copy($source . '/www/phpledger/includes/bootstrap.php', $includes . '/bootstrap.php');
 mkdir($mirror . '/resources', 0700);
 symlink($source . '/resources/modules', $mirror . '/resources/modules');
@@ -26,6 +28,7 @@ try {
     rmdir($mirror . '/resources');
     unlink($mirror . '/www/phpledger/install');
     unlink($includes . '/bootstrap.php');
+    unlink($includes . '/models');
     unlink($includes . '/functions');
     unlink($mirror . '/vendor');
     rmdir($includes);

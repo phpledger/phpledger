@@ -129,7 +129,7 @@ function pl_open_item_activation_check(int $actorId,int $companyId,int $bookId,i
 {
     pl_demo_require_setup_action();
         $access = pl_require_company_access($actorId, $companyId, true);
-        if ($access['role'] !== 'owner') { throw new DomainException('Only an owner can activate open-item accounting.'); }
+        if (!pl_user_can($actorId, $companyId, 'openitem.activate')) { throw new DomainException('Your role cannot activate open-item accounting.'); }
         pl_ledger_book($companyId, $bookId, true);
         $prior = DB::queryFirstRow('SELECT * FROM pl_open_item_accounts WHERE account_id = %i AND company_id = %i AND book_id = %i FOR UPDATE', $accountId, $companyId, $bookId);
         if ($prior) { return $prior; }

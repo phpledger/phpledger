@@ -47,7 +47,7 @@ function pl_session_start(bool $secure): void
         throw new RuntimeException('The session could not be started.');
     }
     // Copies on one host may share PHP's session directory; a session belongs to the copy that created it.
-    $installation = hash('sha256', str_replace('\\', '/', (string) (realpath(dirname(__DIR__, 2)) ?: dirname(__DIR__, 2))));
+    $installation = pl_installation_hash();
     if (!isset($_SESSION['pl_installation'])) {
         $_SESSION['pl_installation'] = $installation;
     } elseif (!is_string($_SESSION['pl_installation']) || !hash_equals($_SESSION['pl_installation'], $installation)) {
@@ -57,6 +57,12 @@ function pl_session_start(bool $secure): void
         }
         $_SESSION['pl_installation'] = $installation;
     }
+}
+
+/** Identifies this copy of the application: two copies on one host never share a sign-in. */
+function pl_installation_hash(): string
+{
+    return hash('sha256', str_replace('\\', '/', (string) (realpath(dirname(__DIR__, 2)) ?: dirname(__DIR__, 2))));
 }
 
 function pl_require_session(): void
@@ -120,12 +126,25 @@ function pl_login_session(array $user): void
     $_SESSION['authenticated_at'] = $now;
     $_SESSION['last_activity'] = $now;
     $_SESSION['rotated_at'] = $now;
+    // 1.2 M7: the durable half of the sign-in. The PHP session is still the cookie transport, but
+    // this row is what decides whether the sign-in is still valid, so it can be ended from
+    // another machine (Profile > Active sessions, and Admin > Users). A caller that hands us an
+    // id with no user row — the installer's own fixtures and two auth tests do — gets the old
+    // cookie-only behaviour and is then refused by pl_current_user_id()'s active-account check.
+    if (function_exists('pl_session_open') && class_exists('DB', false)
+        && DB::queryFirstField('SELECT id FROM pl_users WHERE id = %i', $userId) !== null) {
+        $_SESSION['session_token'] = pl_session_open($userId, pl_installation_hash(), (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+    }
     pl_csrf_rotate();
 }
 
 function pl_logout_session(): void
 {
     pl_require_session();
+    $token = $_SESSION['session_token'] ?? null;
+    if (is_string($token) && $token !== '' && function_exists('pl_session_close') && class_exists('DB', false)) {
+        pl_session_close($token);
+    }
     $regional = $_SESSION['regional_suggestion'] ?? null;
     $_SESSION = is_array($regional) ? ['regional_suggestion' => $regional] : [];
     if (!session_regenerate_id(true)) {
@@ -154,6 +173,16 @@ function pl_current_user_id(): ?int
     if (!$active) {
         pl_logout_session();
         return null;
+    }
+    // 1.2 M7: a signed-in user needs a live, unrevoked server-side session. A cookie that
+    // survives a revocation, a suspension or a password change no longer signs anybody in.
+    // The installer and the maintenance page never reach here: neither asks who is signed in.
+    if (function_exists('pl_session_validate')) {
+        $token = $_SESSION['session_token'] ?? null;
+        if (!is_string($token) || pl_session_validate($token, $userId, pl_installation_hash()) === null) {
+            pl_logout_session();
+            return null;
+        }
     }
     $rotated = $_SESSION['rotated_at'] ?? 0;
     if (!is_int($rotated) || $now - $rotated >= 900) {

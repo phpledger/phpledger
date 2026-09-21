@@ -7,9 +7,9 @@ function pl_period_require_write(int $actorId, int $companyId, bool $reopen = fa
     if (pl_demo_enabled() && !pl_demo_provisioning()) {
         throw new DomainException('Period administration is disabled in the public sample.');
     }
-    $member = pl_require_company_access($actorId, $companyId, true);
-    if ($reopen && $member['role'] !== 'owner') {
-        throw new DomainException('Only a business owner can reopen a closed period.');
+    pl_require_company_access($actorId, $companyId, true);
+    if ($reopen && !pl_user_can($actorId, $companyId, 'periods.reopen')) {
+        throw new DomainException('Your role cannot reopen a closed period.');
     }
 }
 

@@ -133,7 +133,7 @@ function pl_save_document_series(int $actorId, int $companyId, int $bookId, stri
     }
     return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $type, $reason, $prefix, $padding, $yearSegment, $resetRule, $nextNumber, $revision): array {
         $member = pl_require_company_access($actorId, $companyId, true);
-        if ($member['role'] !== 'owner') {
+        if (!pl_user_can($actorId, $companyId, 'numbering.manage')) {
             throw new DomainException('Only the business owner can change document numbering.');
         }
         pl_ledger_book($companyId, $bookId, true);

@@ -8,6 +8,7 @@
 
 - [[Accounting and reports|Accounting-and-Reports]]
 - [[Stock locations|Stock-Locations]]
+- [[Users and roles|Users-and-Roles]]
 - [[POS showcase|POS-Showcase]]
 - [[Countries and currencies|Countries-and-Currencies]]
 - [[Tax research|Tax-Research]]

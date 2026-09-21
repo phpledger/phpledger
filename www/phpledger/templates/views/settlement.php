@@ -38,7 +38,7 @@ for ($index=0;$index<max(6,count($rows)+2);$index++):
 </tr>
 <?php endfor; ?>
 </tbody></table></div>
-<?php if ($batch!==null && $batch['rows']!==[]): ?>
+<?php if ($batch['rows']!==[]): ?>
 <div class="flex justify-between items-center gap-3 mt-3"><p class="text-sm"><strong><?= count($batch['rows']) ?></strong> vouchers will be posted, one per party row.</p>
 <button class="btn btn-primary" name="action" value="post_batch">Post all</button></div>
 <?php else: ?><p class="text-xs text-ink-muted mt-3">Enter at least one party and amount, then update the preview. Nothing is posted until you choose "Post all".</p><?php endif; ?>

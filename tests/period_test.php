@@ -164,7 +164,7 @@ test('period administration separates owner, accountant and viewer permissions a
     assert_throws(fn() => pl_change_period_status($viewer['actor_id'], $f['company_id'], $f['book_id'], $f['period_id'], 'closed', 1, 'Viewer action', 'viewer'), DomainException::class, 'access');
     pl_create_period($accountant['actor_id'], $f['company_id'], $f['book_id'], period_input());
     pl_change_period_status($accountant['actor_id'], $f['company_id'], $f['book_id'], $f['period_id'], 'closed', 1, 'Accountant review', 'accountant-close');
-    assert_throws(fn() => pl_change_period_status($accountant['actor_id'], $f['company_id'], $f['book_id'], $f['period_id'], 'open', 2, 'Cannot authorize', 'accountant-open'), DomainException::class, 'owner');
+    assert_throws(fn() => pl_change_period_status($accountant['actor_id'], $f['company_id'], $f['book_id'], $f['period_id'], 'open', 2, 'Cannot authorize', 'accountant-open'), DomainException::class, 'cannot reopen');
     assert_throws(fn() => pl_change_period_status($f['actor_id'], $f['company_id'], $f['book_id'], $accountant['period_id'], 'closed', 1, 'Wrong period', 'scope'), DomainException::class, 'selected company');
     assert_throws(fn() => pl_list_periods($f['actor_id'], $accountant['company_id'], $accountant['book_id']), DomainException::class, 'access');
     assert_throws(fn() => pl_period_history($f['actor_id'], $accountant['company_id'], $accountant['book_id']), DomainException::class, 'access');

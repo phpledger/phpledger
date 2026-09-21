@@ -126,6 +126,24 @@ Published 21 September 2026 (M1, [release plan](strategy/RELEASE-PLAN-1.2.md)), 
 
 `tests/module_test.php`'s generic module-matrix test drives the combinations every row above needs at minimum: for each optional manifest above, a fresh company enables it alone together with its required dependencies (walking the `requires` chain — for example enabling `inventory` before `inventory-locations`, or `inventory` and `ap` before `purchasing`), disables it, re-enables it, and asserts core-only operation (posting and reversing a general journal, a reconciled trial balance) keeps working throughout. It does not by itself cover every optional module enabled *together* in one company, van-stock-present disablement, failure rollback under a mid-migration fault, or the MariaDB floor image; those remain the job of `inventory_location_test.php`, `stock_document_test.php` (which covers van-stock-present disablement for Stock locations) and the definition-of-done checklist, per module (see [Definition of done for a bundled module](DEVELOPMENT.md#definition-of-done-for-a-bundled-module)).
 
+## The Users module and the capability contract (1.2 M7)
+
+Delivered 21 September 2026 (M7, [release plan](strategy/RELEASE-PLAN-1.2.md)), against the amendment above: "A Users module (profiles, user meta, roles and capabilities) is planned on the same platform."
+
+The contract line "enforce capability, actor/action permission, company/book scope, readiness and period checks on the server for every operation" now has a mechanism behind its first clause. A capability is a registered permission with an **owner column**, so it belongs to whoever declared it:
+
+- **`core`** — the seventeen company-scoped capabilities and `installation.admin`, in `pl_capability_catalogue()`. Adding one is a PHP change, not a migration, so a release does not need a schema step to gain a permission.
+- **`module`** — a bundled module's own capabilities, declared in its manifest's optional `grants` map. **No bundled manifest declares one in 1.2.** That is deliberate: a manifest change moves its digest, and a moved digest asks every company that uses the module to re-review it before its next operation. Doing that inside a Users milestone would make every existing installation stop and review Stock locations because user permissions shipped. `cost.view` and `settlement.approve` are therefore core-owned, which is also where they belong — B58 makes cost visibility an Admin judgement about people and reports, not a module feature.
+- **`plugin`** — the M8 case. Contract 2 declares `grants` in `package.json`, and the mechanism it will use is already built, validated (`pl_manifest_capability_grants()`) and tested against a fixture manifest.
+
+**Inert retention.** A grant of a module-owned capability survives that module being disabled for a company: the `pl_role_capabilities` row stays and `pl_user_can()` answers no until the module is enabled again. This is what the contract's "re-enabling a compatible version restores operations" means for permissions — an owner who disables a module for a week does not lose the permission map they configured. `tests/users_test.php` proves enable → grant applies, disable → grant inert but retained, re-enable → exactly what was configured.
+
+**Roles are per company** (owner decision B17), so the three protected system roles are installation-wide *definitions* (`pl_roles.company_id` NULL) that each company assigns, while a custom role belongs to one company and is invisible to every other. Migration 040 backfills `pl_company_members.role_id` from the 1.1 ENUM and keeps the ENUM mirrored through 1.2; 1.3 drops it.
+
+**What M8 inherits.** `installation.admin` gates package installation and activation (B44), and is held per person rather than through a per-company role, because the owner of company 2 must not inherit the installation rights of the owner of company 1. Admin › Packages reads `pl_user_can($actor, 0, 'installation.admin')`; decision 10 of the onboarding-and-packages frames (option B: a business owner sees Packages read-only) is a screen decision that this capability makes expressible, and the read-only variant is still undrawn.
+
+Module manifests keep their contract-1 `permissions` list of role names for now. `pl_require_module()` still reads it, because changing it is a manifest change and therefore a per-company module review; contract 2 in M8 is where module action permissions become capabilities.
+
 ## Trading documents: what the 1.2 M3 module does and does not do
 
 The bundled `trading-documents` module adds a trading shape to the customer/vendor document

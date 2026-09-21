@@ -90,8 +90,9 @@ function pl_save_trading_policies(int $actorId, int $companyId, int $bookId, arr
         'cash_on_invoice_cap' => $cap];
     $hash = hash('sha256', json_encode([$actorId, $bookId, $data, $revision, $reason], JSON_THROW_ON_ERROR));
     return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $data, $revision, $reason, $key, $hash): array {
-        if (pl_require_company_access($actorId, $companyId, true)['role'] !== 'owner') {
-            throw new DomainException('Only the business owner can change the accounting policies.');
+        pl_require_company_access($actorId, $companyId, true);
+        if (!pl_user_can($actorId, $companyId, 'policy.manage')) {
+            throw new DomainException('Your role cannot change the accounting policies.');
         }
         pl_ledger_book($companyId, $bookId, true);
         $prior = DB::queryFirstRow('SELECT payload_hash, result_json FROM pl_trading_policy_actions WHERE company_id=%i AND request_key=%s FOR UPDATE', $companyId, $key);
@@ -194,8 +195,9 @@ function pl_save_company_profile(int $actorId, int $companyId, array $input): ar
     if (!is_int($revision) || $revision < 0) { throw new DomainException('Reload the company profile before saving.'); }
     $hash = hash('sha256', json_encode([$actorId, $companyId, $data, $revision, $reason], JSON_THROW_ON_ERROR));
     return pl_ledger_transaction(function () use ($actorId, $companyId, $data, $revision, $reason, $key, $hash): array {
-        if (pl_require_company_access($actorId, $companyId, true)['role'] !== 'owner') {
-            throw new DomainException('Only the business owner can change the company profile.');
+        pl_require_company_access($actorId, $companyId, true);
+        if (!pl_user_can($actorId, $companyId, 'policy.manage')) {
+            throw new DomainException('Your role cannot change the company profile.');
         }
         DB::queryFirstField('SELECT id FROM pl_companies WHERE id=%i FOR UPDATE', $companyId);
         $prior = DB::queryFirstRow('SELECT payload_hash, result_json FROM pl_trading_policy_actions WHERE company_id=%i AND request_key=%s FOR UPDATE', $companyId, $key);

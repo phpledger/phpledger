@@ -42,6 +42,13 @@ function pl_validate_module_registry(array $registry): void
         if (array_key_exists('lang', $m) && (!is_string($m['lang']) || !preg_match('#^[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*){0,4}$#D', $m['lang']) || strlen($m['lang']) > 128)) {
             throw new DomainException('A module translation directory must be a plain relative path.');
         }
+        // Optional permission capabilities this module owns (release plan 1.2 M7), a map of
+        // capability name to label. A manifest that omits `grants` is byte-identical to the one
+        // 1.1 shipped, so its digest does not move and no company is asked to re-review a module
+        // that did not change; the bundled manifests omit it in 1.2. Same rule as `lang`.
+        if (array_key_exists('grants', $m) && function_exists('pl_manifest_capability_grants')) {
+            pl_manifest_capability_grants($m);
+        }
         foreach (['capabilities', 'migrations', 'routes', 'permissions', 'settings', 'reports', 'api_operations', 'mcp_operations'] as $key) {
             if (!is_array($m[$key] ?? null) || !array_is_list($m[$key]) || count($m[$key]) !== count(array_unique($m[$key], SORT_REGULAR))) { throw new DomainException('Module declarations must be unique lists.'); }
             foreach ($m[$key] as $value) { if (!is_string($value) || $value === '') { throw new DomainException('Module declarations must be nonempty strings.'); } }
@@ -129,7 +136,7 @@ function pl_set_company_module(int $actorId, int $companyId, string $id, bool $e
     $hash = hash('sha256', json_encode([$actorId, $id, $enabled, $revision, $digest, $reason], JSON_THROW_ON_ERROR));
     return pl_ledger_transaction(function () use ($actorId, $companyId, $id, $enabled, $revision, $reason, $key, $hash, $manifest, $registry): array {
         $member = pl_require_company_access($actorId, $companyId, true);
-        if ($member['role'] !== 'owner') { throw new DomainException('Only the company owner can change modules.'); }
+        if (!pl_user_can($actorId, $companyId, 'modules.manage')) { throw new DomainException('Your role cannot change modules for this company.'); }
         DB::queryFirstField('SELECT id FROM pl_companies WHERE id = %i FOR UPDATE', $companyId);
         $prior = DB::queryFirstRow('SELECT payload_hash, result_json FROM pl_module_actions WHERE company_id = %i AND request_key = %s FOR UPDATE', $companyId, $key);
         if ($prior) {

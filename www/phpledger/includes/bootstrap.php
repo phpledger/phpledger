@@ -75,6 +75,14 @@ require_once __DIR__ . '/functions/opening_functions.php';
 require_once __DIR__ . '/functions/period_functions.php';
 require_once __DIR__ . '/functions/reconciliation_functions.php';
 require_once __DIR__ . '/functions/module_functions.php';
+require_once __DIR__ . '/functions/capability_functions.php';
+require_once __DIR__ . '/functions/user_functions.php';
+// The first MeekroORM records (1.2 M7). They are used on administration screens only;
+// see PL_Model's class comment for the per-request metadata cost that decides that.
+require_once __DIR__ . '/models/PL_Model.php';
+require_once __DIR__ . '/models/PL_User.php';
+require_once __DIR__ . '/models/PL_Role.php';
+require_once __DIR__ . '/models/PL_Capability.php';
 require_once __DIR__ . '/functions/connection_functions.php';
 require_once __DIR__ . '/functions/read_functions.php';
 require_once __DIR__ . '/functions/demo_pack_functions.php';

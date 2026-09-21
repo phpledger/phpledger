@@ -64,6 +64,10 @@ $routes = [
     '/stock-documents' => ['GET', 'POST'], '/stock-documents/detail' => ['GET', 'POST'], '/stock-documents/settlement' => ['GET', 'POST'],
     '/reports/stock-by-location' => ['GET'],
     '/pos' => ['GET'], '/pos/review' => ['GET', 'POST'], '/pos/edit' => ['POST'], '/pos/checkout' => ['POST'], '/pos/retry' => ['POST'], '/pos/receipt' => ['GET'],
+    // 1.2 M7: the Users module. /invitation and /reset-password are reachable without a session,
+    // because they are how an invited person and a reset password get their first sign-in.
+    '/users' => ['GET', 'POST'], '/roles' => ['GET', 'POST'], '/profile' => ['GET', 'POST'],
+    '/cost-visibility' => ['GET', 'POST'], '/invitation' => ['GET', 'POST'], '/reset-password' => ['GET', 'POST'],
     '/sample-guide' => ['GET'], '/help' => ['GET'], '/modules' => ['GET', 'POST'], '/connections' => ['GET','POST'], '/oauth/authorize' => ['GET','POST'], '/tables' => ['GET'],
     '/accounts' => ['GET'], '/accounts/save' => ['POST'], '/logo' => ['GET'],
     '/owner' => ['GET'], '/owner/post' => ['POST'], '/owner/reverse' => ['POST'],
@@ -115,7 +119,7 @@ try {
     pl_regional_suggestion();
     require_once dirname(__DIR__) . '/includes/bootstrap.php';
     $actorId = pl_current_user_id();
-    $user = $actorId ? DB::queryFirstRow('SELECT id, display_name, email FROM pl_users WHERE id = %i', $actorId) : null;
+    $user = $actorId ? DB::queryFirstRow('SELECT id, display_name, email, must_change_password FROM pl_users WHERE id = %i', $actorId) : null;
     if ($path === '/') {
         pl_redirect($actorId ? (!empty($_SESSION['company_id']) ? '/home' : '/companies') : '/login');
     }
@@ -136,6 +140,13 @@ try {
         $_SESSION['company_id'] = $visit['company_id'];
         if (is_array($pendingOAuth)) { $_SESSION['oauth_pending'] = $pendingOAuth; pl_redirect('/oauth/authorize?resume=1'); }
         pl_redirect(isset($_POST['sample_pack']) ? '/sample-guide' : '/reports');
+    }
+    if ($path === '/invitation' || $path === '/reset-password') {
+        if (pl_demo_enabled()) {
+            throw new DomainException('Invitations and password resets are unavailable in the public sample.');
+        }
+        require_once dirname(__DIR__) . '/includes/functions/user_web_functions.php';
+        pl_web_account_access($path, $method);
     }
     if ($path === '/login') {
         if ($actorId) {
@@ -166,6 +177,14 @@ try {
     if ($path === '/logout') {
         pl_logout_session();
         pl_redirect('/login');
+    }
+    // 1.2 M7: a forced password reset is not a suggestion. Until it is done, the only screens a
+    // signed-in account reaches are its own profile, where the new password is set, and signing
+    // out. /invitation and /reset-password are handled above, before this point, because they
+    // are how an account gets here at all.
+    if ($user !== null && !empty($user['must_change_password']) && $path !== '/profile') {
+        pl_notice('An administrator asked you to set a new password before continuing.');
+        pl_redirect('/profile');
     }
     if ($path === '/company/select') {
         $selected = pl_company_context($actorId, pl_web_id($_POST, 'company_id'));
@@ -309,6 +328,15 @@ try {
         $input = $form['input'] ?: ($_SESSION['onboarding']['input'] ?? []);
         pl_render('onboarding', ['title' => $preview ? 'Preview your setup' : 'Set up a business', 'user' => $user, 'template' => $template, 'preview' => $preview, 'wizard_step' => $wizardStep, 'form' => $form, 'input' => $input]);
     }
+    if ($path === '/profile') {
+        require_once dirname(__DIR__) . '/includes/functions/user_web_functions.php';
+        $profileCompany = null;
+        if (!empty($_SESSION['company_id'])) {
+            try { $profileCompany = pl_company_context($actorId, (int) $_SESSION['company_id']); }
+            catch (DomainException) { /* Your own profile stays reachable if company access was revoked. */ }
+        }
+        pl_web_profile($actorId, $user, $profileCompany, $method);
+    }
     if ($path === '/help') {
         $helpCompany = null;
         if (!empty($_SESSION['company_id'])) {
@@ -370,6 +398,12 @@ try {
     if ($path === '/modules') {
         require_once dirname(__DIR__) . '/includes/functions/module_web_functions.php';
         pl_web_modules($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    if ($path === '/users' || $path === '/roles' || $path === '/cost-visibility') {
+        require_once dirname(__DIR__) . '/includes/functions/user_web_functions.php';
+        if ($path === '/users') { pl_web_users($actorId, $companyId, $bookId, $user, $company, $method); }
+        if ($path === '/roles') { pl_web_roles($actorId, $companyId, $bookId, $user, $company, $method); }
+        pl_web_cost_visibility($actorId, $companyId, $bookId, $user, $company, $method);
     }
     if ($path === '/opening-balances') {
         require_once dirname(__DIR__) . '/includes/functions/opening_web_functions.php';

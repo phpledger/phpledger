@@ -1,0 +1,444 @@
+time="2026-09-21T06:18:54+05:00" level=warning msg="Found orphan containers (phpledger-release-oauth-20260918, phpledger-preview-upgrade-20260918, phpledger-redesign-browser) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Network phpledger_default Creating 
+ Network phpledger_default Creating 
+ Network phpledger_default Created 
+ Network phpledger_default Created 
+ Container phpledger-db_test-1 Creating 
+ Container phpledger-db_test-1 Created 
+ Container phpledger-db_test-1 Starting 
+ Container phpledger-db_test-1 Started 
+ Container phpledger-db_test-1 Waiting 
+ Container phpledger-db_test-1 Healthy 
+ Container phpledger-test-run-c6ded7a1f467 Creating 
+ Container phpledger-test-run-c6ded7a1f467 Created 
+PHP lint: 286 files, 0 failures.
+Note: Using configuration file /var/www/phpledger/phpstan.neon.
+
+ [OK] No errors                                                                 
+
+Sample data valid: {"packs":7,"events":77,"documents":42,"items":16}.
+Validator self-test: 8 invalid in-memory packs rejected.
+i18n sweep: 27 of 29 routes rendered under the pseudo-locale; 24 of them show translated text.
+i18n backlog: 1674 untranslated interface text runs in 68 template files (ceiling 1700); most: views/sample-guide.php 120, views/bank-reconciliation.php 96, views/install.php 94, views/pos.php 86, views/opening-balances.php 68.
+PASS passwords are hashed and invalid credentials are rejected
+PASS unsafe HTTP verbs are rejected and HTML output is escaped
+PASS sessions expire at idle and absolute deadlines and reject future state
+PASS CSRF and session identities rotate at login, logout, and expiry
+PASS real authentication uses persistent account throttling and expires the block
+PASS client limits, disabled accounts, and unknown accounts fail closed
+PASS owners sign in with a username or an email, and both share one attempt limit
+PASS company access enforces membership, read-only roles, and active accounts
+PASS financial amounts preserve four decimals without float conversion
+PASS a cash tender is held to whole minor units while the ledger keeps four places
+PASS company setup creates one book, an owner, an annual period and scoped template
+PASS setup exposes safe entity and year-end choices without changing the accounting contract
+PASS balanced receipt posts and report figures drill down to exact source lines
+PASS unbalanced, zero-sided and malformed posting requests do not write journals
+PASS idempotency returns original for equivalent precision and rejects changed payload
+PASS cross-company accounts, books, journals and reporting are denied
+PASS viewers can report but cannot post or reverse; inactive actors cannot read
+PASS period boundaries are inclusive, closed periods reject new posts, and retries remain stable
+PASS currency mismatch, inactive accounts and overlapping periods prevent posting
+PASS reversal is linked, one-time, idempotent and preserves the original
+PASS database refuses edits and deletion of posted headers and lines
+PASS a storage failure on the second line rolls back header and first line
+PASS outer rollback includes company creation and nested posting transaction
+PASS migration replay verifies checksums and skips the applied foundation
+PASS a caller-owned old snapshot cannot retain revoked write permission
+PASS simultaneous retries create one journal across separate database connections
+PASS simultaneous distinct postings both commit and reconcile
+PASS simultaneous reversal retries create exactly one linked reversal
+PASS an older caller snapshot retrieves and retries another connection committed journal
+PASS four independent companies post concurrently without leaking deadlock or savepoint errors
+PASS setup pins one chart and rejects stale previews and changed requests
+PASS opening readiness blocks documents and direct ledger posts without bypass through review
+PASS prior company review preserves renamed accounts and posted history
+PASS draft creation is idempotent and edits and posting reject stale revisions
+PASS receipt expense and linked reversal reconcile immutable sources and report drilldown
+PASS document permissions and scoped account roles fail closed
+PASS closed periods and source linkage failures preserve drafts with no partial posting
+PASS core sample isolates two supported postings and four drafts and never replaces existing data
+PASS a sample start is refused in production through preview and confirm but allowed in local and test
+PASS simultaneous document posts create one scoped source-linked journal
+PASS simultaneous setup and first draft submissions return one durable result each
+PASS country suggestions use explicit trusted proxies and reject nonpublic or malformed addresses
+PASS country defaults retain unsupported and multiple currencies without pretending they are USD
+PASS successful country lookup runs once per session and survives login and logout rotation
+PASS new Asian country defaults and cached suggestions use their supported base currency without another lookup
+PASS failed country lookup is cached and local addresses never call the provider
+PASS demo configuration and service guards refuse ordinary databases and normal administration
+PASS calendar report presets cover leap months quarter and custom boundaries
+PASS cost-of-sales classification preserves net profit and immutable entries and is auditable
+PASS owner statements reconcile posted receipt expense and dated reversal without including drafts
+PASS account statements carry opening balances through inclusive dates and exclude later postings
+PASS empty account periods retain inactive account history and exact credit balances
+PASS running balances cross debit and credit exactly without assuming an accounts normal side
+PASS account pagination carries balances across tied lines and backdated journals in ledger order
+PASS every ledger account closing reconciles to the trial balance across all five types
+PASS account statements enforce actor company book and account scope while permitting viewers
+PASS owner statements include liabilities recorded capital and retained earnings exactly once
+PASS owner reports provide zero states valid date boundaries and scoped read permissions
+PASS cash scenarios use exact signed balances and disclose the first shortfall without writes
+PASS POS review prices the cart exactly without posting and matches the confirmed receipt
+PASS POS review rejects stale catalog forged financial fields and invalid cart without writes
+PASS POS correction after insufficient cash and closed period reuses its key for one sale
+PASS all added base currencies survive sample setup POS posting and reconciled owner reports
+PASS POS uses exact server prices and atomically links cash receipt journal and immutable lines
+PASS POS canonical retries return one receipt and changed checkout content conflicts
+PASS POS rejects forged prices quantities stale catalog and insufficient cash without writes
+PASS POS enforces reader writer company book and opening-readiness boundaries
+PASS POS closed-period failure rolls back its newly created source
+PASS POS snapshot failure rolls back receipt journal and lines together
+PASS POS concurrent duplicate checkouts create one receipt and journal
+PASS POS linked reversal preserves price snapshots while reversing the report effect
+PASS POS unresolved recovery preserves exact request and only its matching reviewed snapshot
+PASS POS committed identical recovery works when the current catalog is unavailable
+PASS POS refuses a tender finer than cash and shows one precision on the receipt
+PASS POS sample prices stay in whole minor units so every cart total is tenderable
+PASS chart creation is idempotent scoped and concurrent while preserving starter provenance
+PASS account edits audit names and status and reject stale revisions or reclassification
+PASS core account and general journal services enforce viewers scope and readiness
+PASS general drafts preserve unbalanced work and exclude it from reports until explicitly posted
+PASS general journal reversals retain dated source and restore account balances once
+PASS closed periods and inactive accounts reject general posting and preserve the draft
+PASS audit failure rolls back journal source linkage and all financial effects
+PASS an older caller snapshot cannot overwrite a changed account or post stale general amounts
+PASS opening restart preserves saved general journals from the merged core workflow
+PASS opening preview preserves readiness and confirmation posts reconciled controls exactly once
+PASS opening refuses unbalanced, unreconciled, duplicated, guessed and future document data
+PASS opening confirmation requires expected source digest, explicit consent and a current chart
+PASS opening preview idempotency rejects changed data and competing confirmations cannot double count
+PASS opening zero cutover has a durable receipt and requires an open period without a fake journal
+PASS opening access is scoped and readonly viewers cannot prepare or confirm
+PASS opening forbids pre-cutover posting and generic opening reversal but supports linked restart
+PASS opening posting failure rolls back readiness, receipt, journal and unpaid register
+PASS opening immutable previews and document records cannot be overwritten
+PASS opening CSV handles quoted commas and refuses wrong headers, malformed widths and oversize input
+PASS simultaneous opening confirmations share one durable journal and control register
+PASS opening cutover date gate uses current state despite an older caller snapshot
+PASS period creation is scoped, reasoned and idempotent with durable original receipts
+PASS period creation refuses invalid, overlapping and pre-business dates without writes
+PASS closed periods block posting and reversal; reopening preserves all prior journals
+PASS period actions enforce revision conflicts, required reasons and request payload identity
+PASS period administration separates owner, accountant and viewer permissions and company scope
+PASS period administration denies demo calls even from direct service callers
+PASS period history is immutable and failed audit persistence rolls back status and revision
+PASS simultaneous overlapping period creation accepts one and simultaneous retries return one receipt
+PASS simultaneous period closes accept one revision and posting serializes against close
+PASS period service uses current state and receipts even with an older caller snapshot
+PASS bank CSV strictly validates format, quoting, row limits, exact money and unique references
+PASS bank import preview writes nothing, requires reviewed baseline, and has durable replay/conflict handling
+PASS bank access rejects viewer writes, cross-company objects, wrong accounts, unready books and demo mutations
+PASS bank matching shows ambiguity, rejects cross-scope and double allocation, and preserves unmatch audit
+PASS bank completion reconciles outstanding entries, freezes history, blocks backdating and carries continuity
+PASS bank first statement baseline is explicit and excludes already cleared earlier entries
+PASS bank service outer rollback removes imports and match history atomically
+PASS bank baseline and completion gates use current reads despite an older outer transaction snapshot
+PASS simultaneous bank import and completion retries retain one statement and one completion
+PASS bank cancellation retains immutable evidence and releases exact references for a corrected import
+PASS core two-period business reconciles cutover journals bank balances earnings and closed periods
+PASS core CSV exports include all statement pages exact balances safe text and scoped access
+PASS core-only companies post report export and reverse with every optional module disabled
+PASS module enable disable and reenable retain POS sources exact receipts and accounting corrections
+PASS module changes enforce owner identity scope freshness compatible installation and rollback
+PASS module manifests reject unknown contracts missing dependencies capability collisions and cycles
+PASS concurrent module retries create one audited decision and current reads observe disablement
+FAIL every optional bundled module enables alone disables and re-enables while core-only operation keeps working: SQLSTATE[45000]: <<Unknown error>>: 1644 Sample module audit failure
+PASS installer prerequisites identify missing runtime, extensions and dependencies
+PASS installer schema inspection distinguishes fresh, pending and unsafe receipts
+PASS binary-logged servers that refuse triggers are named before any migration runs
+PASS an interrupted migration resumes at the statement that stopped it
+FAIL preflight and migration replay preserve receipts and existing data: Values differ. Expected 253, got 254
+PASS installer connection failures do not expose credentials or stack traces
+PASS missing autoload and invalid local configuration produce safe installer failures
+PASS database platforms: MySQL 8.4 and MariaDB are accepted, other servers refused
+PASS MariaDB translation rewrites only MySQL-only spellings; MySQL statements stay unchanged
+PASS plain HTTP is accepted only from a browser on the same computer
+PASS uploaded folders may use dotted names but never escape the site
+PASS only a database on this server skips the one-time setup code
+PASS a database on this server accepts the account local stacks install, elsewhere does not
+PASS a site installed at a plain http address keeps working and names what a certificate would add
+PASS the public address may stay plain http only when it is the address the owner is using
+PASS one installer request applies as much of the chain as its PHP time limit allows
+PASS the progress bar names the step that is running in words an owner recognises
+PASS the setup lights summarise what the server can and cannot do
+PASS the checks setup runs against the finished database prove what the owner cannot see
+PASS private-folder probes stay inside the uploaded folder and are skipped for a public document root
+PASS the optional logo accepts real PNG, JPEG or WebP images only and is stored byte for byte
+PASS repeating administrator creation preserves the original account and password
+PASS personal credentials are hashed scoped revocable and independent of browser sessions
+PASS report-only personal and OAuth grants enforce the same API and MCP operation boundary
+PASS every advertised business operation returns an authorized source or report
+PASS machine reads match browser money and continue exact running balances across bounded pages
+PASS membership expiry client revocation and generation binding deny previously valid credentials
+PASS OAuth S256 issues audience-bound credentials rotates refresh and rejects replay and bad verifier
+PASS metadata rejects private addresses and CORS allows only explicit origins and headers
+PASS MCP handshake discovers read tools and session IDs cannot cross connections
+PASS MCP 2026 per-request discovery and tool reads agree with API and reject mixed versions
+PASS table filters never redefine balances and unsafe sorting and paging are rejected
+PASS OAuth standard revocation binds the client and refresh scope can only narrow
+PASS client metadata renewal never revives old grants and expiry caps new grants
+PASS signed access credentials cannot substitute audience issuer actor or client claims
+PASS concurrent refresh redemption issues once and revokes the replayed connection
+PASS all collection pagination clamps consistently and metadata blocks IPv6 transition networks
+PASS demo grants expire at the reset boundary and reused actor and company IDs never restore access
+PASS standalone STDIO bridge discovers tools reads both protocols and reports revocation
+PASS service-agency reconciles 36 months, immutable history, manual schedules and editable practice
+PASS retail-shop reconciles 36 months, immutable history, manual schedules and editable practice
+PASS seasonal-business reconciles 36 months, immutable history, manual schedules and editable practice
+PASS distributor reconciles 36 months, immutable history, manual schedules and editable practice
+PASS trader reconciles 36 months, immutable history, manual schedules and editable practice
+PASS restaurant reconciles 36 months, immutable history, manual schedules and editable practice
+PASS membership-club reconciles 36 months, immutable history, manual schedules and editable practice
+PASS pharmacy reconciles 36 months, immutable history, manual schedules and editable practice
+PASS jewelry-studio reconciles 36 months, immutable history, manual schedules and editable practice
+PASS light-manufacturing reconciles 36 months, immutable history, manual schedules and editable practice
+PASS service-workshop reconciles 36 months, immutable history, manual schedules and editable practice
+PASS installation history snapshots reject updates and deletes
+PASS sample selection rejects paths dates ordinary companies and foreign guide access atomically
+PASS currency arithmetic uses twelve-place rates and explicit half-up without floats
+PASS domestic snapshots, immutable functional currency and unknown monetary classification
+PASS manual rates append revisions, select prior dates, enforce scope and preserve provenance
+PASS foreign snapshots validate accounts and conversion and reverse frozen original rate metadata
+PASS legacy canonical hash remains reproducible only for unchanged domestic requests
+PASS account currency changes see postings committed after the caller snapshot
+PASS party list pages scoped records with literal search and role filters
+PASS party storage is country neutral, dual role and creates one private-data-free event
+PASS legal identifier dedup blocks canonical collision and allows isolated company identity
+PASS party mutations enforce revision, scope, membership and reserved schema boundaries
+PASS phone duplicates need explicit acknowledgement and reason without silent merge
+PASS party failure and caller rollback preserve source and event atomicity
+PASS concurrent normalized tax identities create one scoped party and event
+PASS concurrent shared phone entries require acknowledgement without losing either acknowledged contact
+PASS outbound content is transactional immutable and content-bound
+PASS scoped fake outbound dispatch acknowledges once outside transaction
+PASS outbound failure retries with capped backoff and eight-attempt terminal state
+PASS outbound leases recover and old worker cannot acknowledge replacement
+PASS separate outbound workers claim disjoint events and cannot claim a live lease twice
+PASS fake receiver deduplicates delivered event after lost acknowledgement and expired lease
+PASS realised FX worked example closes both currencies and reverses allocation with the journal
+PASS AP settlement handles gain loss and zero difference with the correct signs
+PASS partial settlements allocate the exact final carrying residual without changing recognition rate
+PASS unused-account activation and tracked-control funnel cannot be bypassed
+PASS settlement rejects conflicts closed periods over-allocation and failed writes roll back
+PASS settlement races serialize duplicate commands and prevent overlapping allocation
+PASS foreign-bank payments and out-of-order activity are rejected without base-only residuals
+PASS recognition reversal exact retry returns its original receipt after the item closes
+PASS open-item activation sees postings committed after the caller snapshot
+PASS same source correction retains original identity and snapshots across repeat corrections
+PASS correction rollback keeps reversal replacement and source history atomic
+PASS receipt correction keeps list filters totals API and account links on its current revision
+PASS correction rejects stale scope rename and unsupported document kinds
+PASS concurrent identical correction requests return one reversal and replacement pair
+PASS original-date correction is owner permissioned and closed periods still deny it
+PASS ordinary posting cannot bypass source correction identity with another request key
+PASS competing corrections accept one expected revision across separate connections
+PASS foreign general source corrections reverse frozen FX metadata and preserve both histories
+PASS AR AP exact draft lines round once and prohibit quote kinds
+PASS domestic settlement does not require unused realised FX accounts
+PASS AR AP shared starter supports invoice receipt credit final receipt and historical ageing
+PASS AP supplier bill partial payment and supplier credit use payable direction
+PASS AR AP rejects excessive credits and settled-document correction atomically
+PASS AR AP correction preserves source identity original rows and historical control totals
+PASS AR AP posted source snapshots and lines reject edits inserts and deletes
+PASS AR AP posting rejects changed review closed periods invalid roles and foreign company access
+PASS AR AP line FX rounding is explicit and final credits consume the exact carrying residual
+PASS AR AP competing postings settlements and credits serialize across separate connections
+PASS AR AP mixed tax lines post gross controls and separate output and input taxes
+PASS AR AP changed effective tax rate requires draft review and never restates posted tax
+PASS AR AP tax credits preserve original tax snapshot and exact residual across partial credits
+PASS AR AP inclusive setting freezes entered prices and original-mode credits retain gross totals
+PASS AR AP many small tax credits consume remaining tax without cumulative rounding over-credit
+PASS product register pages and filters without changing valuation scope
+PASS inventory weighted average issues exact carrying residual and reconciles its GL
+PASS inventory precise thirds never leave value without stock
+PASS partial purchase and customer returns use original costs and reject excess returns
+PASS stock adjustments require a fresh count and reviewed positive increase cost
+PASS reviewed value adjustments preserve quantity and reject stale value snapshots
+PASS stock rejects negative balances backdating closed periods duplicate sources and outer failures atomically
+PASS inventory enabled writes and historical reads enforce company permissions
+PASS inventory simultaneous duplicate and competing issues serialize the remaining stock
+PASS reviewed stock opening conversion links existing value without reposting the GL
+PASS invoice stock adapter is atomic and its reversal restores original issue cost
+PASS reversing a customer credit restores the invoice returnable basis without rewriting movements
+PASS real stock invoices and credits post and reverse financial and physical effects together
+PASS stock locations: the default warehouse works without the module and other warehouses require it
+PASS stock locations: warehouse masters enforce scope revisions retries and immutable identity
+PASS stock locations: movements balances history and valuation are scoped per warehouse
+PASS stock locations: transfers pair carrying value preserve the GL and consume the exact final residual
+PASS stock locations: a failed second transfer leg rolls back and the same request can recover
+PASS stock locations: transfers enforce access scope active warehouses periods and stock guards
+PASS stock locations: returns credits and reversals stay in the original warehouse at original cost
+PASS stock locations: reviewed count and value changes use the selected warehouse snapshot
+PASS stock locations: racing transfer retries and competing transfers retain one stock balance
+PASS stock locations: movements and retry hashes recorded before the module keep the default warehouse
+PASS stock locations: opening allocations split one product across warehouses without a second GL
+PASS stock locations: transfer retries reject a changed source destination date or metadata
+PASS purchase order list pages exact totals and derives receipt progress without changing order state
+PASS purchasing partial order receipts and later AP bills reconcile independent inventory and payable ledgers
+PASS supplier document sources retain multiple receipt links and reject another book
+PASS purchasing rejects excess receipt duplicate billing and cross-company references atomically
+PASS purchase price variance needs review and preserves receipt cost while clearing GRNI
+PASS unbilled purchase returns reduce stock and clearing without creating a payable
+PASS purchasing cancellation and module disable preserve receipts while blocking new receipts
+PASS mixed fractional bills and unbilled returns consume actual remaining basis with reviewed residual variance
+PASS concurrent purchasing receipt and bill allocations cannot overreceive or overbill
+PASS purchasing stale caller snapshots see committed receipt quantities before the next receipt
+PASS inclusive supplier bills and returns keep net receipt matching separate from input tax
+PASS supplier bill confirmation rejects a stale receipt preview and closed receipt periods roll back stock
+PASS reviewed opening debt conversion allocates shared GL basis without posting twice
+PASS opening conversion requires complete explicit mapping fresh digest and owner confirmation
+PASS concurrent opening conversion retries allocate shared basis once and preserve the existing journal
+PASS core tax exact percentage and four-place rounding avoid floats
+PASS core tax dated revisions are scoped immutable and selected without future lookahead
+PASS starter has required AR AP and independent optional purchasing and inventory capabilities
+PASS hiding AR AP is audited owner presentation only and preserves required services
+PASS starter playground is a separate explicit choice and retains the eleven pinned histories
+PASS starter playground provisions zero balances current open year and scoped usable module mappings once
+PASS starter playground rejects foreign guides ordinary books and invalid practice dates without replacing records
+PASS workspace shell preserves view data while rendering navigation
+PASS shared shell exposes the candidate version and grouped navigation contract
+PASS setup shell exposes six focused decisions and an explicit chart choice
+PASS sample import has a bounded operational replay path
+PASS account chart filters page within classifications and reject unsafe or foreign queries
+PASS list request rejects untrusted order identifiers malformed paging and array query input
+PASS server lists paginate without overlaps preserve filters and enforce company scope
+PASS journal status and text filters use the effective source and reconcile page totals
+PASS account report return context keeps original dates and rejects arbitrary destinations
+PASS bank summary counts every row independently of paged or searched statement views
+PASS source return links retain account filters and cannot choose an external destination
+PASS Home reuses posted cash and draft totals without posting or crossing company scope
+PASS Home bank attention agrees with reconciliation and excludes cancelled statements
+PASS workflow recovery carries report context through reads writes and demo base paths without accepting redirect URLs
+PASS workflow recovery identifies rejected editor fields without coercing money or changing submitted values
+PASS workflow recovery retains ageing dates through document and journal actions and rejects foreign destinations
+PASS workflow recovery renders linked field errors escaped values and unavailable choices without substitution
+PASS editor return state preserves validated filters and rejects malformed orders
+PASS transaction editor preview is read only and matches the posted service payload in both directions
+PASS server journal line controls retain incomplete values and enforce the line limit
+PASS editor posting saves and posts once and rolls back rejected unbalanced work
+PASS rejected editor posting preserves the previously saved draft and revision
+PASS payment confirmation binds financial review and permits the applicable FX account choice
+PASS another payment invalidates reviewed balances even when the allocation still fits
+PASS multi-item domestic settlement previews without writes and posts one bank line with retry and reversal
+PASS multi-item invalid allocation rejects the whole payment and never guesses a remainder
+PASS foreign batch netting to zero needs no FX account and a difference requires only its applicable side
+PASS concurrent identical multi-item requests settle once
+PASS partial batch allocations keep exact residuals and a closed period rolls back the whole payment
+PASS the oldest-first planner is pure, fills by due date then id, and leaves the rest unapplied
+PASS the planner action reads a party and still goes through preview and confirm
+PASS a receipt with a remainder posts one journal with one bank line and one advance item
+PASS a receipt entirely on account still posts one voucher and names its currency
+PASS unapplied credit applies to invoices with no bank line, domestic and foreign
+PASS an application refuses another party, another currency, a bank line and an invoice as the credit
+PASS B7 reversal rules hold: the receipt locks once applied, the application reverses alone, the advance never returns
+PASS unapplied credit is refunded from its own control and never from an invoice
+PASS a credit note with no original invoice becomes unapplied credit against sales returns
+PASS supplier advances mirror the customer side through payment, application and refund
+PASS unapplied credit is its own report section, reconciled to the control and never in the ageing
+PASS a batch posts one voucher per customer with its own remainder and one idempotency receipt
+PASS concurrent identical batches post one set of vouchers
+PASS concurrent applications of the same credit cannot spend it twice
+PASS the advances schema ties an advance to its own control and no screen can forge one
+PASS the receipt, batch and ageing screens render their advances sections
+PASS unapplied credit is an authorized read grant with its own bounded arguments
+PASS purchase order editor confirms current values atomically and retries without a journal
+PASS goods receipt preview shares exact stock and GRNI amounts with posting and remains read-only
+PASS goods receipt confirmation rejects changed remaining quantities and preview retains scope guards
+PASS stock count preview writes nothing and confirmation uses the exact reviewed journal effect
+PASS count preview binds carrying value and retains count increase and period validation
+PASS correction preview is read only and reviewed replacement is atomic and retry safe
+PASS stock correction previews restore the old issue before costing replacement and credit returns
+PASS correction preview rejects allocations closed periods and foreign access without writing
+PASS foreign supplier credit correction restores its carrying allocation for review
+PASS stock document previews consume exact sequential issue and historical return residuals
+PASS stock editor confirmation rejects a changed cost basis without saving a draft
+PASS invoice and bill editor preview writes nothing and shares exact financial lines with posting
+PASS credit editor preview retains original tax residual and carrying value
+PASS editor rejects unreviewed changes and closed-period posting rolls back draft and control activation
+PASS customer and supplier lists page and filter the effective immutable revision
+PASS the print registry pairs every document type with formats, labels and existing views
+PASS an omitted format defaults to A4 and an unknown type or format is refused
+PASS the settlement receipt reads the posted allocations without changing anything
+PASS printing follows the record screen: owner, accountant and viewer read; a stranger and another company do not
+PASS only a settlement journal prints as a payment receipt
+PASS the print route is one read-only GET route driven by the registry
+PASS print output carries no application shell
+PASS print styles ship in the compiled stylesheet and keep tokens and logical properties
+PASS every book carries the recommended default series per document type
+PASS a draft stays unnumbered and posting allocates the series number for its type
+PASS a posted correction keeps the number the document was issued with
+PASS an allocated number is never reused and a rolled-back allocation leaves no gap
+PASS simultaneous postings in one book take consecutive numbers with no duplicate and no gap
+PASS a document posted before the series existed keeps its derived number
+PASS a yearly series restarts at one in the next year and refuses an earlier year
+PASS only the owner may change numbering and the next number can never be lowered
+PASS document lists and record screens find a document by its issued number
+PASS a pack resolves to a base quantity before pricing, tax and stock issue
+PASS a pack keeps its product, code and size for ever, in the service and in the database
+PASS a line discount stores its amount and, under the net policy, never reaches the ledger
+PASS the gross discount policy recognises the undiscounted sale and the discount as contra-income
+PASS gross discount posting needs a contra-income account and refuses anything else
+PASS free goods carry no value to the customer and their cost leaves stock to the promotional account
+PASS free goods need their promotional account and are refused on a credit note or a bill
+PASS the open-market-value policy charges output tax on free goods to the business, never to the customer
+PASS every policy value is a per-company setting with one revision at a time and an audit trail
+PASS cash received on an invoice posts recognition and settles its own portion atomically
+PASS cash on an invoice is refused without a cap, above the cap and above the invoice total
+PASS reversing a cash invoice releases the cash and the receivable together, and correction says so
+PASS the sales-staff and area dimensions are validated, audited and kept on the revision snapshot
+PASS the company profile is per company, empty by default, owner-only and audited
+PASS the invoice and statement print templates are registered with existing views and formats
+PASS printing an invoice follows the record screen: owner, accountant and viewer read, others do not
+PASS the party statement reconciles to the ledger control account over its range
+PASS a trading document keeps working when the module is disabled and is refused for new entry
+PASS the trading module manifest declares its dependencies and its one migration
+PASS the editor screen path carries a pack line through to a resolved base quantity
+PASS the editor screen path carries a line discount and shows the amount it computes
+PASS the editor screen path marks a free-goods line and keeps it out of the money columns
+PASS the screen refuses a free-goods line on a credit note and cash above the cap
+PASS the editor screen carries the dimensions and offers only what the policies allow
+PASS the readout strip reads the customer balance and stock without posting anything
+PASS English is the source language: it returns its keys, loads no catalogue and reads left to right
+PASS placeholders are named, never positional, and an unfilled one stays visible
+PASS a catalogue translates by English key, inherits its base language and falls back per key
+PASS a malformed, unreadable or unknown catalogue still renders the English source
+PASS the plural table covers the six CLDR forms and keeps Arabic addable without touching pl_tn
+PASS the pseudo-locale transforms every translated string and leaves placeholders intact
+PASS a module may declare a lang directory without any bundled manifest digest moving
+PASS registered catalogue directories merge after the core one, and a path cannot escape
+PASS the formatting seams exist and leave todays written amounts and dates unchanged
+PASS every route renders under the pseudo-locale and the document language follows the locale
+PASS the untranslated interface text in the source only falls
+PASS every screen the application renders is in the template allowlist and has its view file
+PASS the template allowlist names no screen the application never renders
+PASS structured account codes parse, format and refuse shapes that are not X-XXX-XXXXX-XX
+PASS a code carries its own hierarchy, level and class so no parent identifier is stored
+PASS the contra band is reserved above every group the conversion may allocate
+PASS the bundled starter chart is numbered, keeps every old number and carries the owner accounts
+PASS a new book is born numbered and keeps each account reachable by its 1.0.0 number
+PASS headings and sub-accounts are created from the chart screen and only leaves receive postings
+PASS the conversion migration renumbers a populated chart without touching identity or postings
+PASS the report tree aggregates every measure at the class, group and account levels
+PASS the depth control and the flattened rows keep the same totals
+PASS an account still numbered the old way keeps its balance under its own classification
+PASS contra accounts are deductions inside their own section and the trial balance still balances
+PASS each owner transaction posts the journal its accounting treatment requires
+PASS owner transactions are idempotent, immutable and corrected only by a linked reversal
+PASS owner transactions refuse invalid input, missing accounts and callers without write access
+PASS partner capital accounts carry profit-sharing ratios that must total one
+PASS stock documents: each kind takes its own series and a number is never reused
+PASS stock documents: a gate pass moves no stock and posts nothing
+PASS stock documents: a van is a mobile warehouse and its kind is permanent
+PASS stock documents: transfers still move carrying value and write no journal
+PASS stock documents: the driver's day loads, sells, re-issues, returns and settles
+PASS stock documents: approving a settlement needs the approval permission and a day that reconciles
+PASS stock documents: the location reports reconcile to the movements and to the ledger
+PASS stock documents: the module can be disabled and re-enabled with van stock present
+PASS stock documents: print templates follow the record screen and its role rule
+PASS stock documents: warehouses and transfers are readable over the API and MCP contract
+PASS stock documents: the manifest declares the routes it now has
+418 tests, 2 failures.
+Script php tests/run.php handling the test event returned with error code 1
+Script @test was called via check
+
