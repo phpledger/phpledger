@@ -2,7 +2,7 @@
 
 > PHP Ledger is open-source, self-hosted double-entry accounting software with core invoices, bills and payments, optional purchasing and inventory, and a manually configured tax engine. Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+, 1.1.3 is the current release: unzip it into any web folder, open it, and the browser installer starts; updates are publisher-signed. 1.0.0 was the first stable release; independent accounting and security review remain post-release commitments.
 
-Current stable release: 1.1.3. PHP 8.2+ (8.3 recommended), MySQL 8.4 or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
+Current stable release: 1.2.1. PHP 8.2+ (8.3 recommended), MySQL 8.4 or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
 
 New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-adoption 0.1.0 through 0.1.5 previews retain MIT; dependencies and archived code keep their own terms.
 
