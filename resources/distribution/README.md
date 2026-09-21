@@ -162,9 +162,21 @@ Only these four, all verified publicly reachable, are referenced:
 - `docs/repository/assets/expense-to-journal-preview.webp`
 - `docs/repository/assets/cash-pos-click-preview.png`
 
-Several catalogues conventionally want a dedicated icon committed inside their own app
-folder rather than an external URL, and Coolify references a file in its own `svgs/`
-directory. Those are left as named TODOs in the manifests rather than as invented URLs.
+**Several catalogues want the logo committed to their own repository, not linked.** What
+each actually requires, checked against their shipped apps:
+
+- **Coolify**: one file under `templates/svgs/`. Despite the directory name they accept
+  PNG (`actualbudget` ships `svgs/actualbudget.png`), so the existing
+  `icon-512.png` satisfies it. **Nothing is blocking a Coolify submission.**
+- **CasaOS**: every shipped app carries `icon.png` **and** `icon.svg`, plus a
+  `thumbnail.png` and two to five screenshots, all inside `Apps/<Name>/`. We have the PNG
+  icon and three screenshots. **A vector logo and a thumbnail do not exist in this
+  repository, and that blocks a clean CasaOS submission.** Checked against Jellyfin,
+  Syncthing, Vaultwarden and ActualBudget, which all ship both icon formats.
+- **CapRover**: a `logoUrl`, which an external URL satisfies.
+
+Umbrel's current packaging guidance asks for an empty gallery, which contradicts issue
+#101's text; the fresher source was followed.
 Umbrel's current packaging guidance asks for an empty gallery, which contradicts issue
 #101's text; the fresher source was followed.
 

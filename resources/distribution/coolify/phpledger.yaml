@@ -2,7 +2,7 @@
 # slogan: Complete double-entry accounting that runs on your own PHP hosting.
 # category: finance
 # tags: accounting,ledger,invoicing,php,mysql,finance
-# logo: svgs/phpledger.svg
+# logo: svgs/phpledger.png
 # port: 8080
 #
 # Submitted to https://github.com/coollabsio/coolify as templates/compose/phpledger.yaml,
