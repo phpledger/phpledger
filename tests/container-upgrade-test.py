@@ -3,11 +3,13 @@
 Simulates "pull a newer image, restart with PL_AUTO_MIGRATE=1" using a single built
 image (the only difference between "the installed version" and "the newer version" in
 a real upgrade is which migrations are already applied, so this test creates that
-same condition directly): installs from the environment against a disposable database
-(a populated installation), removes the most recent migration's applied receipt the
-same way tests/update-migrate-test.php's fixture does, then starts a fresh container
-of the same image with PL_AUTO_MIGRATE=1 against that same database and checks the
-pending migration is applied and the container comes up healthy.
+same condition directly, the same way tests/update-migrate-test.php's fixture does):
+seeds a populated installation whose schema stops one migration short of current -
+migrated, an administrator created, and marked installed, but the most recent
+migration genuinely never applied, not applied-then-reverted, which would leave
+schema objects behind that a real re-run could collide with - then starts the image
+normally with PL_AUTO_MIGRATE=1 against that same database and checks the pending
+migration is applied and the container comes up healthy.
 
     python3 tests/container-upgrade-test.py
 """
@@ -27,30 +29,36 @@ def check(condition: bool, label: str) -> None:
     print(f"PASS {label}")
 
 
-PHP_LAST_VERSION = (
+PHP_BOOT = (
     "require '/var/www/phpledger/www/phpledger/includes/bootstrap.php';"
     "require_once '/var/www/phpledger/www/phpledger/includes/functions/install_functions.php';"
-    "$versions = pl_install_migration_versions();"
-    "echo end($versions);"
+    "require_once '/var/www/phpledger/www/phpledger/includes/functions/auth_functions.php';"
 )
 
-PHP_REVERT_LAST = (
-    "require '/var/www/phpledger/www/phpledger/includes/bootstrap.php';"
-    "require_once '/var/www/phpledger/www/phpledger/includes/functions/install_functions.php';"
+# Migrates up to (not including) the last migration, creates an administrator over
+# that schema, and writes the installed.json receipt directly (install/complete.php
+# refuses unless the schema is fully current, which is deliberately not true here).
+PHP_SEED_PARTIAL_INSTALL = PHP_BOOT + (
     "$versions = pl_install_migration_versions();"
-    "$last = end($versions);"
-    "DB::query('DELETE FROM pl_schema_migrations WHERE version = %s', $last);"
-    "echo 'reverted ' . $last;"
+    "$pending = count($versions) - 1;"
+    "pl_migrate($pending);"
+    "$userId = pl_create_user(%(email)s, %(name)s, %(password)s);"
+    "$operatorKey = pl_install_directory() . '/operator.key';"
+    "if (!is_file($operatorKey)) { pl_install_write_private($operatorKey, bin2hex(random_bytes(32)) . \"\\n\", false); }"
+    "pl_install_save_state(['format' => 1, 'initial_owner_id' => $userId, 'completed_at' => gmdate('c')], 'installed.json');"
+    "echo end($versions) . ' pending of ' . count($versions) . ' total, owner ' . $userId;"
 )
 
-PHP_CHECK_APPLIED = (
-    "require '/var/www/phpledger/www/phpledger/includes/bootstrap.php';"
-    "require_once '/var/www/phpledger/www/phpledger/includes/functions/install_functions.php';"
+PHP_CHECK_LAST_STATUS = PHP_BOOT + (
     "$versions = pl_install_migration_versions();"
     "$last = end($versions);"
     "$status = DB::queryFirstField('SELECT status FROM pl_schema_migrations WHERE version = %s', $last);"
-    "echo $status;"
+    "echo (string) $status;"
 )
+
+
+def php_literal(value: str) -> str:
+    return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
 
 
 def main() -> int:
@@ -65,6 +73,7 @@ def main() -> int:
         "PL_DB_NAME": "phpledger",
         "PL_DB_USER": "phpledger",
         "PL_DB_PASSWORD": support.DB_PASSWORD,
+        "PL_INSTALL_DIRECTORY": "/var/lib/phpledger/installation",
     }
     try:
         archive = support.build_release_zip(build_dir)
@@ -72,33 +81,34 @@ def main() -> int:
         support.build_release_image(archive)
 
         support.start_network_and_database()
-
-        # 1. A populated installation, exactly like an existing deployment before a pull.
-        support.start_web(
-            {
-                "PL_ADMIN_EMAIL": support.ADMIN_EMAIL,
-                "PL_ADMIN_NAME": support.ADMIN_NAME,
-                "PL_ADMIN_PASSWORD": support.ADMIN_PASSWORD,
-            }
+        # The private volume needs its subdirectories before any bootstrap.php call
+        # (including the seed step below) - normally the entrypoint's first action;
+        # nothing has run it yet against this brand new volume.
+        support.run_once_sh(
+            support.IMAGE_TAG, support.NETWORK, {},
+            "mkdir -p /var/lib/phpledger/installation /var/lib/phpledger/oauth",
         )
-        support.wait_for_health(support.WEB_NAME)
-        last_version = support.run_once_php(support.IMAGE_TAG, support.NETWORK, common_env, PHP_LAST_VERSION)
-        check(last_version != "", "the populated installation has at least one migration recorded")
 
-        # 2. Make that installation look like it is one migration behind the image.
-        support.try_run(["docker", "rm", "-f", support.WEB_NAME])
-        reverted = support.run_once_php(support.IMAGE_TAG, support.NETWORK, common_env, PHP_REVERT_LAST)
-        check(reverted == f"reverted {last_version}", "the most recent migration's receipt was removed")
-        status_before = support.run_once_php(support.IMAGE_TAG, support.NETWORK, common_env, PHP_CHECK_APPLIED)
-        check(status_before == "", f"migration {last_version} is now pending, not applied ({status_before!r})")
+        # 1. A populated installation, one migration short of current - like a real
+        #    deployment the moment before it pulls a newer image.
+        seed_code = PHP_SEED_PARTIAL_INSTALL % {
+            "email": php_literal(support.ADMIN_EMAIL),
+            "name": php_literal(support.ADMIN_NAME),
+            "password": php_literal(support.ADMIN_PASSWORD),
+        }
+        seeded = support.run_once_php(support.IMAGE_TAG, support.NETWORK, common_env, seed_code)
+        check(" pending of " in seeded and seeded != "", f"seeded a populated installation one migration short of current ({seeded})")
+        status_before = support.run_once_php(support.IMAGE_TAG, support.NETWORK, common_env, PHP_CHECK_LAST_STATUS)
+        check(status_before == "", f"the most recent migration is genuinely pending, not applied ({status_before!r})")
 
-        # 3. A fresh container of "the pulled newer image" against the same, now-behind database.
-        support.start_web({**common_env, "PL_AUTO_MIGRATE": "1"}, name=support.WEB_NAME)
+        # 2. The pulled newer image, started normally (no admin env vars - installed.json
+        #    already exists) with PL_AUTO_MIGRATE=1 against that same populated database.
+        support.start_web({**common_env, "PL_AUTO_MIGRATE": "1"})
         health = support.wait_for_health(support.WEB_NAME)
         check(health.get("status") == "ok", "PL_AUTO_MIGRATE=1 comes up healthy against the populated database")
 
-        status_after = support.run_once_php(support.IMAGE_TAG, support.NETWORK, common_env, PHP_CHECK_APPLIED)
-        check(status_after == "applied", f"PL_AUTO_MIGRATE=1 applied the pending migration {last_version} (status {status_after!r})")
+        status_after = support.run_once_php(support.IMAGE_TAG, support.NETWORK, common_env, PHP_CHECK_LAST_STATUS)
+        check(status_after == "applied", f"PL_AUTO_MIGRATE=1 applied the previously pending migration (status {status_after!r})")
     finally:
         support.cleanup()
         support.remove_test_image()

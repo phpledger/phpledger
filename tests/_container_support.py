@@ -226,3 +226,18 @@ def run_once_php(image: str, network: str, env: dict[str, str], code: str) -> st
         *env_args, "--entrypoint", "php", image, "-r", code,
     ], capture_output=True, text=True)
     return result.stdout.strip()
+
+
+def run_once_sh(image: str, network: str, env: dict[str, str], script: str) -> str:
+    """Like run_once_php, but for a shell script - e.g. to mkdir the private
+    volume's subdirectories before the very first PHP call ever touches it,
+    since nothing has run the entrypoint yet on a brand new volume."""
+    env_args = []
+    for key, value in env.items():
+        env_args += ["-e", f"{key}={value}"]
+    result = run([
+        "docker", "run", "--rm", "--network", network,
+        "-v", f"{PRIVATE_VOLUME}:/var/lib/phpledger",
+        *env_args, "--entrypoint", "sh", image, "-c", script,
+    ], capture_output=True, text=True)
+    return result.stdout.strip()
