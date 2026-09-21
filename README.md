@@ -40,11 +40,42 @@ The `docs/` folder is tracked in the repository. Documentation links below point
 
 PHP Ledger is open-source, self-hosted double-entry accounting software with a simple cash point of sale for small businesses, built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+. **1.1.3** is the current release; **1.0.0** was the first stable release.
 
-It records receipts and expenses as balanced double-entry journals, keeps posted entries immutable with linked reversals, and shows a trial balance, profit and loss, balance sheet and an entered cash scenario. A small cash point of sale posts sales through the same service and prints a receipt. Modern source lives in `www/phpledger`; the historical application is available only in Git history under its original terms.
+Modern source lives in `www/phpledger`; the historical application is available only in Git history under its original terms.
 
 **Requirements:** PHP 8.2+ (8.3 recommended) with BCMath, PDO, PDO MySQL, mbstring, sessions, cURL, OpenSSL and fileinfo, MySQL 8.4 or MariaDB 10.4+ with InnoDB, and HTTPS (plain `http://localhost` is accepted on your own computer). Unzip the package into any web folder and open its address; the installer starts by itself, and no terminal access is required. Pointing the document root at `www/phpledger/public` remains the most secure layout. The PHP zip extension is required to use automatic in-browser updates; CLI installation and recovery remain available for operators who prefer them.
 
-The accounting starter adds customer invoices, supplier bills, partial payments, credits and ageing to the base accounting core. Purchasing and shared Inventory are bundled optional modules. A manually configurable core tax engine supports inclusive or exclusive entered prices. All financial activity uses the same posting and reporting services.
+## Core features
+
+**For the accountant**
+
+- Posted journals cannot be edited or deleted; the database itself refuses it, not just the screen.
+- A correction posts a new, linked reversal entry, so the original, the reversal and any replacement stay connected in the history.
+- A closed accounting period refuses a new posting until someone with the right to reopen it does.
+- One central posting service handles every entry, whether it comes from a sale, a bill, a stock movement, an owner transaction or a manual journal.
+- Contra accounts are marked and shown as deductions inside their own section, never netted away.
+- Customer and supplier advances sit in their own control account, never folded into receivables or payables.
+- Account codes follow one structured `X-XXX-XXXXX-XX` shape, and only the lowest account in the chart accepts a posting.
+- Every report reads the posted journals directly, so a total traces back to the entries behind it.
+- Core and user actions are both kept in an audit trail that cannot be edited or deleted.
+
+**For the business graduate**
+
+- The trial balance, profit and loss and balance sheet collapse from class to group to account, so you can see the whole picture or open one line.
+- Receivables and payables ageing splits open items into current and overdue bands, for customers and for suppliers.
+- A cash scenario projects a cash position from the weekly assumptions you enter.
+- Stock by location shows quantity and carrying value by warehouse or van.
+- Cost figures are withheld from anyone without the capability to see them, on screen and through the read API alike.
+- Every report exports to CSV.
+- A read-only API and MCP connection expose the trial balance, profit and loss, balance sheet and account statements to a reporting tool, with no path to write.
+
+**For the owner**
+
+- Runs on ordinary PHP hosting: PHP 8.2+ and MySQL 8.4 or MariaDB 10.4+, installed from a browser with no Composer, Node or terminal needed.
+- No subscription and no licence key; the core is AGPL-3.0-or-later, and self-hosting costs nothing beyond your own hosting.
+- Your records stay in your own database, on infrastructure you control.
+- Capital introduced, owner loans and repayments, drawings and partner capital accounts are first-class transactions with their own screen.
+- Invoices, receipts, statements, stock issues and gate passes print from one template registry.
+- Try a live demo with no registration and no real business information needed.
 
 **Release status:** **1.1.3**, published 20 September 2026, fixes issue [#90](https://github.com/phpledger/phpledger/issues/90): the in-app updater now completes its migrate phase without error. An installation on **1.1.1 or 1.1.2** with the publisher key pinned installs 1.1.3 from `/maintenance.php`, both proven end to end; an installation on **1.1.0** must use the manual procedure, because its own database helpers predate a function the new migrations call ([issue #91](https://github.com/phpledger/phpledger/issues/91)).php`. **1.1.2**, published 20 September 2026, corrects the 1.1.1 record (its package carries migration 034 and the optional Stock locations module), counts point-of-sale cash in whole minor units ([issue #88](https://github.com/phpledger/phpledger/issues/88)) and restores signed update metadata. **1.1.1**, published 20 September 2026, rebuilds browser setup into six stages with green and red checks, accepts a local database account with no password and creates the database on your own computer, and warns instead of refusing over plain HTTP. Its release notes said it carries no migration; in fact the package includes migration 034 and the optional Stock locations module, and an installation upgraded from 1.1.0 by replacing files must run `install/migrate.php` once (corrected in 1.1.2). 1.1.0, published 19 September 2026, makes installation work like WordPress (unzip into any web folder and open it), adds MariaDB 10.4+, a chosen username and an optional logo, and is the first release with signed update metadata. See the [release notes](resources/release/RELEASE-NOTES.md). **1.0.0**, published 18 September 2026, was the first stable release. The owner consolidated the locally implemented 0.6.1 workflow-recovery closure, the 0.7 browser installer and the 0.8 signed update/automatic-backup/recovery work into this single release and published it as the supported production scope. Automated test suites, fault-injection update/recovery tests, exact-artifact install/upgrade/recovery checks against the built package, and developer-operated browser checks back this release. Independent accounting review, independent security review, supervised pilots with a real month-end close, unfamiliar-operator installation observation, and restricted shared-host recovery certification have **not** happened; the owner published with these limits disclosed as post-release commitments, not as claims of completed review. See [Validation](docs/VALIDATION.md#100-publication--18-september-2026) and [Roadmap](docs/ROADMAP.md#current-delivery-contract-first-stable-10) for the exact evidence and open gates.
 
