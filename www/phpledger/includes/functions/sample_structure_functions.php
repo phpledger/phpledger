@@ -44,7 +44,11 @@ function pl_sample_structure_ids(): array
 /** Where the bundled structure catalogue lives. */
 function pl_sample_structure_directory(): string
 {
-    return PL_ROOT . '/resources/sample-structures';
+    // The trailing slash is load-bearing, and rtrim puts it back the way it was. The package
+    // boundary test reads this literal to decide what the code needs at runtime: written without
+    // the slash it asks for a file named 'resources/sample-structures', which is not packaged
+    // because the directory's contents are. resources/lang solves the same problem the same way.
+    return rtrim(PL_ROOT . '/resources/sample-structures/', '/');
 }
 
 /**
