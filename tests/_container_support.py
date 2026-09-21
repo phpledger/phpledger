@@ -73,10 +73,18 @@ def reclaim(path) -> None:
     """
     if os.name == "nt":
         return
+    # --user 0:0 is required, and it is required for the reason this whole test
+    # exists: the release image runs as www-data, so without the override the
+    # chown itself runs unprivileged and cannot touch root-owned files. That is
+    # what made the first attempt at this fail silently.
+    #
     # try_run, not run: run() already sets check=True, and a reclaim that cannot
-    # start must not replace the real result with its own failure.
-    try_run(["docker", "run", "--rm", "-v", f"{path}:/reclaim", IMAGE_TAG,
+    # start must not replace the real result with its own failure. The caller
+    # reports it instead, so a silent no-op cannot happen twice.
+    try_run(["docker", "run", "--rm", "--user", "0:0", "-v", f"{path}:/reclaim", IMAGE_TAG,
              "chown", "-R", f"{os.getuid()}:{os.getgid()}", "/reclaim"])
+    if any(not os.access(str(entry), os.W_OK) for entry in Path(path).rglob("*")):
+        print(f"warning: {path} is still not writable after reclaim; removal will fail", file=sys.stderr)
 
 
 def remove_test_image() -> None:
