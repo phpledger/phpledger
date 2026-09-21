@@ -1,0 +1,207 @@
+{
+  "contract": 1,
+  "id": "service-agency",
+  "version": "1.0.0",
+  "name": "Cedar Studio",
+  "business": "Professional services / agency",
+  "source_digest": "6183544bf9569355d089e133781a22cb051d7684183ac99cbba1de81338e7428",
+  "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
+  "accounts": [
+    {
+      "code": "1010",
+      "name": "Reserve bank",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1020",
+      "name": "Cash till",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1030",
+      "name": "Petty cash",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1200",
+      "name": "Prepaid insurance",
+      "type": "asset"
+    },
+    {
+      "code": "1300",
+      "name": "Equipment at cost",
+      "type": "asset"
+    },
+    {
+      "code": "1390",
+      "name": "Accumulated depreciation",
+      "type": "asset",
+      "is_contra": true
+    },
+    {
+      "code": "1500",
+      "name": "Staff advances",
+      "type": "asset"
+    },
+    {
+      "code": "2100",
+      "name": "Accrued staff bonus",
+      "type": "liability"
+    },
+    {
+      "code": "2200",
+      "name": "Term loan",
+      "type": "liability"
+    },
+    {
+      "code": "2300",
+      "name": "Net salaries payable",
+      "type": "liability"
+    },
+    {
+      "code": "2310",
+      "name": "Withholding tax payable",
+      "type": "liability"
+    },
+    {
+      "code": "2320",
+      "name": "Social security payable",
+      "type": "liability"
+    },
+    {
+      "code": "2330",
+      "name": "Provident fund payable",
+      "type": "liability"
+    },
+    {
+      "code": "2400",
+      "name": "Deferred support income",
+      "type": "liability"
+    },
+    {
+      "code": "5100",
+      "name": "Fictional staff salaries",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5150",
+      "name": "Employer contributions",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5200",
+      "name": "Rent",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5300",
+      "name": "Utilities",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5400",
+      "name": "Insurance expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5500",
+      "name": "Depreciation expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5600",
+      "name": "Loan interest",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5800",
+      "name": "Loss on asset disposal",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "3100",
+      "name": "Partner capital - Mira Vale (Sample)",
+      "type": "equity",
+      "role": "owner_equity"
+    },
+    {
+      "code": "3910",
+      "name": "Partner drawings - Mira Vale (Sample)",
+      "type": "equity",
+      "is_contra": true
+    },
+    {
+      "code": "3110",
+      "name": "Partner capital - Noel Reed (Sample)",
+      "type": "equity",
+      "role": "owner_equity"
+    },
+    {
+      "code": "3920",
+      "name": "Partner drawings - Noel Reed (Sample)",
+      "type": "equity",
+      "is_contra": true
+    },
+    {
+      "code": "4100",
+      "name": "Project fees",
+      "type": "income"
+    },
+    {
+      "code": "4110",
+      "name": "Recurring service fees",
+      "type": "income"
+    },
+    {
+      "code": "5110",
+      "name": "Direct contractor delivery costs",
+      "type": "expense"
+    },
+    {
+      "code": "5120",
+      "name": "Project delivery tools",
+      "type": "expense"
+    }
+  ],
+  "open_item_accounts": [
+    "1100",
+    "2000"
+  ],
+  "modules": [],
+  "packages": [],
+  "number_series": [],
+  "policies": {},
+  "parties": [
+    {
+      "legal_name": "Northstar Foods (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1100",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Blue Kite Copywriting (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2000",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    }
+  ],
+  "products": [],
+  "tax_codes": []
+}

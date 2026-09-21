@@ -1,0 +1,201 @@
+{
+  "contract": 1,
+  "id": "membership-club",
+  "version": "1.0.0",
+  "name": "Riverside Community Club",
+  "business": "Membership club",
+  "source_digest": "bd682b1b773de622ed49164263b65735186a98d4929c6c9f9d17501db4cbd7cb",
+  "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
+  "accounts": [
+    {
+      "code": "1010",
+      "name": "Reserve bank",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1020",
+      "name": "Cash till",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1030",
+      "name": "Petty cash",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1200",
+      "name": "Prepaid insurance",
+      "type": "asset"
+    },
+    {
+      "code": "1300",
+      "name": "Equipment at cost",
+      "type": "asset"
+    },
+    {
+      "code": "1390",
+      "name": "Accumulated depreciation",
+      "type": "asset",
+      "is_contra": true
+    },
+    {
+      "code": "1500",
+      "name": "Staff advances",
+      "type": "asset"
+    },
+    {
+      "code": "2100",
+      "name": "Accrued staff bonus",
+      "type": "liability"
+    },
+    {
+      "code": "2200",
+      "name": "Term loan",
+      "type": "liability"
+    },
+    {
+      "code": "2300",
+      "name": "Net salaries payable",
+      "type": "liability"
+    },
+    {
+      "code": "2310",
+      "name": "Withholding tax payable",
+      "type": "liability"
+    },
+    {
+      "code": "2320",
+      "name": "Social security payable",
+      "type": "liability"
+    },
+    {
+      "code": "2330",
+      "name": "Provident fund payable",
+      "type": "liability"
+    },
+    {
+      "code": "2400",
+      "name": "Deferred support income",
+      "type": "liability"
+    },
+    {
+      "code": "5100",
+      "name": "Fictional staff salaries",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5150",
+      "name": "Employer contributions",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5200",
+      "name": "Rent",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5300",
+      "name": "Utilities",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5400",
+      "name": "Insurance expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5500",
+      "name": "Depreciation expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5600",
+      "name": "Loan interest",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5800",
+      "name": "Loss on asset disposal",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "4100",
+      "name": "Membership dues income",
+      "type": "income"
+    },
+    {
+      "code": "4110",
+      "name": "Club event income",
+      "type": "income"
+    },
+    {
+      "code": "5110",
+      "name": "Program and activity costs",
+      "type": "expense"
+    },
+    {
+      "code": "3210",
+      "name": "Board-designated reserves",
+      "type": "equity"
+    }
+  ],
+  "open_item_accounts": [
+    "1100",
+    "2000"
+  ],
+  "modules": [],
+  "packages": [],
+  "number_series": [],
+  "policies": {},
+  "parties": [
+    {
+      "legal_name": "Demo Member Group One (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1100",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Demo Member Group Two (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1100",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Demo Hall Provider (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2000",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Demo Event Supplier (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2000",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    }
+  ],
+  "products": [],
+  "tax_codes": []
+}

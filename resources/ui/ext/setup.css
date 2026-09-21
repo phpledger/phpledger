@@ -153,3 +153,121 @@
   .sample-schedules dd { margin: 0; line-height: 1.5; }
   @media (max-width: 767px) { .sample-schedules, .sample-months { grid-template-columns: minmax(0, 1fr); } }
 }
+
+/* Onboard a business, in the installer's Workbench language (owner decision B50).
+   The installer owns .install-frame in the foundation stylesheet, but its tray, heading, body
+   and action rails are unscoped, so the wizard reuses them rather than restating them. What is
+   added here is what only the wizard has: a labelled tray, the three source cards, the contents
+   lists that say what does and does not come across, and the review split. */
+@layer components {
+  html[data-screen="onboarding"] .auth-card { max-width: 72rem; }
+  .bench-stage { inline-size: 100%; display: flex; flex-direction: column; gap: 1rem; }
+  .bench-stage .bench-body { gap: 1rem; }
+  .bench-stage .bench-heading { font-size: 22px; line-height: 28px; }
+  .bench-stage .bench-heading.size-lg { font-size: 26px; line-height: 32px; }
+  .bench-head-split { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+  .bench-note {
+    margin: 0;
+    display: flex;
+    gap: .5rem;
+    font-size: .75rem;
+    line-height: 1.55;
+    color: var(--ink-muted);
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-panel);
+    padding: .75rem .9375rem;
+  }
+  .bench-action-pair { display: flex; gap: .625rem; align-items: center; }
+
+  /* The installer's tray slots are unlabelled lozenges; onboarding has five named stages and
+     room to name them, so the label is shown rather than kept for screen readers only. */
+  .bench-tray.is-labelled .tray-slot {
+    inline-size: auto;
+    min-inline-size: 5.5rem;
+    padding-inline: .5625rem;
+    gap: .25rem;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: .02em;
+  }
+  .bench-tray.is-labelled .tray-slot.is-done { color: #fff; }
+  .bench-tray.is-labelled .tray-slot.is-current { color: var(--brand-navy); }
+
+  /* Source and starting-point cards. The radio stays in the markup for keyboard and screen
+     readers; :has() promotes its checked state to the whole card. */
+  .choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .875rem; border: 0; padding: 0; margin: 0; }
+  .choice-card {
+    position: relative;
+    display: block;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-panel);
+    padding: .9375rem 1rem;
+    cursor: pointer;
+    transition: border-color .12s ease, background-color .12s ease;
+  }
+  .choice-card:hover { border-color: var(--border-strong); }
+  .choice-card:has(input:checked) { border-color: var(--brand-blue); background: var(--brand-selected); }
+  .choice-card:has(input:focus-visible) { outline: 2px solid var(--brand-blue); outline-offset: 2px; }
+  .choice-card input[type="radio"] { position: absolute; inset-block-start: .875rem; inset-inline-end: .875rem; margin: 0; }
+  .choice-body { display: flex; flex-direction: column; gap: .4375rem; }
+  .choice-title { font-size: .84375rem; font-weight: 650; color: var(--ink); padding-inline-end: 1.25rem; }
+  .choice-detail { font-size: .71875rem; line-height: 1.5; color: var(--ink-muted); }
+  .choice-tag {
+    align-self: flex-start;
+    font-size: .625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    color: var(--ink-faint);
+    border: 1px dashed var(--border-strong);
+    border-radius: 999px;
+    padding: .125rem .5rem;
+  }
+
+  /* What comes across and what does not, in one list. A struck-through line is a deliberate
+     omission, not a missing feature, so it is stated rather than left off the card. */
+  .contents-list { list-style: none; margin: .125rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .1875rem; }
+  .contents-list > * { font-size: .65625rem; line-height: 1.5; color: var(--ink-muted); display: flex; align-items: center; gap: .3125rem; }
+  .contents-list .is-in::before,
+  .contents-list .is-out::before { content: ""; inline-size: 5px; block-size: 5px; border-radius: 999px; flex: none; }
+  .contents-list .is-in::before { background: var(--success); }
+  .contents-list .is-out::before { background: var(--border-strong); }
+  .contents-list .is-out { text-decoration: line-through; opacity: .62; }
+  .contents-list .snip { margin-inline-start: auto; }
+
+  .picker-row {
+    display: flex;
+    align-items: flex-end;
+    gap: .875rem;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-panel);
+    padding: .8125rem 1rem;
+  }
+  .picker-row .field { flex: 1; min-inline-size: 0; }
+  .picker-hint { flex: 1.3; margin: 0; font-size: .6875rem; line-height: 1.5; color: var(--ink-muted); }
+
+  /* Review: the summary and the chart on the left, what the source brings in on the right. */
+  .review-split { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+  .review-side { display: flex; flex-direction: column; gap: .75rem; }
+  .summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem 1rem; margin: 0 0 .875rem; }
+  .summary-grid dt { font-size: .6875rem; color: var(--ink-muted); }
+  .summary-grid dd { margin: 0; font-size: .8125rem; font-weight: 500; color: var(--ink); }
+  .contents-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: .875rem 1rem; }
+  .contents-card.is-muted { background: var(--surface-subtle); }
+  .contents-card h2 { font-size: .8125rem; font-weight: 650; color: var(--ink); margin: 0 0 .375rem; }
+  .contents-card .field-hint { margin-block-start: .375rem; }
+
+  @media (max-width: 60rem) {
+    .choice-grid { grid-template-columns: minmax(0, 1fr); }
+    .review-split, .summary-grid { grid-template-columns: minmax(0, 1fr); }
+    .picker-row { flex-direction: column; align-items: stretch; }
+    .bench-head-split { flex-direction: column; }
+    .bench-tray.is-labelled .tray-slot { min-inline-size: 0; padding-inline: .5rem; }
+    .bench-tray.is-labelled .tray-slot span { display: none; }
+  }
+}

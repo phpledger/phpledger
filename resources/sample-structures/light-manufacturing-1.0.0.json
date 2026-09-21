@@ -1,0 +1,249 @@
+{
+  "contract": 1,
+  "id": "light-manufacturing",
+  "version": "1.0.0",
+  "name": "Maple Bench Works",
+  "business": "Light manufacturing",
+  "source_digest": "e4be6d3a2b8825d8079f2e5c0dd804477137fafdc39547976efeaaddd6329d5d",
+  "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
+  "accounts": [
+    {
+      "code": "1010",
+      "name": "Reserve bank",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1020",
+      "name": "Cash till",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1030",
+      "name": "Petty cash",
+      "type": "asset",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1200",
+      "name": "Prepaid insurance",
+      "type": "asset"
+    },
+    {
+      "code": "1300",
+      "name": "Equipment at cost",
+      "type": "asset"
+    },
+    {
+      "code": "1390",
+      "name": "Accumulated depreciation",
+      "type": "asset",
+      "is_contra": true
+    },
+    {
+      "code": "1500",
+      "name": "Staff advances",
+      "type": "asset"
+    },
+    {
+      "code": "2100",
+      "name": "Accrued staff bonus",
+      "type": "liability"
+    },
+    {
+      "code": "2200",
+      "name": "Term loan",
+      "type": "liability"
+    },
+    {
+      "code": "2300",
+      "name": "Net salaries payable",
+      "type": "liability"
+    },
+    {
+      "code": "2310",
+      "name": "Withholding tax payable",
+      "type": "liability"
+    },
+    {
+      "code": "2320",
+      "name": "Social security payable",
+      "type": "liability"
+    },
+    {
+      "code": "2330",
+      "name": "Provident fund payable",
+      "type": "liability"
+    },
+    {
+      "code": "2400",
+      "name": "Deferred support income",
+      "type": "liability"
+    },
+    {
+      "code": "5100",
+      "name": "Fictional staff salaries",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5150",
+      "name": "Employer contributions",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5200",
+      "name": "Rent",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5300",
+      "name": "Utilities",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5400",
+      "name": "Insurance expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5500",
+      "name": "Depreciation expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5600",
+      "name": "Loan interest",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5800",
+      "name": "Loss on asset disposal",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "1400",
+      "name": "Stock - manual support schedule",
+      "type": "asset"
+    },
+    {
+      "code": "5700",
+      "name": "Cost of sales - manual schedule",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "1410",
+      "name": "Raw material inventory",
+      "type": "asset"
+    },
+    {
+      "code": "1420",
+      "name": "Production in progress",
+      "type": "asset"
+    },
+    {
+      "code": "1430",
+      "name": "Finished goods inventory",
+      "type": "asset"
+    },
+    {
+      "code": "4100",
+      "name": "Manufactured product income",
+      "type": "income"
+    },
+    {
+      "code": "5110",
+      "name": "Manufactured cost of sales",
+      "type": "expense",
+      "report_classification": "cost_of_sales"
+    },
+    {
+      "code": "5120",
+      "name": "Production workshop costs",
+      "type": "expense"
+    },
+    {
+      "code": "5130",
+      "name": "Abnormal production losses",
+      "type": "expense"
+    }
+  ],
+  "open_item_accounts": [
+    "1100",
+    "2000"
+  ],
+  "modules": [
+    "inventory",
+    "purchasing"
+  ],
+  "packages": [],
+  "number_series": [
+    {
+      "type": "bill",
+      "prefix": "BILL",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "supplier_credit",
+      "prefix": "SC",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    }
+  ],
+  "policies": {},
+  "parties": [
+    {
+      "legal_name": "Civic Studio Interiors (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1100",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Mill Road Timber (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2000",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    }
+  ],
+  "products": [
+    {
+      "sku": "BENCH-FINISHED",
+      "name": "Finished bench teaching unit (Sample)",
+      "kind": "stock",
+      "base_unit": "piece",
+      "selling_price": "650.0000",
+      "sales_code": "4100",
+      "purchase_code": "5000",
+      "inventory_code": "1430",
+      "cogs_code": "5110"
+    },
+    {
+      "sku": "BENCH-SERVICE",
+      "name": "Bench finishing service (Sample)",
+      "kind": "nonstock",
+      "base_unit": "job",
+      "selling_price": "120.0000",
+      "sales_code": "4100",
+      "purchase_code": "5000"
+    }
+  ],
+  "tax_codes": []
+}

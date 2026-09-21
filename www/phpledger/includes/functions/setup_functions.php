@@ -76,7 +76,10 @@ function pl_install_template_snapshot(int $actorId, int $companyId, int $bookId,
 /** Record a complete installation fact without changing the original chart row. */
 function pl_record_installation_history(int $actorId, int $companyId, int $bookId, string $kind, array $template, string $snapshot): void
 {
-    if (!in_array($kind, ['chart', 'sample'], true)) {
+    // 'skeleton' arrived with migration 043: a business started from a sample's structure with
+    // none of its transactions. It is a third way a book's structure can arrive, beside the
+    // installed chart and a seeded sample pack.
+    if (!in_array($kind, ['chart', 'sample', 'skeleton'], true)) {
         throw new DomainException('Unknown installation history snapshot kind.');
     }
     $digest = hash('sha256', $snapshot);
@@ -141,20 +144,51 @@ function pl_setup_company(int $actorId, array $input, string $requestKey): array
         || ($chartChoice === 'bring_own' && $mode !== 'existing')) {
         throw new DomainException('Choose the neutral starter chart, or bring an existing chart with past records.');
     }
+    // How much of a sample company this business starts from (B50). `blank` is the neutral
+    // starter chart and nothing else, which is what every setup did before 1.2.1. `skeleton`
+    // brings one sample's structure with none of its transactions, so it is a legitimate start
+    // for a real business. `full` brings the structure and the fictional history with it, which
+    // only ever belongs in an isolated sample company.
+    //
+    // A caller that names a sample without naming a source is the pre-1.2.1 contract — the
+    // sample chooser and the public demo both do — and means the full sample.
+    $source = $input['source'] ?? (isset($input['sample_pack']) ? 'full' : 'blank');
+    if (!in_array($source, ['blank', 'skeleton', 'full'], true)) {
+        throw new DomainException('Choose a blank chart, a sample company\'s structure, or a full sample company.');
+    }
+    if ($source === 'blank' && isset($input['sample_pack'])) {
+        throw new DomainException('A blank business starts from the neutral chart, without a sample company.');
+    }
+    if ($source !== 'blank' && !is_string($input['sample_pack'] ?? null)) {
+        throw new DomainException('Choose which sample company this business starts from.');
+    }
+    if ($source === 'full' && $mode !== 'sample') {
+        throw new DomainException('A full sample carries fictional transactions, so it is only created as a separate sample company.');
+    }
+    if ($source === 'skeleton' && $mode === 'existing') {
+        throw new DomainException('Past records bring their own chart through the opening cutover, so they start from a blank chart here.');
+    }
     $canonical = [
         'name' => pl_ledger_text($input['name'] ?? null, 'Business name', 160),
         'currency' => pl_ledger_text($input['currency'] ?? null, 'Currency', 3),
         'start_date' => pl_ledger_date(pl_ledger_text($input['start_date'] ?? null, 'Accounting start date', 10)),
         'fiscal_year_end' => pl_ledger_text($input['fiscal_year_end'] ?? '12-31', 'Fiscal year end', 5),
-        'start_mode' => $mode, 'chart_choice' => $chartChoice, 'template_digest' => $template['digest'],
+        'start_mode' => $mode, 'chart_choice' => $chartChoice, 'source' => $source,
+        'template_digest' => $template['digest'],
     ];
     if (isset($input['sample_pack'])) {
-        if ($mode !== 'sample' || !is_string($input['sample_pack'])) { throw new DomainException('Choose a sample pack only for a new isolated sample.'); }
-        $pack = pl_demo_sample($input['sample_pack']);
-        if ($canonical['start_date'] !== $pack['start_date'] || $canonical['fiscal_year_end'] !== '12-31') {
+        // The source checks above have already refused a sample_pack that is not a string, and
+        // refused a source that names no sample at all.
+        $pack = pl_demo_sample((string) $input['sample_pack']);
+        // A full sample replays a pinned history, so its book has to start where that history
+        // starts. A skeleton replays nothing, so this business keeps the dates its owner chose.
+        if ($source === 'full' && ($canonical['start_date'] !== $pack['start_date'] || $canonical['fiscal_year_end'] !== '12-31')) {
             throw new DomainException($pack['id'] === 'accounting-starter'
                 ? 'The starter playground uses the current January practice-year start and December year end.'
                 : 'Historical samples use the pinned 2024 start and December year end.');
+        }
+        if ($source === 'skeleton' && pl_sample_structure_read($pack['id']) === null) {
+            throw new DomainException('This sample company does not publish a structure yet, so it cannot start a business.');
         }
         $canonical['sample_pack'] = $pack['id'];
         $canonical['sample_digest'] = $pack['digest'];
@@ -178,7 +212,11 @@ function pl_setup_company(int $actorId, array $input, string $requestKey): array
             'setup_status' => $canonical['start_mode'] === 'existing' ? 'opening_required' : 'ready',
             'setup_request_key' => $requestKey, 'setup_payload_hash' => $hash,
         ], 'id = %i', $created['company_id']);
-        if ($canonical['start_mode'] === 'sample') {
+        if ($canonical['source'] === 'skeleton') {
+            // Structure only. The importer proves the book is still empty and balanced at zero
+            // before this transaction commits, for a real business and a sample alike.
+            pl_import_sample_skeleton($actorId, $created['company_id'], $created['book_id'], (string) $canonical['sample_pack'], $requestKey);
+        } elseif ($canonical['start_mode'] === 'sample') {
             if (($canonical['sample_pack'] ?? '') === 'accounting-starter') { pl_seed_demo_starter_playground($actorId, $created['company_id'], $created['book_id']); }
             elseif (isset($canonical['sample_pack'])) { pl_seed_demo_pack($actorId, $created['company_id'], $created['book_id'], $canonical['sample_pack']); }
             else { pl_seed_core_sample($actorId, $created['company_id'], $created['book_id']); }

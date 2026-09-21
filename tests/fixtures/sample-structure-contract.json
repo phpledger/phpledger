@@ -1,0 +1,108 @@
+{
+  "_comment": [
+    "The reference shape of a sample company's `structure` section (owner decision B50).",
+    "",
+    "A bundled sample carries this either as `structure` inside its own manifest, which is what",
+    "tools/build-demo-packs.py should emit, or as resources/sample-structures/<id>-<version>.json,",
+    "which is where it lives until the packs carry it themselves. Either way it is the complete",
+    "answer to 'what is this business', and it contains nothing that answers 'what did it do'.",
+    "",
+    "This file is the fixture tests/onboarding_skeleton_test.php validates the contract against.",
+    "It is not loaded by the application and no sample has this identity.",
+    "",
+    "Every section is optional except `contract`. A sample that brings only a chart is valid.",
+    "`events`, `drafts`, `checkpoints`, `monthly_support`, `journals` and `documents` are",
+    "refused here: they are history and belong in the sample's own history sections.",
+    "An account may not carry a balance, a party may not carry an opening balance and a product",
+    "may not carry opening stock, because a skeleton starts at zero and that is checked, not",
+    "assumed."
+  ],
+  "contract": 1,
+  "id": "contract-reference",
+  "version": "1.0.0",
+  "name": "Contract reference",
+  "business": "Every section the contract allows",
+
+  "accounts": [
+    { "code": "1410", "name": "Goods for resale", "type": "asset" },
+    { "code": "1490", "name": "Stock provision", "type": "asset", "is_contra": true },
+    { "code": "2410", "name": "Deposits held", "type": "liability" },
+    { "code": "4100", "name": "Goods income", "type": "income" },
+    { "code": "5110", "name": "Cost of goods sold", "type": "expense", "report_classification": "cost_of_sales" }
+  ],
+
+  "open_item_accounts": ["1100", "2000"],
+
+  "modules": ["inventory", "purchasing"],
+  "packages": [],
+
+  "number_series": [
+    { "type": "invoice", "prefix": "INV", "padding": 6, "year_segment": true, "reset_rule": "yearly" },
+    { "type": "bill", "prefix": "BILL", "padding": 5, "year_segment": false, "reset_rule": "never" }
+  ],
+
+  "policies": {
+    "discount_posting": "net",
+    "free_goods_output_tax": "none",
+    "cash_on_invoice_cap": "0.0000"
+  },
+
+  "company_profile": {
+    "footer_terms": "Only the wording a printed document carries. A sample's own legal name, address and registration are its identity and are never copied into a real business."
+  },
+
+  "parties": [
+    {
+      "legal_name": "Reference customer",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1100",
+      "notes": "No balance and no document is copied with a party."
+    },
+    {
+      "legal_name": "Reference supplier",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2000",
+      "notes": "No balance and no document is copied with a party."
+    }
+  ],
+
+  "products": [
+    {
+      "sku": "REFERENCE-GOODS",
+      "name": "Reference goods",
+      "kind": "stock",
+      "base_unit": "each",
+      "selling_price": "25.0000",
+      "inventory_code": "1410",
+      "cogs_code": "5110",
+      "sales_code": "4100",
+      "purchase_code": "5000"
+    },
+    {
+      "sku": "REFERENCE-SERVICE",
+      "name": "Reference service",
+      "kind": "nonstock",
+      "base_unit": "service",
+      "selling_price": "50.0000",
+      "sales_code": "4100",
+      "purchase_code": "5000"
+    }
+  ],
+
+  "tax_codes": [
+    {
+      "code": "REF5",
+      "name": "Reference example 5 percent",
+      "treatment": "standard",
+      "percentage": "5",
+      "sales_code": "2410",
+      "purchase_code": "1410"
+    }
+  ]
+}
