@@ -73,8 +73,10 @@ def reclaim(path) -> None:
     """
     if os.name == "nt":
         return
-    run(["docker", "run", "--rm", "-v", f"{path}:/reclaim", IMAGE_TAG,
-         "chown", "-R", f"{os.getuid()}:{os.getgid()}", "/reclaim"], check=False)
+    # try_run, not run: run() already sets check=True, and a reclaim that cannot
+    # start must not replace the real result with its own failure.
+    try_run(["docker", "run", "--rm", "-v", f"{path}:/reclaim", IMAGE_TAG,
+             "chown", "-R", f"{os.getuid()}:{os.getgid()}", "/reclaim"])
 
 
 def remove_test_image() -> None:
