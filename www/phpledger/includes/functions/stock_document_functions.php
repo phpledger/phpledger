@@ -253,6 +253,17 @@ function pl_stock_document_summary(int $actorId, int $companyId, int $bookId, in
         $row['total_sale_value'] = bcadd($row['total_sale_value'], $line['sale_value'], 4);
         $row['lines'][] = $line;
     }
+    // 1.2 M7 (owner decision B58): a stock document carries carrying value, which is cost. It is
+    // withheld — from this read, not only from the screen — unless the reader holds `cost.view`
+    // AND Admin > Cost visibility has this report showing cost. `sale_value` is the selling price,
+    // not cost, and is unaffected. Quantities, movements and numbers are never withheld: they are
+    // what the document IS, and a storeman has to be able to read the document he is handed.
+    $row['cost_visible'] = pl_stock_cost_visible($actorId, $companyId, $bookId, 'stock-documents');
+    if (!$row['cost_visible']) {
+        foreach ($row['lines'] as &$withheld) { $withheld['value_base'] = null; }
+        unset($withheld);
+        $row['total_value_base'] = null;
+    }
     $pass = DB::queryFirstRow('SELECT * FROM pl_gate_passes WHERE document_id=%i AND company_id=%i AND book_id=%i FOR SHARE', $id, $companyId, $bookId);
     $row['gate_pass'] = null;
     if ($pass) {
@@ -419,18 +430,25 @@ function pl_review_van_settlement(int $actorId, int $companyId, int $bookId, int
 /**
  * Approving a settlement is a distinct act from recording one (research decision 6).
  *
- * The Users module has no capability system yet, so the interim rule is the existing owner
- * check, exactly as the release plan's "interim: owner role until M7 lands" says. When the
- * capability lands, replace this one call with the `settlement.approve` check and keep the
- * rest: the seam is deliberately a single line.
+ * M4 wrote this as a one-line seam over the interim owner check, to be replaced by a capability
+ * when the Users module landed. 1.2 M7 replaced it: the permission is `settlement.approve`, which
+ * the Owner role holds by default, so the authorisation outcome is unchanged for every existing
+ * installation and a custom role can now be given it. tests/capability_equivalence_test.php
+ * proves the outcome did not move.
  */
 function pl_van_settlement_require_approver(int $actorId, int $companyId): array
 {
     $member = pl_require_company_access($actorId, $companyId, true);
-    if ($member['role'] !== 'owner') {
-        throw new DomainException('Approving a van settlement needs the settlement approval permission. Until user permissions ship, only the business owner can approve one.');
-    }
+    pl_require_capability($actorId, $companyId, 'settlement.approve',
+        'Approving a van settlement needs the settlement approval permission. An administrator can grant it in Admin > Roles.');
     return $member;
+}
+
+/** The same question without the throw, for a screen deciding whether to show the button. */
+function pl_van_settlement_can_approve(int $actorId, int $companyId): bool
+{
+    pl_require_company_access($actorId, $companyId);
+    return pl_user_can($actorId, $companyId, 'settlement.approve');
 }
 
 function pl_approve_van_settlement(int $actorId, int $companyId, int $bookId, int $id, string $reason, string $key): array
@@ -480,12 +498,21 @@ function pl_list_van_settlements(int $actorId, int $companyId, int $bookId, ?int
 }
 
 /**
- * Cost columns are a separate permission. Until the Users module lands, the interim rule
- * named in the release plan is the owner role; the seam is this one function.
+ * Cost columns are a separate permission. M4 wrote this as a one-line seam over the interim owner
+ * check; 1.2 M7 replaced it with TWO questions, both of which must say yes (owner decision B58):
+ *
+ *   1. does this viewer hold `cost.view`? — a judgement about the person. Cost is a trade secret
+ *      in some domains and is never visible to an ordinary user without authority.
+ *   2. is this report configured to show cost? — a judgement about the report, made per report by
+ *      an Admin in Admin > Cost visibility, because the answer differs report by report.
+ *
+ * The Owner role holds `cost.view` by default and every report ships showing cost, so the
+ * authorisation outcome is unchanged for every existing installation.
  */
-function pl_stock_cost_visible(int $actorId, int $companyId): bool
+function pl_stock_cost_visible(int $actorId, int $companyId, int $bookId, string $reportId = 'stock-by-location'): bool
 {
-    return pl_require_company_access($actorId, $companyId)['role'] === 'owner';
+    pl_require_company_access($actorId, $companyId);
+    return pl_report_cost_visible($actorId, $companyId, $bookId, $reportId);
 }
 
 /**
@@ -506,7 +533,7 @@ function pl_stock_by_location(int $actorId, int $companyId, int $bookId, ?string
     if (!in_array($locations, ['all', 'fixed', 'mobile'], true)) { throw new DomainException('Choose all locations, warehouses only or vans only.'); }
     $asOf = pl_ledger_date($asOf ?? gmdate('Y-m-d'));
     $search = pl_ledger_text($search, 'Search', 160, false);
-    $costVisible = pl_stock_cost_visible($actorId, $companyId);
+    $costVisible = pl_stock_cost_visible($actorId, $companyId, $bookId);
     $warehouses = []; $default = null;
     foreach (pl_list_inventory_warehouses($actorId, $companyId, $bookId) as $warehouse) {
         if ($warehouse['is_default']) { $default = $warehouse['id']; }
@@ -596,7 +623,7 @@ function pl_van_stock_report(int $actorId, int $companyId, int $bookId, ?string 
  */
 function pl_stock_location_aggregate(int $actorId, int $companyId, int $bookId, ?string $asOf = null): array
 {
-    $costVisible = pl_stock_cost_visible($actorId, $companyId);
+    $costVisible = pl_stock_cost_visible($actorId, $companyId, $bookId);
     $valuation = pl_inventory_valuation($actorId, $companyId, $bookId, $asOf);
     $grouped = pl_stock_by_location($actorId, $companyId, $bookId, $valuation['as_of']);
     $perLocation = '0.0000';

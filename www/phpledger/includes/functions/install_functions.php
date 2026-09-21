@@ -308,6 +308,14 @@ function pl_migrate(?int $limit = null, ?float $seconds = null): array
             DB::update('pl_schema_migrations', ['status' => 'applied', 'applied_at' => gmdate('Y-m-d H:i:s')], 'version = %s', $version);
             $result['applied'][] = $version;
         }
+        // 1.2 M7: the capability catalogue lives in PHP, not in a migration, so a module or a
+        // plugin can add to it without one (capability_functions.php). Registering it is
+        // idempotent, never removes a capability or a grant, and runs on every migrate so an
+        // upgraded copy gains the release's new capabilities without a second command.
+        if (function_exists('pl_sync_capability_catalogue') && in_array('pl_capabilities', pl_install_tables(), true)) {
+            pl_sync_capability_catalogue();
+            pl_seed_installation_admin();
+        }
         return $result;
     } finally {
         DB::queryFirstField('SELECT RELEASE_LOCK(%s)', $lock);

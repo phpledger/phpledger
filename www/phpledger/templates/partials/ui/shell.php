@@ -44,6 +44,10 @@ $navGroups = [
         ['/accounting-policies', pl_t('Accounting policies'), 'adjustments-horizontal', ['accounting-policies'], !pl_demo_enabled()],
         ['/company-profile', pl_t('Company profile'), 'building', ['company-profile'], !pl_demo_enabled()],
         ['/modules', 'Modules', 'adjustments-horizontal', ['modules'], !pl_demo_enabled()],
+        // 1.2 M7. The nav is a hint, never the gate: each screen repeats its own capability check.
+        ['/users', pl_t('Users'), 'users', ['users'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'users.manage')],
+        ['/roles', pl_t('Roles'), 'key', ['roles'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'roles.manage')],
+        ['/cost-visibility', pl_t('Cost visibility'), 'lock', ['cost-visibility'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'reports.cost_settings.manage')],
         ['/connections', 'Connections & API', 'external-link', ['connections'], true],
     ],
 ];
@@ -78,7 +82,7 @@ $quickCreate = [
         <a class="nav-item" href="<?= pl_e(pl_url('/home')) ?>" title="Home"<?= $view === 'home' ? ' aria-current="page"' : '' ?>><?= pl_icon('home') ?><span>Home</span></a>
         <?php foreach ($navGroups as $group => $items): ?>
             <?php $items = array_filter($items, static fn (array $item): bool => (bool)$item[4]); if ($items === []) { continue; } ?>
-            <?php if ($group === 'Setup'): ?><details class="nav-group-collapsible"<?= in_array($view, ['accounts','tax','opening-balances','opening-conversion','periods','modules','connections'], true) ? ' open' : '' ?>><summary class="nav-group-summary"><span>Setup</span><?= pl_icon('chevron-down') ?></summary><div class="nav-group-body"><?php else: ?><p class="nav-group-label"><?= pl_e($group) ?></p><?php endif; ?>
+            <?php if ($group === 'Setup'): ?><details class="nav-group-collapsible"<?= in_array($view, ['accounts','tax','opening-balances','opening-conversion','periods','modules','connections','users','roles','cost-visibility'], true) ? ' open' : '' ?>><summary class="nav-group-summary"><span>Setup</span><?= pl_icon('chevron-down') ?></summary><div class="nav-group-body"><?php else: ?><p class="nav-group-label"><?= pl_e($group) ?></p><?php endif; ?>
             <?php foreach ($items as [$href, $label, $icon, $views]): ?>
                 <a class="nav-item" href="<?= pl_e(pl_url($href)) ?>" title="<?= pl_e($label) ?>"<?= in_array($view, $views, true) ? ' aria-current="page"' : '' ?>><?= pl_icon($icon) ?><span><?= pl_e($label) ?></span></a>
             <?php endforeach; ?>
@@ -96,6 +100,6 @@ $quickCreate = [
         <div class="topbar-actions">
             <?php if (pl_can_write($company)): ?><details class="menu"><summary class="btn btn-primary btn-sm"><?= pl_icon('plus') ?> New</summary><div class="menu-panel menu-panel-end"><p class="menu-label">Quick create</p><?php foreach ($quickCreate as [$href, $label, $visible]): if (!$visible) { continue; } ?><a class="menu-item" href="<?= pl_e(pl_url($href)) ?>"><?= pl_e($label) ?></a><?php endforeach; ?></div></details><?php endif; ?>
             <?php if ($company['is_sample'] && pl_company_demo_pack((int)$user['id'], (int)$company['id'], (int)$company['book_id']) !== null): ?><a class="sample-guide-link max-lg:hidden" href="<?= pl_e(pl_url('/sample-guide')) ?>">Sample guide <?= pl_icon('arrow-right') ?></a><?php endif; ?>
-            <details class="menu"><summary class="user-menu-trigger" aria-label="User menu"><span class="avatar"><?= pl_e(mb_strtoupper(mb_substr($user['display_name'], 0, 1))) ?></span><?= pl_icon('chevron-down') ?></summary><div class="menu-panel menu-panel-end"><p class="menu-label"><?= pl_e($user['display_name']) ?></p><?php if (!pl_demo_enabled()): ?><p class="menu-item-static"><?= pl_e($user['email']) ?></p><a class="menu-item" href="<?= pl_e(pl_url('/companies')) ?>">Switch business</a><?php endif; ?><form action="<?= pl_e(pl_url('/logout')) ?>" method="post"><?= pl_csrf_field() ?><button type="submit" class="menu-item"><?= pl_icon('logout') ?> <?= pl_demo_enabled() ? 'Leave demo' : 'Sign out' ?></button></form></div></details>
+            <details class="menu"><summary class="user-menu-trigger" aria-label="User menu"><span class="avatar"><?= pl_e(mb_strtoupper(mb_substr($user['display_name'], 0, 1))) ?></span><?= pl_icon('chevron-down') ?></summary><div class="menu-panel menu-panel-end"><p class="menu-label"><?= pl_e($user['display_name']) ?></p><?php if (!pl_demo_enabled()): ?><p class="menu-item-static"><?= pl_e($user['email']) ?></p><a class="menu-item" href="<?= pl_e(pl_url('/profile')) ?>"><?= pl_e(pl_t('Your profile')) ?></a><a class="menu-item" href="<?= pl_e(pl_url('/companies')) ?>">Switch business</a><?php endif; ?><form action="<?= pl_e(pl_url('/logout')) ?>" method="post"><?= pl_csrf_field() ?><button type="submit" class="menu-item"><?= pl_icon('logout') ?> <?= pl_demo_enabled() ? 'Leave demo' : 'Sign out' ?></button></form></div></details>
         </div>
     </header>

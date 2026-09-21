@@ -4,8 +4,19 @@ parameters:
         - www/phpledger/includes
         - www/phpledger/install
         - www/phpledger/public
+        - www/phpledger/templates
         - tools
     tmpDir: .cache/phpstan
     scanFiles:
         - vendor/sergeytsalkov/meekrodb/db.class.php
-        - www/phpledger/templates/partials/ui/components.php
+        - vendor/sergeytsalkov/meekrodb/orm.class.php
+    ignoreErrors:
+        # Release plan 1.2 M7 brought templates under analysis. A view is rendered by pl_render(),
+        # which extract()s the data the route assembled, so every view variable is "undefined" as
+        # far as static analysis is concerned. The variables are documented in each view's header
+        # block instead; narrowing this further needs the views to take a typed object, which is a
+        # separate refactor, not a Users-module change.
+        -
+            identifier: variable.undefined
+            paths:
+                - www/phpledger/templates/*

@@ -114,8 +114,8 @@ function pl_correct_source(int $actorId, int $companyId, int $bookId, string $so
         if (DB::queryFirstField('SELECT id FROM pl_journals WHERE reversal_of_id=%i FOR UPDATE', $original['id'])) { throw new DomainException('The current posting has already been reversed.'); }
         pl_open_item_assert_correction_allowed($companyId, $bookId, $original['id']);
         $reversalDate = $date ?? gmdate('Y-m-d');
-        if ($reversalDate !== gmdate('Y-m-d') && ($member['role'] !== 'owner' || $reversalDate !== $original['journal_date'])) {
-            throw new DomainException('Only an owner may use the original posting date instead of the cancellation date.');
+        if ($reversalDate !== gmdate('Y-m-d') && (!pl_user_can($actorId, $companyId, 'journal.reverse_backdated') || $reversalDate !== $original['journal_date'])) {
+            throw new DomainException('Only a role with the backdated-reversal permission may use the original posting date instead of the cancellation date.');
         }
         if ($data['document_date'] < $reversalDate) { throw new DomainException('A corrected posting cannot precede its reversing entry.'); }
         if ($data['reference'] !== $raw['reference']) { throw new DomainException('A correction must retain the same document reference.'); }

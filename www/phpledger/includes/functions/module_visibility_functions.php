@@ -17,7 +17,8 @@ function pl_set_company_visibility(int $actorId, int $companyId, bool $showAr, b
     $key = pl_request_key($key);
     $hash = hash('sha256', json_encode([$actorId,$companyId,$showAr,$showAp,$revision,$reason], JSON_THROW_ON_ERROR));
     return pl_ledger_transaction(function () use ($actorId,$companyId,$showAr,$showAp,$revision,$reason,$key,$hash): array {
-        if (pl_require_company_access($actorId,$companyId,true)['role'] !== 'owner') { throw new DomainException('Only the company owner can change navigation.'); }
+        pl_require_company_access($actorId,$companyId,true);
+        if (!pl_user_can($actorId,$companyId,'navigation.manage')) { throw new DomainException('Your role cannot change navigation for this company.'); }
         DB::queryFirstField('SELECT id FROM pl_companies WHERE id=%i FOR UPDATE', $companyId);
         $prior = DB::queryFirstRow('SELECT payload_hash,result_json FROM pl_visibility_actions WHERE company_id=%i AND request_key=%s FOR UPDATE', $companyId,$key);
         if ($prior) {

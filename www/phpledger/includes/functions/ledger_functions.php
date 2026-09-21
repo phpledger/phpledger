@@ -115,7 +115,10 @@ function pl_create_company(int $actorId, string $name, string $currency, string 
         }
         DB::insert('pl_companies', ['name' => $name, 'currency' => $currency, 'functional_currency' => $currency, 'presentation_currency' => $currency, 'start_date' => $startDate, 'fiscal_year_end' => $fiscalYearEnd, 'created_by' => $actorId, 'setup_status' => 'ready']);
         $companyId = (int) DB::insertId();
-        DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $actorId, 'role' => 'owner']);
+        // 1.2 M7 dual write: the 1.1 ENUM and the new role_id both name the Owner role. The ENUM
+        // is dropped in 1.3; until then every membership write sets both (migration 040).
+        DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $actorId, 'role' => 'owner',
+            'role_id' => DB::queryFirstField("SELECT id FROM pl_roles WHERE company_id IS NULL AND slug = 'owner'")]);
         DB::insert('pl_books', ['company_id' => $companyId, 'name' => 'Primary book', 'functional_currency' => $currency, 'presentation_currency' => $currency]);
         $bookId = (int) DB::insertId();
         DB::insert('pl_periods', ['company_id' => $companyId, 'book_id' => $bookId, 'start_date' => $startDate, 'end_date' => $endDate, 'status' => 'open']);
@@ -138,6 +141,11 @@ function pl_create_company(int $actorId, string $name, string $currency, string 
             $mapping[$definition['semantic_key']] = $accountId;
         }
         pl_install_template_snapshot($actorId, $companyId, $bookId, $template, $mapping);
+        // B44: the owner of the FIRST company on this installation becomes its administrator.
+        // A no-op once anybody holds installation.admin, so the second company changes nothing.
+        if (function_exists('pl_seed_installation_admin')) {
+            pl_seed_installation_admin();
+        }
         return ['company_id' => $companyId, 'book_id' => $bookId, 'period_id' => $periodId, 'accounts' => $accounts];
     });
 }
@@ -240,9 +248,9 @@ function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array
         }
         pl_correction_assert_posting_allowed($companyId, $bookId, $payload, $reversalOf);
         if ($reversalOf !== null && $original['source_type'] !== 'opening_balance' && $payload['date'] < gmdate('Y-m-d')) {
-            $member = pl_require_company_access($actorId, $companyId, true);
-            if ($member['role'] !== 'owner' || $payload['date'] !== $original['journal_date']) {
-                throw new DomainException('Backdated reversals require an owner, the original posting date and an open period.');
+            pl_require_company_access($actorId, $companyId, true);
+            if (!pl_user_can($actorId, $companyId, 'journal.reverse_backdated') || $payload['date'] !== $original['journal_date']) {
+                throw new DomainException('Backdated reversals require the backdated-reversal permission, the original posting date and an open period.');
             }
         }
         $carryingAccount = $settlementItemId === null ? null : pl_open_item_validate_settlement_basis($companyId, $bookId, $payload, $settlementItemId);

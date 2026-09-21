@@ -135,7 +135,7 @@ function pl_web_van_settlement(int $actorId, int $companyId, int $bookId, array 
     pl_render('van-settlement', ['title' => 'Van settlement', 'user' => $user, 'company' => $company, 'enabled' => $enabled,
         'vans' => $vans, 'warehouseId' => $warehouseId, 'date' => $date, 'day' => $day, 'settlement' => $settlement,
         'settlements' => pl_list_van_settlements($actorId, $companyId, $bookId, $warehouseId ?: null),
-        'canApprove' => pl_require_company_access($actorId, $companyId)['role'] === 'owner',
+        'canApprove' => pl_van_settlement_can_approve($actorId, $companyId),
         'form' => $form, 'input' => $form['input'] ?: ['request_key' => bin2hex(random_bytes(20))]]);
 }
 

@@ -309,9 +309,9 @@ function pl_reverse_opening(int $actorId, int $companyId, int $bookId, int $cuto
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($reason, 'Cutover correction reason', 400);
     return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $cutoverId, $reason): array {
-        $member = pl_require_company_access($actorId, $companyId, true);
-        if ($member['role'] !== 'owner') {
-            throw new DomainException('Only the company owner can restart an opening cutover.');
+        pl_require_company_access($actorId, $companyId, true);
+        if (!pl_user_can($actorId, $companyId, 'opening.manage')) {
+            throw new DomainException('Your role cannot restart an opening cutover.');
         }
         pl_ledger_book($companyId, $bookId, true);
         $cutover = DB::queryFirstRow('SELECT * FROM pl_opening_cutovers WHERE id = %i AND company_id = %i AND book_id = %i FOR UPDATE', $cutoverId, $companyId, $bookId);

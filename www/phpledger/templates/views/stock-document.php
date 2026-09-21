@@ -54,13 +54,15 @@ foreach ($facts as $label => $value): ?><div><span class="text-xs text-ink-muted
 <?php $shown = $pass !== null && $document['covers'] !== null ? $document['covers'] : $document; ?>
 <?php if ($shown['lines'] !== []): ?>
 <section><h2 class="section-title mb-2"><?= pl_e($shown !== $document ? pl_t('Lines of {number}', ['number' => (string) $shown['document_number']]) : pl_t('Lines')) ?></h2>
-<?php pl_ui_table([pl_t('#'), pl_t('Code'), pl_t('Item'), pl_t('Quantity'), pl_t('Unit'), pl_t('Carrying value ({currency})', ['currency' => $company['currency']]), pl_t('Movements')], static function () use ($shown): void { foreach ($shown['lines'] as $line): ?>
+<?php $showCost = (bool) ($shown['cost_visible'] ?? true); ?>
+<?php pl_ui_table(array_merge([pl_t('#'), pl_t('Code'), pl_t('Item'), pl_t('Quantity'), pl_t('Unit')], $showCost ? [pl_t('Carrying value ({currency})', ['currency' => $company['currency']])] : [], [pl_t('Movements')]), static function () use ($shown, $showCost): void { foreach ($shown['lines'] as $line): ?>
 <tr><td><?= (int) $line['line_number'] ?></td><td><?= pl_e((string) $line['sku']) ?></td><td><?= pl_e((string) $line['product_name']) ?></td>
 <td class="amount"><?= pl_e((string) $line['quantity']) ?></td><td><?= pl_e((string) $line['base_unit']) ?></td>
-<td class="amount"><?= pl_e(pl_money((string) $line['value_base'])) ?></td>
+<?php if ($showCost): ?><td class="amount"><?= pl_e(pl_money((string) $line['value_base'])) ?></td><?php endif; ?>
 <td class="text-xs text-ink-muted"><?= pl_e(pl_t('out {out} · in {in}', ['out' => (int) $line['out_movement_id'], 'in' => (int) $line['in_movement_id']])) ?></td></tr>
 <?php endforeach; }, pl_t('Stock document lines')); ?>
-<?php pl_ui_totals([pl_t('Quantity') => $shown['total_quantity'], pl_t('Carrying value ({currency})', ['currency' => $company['currency']]) => pl_money($shown['total_value_base']), pl_t('Value at sale rate ({currency})', ['currency' => $company['currency']]) => pl_money($shown['total_sale_value'])]); ?>
+<?php pl_ui_totals(array_merge([pl_t('Quantity') => $shown['total_quantity']], $showCost ? [pl_t('Carrying value ({currency})', ['currency' => $company['currency']]) => pl_money((string) $shown['total_value_base'])] : [], [pl_t('Value at sale rate ({currency})', ['currency' => $company['currency']]) => pl_money($shown['total_sale_value'])])); ?>
+<?php if (!$showCost): ?><p class="text-xs text-ink-muted"><?= pl_e(pl_t('Carrying value is a separate permission on this document. Ask an administrator for the "See cost and margin" permission, or check Admin > Cost visibility.')) ?></p><?php endif; ?>
 <p class="text-xs text-ink-muted"><?= pl_e(pl_t('Each line moved its quantity between two of your own locations at the source\'s average cost. No journal was written: ownership did not change.')) ?></p>
 </section>
 <?php elseif ($pass === null): ?>

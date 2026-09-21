@@ -663,7 +663,10 @@ function pl_render(string $view, array $data = []): never
         // 1.2 M4: the stock document family and its report.
         'stock-documents', 'stock-document', 'van-settlement', 'stock-by-location',
         // 1.2 M3: the trading-document policy and company-profile screens.
-        'accounting-policies', 'company-profile'];
+        'accounting-policies', 'company-profile',
+        // 1.2 M7: the Users module. 'account-access' is the signed-out screen that redeems an
+        // invitation token or a forced-reset token.
+        'users', 'roles', 'profile', 'cost-visibility', 'account-access'];
     if (!in_array($view, $allowed, true)) {
         throw new LogicException('Unknown template.');
     }

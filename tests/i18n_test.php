@@ -291,7 +291,11 @@ test('every route renders under the pseudo-locale and the document language foll
     $routes = ['/login', '/', '/home', '/companies', '/accounts', '/transactions', '/transactions/new', '/general-journals',
         '/general-journals/new', '/reports', '/reports/trial-balance', '/reports/balance-sheet', '/reports/profit-loss',
         '/reports/cash-forecast', '/reports/ageing', '/periods', '/opening-balances', '/bank-reconciliation', '/parties',
-        '/ar', '/ap', '/inventory', '/purchasing', '/tax', '/modules', '/connections', '/help', '/pos', '/no-such-route'];
+        '/ar', '/ap', '/inventory', '/purchasing', '/tax', '/modules', '/connections', '/help', '/pos',
+        // 1.2 M7: the Users module's screens. /invitation and /reset-password render without a
+        // token as the empty form they are, which is what the sweep needs to see.
+        '/users', '/roles', '/cost-visibility', '/profile', '/invitation', '/reset-password',
+        '/no-such-route'];
     $rendered = 0;
     $translated = 0;
     $statuses = [];

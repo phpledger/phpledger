@@ -68,6 +68,10 @@ $suites[] = 'account_code_test.php';
 $suites[] = 'report_tree_test.php';
 $suites[] = 'owner_test.php';
 $suites[] = 'stock_document_test.php';
+// 1.2 M7: the Users module and the authorisation equivalence proof. They run after the
+// module suites because the inert-grant test enables and disables a real module.
+$suites[] = 'capability_equivalence_test.php';
+$suites[] = 'users_test.php';
 if (($argv[1] ?? '') === '--suite=ar-lists') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','ar_list_test.php','reconciliation_test.php','list_test.php','document_series_test.php'];
 }
@@ -127,6 +131,9 @@ if (($argv[1] ?? '') === '--suite=lists') {
 }
 if (($argv[1] ?? '') === '--suite=i18n') {
     $suites = ['ledger_test.php', 'i18n_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=users') {
+    $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php', 'module_test.php', 'capability_equivalence_test.php', 'users_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=modules') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'purchasing_test.php', 'pos_test.php', 'module_test.php'];

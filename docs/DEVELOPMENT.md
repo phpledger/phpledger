@@ -225,6 +225,54 @@ The committed default target is `http://127.0.0.1:18200` with the default Compos
 
 It does not cover desktop and phone widths. That half of definition-of-done item 2 still needs a browser fixture.
 
+### Users, roles and capabilities (1.2 M7)
+
+Authorisation is one function. Ask it; do not read a role name.
+
+| Signature | What it is for |
+|---|---|
+| `pl_user_can(int $actorId, int $companyId, string $capability): bool` | The only authorisation question. `$companyId` 0 asks about installation scope. Returns false, never throws, for a stranger. |
+| `pl_require_capability(int $actorId, int $companyId, string $capability, string $message): void` | The throwing form, for a service that has already checked membership. |
+| `pl_user_capabilities(int $actorId, int $companyId): array<string,bool>` | The effective set, cached per request; reset it with `pl_capability_cache_reset()` after any grant, role or membership change. |
+| `pl_capability_catalogue(): array` | The core catalogue: capability => label, description, scope. Add a core capability here, not in a migration. |
+| `pl_system_role_grants(): array<string,list<string>>` | What Owner, Accountant and Viewer hold. Changing it changes the equivalence test's expectations, deliberately. |
+| `pl_manifest_capability_grants(array $manifest): array<string,string>` | A module's own capabilities, from its optional `grants` map. Omitting `grants` leaves a manifest byte-identical, so its digest does not move and no company is asked to re-review it. |
+| `pl_sync_capability_catalogue(): void` | Registers the catalogue and the system roles' grants. Idempotent; runs at the end of `pl_migrate()`; never removes a capability or a grant. |
+| `pl_list_roles/pl_get_role/pl_save_role(...)` | Roles for one company: the installation-wide system roles (read-only) plus its own. |
+| `pl_assign_company_role(int $actorId, int $companyId, int $userId, int $roleId, string $reason): array` | The only way to change a membership. Writes both `role_id` and the mirrored 1.1 ENUM. |
+| `pl_admin_update_user(int $actorId, int $companyId, int $userId, array $input, string $reason): array` | Edit somebody else's name and contact details. Never their email, username or password: those belong to the person, and `pl_force_password_reset()` hands over a one-time link instead. |
+| `pl_report_cost_visible(int $actorId, int $companyId, int $bookId, string $reportId): bool` | What every cost-bearing report asks (B58). `pl_report_margin_visible()` is its margin twin. |
+| `pl_session_open/pl_session_validate/pl_session_close/pl_revoke_user_sessions(...)` | Server-side sessions. `pl_login_session()` and `pl_current_user_id()` already call them; call them directly only from an administration service. |
+
+The capabilities this release registers:
+
+| Capability | Scope | Replaced | Held by default |
+|---|---|---|---|
+| `company.read` | company | the membership gate's read check | Owner, Accountant, Viewer |
+| `company.write` | company | the membership gate's write check | Owner, Accountant |
+| `modules.manage` | company | `module_functions.php` owner check | Owner |
+| `navigation.manage` | company | `module_visibility_functions.php` owner check | Owner |
+| `numbering.manage` | company | `document_series_functions.php` owner check | Owner |
+| `periods.reopen` | company | `period_functions.php` reopen owner check | Owner |
+| `opening.manage` | company | five owner checks across `opening_functions.php`, `opening_conversion_functions.php`, `inventory_functions.php` and `starter_inventory_web_functions.php` | Owner |
+| `openitem.activate` | company | `open_item_functions.php` owner check | Owner |
+| `tax.settings.manage` | company | `tax_functions.php` owner check | Owner |
+| `policy.manage` | company | the two `trading_functions.php` owner checks | Owner |
+| `journal.reverse_backdated` | company | the three backdated-reversal owner checks (`ledger_functions.php`, `correction_functions.php`, `ar_ap_functions.php`) | Owner |
+| `connections.manage_all` | company | the two `connection_functions.php` owner checks | Owner |
+| `cost.view` | company | the M4 seam `pl_stock_cost_visible()` | Owner |
+| `settlement.approve` | company | the M4 seam `pl_van_settlement_require_approver()` | Owner |
+| `users.manage` | company | new | Owner |
+| `roles.manage` | company | new | Owner |
+| `reports.cost_settings.manage` | company | new | Owner |
+| `installation.admin` | installation | new (B44) | the first company's owner, seeded once |
+
+Deliberately still on the old checks: `pl_require_company_access()` itself, which remains the membership boundary and the read/write gate that every capability check runs behind; `pl_can_write()`, the presentation helper over the same ENUM; and `pl_require_module()`'s manifest `permissions` list, which names roles because module contract 1 does — contract 2 in M8 is where that changes, and moving it earlier would change every bundled manifest's digest and force every company to re-review every module inside a Users-module milestone.
+
+Screens: `/users`, `/roles`, `/cost-visibility` (company-scoped, in Setup), `/profile` (yours, needs no company), and `/invitation` and `/reset-password`, which are reachable without a session because they are how an invited person and a reset password reach their first sign-in.
+
+Run the suite with `docker compose --profile test run --rm test php tests/run.php --suite=users`. Use your own Compose project name and a non-overlapping `PL_DOCKER_SUBNET` when another agent or worktree may be running: two stacks sharing the default project tear each other's database down.
+
 ## Opening cutover, periods and bank reconciliation
 
 These existing core workflows are also used by the accounting starter. Back up existing development data, then apply the complete versioned migration chain with `docker compose exec -T web php www/phpledger/install/migrate.php`. Local source changes do not update a published package or hosted demo.

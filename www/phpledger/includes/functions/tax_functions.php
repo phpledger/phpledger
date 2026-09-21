@@ -46,7 +46,8 @@ function pl_set_tax_price_mode(int $actorId,int $companyId,int $bookId,string $m
     $reason=pl_ledger_text($reason,'Setting reason',500); $key=pl_request_key($key);
     $hash=hash('sha256',json_encode([$actorId,$mode,$revision,$reason],JSON_THROW_ON_ERROR));
     return pl_ledger_transaction(function () use($actorId,$companyId,$bookId,$mode,$revision,$reason,$key,$hash):array {
-        if (pl_require_company_access($actorId,$companyId,true)['role']!=='owner') { throw new DomainException('Only the owner can change tax price settings.'); }
+        pl_require_company_access($actorId,$companyId,true);
+        if (!pl_user_can($actorId,$companyId,'tax.settings.manage')) { throw new DomainException('Your role cannot change tax price settings.'); }
         pl_ledger_book($companyId,$bookId,true);
         $prior=DB::queryFirstRow('SELECT payload_hash,result_json FROM pl_tax_setting_actions WHERE book_id=%i AND request_key=%s FOR UPDATE',$bookId,$key);
         if ($prior) { if (!hash_equals($prior['payload_hash'],$hash)) { throw new DomainException('Tax setting request already has different content.'); } return json_decode($prior['result_json'],true,512,JSON_THROW_ON_ERROR); }

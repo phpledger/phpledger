@@ -287,6 +287,28 @@ test('stock documents: the location reports reconcile to the movements and to th
         foreach ($group['rows'] as $row) { assert_same(null, $row['value_base']); }
     }
     assert_same($report['totals']['quantity'], $hidden['totals']['quantity'], 'Hiding cost changed the quantities.');
+
+    // 1.2 M7 (B58): a stock document carries carrying value too, so the same two questions decide
+    // it — the reader's `cost.view` permission, and whether Admin > Cost visibility has this
+    // report showing cost. Quantities, movements and numbers are never withheld.
+    $issued = pl_post_stock_document(...array_merge($args, [stock_document_input($f, 'stock_issue', ['date' => '2026-01-06'])]));
+    $ownerRead = pl_get_stock_document(...array_merge($args, [(int) $issued['id']]));
+    assert_same(true, $ownerRead['cost_visible']);
+    assert_true($ownerRead['total_value_base'] !== null);
+    $accountantRead = pl_get_stock_document($accountant, $f['company_id'], $f['book_id'], (int) $issued['id']);
+    assert_same(false, $accountantRead['cost_visible']);
+    assert_same(null, $accountantRead['total_value_base']);
+    foreach ($accountantRead['lines'] as $line) { assert_same(null, $line['value_base']); }
+    assert_same($ownerRead['total_quantity'], $accountantRead['total_quantity'], 'Hiding cost changed the quantities.');
+    assert_same($ownerRead['document_number'], $accountantRead['document_number'], 'Hiding cost changed the document.');
+    // Turning the report off withholds it from the owner as well, on the read the screen uses.
+    pl_save_report_cost_setting($f['actor_id'], $f['company_id'], $f['book_id'], 'stock-documents', false, false, 0, 'Sample trade-secret decision');
+    pl_capability_cache_reset();
+    assert_same(false, pl_get_stock_document(...array_merge($args, [(int) $issued['id']]))['cost_visible']);
+    // ...and only that report: the by-location report still shows cost to the owner.
+    assert_same(true, pl_stock_by_location(...array_merge($args, ['2026-01-06']))['cost_visible']);
+    pl_save_report_cost_setting($f['actor_id'], $f['company_id'], $f['book_id'], 'stock-documents', true, false, 1, 'Sample restore');
+    pl_capability_cache_reset();
 });
 
 test('stock documents: the module can be disabled and re-enabled with van stock present', function (): void {

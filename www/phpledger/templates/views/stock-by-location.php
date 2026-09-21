@@ -22,7 +22,7 @@ $columns = count($headings);
         'locations' => $report['totals']['locations'], 'items' => $report['totals']['items'],
     ])
     .($report['totals']['negative'] > 0 ? ' · '.pl_t('{count} negative', ['count' => $report['totals']['negative']]) : ''),
-    static function () use ($report): void { ?>
+    static function (): void { ?>
 <a class="btn btn-ghost" href="<?= pl_e(pl_url('/stock-documents')) ?>"><?= pl_e(pl_t('Stock documents')) ?></a>
 <?php }); ?>
 

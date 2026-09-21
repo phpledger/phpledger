@@ -31,7 +31,7 @@ $activeStep = $preview ? 5 : max(1, min(4, (int) ($wizard_step ?? 1)));
 ?>
 <section class="auth-panel setup-wizard" aria-labelledby="onboarding-title">
     <p class="eyebrow">Business setup · Step <?= $preview ? '5 of 6' : $activeStep . ' of 6' ?></p>
-    <?php pl_ui_page_header($preview ? 'Preview your setup' : ($steps[$activeStep] ?? 'Set up a business'), $preview ? 'Check the business identity, period and chart choice before anything is created.' : 'Set up the decisions that shape these books, one focused step at a time.', static function (): void { ?>
+    <?php pl_ui_page_header($preview ? 'Preview your setup' : ($steps[$activeStep]), $preview ? 'Check the business identity, period and chart choice before anything is created.' : 'Set up the decisions that shape these books, one focused step at a time.', static function (): void { ?>
         <a class="btn btn-secondary" href="<?= pl_e(pl_url('/companies')) ?>">Back to businesses</a>
     <?php }, 'onboarding-title'); ?>
 

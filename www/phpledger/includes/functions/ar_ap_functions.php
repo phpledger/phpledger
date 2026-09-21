@@ -792,7 +792,7 @@ function pl_preview_ar_correction(int $actorId,int $companyId,int $bookId,int $d
         pl_ar_assert_correctable($document);
         $journal=pl_get_journal($actorId,$companyId,$bookId,$document['journal_id']);
         if ($date<$journal['journal_date'] || $data['document_date']<$date) { throw new DomainException('Date the reversal on or after its original posting, and the replacement on or after the reversal.'); }
-        if ($date<gmdate('Y-m-d') && ($member['role']!=='owner' || $date!==$journal['journal_date'])) { throw new DomainException('Backdated reversals require an owner, the original posting date and an open period.'); }
+        if ($date<gmdate('Y-m-d') && (!pl_user_can($actorId,$companyId,'journal.reverse_backdated') || $date!==$journal['journal_date'])) { throw new DomainException('Backdated reversals require the backdated-reversal permission, the original posting date and an open period.'); }
         pl_open_item_assert_correction_allowed($companyId,$bookId,$document['journal_id']);
         pl_purchasing_assert_reversal_allowed($companyId,$bookId,$document['journal_id']);
         $reversal=[];

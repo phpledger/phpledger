@@ -1,5 +1,16 @@
 # Shared Claude and Codex state
 
+## Latest checkpoint, 21 September 2026 (Claude): 1.2 M7 built, not merged
+
+- **Branch `m7/users-module` from `4c223a7`, committed, not pushed.** The full Users module (B44, B58, B17, B53, B12): migration `040_users_and_roles.php`, a capability catalogue, `pl_user_can()` replacing about fourteen literal owner-only checks, the three protected system roles as installation-wide definitions assigned per company, custom roles per company, invitations, forced password resets, server-side revocable sessions, a profile page, per-report cost visibility, an immutable user audit, and the first MeekroORM records (`PL_Model`, `PL_User`, `PL_Role`, `PL_Capability`).
+- **Authorisation has one question now:** `pl_user_can($actor, $company, $capability)`. `pl_require_company_access()` is unchanged and still the membership boundary and read/write gate; it runs first at every converted call site. `tests/capability_equivalence_test.php` proves the conversion changed no outcome for owner, accountant, viewer, outsider and inactive actors across every gate converted, as a tri-state (allowed / denied / no-access).
+- **The 1.1 role ENUM on `pl_company_members` is mirrored, not replaced.** Every membership write sets both it and `role_id`; a custom role mirrors to `accountant` or `viewer` by whether it can write, and never to `owner`. 1.3 drops the ENUM.
+- **`resources/modules/core.json` changed**, so the core manifest digest moves. Safe for `core` only: no per-company `manifest_hash` is stored for a required module. No optional manifest was touched.
+- **Templates are under PHPStan** (`www/phpledger/templates` in `paths`, one scoped ignore for the variables `pl_render()` extracts). Four real findings in existing templates were fixed.
+- **Still open after M7:** no mail transport, so invitation, reset and email-confirmation links are shown once on screen; the van settlement's cost totals are not yet under `cost.view` (they feed the approval comparison); module action permissions still name roles until M8's contract 2; `installation.admin` has no consumer until M8's Packages.
+- **Migration numbering:** 040 was the next free number at the branch point; renumber at merge in landing order per B62. It appears in four places only — the file name, the installer label in `install_check_functions.php`, two lines in `tools/package-files.json`, and the `migrations` list in `resources/modules/core.json`.
+
+
 ## Latest checkpoint, 20 September 2026 night (Claude): 1.1.3 published, 1.2 started
 
 - **Release [v1.1.3](https://github.com/phpledger/phpledger/releases/tag/v1.1.3) published 2026-09-20 20:40:01 UTC** from `521dbc3` (tag `v1.1.3`). `phpledger-1.1.3.zip` 2,952,255 bytes, SHA-256 `208c0a089ee32d377116026a4d0401790d21706399a5c63b5f5f818a4d3b5482`, 1,502 manifest files, two local builds byte-identical; `phpledger-1.1.3.update.json` 312,687 bytes, SHA-256 `c285f3aa11dc9db697c4ae62ca5750e8103f360f4a1ab19a062a3ae885cb2002`, owner-signed via `.cache/release-1.1.3/sign-1.1.3.py`, verified from 1.1.0, 1.1.1 and 1.1.2; no media kit (B29). All assets re-downloaded anonymously and hash-verified. `composer check` 320 tests, 0 failures; CI green on the tag.

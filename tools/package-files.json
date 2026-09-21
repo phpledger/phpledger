@@ -1309,6 +1309,58 @@
     {
       "source": "www/phpledger/includes/functions/advance_functions.php",
       "destination": "www/phpledger/includes/functions/advance_functions.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/040_users_and_roles.php",
+      "destination": "www/phpledger/install/migrations/040_users_and_roles.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/capability_functions.php",
+      "destination": "www/phpledger/includes/functions/capability_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/user_functions.php",
+      "destination": "www/phpledger/includes/functions/user_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/user_web_functions.php",
+      "destination": "www/phpledger/includes/functions/user_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/models/PL_Model.php",
+      "destination": "www/phpledger/includes/models/PL_Model.php"
+    },
+    {
+      "source": "www/phpledger/includes/models/PL_User.php",
+      "destination": "www/phpledger/includes/models/PL_User.php"
+    },
+    {
+      "source": "www/phpledger/includes/models/PL_Role.php",
+      "destination": "www/phpledger/includes/models/PL_Role.php"
+    },
+    {
+      "source": "www/phpledger/includes/models/PL_Capability.php",
+      "destination": "www/phpledger/includes/models/PL_Capability.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/users.php",
+      "destination": "www/phpledger/templates/views/users.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/roles.php",
+      "destination": "www/phpledger/templates/views/roles.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/profile.php",
+      "destination": "www/phpledger/templates/views/profile.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/cost-visibility.php",
+      "destination": "www/phpledger/templates/views/cost-visibility.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/account-access.php",
+      "destination": "www/phpledger/templates/views/account-access.php"
     }
   ]
 }

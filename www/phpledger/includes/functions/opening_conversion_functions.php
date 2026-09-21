@@ -4,8 +4,8 @@ declare(strict_types=1);
 /** Pure reviewed allocation of an existing opening journal; confirmation never posts GL. */
 function pl_opening_conversion_review(int $actorId, int $companyId, int $bookId, int $cutoverId, array $mappings): array
 {
-    $access = pl_require_company_access($actorId, $companyId, true);
-    if ($access['role'] !== 'owner') { throw new DomainException('Only the owner can review opening debt conversion.'); }
+    pl_require_company_access($actorId, $companyId, true);
+    if (!pl_user_can($actorId, $companyId, 'opening.manage')) { throw new DomainException('Your role cannot review opening debt conversion.'); }
     $book = pl_ledger_book($companyId, $bookId, true);
     pl_require_book_ready($companyId);
     $cutover = DB::queryFirstRow('SELECT * FROM pl_opening_cutovers WHERE id = %i AND company_id = %i AND book_id = %i FOR SHARE', $cutoverId, $companyId, $bookId);
@@ -59,8 +59,8 @@ function pl_confirm_opening_conversion(int $actorId, int $companyId, int $bookId
     if (!$confirmed) { throw new DomainException('Confirm the party mappings and reconciled opening carrying amounts.'); }
     $key = pl_request_key($key); $reason = pl_ledger_text($reason, 'Conversion reason', 500);
     return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $cutoverId, $mappings, $expectedHash, $key, $reason): array {
-        $access = pl_require_company_access($actorId, $companyId, true);
-        if ($access['role'] !== 'owner') { throw new DomainException('Only the owner can confirm opening debt conversion.'); }
+        pl_require_company_access($actorId, $companyId, true);
+        if (!pl_user_can($actorId, $companyId, 'opening.manage')) { throw new DomainException('Your role cannot confirm opening debt conversion.'); }
         pl_ledger_book($companyId, $bookId, true);
         $prior = DB::queryFirstRow('SELECT * FROM pl_opening_conversions WHERE book_id = %i AND request_key = %s FOR UPDATE', $bookId, $key);
         $canonicalMappings = $mappings;

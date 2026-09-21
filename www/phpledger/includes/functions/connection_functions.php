@@ -177,7 +177,12 @@ function pl_revoke_connection(int $actor, string $id): void
 {
     pl_ledger_transaction(function () use ($actor, $id): void {
         $row = DB::queryFirstRow('SELECT actor_id FROM pl_connections WHERE id = %s FOR UPDATE', $id);
-        $owner = DB::queryFirstField("SELECT m.user_id FROM pl_connection_books b JOIN pl_company_members m ON m.company_id = b.company_id JOIN pl_users u ON u.id = m.user_id WHERE b.connection_id = %s AND m.user_id = %i AND m.role = 'owner' AND u.is_active = 1 FOR SHARE", $id, $actor);
+        // 1.2 M7: 'may manage anyone's connection in one of this connection's companies',
+        // formerly 'is the owner of one of them'.
+        $owner = false;
+        foreach (DB::queryFirstColumn('SELECT company_id FROM pl_connection_books WHERE connection_id = %s', $id) as $scoped) {
+            if (pl_user_can($actor, (int) $scoped, 'connections.manage_all')) { $owner = true; break; }
+        }
         if (!$row || ((int) $row['actor_id'] !== $actor && !$owner) || !DB::queryFirstField('SELECT id FROM pl_users WHERE id = %i AND is_active = 1 FOR SHARE', $actor)) {
             throw new DomainException('You cannot revoke this connection.');
         }
@@ -199,7 +204,7 @@ function pl_connection_end_sessions(string $id): void
 
 function pl_list_connections(int $actor, int $company, int $book): array
 {
-    $member = pl_require_company_access($actor, $company);
+    pl_require_company_access($actor, $company);
     pl_ledger_book($company, $book);
-    return DB::query('SELECT c.id, c.name, c.kind, c.access_mode, c.client_id, c.actor_id, c.created_at, c.expires_at, c.revoked_at FROM pl_connections c JOIN pl_connection_books b ON b.connection_id = c.id WHERE b.company_id = %i AND b.book_id = %i AND (c.actor_id = %i OR %i = 1) ORDER BY c.created_at DESC, c.id LIMIT 100', $company, $book, $actor, $member['role'] === 'owner' ? 1 : 0);
+    return DB::query('SELECT c.id, c.name, c.kind, c.access_mode, c.client_id, c.actor_id, c.created_at, c.expires_at, c.revoked_at FROM pl_connections c JOIN pl_connection_books b ON b.connection_id = c.id WHERE b.company_id = %i AND b.book_id = %i AND (c.actor_id = %i OR %i = 1) ORDER BY c.created_at DESC, c.id LIMIT 100', $company, $book, $actor, pl_user_can($actor, $company, 'connections.manage_all') ? 1 : 0);
 }

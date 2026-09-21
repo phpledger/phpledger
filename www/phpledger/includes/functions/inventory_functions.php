@@ -760,8 +760,8 @@ function pl_inventory_opening_payload(int $actorId, int $companyId, int $bookId,
 function pl_preview_inventory_opening(int $actorId, int $companyId, int $bookId, array $input): array
 {
     return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $input): array {
-        $member = pl_require_company_access($actorId, $companyId, true);
-        if ($member['role'] !== 'owner') { throw new DomainException('Only the company owner can review opening stock conversion.'); }
+        pl_require_company_access($actorId, $companyId, true);
+        if (!pl_user_can($actorId, $companyId, 'opening.manage')) { throw new DomainException('Your role cannot review opening stock conversion.'); }
         pl_require_module($actorId, $companyId, $bookId, 'inventory');
         $payload = pl_inventory_opening_payload($actorId, $companyId, $bookId, $input);
         $hash = hash('sha256', json_encode($payload, JSON_THROW_ON_ERROR));
@@ -774,8 +774,8 @@ function pl_confirm_inventory_opening(int $actorId, int $companyId, int $bookId,
 {
     if (!$confirmed) { throw new DomainException('Confirm the reviewed product quantities and opening journal allocations.'); }
     return pl_inventory_command($actorId, $companyId, $bookId, $key, ['opening', $previewId, $expectedHash, $confirmed], function () use ($actorId, $companyId, $bookId, $previewId, $expectedHash): array {
-        $member = pl_require_company_access($actorId, $companyId, true);
-        if ($member['role'] !== 'owner') { throw new DomainException('Only the company owner can confirm opening stock conversion.'); }
+        pl_require_company_access($actorId, $companyId, true);
+        if (!pl_user_can($actorId, $companyId, 'opening.manage')) { throw new DomainException('Your role cannot confirm opening stock conversion.'); }
         $preview = DB::queryFirstRow('SELECT * FROM pl_inventory_opening_previews WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', $previewId, $companyId, $bookId);
         if (!$preview || !hash_equals($preview['payload_hash'], $expectedHash)) { throw new DomainException('The opening stock preview identity changed. Review it again.'); }
         $payload = json_decode($preview['payload_json'], true, 64, JSON_THROW_ON_ERROR);
