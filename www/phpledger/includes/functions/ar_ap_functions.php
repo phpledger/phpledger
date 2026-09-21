@@ -33,8 +33,23 @@ function pl_ar_line_amount(string $quantity, string $unitPrice): string
     return $total;
 }
 
-function pl_normalize_ar_document(array $input): array
+/**
+ * Normalise one customer/vendor document.
+ *
+ * Trading fields (release plan 1.2 M3) are optional and neutral by default, so a caller
+ * written against 1.1 produces exactly the document it produced before. Pack resolution
+ * needs the frozen pack sizes, which are read separately by
+ * pl_trading_document_pack_sizes() and passed in here: this function stays a pure
+ * function of its input, so the resolved base quantity is part of the draft's identity
+ * hash and can never drift.
+ *
+ * @param array<int,string> $packSizes pack id => units per pack, frozen at pack creation
+ */
+function pl_normalize_ar_document(array $input, array $packSizes = []): array
 {
+    // A browser form submits an untouched optional number as an empty string, which means
+    // "none" and not "invalid"; every other caller passes the value or omits the key.
+    $number = static fn (mixed $value, string $fallback = '0'): string => is_string($value) && trim($value) !== '' ? trim($value) : $fallback;
     $kind = $input['kind'] ?? null;
     if (!in_array($kind, ['invoice', 'bill', 'customer_credit', 'supplier_credit'], true)) { throw new DomainException('Choose an invoice, bill, customer credit or supplier credit.'); }
     $date = pl_ledger_date(pl_ledger_text($input['date'] ?? null, 'Document date', 10));
@@ -42,21 +57,60 @@ function pl_normalize_ar_document(array $input): array
     if (!is_int($input['party_id'] ?? null) || $input['party_id'] < 1) { throw new DomainException('Choose a customer or vendor.'); }
     $lines = $input['lines'] ?? null;
     if (!is_array($lines) || !array_is_list($lines) || count($lines) < 1 || count($lines) > 100) { throw new DomainException('Add between one and 100 document lines.'); }
-    $normalizedLines = []; $subtotal = '0.0000';
+    $normalizedLines = []; $subtotal = '0.0000'; $discountTotal = '0.0000'; $valuedLines = 0;
     foreach ($lines as $index => $line) {
         if (!is_array($line)) { throw new DomainException('A document line is invalid.'); }
         $description = pl_ledger_text($line['description'] ?? null, 'Line description', 500);
-        $quantity = pl_amount(pl_ledger_text($line['quantity'] ?? null, 'Line quantity', 30));
-        $unitPrice = pl_amount(pl_ledger_text($line['unit_price'] ?? null, 'Unit price', 30));
-        $lineTotal = pl_ar_line_amount($quantity, $unitPrice);
+        $free = $line['is_free_goods'] ?? false;
+        if (!is_bool($free)) { throw new DomainException('A line is either free goods or it is not.'); }
+        if ($free && in_array($kind, ['customer_credit','supplier_credit','bill'], true)) {
+            throw new DomainException('Free goods accompany a customer invoice. Return bonus stock with a reviewed stock adjustment instead.');
+        }
+        // A pack resolves to base units before pricing, tax and stock issue (decision 4).
+        $packId = isset($line['pack_id']) && $line['pack_id'] !== '' ? pl_oi_id($line, 'pack_id') : null;
+        $packQuantity = '0.0000'; $unitQuantity = '0.0000';
+        if ($packId !== null) {
+            if (!isset($packSizes[$packId])) { throw new DomainException('Resolve every pack through the trading-documents service before saving this document.'); }
+            $packQuantity = pl_amount(pl_ledger_text($number($line['pack_quantity'] ?? null), 'Pack quantity', 30));
+            $unitQuantity = pl_amount(pl_ledger_text($number($line['unit_quantity'] ?? null), 'Loose units', 30));
+            $quantity = pl_trading_pack_quantity($packQuantity, $unitQuantity, $packSizes[$packId]);
+        } else {
+            $quantity = pl_amount(pl_ledger_text($line['quantity'] ?? null, 'Line quantity', 30));
+        }
+        $percent = pl_trading_discount_percent(pl_ledger_text($number($line['discount_percent'] ?? null), 'Line discount', 12));
+        if ($free) {
+            // Decision 3: a separate zero-value line. Its unit price, when one is given, is the
+            // open-market value the B37 free-goods tax policy may charge output tax on; the
+            // customer is never billed for it, so the line's own value is always zero.
+            $unitPrice = pl_amount(pl_ledger_text($number($line['unit_price'] ?? null), 'Open-market unit value', 30));
+            if (bccomp($quantity, '0', 4) <= 0) { throw new DomainException('A free-goods line needs a positive quantity.'); }
+            $gross = bccomp($unitPrice, '0', 4) === 0 ? '0.0000' : pl_amount(bcadd(bcmul($quantity, $unitPrice, 8), '0.00005', 4));
+            $discount = $gross; $lineTotal = '0.0000';
+            $percent = bccomp($gross, '0', 4) === 0 ? '0.0000' : '100.0000';
+        } else {
+            $unitPrice = pl_amount(pl_ledger_text($line['unit_price'] ?? null, 'Unit price', 30));
+            $gross = pl_ar_line_amount($quantity, $unitPrice);
+            $split = pl_trading_line_discount($gross, $percent);
+            $discount = $split['discount']; $lineTotal = $split['net'];
+            if (bccomp($lineTotal, '0', 4) <= 0) { throw new DomainException('A discounted line must keep a positive net amount. Use a free-goods line for a zero-valued one.'); }
+            $valuedLines++;
+        }
         $accountId = isset($line['account_id']) ? pl_oi_id($line, 'account_id') : null;
         $productId = isset($line['product_id']) ? pl_oi_id($line, 'product_id') : null;
+        if ($free && $productId === null) { throw new DomainException('A free-goods line names the product being given away.'); }
         $normalizedLines[] = ['line_number' => $index + 1, 'account_id' => $accountId, 'product_id' => $productId,
             'tax_code_id' => isset($line['tax_code_id']) ? pl_oi_id($line, 'tax_code_id') : null,
             'original_line_number' => isset($line['original_line_number']) ? pl_oi_id($line, 'original_line_number') : null,
-            'description' => $description, 'quantity' => $quantity, 'unit_price' => $unitPrice, 'line_total' => $lineTotal];
+            'description' => $description, 'quantity' => $quantity, 'unit_price' => $unitPrice, 'line_total' => $lineTotal,
+            'pack_id' => $packId, 'pack_quantity' => $packQuantity, 'unit_quantity' => $unitQuantity,
+            'gross_amount' => $gross, 'discount_percent' => $percent, 'discount_amount' => $discount,
+            'is_free_goods' => $free];
         $subtotal = pl_amount(bcadd($subtotal, $lineTotal, 4));
+        // A free line's "discount" is its whole open-market value, which is not a price
+        // reduction the customer was given, so it stays out of the printed discount total.
+        if (!$free) { $discountTotal = pl_amount(bcadd($discountTotal, $discount, 4)); }
     }
+    if ($valuedLines < 1) { throw new DomainException('A document needs at least one valued line; free goods accompany a sale rather than forming a document of their own.'); }
     $dueDate = isset($input['due_date']) && $input['due_date'] !== '' ? pl_ledger_date(pl_ledger_text($input['due_date'], 'Due date', 10)) : null;
     if ($dueDate === null && in_array($kind, ['customer_credit','supplier_credit'], true)) { $dueDate = $date; }
     if ($dueDate === null) { throw new DomainException('An invoice or bill needs a due date.'); }
@@ -65,8 +119,23 @@ function pl_normalize_ar_document(array $input): array
     if ($dueDate < $date) { throw new DomainException('The due date cannot precede the document date.'); }
     $priceMode = $input['price_mode'] ?? null;
     if ($priceMode !== null && !in_array($priceMode, ['exclusive','inclusive'], true)) { throw new DomainException('Choose tax-exclusive or tax-inclusive prices.'); }
+    $optional = static fn (string $field): ?int => isset($input[$field]) && $input[$field] !== '' ? pl_oi_id($input, $field) : null;
+    // Cash taken on the document itself: a counter or van sale paid on delivery. The recognition
+    // and the settlement of this portion are one atomic action at posting (see pl_post_ar_document).
+    $cashReceived = pl_amount(pl_ledger_text($number($input['cash_received'] ?? null), 'Cash received', 30));
+    $cashAccountId = $optional('cash_account_id');
+    if (bccomp($cashReceived, '0', 4) > 0) {
+        if ($kind !== 'invoice') { throw new DomainException('Cash can only be recorded on a customer invoice.'); }
+        if ($cashAccountId === null) { throw new DomainException('Choose the cash or bank account the money went into.'); }
+        // The cap and the document total are checked where both are known: at pricing time.
+    } else {
+        $cashAccountId = null;
+    }
     return ['kind' => $kind, 'party_id' => $input['party_id'], 'document_date' => $date, 'due_date' => $dueDate,
         'original_document_id' => $originalId, 'price_mode'=>$priceMode, 'rounding_account_id' => isset($input['rounding_account_id']) ? pl_oi_id($input, 'rounding_account_id') : null, 'currency' => $currency, 'subtotal' => $subtotal,
+        'sales_staff_id' => $optional('sales_staff_id'), 'area_id' => $optional('area_id'), 'warehouse_id' => $optional('warehouse_id'),
+        'cash_received' => $cashReceived, 'cash_account_id' => $cashAccountId,
+        'discount_total' => $discountTotal, 'free_tax_total' => '0.0000',
         'reference' => pl_ledger_text($input['reference'] ?? '', 'Reference', 120, false),
         'terms' => pl_ledger_text($input['terms'] ?? '', 'Payment terms', 500, false),
         'notes' => pl_ledger_text($input['notes'] ?? '', 'Notes', 10000, false), 'lines' => $normalizedLines];
@@ -92,7 +161,7 @@ function pl_get_ar_document(int $actorId, int $companyId, int $bookId, int $docu
 
 function pl_save_ar_document(int $actorId, int $companyId, int $bookId, array $input, ?int $documentId = null, ?int $expectedRevision = null): array
 {
-    $data = pl_normalize_ar_document($input);
+    $data = pl_normalize_ar_document($input, pl_trading_document_pack_sizes($actorId, $companyId, $bookId, $input));
     $key = $documentId === null ? pl_request_key(pl_ledger_text($input['creation_key'] ?? null, 'Request identity', 128)) : null;
     $hash = hash('sha256', json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
     return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $data, $key, $hash, $documentId, $expectedRevision): array {
@@ -169,6 +238,10 @@ function pl_ar_validate_source(int $actorId, int $companyId, int $bookId, array 
         }
         if ($line['product_id'] !== null) { pl_get_inventory_product($actorId, $companyId, $bookId, $line['product_id']); }
     }
+    // Trading dimensions are checked here, where a draft is saved, so a selection belonging to
+    // another book or a retired route is refused with a readable message rather than by a
+    // foreign key at insert time. The policy-dependent checks stay in the posting plan.
+    pl_ar_validate_dimension_references($actorId, $companyId, $bookId, $data);
     if ($data['original_document_id'] !== null) {
         $original = pl_get_ar_document($actorId, $companyId, $bookId, $data['original_document_id']);
         $expected = $data['kind'] === 'customer_credit' ? 'invoice' : 'bill';
@@ -224,9 +297,35 @@ function pl_ar_price_document(int $actorId, int $companyId, int $bookId, array $
     if ($original !== null && ($data['price_mode'] ?? null) !== null && $data['price_mode'] !== $original['price_mode']) { throw new DomainException('A credit retains the original document price mode.'); }
     $data['price_mode'] = $original['price_mode'] ?? $data['price_mode'] ?? pl_tax_price_mode($actorId,$companyId,$bookId);
     $used=$original===null?[]:pl_ar_credit_used($companyId,$bookId,$original,$excludeCreditId);
-    $taxTotal = '0.0000'; $subtotal = '0.0000';
+    $policies = pl_trading_policies($actorId, $companyId, $bookId);
+    $taxTotal = '0.0000'; $subtotal = '0.0000'; $freeTaxTotal = '0.0000'; $discountTotal = '0.0000';
     foreach ($data['lines'] as &$line) {
-        $rawAmount = pl_ar_line_amount($line['quantity'], $line['unit_price']);
+        // The trading fields are recomputed from the entered quantity, price and discount
+        // percentage on every repricing, exactly as the untouched amount always was, so
+        // pricing stays idempotent and a review hash cannot drift.
+        $free = (bool) ($line['is_free_goods'] ?? false);
+        $percent = pl_trading_discount_percent(trim((string) ($line['discount_percent'] ?? '0')) !== '' ? trim((string) $line['discount_percent']) : '0');
+        if ($free) {
+            $openMarket = bccomp(pl_amount((string) $line['unit_price']), '0', 4) === 0 ? '0.0000'
+                : pl_amount(bcadd(bcmul(pl_amount((string) $line['quantity']), pl_amount((string) $line['unit_price']), 8), '0.00005', 4));
+            if ($original !== null) { throw new DomainException('Free goods accompany a customer invoice, not a credit note.'); }
+            // The tax code is resolved so the rate, account and label are frozen with the
+            // document; whether any output tax is actually charged is the B37 policy's answer.
+            $tax = pl_tax_calculate($actorId, $companyId, $bookId, $line['tax_code_id'], $data['document_date'], $openMarket, 'sale');
+            $freeTax = $policies['free_goods_output_tax'] === 'open_market_value' && bccomp($openMarket, '0', 4) > 0
+                ? pl_tax_amount($openMarket, $tax['tax_rate']) : '0.0000';
+            $freeTaxTotal = pl_amount(bcadd($freeTaxTotal, $freeTax, 4));
+            $line = array_replace($line, $tax, ['line_total' => '0.0000', 'tax_amount' => '0.0000',
+                'gross_amount' => $openMarket, 'discount_amount' => $openMarket,
+                'discount_percent' => bccomp($openMarket, '0', 4) === 0 ? '0.0000' : '100.0000']);
+            continue;
+        }
+        $gross = pl_ar_line_amount($line['quantity'], $line['unit_price']);
+        $split = pl_trading_line_discount($gross, $percent);
+        $line['gross_amount'] = $split['gross']; $line['discount_amount'] = $split['discount']; $line['discount_percent'] = $percent;
+        $discountTotal = pl_amount(bcadd($discountTotal, $split['discount'], 4));
+        $rawAmount = $split['net'];
+        if (bccomp($rawAmount, '0', 4) <= 0) { throw new DomainException('A discounted line must keep a positive net amount. Use a free-goods line for a zero-valued one.'); }
         if ($original === null) {
             $tax = pl_tax_calculate($actorId, $companyId, $bookId, $line['tax_code_id'], $data['document_date'], $rawAmount, $data['kind'] === 'bill' ? 'purchase' : 'sale');
             $split = pl_tax_split($rawAmount,$tax['tax_rate'],$data['price_mode']);
@@ -260,6 +359,19 @@ function pl_ar_price_document(int $actorId, int $companyId, int $bookId, array $
         $subtotal = pl_amount(bcadd($subtotal,$line['line_total'],4));
     } unset($line);
     $data['subtotal'] = $subtotal; $data['tax_total'] = $taxTotal; $data['total'] = pl_amount(bcadd($subtotal, $taxTotal, 4));
+    $data['discount_total'] = $discountTotal;
+    // Output tax on free goods is borne by the business, so it never enters the customer's total.
+    $data['free_tax_total'] = $freeTaxTotal;
+    $cash = pl_amount((string) ($data['cash_received'] ?? '0'));
+    if (bccomp($cash, '0', 4) > 0) {
+        if (bccomp($cash, $data['total'], 4) > 0) { throw new DomainException('Cash received on an invoice cannot exceed the invoice total. Record an advance on account for the excess.'); }
+        if (bccomp($policies['cash_on_invoice_cap'], '0', 4) === 0) {
+            throw new DomainException('Cash on an invoice is not accepted in this book. The owner sets a cap in Admin > Accounting policies first.');
+        }
+        if (bccomp($cash, $policies['cash_on_invoice_cap'], 4) > 0) {
+            throw new DomainException('Cash received exceeds the cash-on-invoice cap of ' . $policies['cash_on_invoice_cap'] . ' set in Admin > Accounting policies.');
+        }
+    }
     return $data;
 }
 
@@ -269,13 +381,19 @@ function pl_ar_document_row(array $row, int $actorId): array
     if ($revision) {
         $row = array_replace($row, json_decode($revision['source_snapshot'], true, 512, JSON_THROW_ON_ERROR), ['revision' => (int) $revision['revision'], 'journal_id' => (int) $revision['journal_id'], 'open_item_id' => (int) $revision['open_item_id'], 'status' => 'posted']);
     } else {
-        $row['lines'] = DB::query('SELECT id,line_number,description,quantity,unit_price,line_total,account_id,product_id,tax_code_id,tax_rate_id,tax_rate,tax_amount,tax_account_id,tax_label,original_line_number FROM pl_ar_document_lines WHERE document_id=%i AND company_id=%i AND book_id=%i ORDER BY line_number FOR SHARE', $row['id'], $row['company_id'], $row['book_id']);
+        $row['lines'] = DB::query('SELECT id,line_number,description,quantity,unit_price,line_total,account_id,product_id,tax_code_id,tax_rate_id,tax_rate,tax_amount,tax_account_id,tax_label,original_line_number,pack_id,pack_quantity,unit_quantity,gross_amount,discount_percent,discount_amount,is_free_goods FROM pl_ar_document_lines WHERE document_id=%i AND company_id=%i AND book_id=%i ORDER BY line_number FOR SHARE', $row['id'], $row['company_id'], $row['book_id']);
     }
     foreach (['id','company_id','book_id','party_id','revision'] as $field) { $row[$field] = (int) $row[$field]; }
-    foreach (['journal_id','open_item_id','original_document_id','rounding_account_id','original_revision'] as $field) { $row[$field] = $row[$field] === null ? null : (int) $row[$field]; }
+    foreach (['journal_id','open_item_id','original_document_id','rounding_account_id','original_revision','sales_staff_id','area_id','warehouse_id','cash_account_id','cash_settlement_journal_id'] as $field) { $row[$field] = ($row[$field] ?? null) === null ? null : (int) $row[$field]; }
+    foreach (['cash_received','discount_total','free_tax_total'] as $field) { $row[$field] = bcadd((string) ($row[$field] ?? '0'), '0', 4); }
     foreach ($row['lines'] as &$line) {
-        foreach (['id','line_number','account_id','product_id','tax_code_id','tax_rate_id','tax_account_id','original_line_number'] as $field) { if (isset($line[$field])) { $line[$field] = (int) $line[$field]; } }
+        foreach (['id','line_number','account_id','product_id','tax_code_id','tax_rate_id','tax_account_id','original_line_number','pack_id'] as $field) { if (isset($line[$field])) { $line[$field] = (int) $line[$field]; } }
         foreach (['quantity','unit_price','line_total'] as $field) { $line[$field] = bcadd((string) $line[$field], '0', 4); }
+        foreach (['pack_quantity','unit_quantity','gross_amount','discount_amount'] as $field) { $line[$field] = bcadd((string) ($line[$field] ?? '0'), '0', 4); }
+        $line['discount_percent'] = bcadd((string) ($line['discount_percent'] ?? '0'), '0', 4);
+        $line['is_free_goods'] = (bool) ($line['is_free_goods'] ?? false);
+        // Pre-M3 rows carry no gross: a document without a discount had gross equal to its net.
+        if (bccomp($line['gross_amount'], '0', 4) === 0 && bccomp($line['line_total'], '0', 4) > 0) { $line['gross_amount'] = $line['line_total']; }
     } unset($line);
     $row['subtotal'] = bcadd((string) $row['subtotal'], '0', 4);
     $row['document_number'] = ($row['document_number'] ?? null) === null ? null : (string) $row['document_number'];
@@ -342,6 +460,13 @@ function pl_ar_posting_plan(int $actorId, int $companyId, int $bookId, array $do
         if (array_intersect_key($line,$taxFields) !== array_intersect_key($repriced['lines'][$index],$taxFields)) { throw new DomainException('The effective tax rate or credited line residual changed. Save and review the draft again before posting.'); }
     }
     if ($document['original_revision'] !== $repriced['original_revision'] || $document['total'] !== $repriced['total']) { throw new DomainException('The original revision or reviewed document total changed. Review this draft again.'); }
+    // An accounting policy changed between review and posting would silently restate the
+    // reviewed entries, so the free-goods tax the policy produces is part of the review.
+    if (bccomp((string) ($document['free_tax_total'] ?? '0'), (string) $repriced['free_tax_total'], 4) !== 0) {
+        throw new DomainException('The free-goods tax policy changed since this draft was reviewed. Review this draft again before posting.');
+    }
+    $policies = pl_trading_policies($actorId, $companyId, $bookId);
+    pl_ar_validate_dimensions($actorId, $companyId, $bookId, $document, $policies);
     $original = null;
     if ($credit) {
         $original = pl_get_ar_document($actorId, $companyId, $bookId, $document['original_document_id']);
@@ -366,15 +491,42 @@ function pl_ar_posting_plan(int $actorId, int $companyId, int $bookId, array $do
     $description = $document['number'] . ' - ' . $document['party']['legal_name'];
     $controlDebit = $receivable !== $credit;
     $lines = [pl_oi_line($control, $document['total'], $base, $controlDebit, $snapshot, $description)]; $offsetBase = '0.0000'; $taxLines = [];
+    $discountNetTotal = '0.0000'; $freeTaxLines = [];
     foreach ($document['lines'] as &$sourceLine) {
+        // A free-goods line has no financial line of its own: nothing is invoiced and nothing
+        // is earned. Its carrying value leaves stock at posting, to the account the B37 policy
+        // names, and the only entry it can produce here is open-market-value output tax.
+        if ((bool) ($sourceLine['is_free_goods'] ?? false)) {
+            $freeTax = $policies['free_goods_output_tax'] === 'open_market_value' && bccomp((string) $sourceLine['gross_amount'], '0', 4) > 0
+                ? pl_tax_amount((string) $sourceLine['gross_amount'], (string) $sourceLine['tax_rate']) : '0.0000';
+            if (bccomp($freeTax, '0', 4) > 0) {
+                $freeBase = pl_fx_convert($freeTax, $snapshot['rate']);
+                $taxLines[] = pl_oi_line((int) $sourceLine['tax_account_id'], $freeTax, $freeBase, !$controlDebit, $snapshot, $sourceLine['tax_label'] . ' · free goods at open-market value');
+                $freeTaxLines[] = pl_oi_line((int) $policies['free_goods_account_id'], $freeTax, $freeBase, $controlDebit, $snapshot, 'Output tax on free goods borne by the business');
+            }
+            continue;
+        }
         $accountId = $sourceLine['account_id'] ?? $offsetAccountId;
         if ($accountId === null) { throw new DomainException('Choose a posting account for every document line.'); }
         $account = DB::queryFirstRow('SELECT * FROM pl_accounts WHERE id=%i AND company_id=%i AND book_id=%i AND is_active=1 FOR SHARE', $accountId, $companyId, $bookId);
         if (!$account || ($receivable ? $account['type'] !== 'income' : !in_array($account['type'], ['expense','asset','liability'], true))
             || in_array($account['role'], ['cash_bank','receivables','payables'], true)) { throw new DomainException('Choose an income line account for sales, or an expense, asset or clearing account for bills.'); }
         $sourceLine['account_id'] = (int) $accountId;
-        $value = pl_fx_convert($sourceLine['line_total'], $snapshot['rate']);
-        $lines[] = pl_oi_line((int) $accountId, $sourceLine['line_total'], $value, !$controlDebit, $snapshot, $sourceLine['description']);
+        // B37 discount posting. "net" leaves the discount out of the ledger entirely; "gross"
+        // recognises the undiscounted amount and shows the reduction as contra-income, so the
+        // discount given is itself a readable figure on the profit and loss account.
+        $discountNet = '0.0000';
+        // Contra-income is a sales concept: a supplier's discount on a bill is always net,
+        // whatever this book's sales policy says.
+        if ($receivable && $policies['discount_posting'] === 'gross' && bccomp((string) ($sourceLine['discount_amount'] ?? '0'), '0', 4) > 0) {
+            $discountNet = ($document['price_mode'] ?? 'exclusive') === 'inclusive'
+                ? pl_tax_split((string) $sourceLine['discount_amount'], (string) $sourceLine['tax_rate'], 'inclusive')['net']
+                : pl_amount((string) $sourceLine['discount_amount']);
+            $discountNetTotal = pl_amount(bcadd($discountNetTotal, $discountNet, 4));
+        }
+        $recognised = bcadd((string) $sourceLine['line_total'], $discountNet, 4);
+        $value = pl_fx_convert($recognised, $snapshot['rate']);
+        $lines[] = pl_oi_line((int) $accountId, $recognised, $value, !$controlDebit, $snapshot, $sourceLine['description']);
         $offsetBase = bcadd($offsetBase, $value, 4);
         if (bccomp($sourceLine['tax_amount'], '0', 4) > 0) {
             $taxBase = pl_fx_convert($sourceLine['tax_amount'], $snapshot['rate']);
@@ -382,7 +534,12 @@ function pl_ar_posting_plan(int $actorId, int $companyId, int $bookId, array $do
             $offsetBase = bcadd($offsetBase, $taxBase, 4);
         }
     } unset($sourceLine);
-    $lines = array_merge($lines, $taxLines);
+    if (bccomp($discountNetTotal, '0', 4) > 0) {
+        $discountBase = pl_fx_convert($discountNetTotal, $snapshot['rate']);
+        $lines[] = pl_oi_line((int) $policies['discount_account_id'], $discountNetTotal, $discountBase, $controlDebit, $snapshot, 'Discounts allowed on ' . $document['number']);
+        $offsetBase = bcsub($offsetBase, $discountBase, 4);
+    }
+    $lines = array_merge($lines, $taxLines, $freeTaxLines);
     $difference = bcsub($base, $offsetBase, 4);
     if (bccomp($difference, '0', 4) !== 0) {
         $roundingId = $document['rounding_account_id']; $magnitude = ltrim($difference, '-');
@@ -392,7 +549,45 @@ function pl_ar_posting_plan(int $actorId, int $companyId, int $bookId, array $do
         $domestic = pl_oi_rate($actorId, $companyId, $bookId, $book['currency'], $document['document_date'], null, null, 'spot');
         $lines[] = pl_oi_line($roundingId, $magnitude, $magnitude, bccomp($difference, '0', 4) > 0 ? !$controlDebit : $controlDebit, $domestic, 'Explicit currency rounding');
     }
-    return ['document'=>$document,'original'=>$original,'currency'=>$book['currency'],'credit'=>$credit,'receivable'=>$receivable,'control'=>$control,'item_id'=>$itemId,'description'=>$description,'lines'=>$lines];
+    return ['document'=>$document,'original'=>$original,'currency'=>$book['currency'],'credit'=>$credit,'receivable'=>$receivable,'control'=>$control,'item_id'=>$itemId,'description'=>$description,'lines'=>$lines,
+        // The policies in force are part of the reviewed plan: changing one between review
+        // and posting changes the entries, so the review hash must move with them.
+        'policies'=>$policies,'discount_posted'=>$discountNetTotal,'free_goods_tax'=>$repriced['free_tax_total']];
+}
+
+/**
+ * Sales-staff, area, warehouse, cash and free-goods selections must all belong to this book
+ * and be usable, and the policies must name the accounts the document's own lines require.
+ */
+function pl_ar_validate_dimension_references(int $actorId, int $companyId, int $bookId, array $document): void
+{
+    foreach (['sales_staff_id' => 'pl_get_sales_staff', 'area_id' => 'pl_get_area'] as $field => $reader) {
+        if (($document[$field] ?? null) === null) { continue; }
+        $row = $reader($actorId, $companyId, $bookId, (int) $document[$field]);
+        if (!$row['is_active']) { throw new DomainException('Choose an active ' . ($field === 'area_id' ? 'area or route' : 'sales staff member') . ' for this document.'); }
+    }
+    if (($document['warehouse_id'] ?? null) !== null) {
+        pl_inventory_movement_warehouse($actorId, $companyId, $bookId, (int) $document['warehouse_id']);
+    }
+    if (bccomp((string) ($document['cash_received'] ?? '0'), '0', 4) > 0) {
+        $cash = DB::queryFirstRow('SELECT id,role,is_active FROM pl_accounts WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', (int) $document['cash_account_id'], $companyId, $bookId);
+        if (!$cash || (string) $cash['role'] !== 'cash_bank' || !(bool) $cash['is_active']) {
+            throw new DomainException('Choose an active cash or bank account for the cash received on this invoice.');
+        }
+    }
+}
+
+function pl_ar_validate_dimensions(int $actorId, int $companyId, int $bookId, array $document, array $policies): void
+{
+    pl_ar_validate_dimension_references($actorId, $companyId, $bookId, $document);
+    $hasFreeGoods = false;
+    foreach ($document['lines'] as $line) { $hasFreeGoods = $hasFreeGoods || (bool) ($line['is_free_goods'] ?? false); }
+    if ($hasFreeGoods && $policies['free_goods_account_id'] === null) {
+        throw new DomainException('Free goods need the promotional expense account named in Admin > Accounting policies before they can be posted.');
+    }
+    if ($policies['discount_posting'] === 'gross' && $policies['discount_account_id'] === null) {
+        throw new DomainException('Gross discount posting needs the contra-income account named in Admin > Accounting policies.');
+    }
 }
 
 function pl_ar_post_version(int $actorId, int $companyId, int $bookId, array $document, ?int $offsetAccountId, ?string $rate, string $key): array
@@ -407,21 +602,76 @@ function pl_ar_post_version(int $actorId, int $companyId, int $bookId, array $do
     }
     $journal = pl_post_journal_locked($actorId, $companyId, $bookId, ['date'=>$document['document_date'],'currency'=>$book['currency'],'source_type'=>$credit ? 'open_item_settlement' : 'open_item_recognition','source_reference'=>'open-item:' . $itemId,'idempotency_key'=>$key,'description'=>$description,'lines'=>$lines], null, $credit ? $itemId : null);
     $document['journal_id'] = (int) $journal['id']; $document['open_item_id'] = $itemId; $document['status'] = 'posted';
-    if ($document['kind'] === 'invoice') { pl_inventory_issue_ar_document($actorId, $companyId, $bookId, $document, (int) $journal['id'], $key . ':stock'); }
+    if ($document['kind'] === 'invoice') { pl_ar_issue_invoice_stock($actorId, $companyId, $bookId, $document, (int) $journal['id'], $key . ':stock', $plan['policies']); }
     if ($document['kind'] === 'customer_credit') { pl_inventory_credit_ar_document($actorId, $companyId, $bookId, $document, $original, $key . ':return'); }
     return $document;
 }
 
+/**
+ * Issue an invoice's stock.
+ *
+ * Valued lines go through the inventory module's own AR issue service, unchanged. A
+ * free-goods line leaves stock at exactly the same carrying value, but its offset is the
+ * promotional expense account the B37 policy names rather than cost of sales: nothing was
+ * sold, so nothing belongs in cost of sales. The movement is recorded with the same source
+ * type, document, journal, reference and idempotency key the inventory service would have
+ * used, so the existing reversal and credit-allocation readers find it without change.
+ */
+function pl_ar_issue_invoice_stock(int $actorId, int $companyId, int $bookId, array $document, int $journalId, string $requestKey, array $policies): array
+{
+    $valued = []; $free = [];
+    foreach ($document['lines'] as $index => $line) {
+        if ((bool) ($line['is_free_goods'] ?? false)) { $free[$index] = $line; } else { $valued[$index] = $line; }
+    }
+    $results = pl_inventory_issue_ar_document($actorId, $companyId, $bookId, array_replace($document, ['lines' => $valued]), $journalId, $requestKey);
+    foreach ($free as $index => $line) {
+        if (($line['product_id'] ?? null) === null) { continue; }
+        $product = pl_get_inventory_product($actorId, $companyId, $bookId, (int) $line['product_id']);
+        if ($product['kind'] !== 'stock') { continue; }
+        $results[] = pl_inventory_issue($actorId, $companyId, $bookId, ['product_id' => $product['id'], 'quantity' => $line['quantity'],
+            'date' => $document['document_date'] ?? $document['date'],
+            'warehouse_id' => $line['warehouse_id'] ?? $document['warehouse_id'] ?? null,
+            'offset_account_id' => (int) $policies['free_goods_account_id'],
+            'source_type' => 'ar_invoice', 'source_reference' => $journalId . ':' . $index,
+            'source_document_id' => (int) $document['id'], 'source_journal_id' => $journalId,
+            'reason' => 'Free goods issued on invoice ' . $document['id'],
+            'idempotency_key' => 'ar-issue:' . hash('sha256', $requestKey . ':' . $index)]);
+    }
+    return $results;
+}
+
 function pl_ar_record_version(int $actorId, array $document, string $reason): void
 {
-    $snapshot = array_intersect_key($document, array_flip(['kind','party_id','document_date','due_date','currency','subtotal','tax_total','total','price_mode','reference','terms','notes','lines','original_document_id','original_revision','rounding_account_id']));
+    // The trading dimensions belong to the posted revision: a statement, a print and a
+    // by-area or by-salesman reading of a corrected document must see the values that
+    // revision carried, not the values the source row happens to hold today.
+    $snapshot = array_intersect_key($document, array_flip(['kind','party_id','document_date','due_date','currency','subtotal','tax_total','total','price_mode','reference','terms','notes','lines','original_document_id','original_revision','rounding_account_id','sales_staff_id','area_id','warehouse_id','cash_received','cash_account_id','cash_settlement_journal_id','discount_total','free_tax_total']));
     DB::insert('pl_ar_document_revisions', ['document_id'=>$document['id'],'company_id'=>$document['company_id'],'book_id'=>$document['book_id'],'revision'=>$document['revision'],'journal_id'=>$document['journal_id'],'open_item_id'=>$document['open_item_id'],'source_snapshot'=>json_encode($snapshot, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),'actor_id'=>$actorId,'reason'=>$reason]);
+}
+
+/**
+ * An invoice that settled its own cash portion is corrected by reversing it and entering a
+ * replacement, not by the in-place correction path.
+ *
+ * Decision taken (B53): the in-place correction reverses and re-posts the recognition only.
+ * Its own reviewed preview asserts that no allocation is outstanding, and the cash settled
+ * on the invoice is exactly such an allocation. Reversing and re-entering releases the cash
+ * and the receivable together, keeps both journals linked and leaves the audit trail
+ * complete. The alternative — teaching the correction path to unwind and replay its own
+ * settlement — is a deeper change to the correction preview's reviewed basis and belongs in
+ * its own milestone. Reversal path: pl_reverse_ar_document() then a new document.
+ */
+function pl_ar_assert_correctable(array $document): void
+{
+    if (($document['cash_settlement_journal_id'] ?? null) !== null) {
+        throw new DomainException('This invoice settled cash when it was posted. Reverse it and enter a corrected invoice, so the cash and the receivable are released together.');
+    }
 }
 
 /** Preview current editor values without saving a draft, activating controls or posting. */
 function pl_preview_ar_document(int $actorId,int $companyId,int $bookId,array $input,?int $documentId=null,?int $revision=null,?string $rate=null): array
 {
-    $data=pl_normalize_ar_document($input);
+    $data=pl_normalize_ar_document($input, pl_trading_document_pack_sizes($actorId,$companyId,$bookId,$input));
     return pl_ledger_transaction(function () use ($actorId,$companyId,$bookId,$data,$documentId,$revision,$rate): array {
         pl_require_company_access($actorId,$companyId,true); pl_ledger_book($companyId,$bookId,true);
         if ($documentId!==null) {
@@ -461,11 +711,41 @@ function pl_post_ar_document(int $actorId, int $companyId, int $bookId, int $doc
         // under the book lock the posting funnel already holds. A failure after this point rolls the
         // whole transaction back, including the counter, so the next posting takes the same number.
         $document['document_number'] = pl_document_series_allocate($actorId, $companyId, $bookId, $document['kind'], $documentId, $document['document_date']);
-        DB::update('pl_ar_documents', ['status'=>'posted','journal_id'=>$document['journal_id'],'open_item_id'=>$document['open_item_id'],'document_number'=>$document['document_number'],'updated_by'=>$actorId,'updated_at'=>gmdate('Y-m-d H:i:s')], 'id=%i AND journal_id IS NULL', $documentId);
+        // Cash taken on the invoice settles its own portion in this same action: one
+        // transaction recognises the receivable and settles the cash part, so a counter sale
+        // can never leave a receivable standing against money already in the till. The
+        // identity of both journals is written by the single update below, because the 017
+        // trigger makes a posted document immutable the moment journal_id is set.
+        $document['cash_settlement_journal_id'] = pl_ar_settle_invoice_cash($actorId, $companyId, $bookId, $document);
+        DB::update('pl_ar_documents', ['status'=>'posted','journal_id'=>$document['journal_id'],'open_item_id'=>$document['open_item_id'],'document_number'=>$document['document_number'],'cash_settlement_journal_id'=>$document['cash_settlement_journal_id'],'updated_by'=>$actorId,'updated_at'=>gmdate('Y-m-d H:i:s')], 'id=%i AND journal_id IS NULL', $documentId);
         pl_ar_record_version($actorId, $document, 'Initial posting');
         pl_ar_event($actorId,$companyId,$bookId,$documentId,'draft','posted','Initial posting');
         return pl_get_ar_document($actorId, $companyId, $bookId, $documentId);
     });
+}
+
+/**
+ * Settle the cash portion recorded on an invoice, inside the posting transaction.
+ *
+ * Returns the settlement journal id, or null when no cash was taken. The settlement uses the
+ * existing open-item service unchanged, so the allocation, the frozen carrying value and the
+ * open-item entries are exactly those of a receipt entered on the payments screen; the only
+ * difference is that this one cannot be forgotten, because it is part of posting the invoice.
+ */
+function pl_ar_settle_invoice_cash(int $actorId, int $companyId, int $bookId, array $document): ?int
+{
+    $cash = pl_amount((string) ($document['cash_received'] ?? '0'));
+    if (bccomp($cash, '0', 4) === 0) { return null; }
+    if ($document['kind'] !== 'invoice') { throw new DomainException('Cash can only be recorded on a customer invoice.'); }
+    $settlement = pl_settle_open_item($actorId, $companyId, $bookId, [
+        'item_id' => (int) $document['open_item_id'],
+        'bank_account_id' => (int) $document['cash_account_id'],
+        'amount_fc' => $cash,
+        'date' => (string) $document['document_date'],
+        'description' => 'Cash received on ' . $document['number'],
+        'idempotency_key' => 'ar-document:' . $document['id'] . ':revision:' . $document['revision'] . ':cash',
+    ]);
+    return (int) $settlement['journal_id'];
 }
 
 function pl_settle_ar_document(int $actorId, int $companyId, int $bookId, int $documentId, array $input): array
@@ -487,6 +767,12 @@ function pl_reverse_ar_document(int $actorId, int $companyId, int $bookId, int $
         if ($document['journal_id'] === null) { throw new DomainException('Only posted documents can be reversed.'); }
         $reversalDate = $date ?? gmdate('Y-m-d');
         pl_inventory_reverse_ar_document($actorId, $companyId, $bookId, $document, $reversalDate, $key . ':stock', $reason);
+        // The cash taken on the invoice was settled in the same action that posted it, so it
+        // is released in the same action that reverses it: the allocation is reversed first,
+        // leaving the recognition free to reverse, and the whole thing is one transaction.
+        if (($document['cash_settlement_journal_id'] ?? null) !== null) {
+            pl_reverse_journal($actorId, $companyId, $bookId, (int) $document['cash_settlement_journal_id'], $date, $key . ':cash', $reason);
+        }
         pl_reverse_journal($actorId, $companyId, $bookId, $document['journal_id'], $date, $key . ':journal', $reason);
         pl_ar_event($actorId,$companyId,$bookId,$documentId,'posted','reversed',$reason);
         return pl_get_ar_document($actorId, $companyId, $bookId, $documentId);
@@ -496,13 +782,14 @@ function pl_reverse_ar_document(int $actorId, int $companyId, int $bookId, int $
 /** Read-only reversal and replacement effects, including stock restored before re-issue. */
 function pl_preview_ar_correction(int $actorId,int $companyId,int $bookId,int $documentId,array $input,int $expectedRevision,string $reason,?string $reversalDate=null,?string $rate=null): array
 {
-    $data=pl_normalize_ar_document($input); $reason=pl_ledger_text($reason,'Correction reason',400);
+    $data=pl_normalize_ar_document($input, pl_trading_document_pack_sizes($actorId,$companyId,$bookId,$input)); $reason=pl_ledger_text($reason,'Correction reason',400);
     $date=pl_ledger_date($reversalDate??gmdate('Y-m-d'));
     return pl_ledger_transaction(function () use ($actorId,$companyId,$bookId,$documentId,$data,$expectedRevision,$reason,$date,$rate): array {
         $member=pl_require_company_access($actorId,$companyId,true); pl_ledger_book($companyId,$bookId,true);
         $document=pl_get_ar_document($actorId,$companyId,$bookId,$documentId);
         if ($document['journal_id']===null || $document['revision']!==$expectedRevision || $document['payment_status']==='reversed') { throw new DomainException('Review the current posted revision before correction.'); }
         if ($document['kind']!==$data['kind'] || $document['reference']!==$data['reference'] || $document['original_document_id']!==$data['original_document_id']) { throw new DomainException('A correction retains the same document identity, kind, reference and original credit link.'); }
+        pl_ar_assert_correctable($document);
         $journal=pl_get_journal($actorId,$companyId,$bookId,$document['journal_id']);
         if ($date<$journal['journal_date'] || $data['document_date']<$date) { throw new DomainException('Date the reversal on or after its original posting, and the replacement on or after the reversal.'); }
         if ($date<gmdate('Y-m-d') && ($member['role']!=='owner' || $date!==$journal['journal_date'])) { throw new DomainException('Backdated reversals require an owner, the original posting date and an open period.'); }
@@ -536,7 +823,7 @@ function pl_preview_ar_correction(int $actorId,int $companyId,int $bookId,int $d
 
 function pl_correct_ar_document(int $actorId, int $companyId, int $bookId, int $documentId, array $input, int $expectedRevision, string $key, string $reason, ?string $reversalDate = null, ?string $rate = null, ?string $expectedHash = null): array
 {
-    $data = pl_normalize_ar_document($input); $reason = pl_ledger_text($reason, 'Correction reason', 500);
+    $data = pl_normalize_ar_document($input, pl_trading_document_pack_sizes($actorId, $companyId, $bookId, $input)); $reason = pl_ledger_text($reason, 'Correction reason', 500);
     return pl_ar_action($actorId, $companyId, $bookId, $documentId, 'correct', $key, compact('data','expectedRevision','reason','reversalDate','rate'), function () use ($actorId,$companyId,$bookId,$documentId,$input,$data,$expectedRevision,$key,$reason,$reversalDate,$rate,$expectedHash): array {
         if ($expectedHash!==null) {
             $plan=pl_preview_ar_correction($actorId,$companyId,$bookId,$documentId,$input,$expectedRevision,$reason,$reversalDate,$rate);
@@ -545,6 +832,7 @@ function pl_correct_ar_document(int $actorId, int $companyId, int $bookId, int $
         $document = pl_get_ar_document($actorId, $companyId, $bookId, $documentId);
         if ($document['journal_id'] === null || $document['revision'] !== $expectedRevision || $document['payment_status'] === 'reversed') { throw new DomainException('Review the current posted revision before correction.'); }
         if ($document['kind'] !== $data['kind'] || $document['reference'] !== $data['reference'] || $document['original_document_id'] !== $data['original_document_id']) { throw new DomainException('A correction retains the same document identity, kind, reference and original credit link.'); }
+        pl_ar_assert_correctable($document);
         $date = $reversalDate ?? gmdate('Y-m-d');
         if ($data['document_date'] < $date) { throw new DomainException('A corrected posting cannot precede its reversal.'); }
         pl_inventory_reverse_ar_document($actorId, $companyId, $bookId, $document, $date, $key . ':stock-reversal', $reason);

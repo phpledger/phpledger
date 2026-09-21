@@ -75,11 +75,19 @@ function pl_starter_lines(array $input): array
         if (!is_array($row)) { throw new DomainException('Invalid document line.'); }
         $hasInput=false;
         foreach (['description','quantity','unit_price'] as $field) { if (pl_web_text($row,$field)!=='') { $hasInput=true; } }
-        foreach (['account_id','product_id','tax_code_id','original_line_number'] as $field) { if (pl_web_id($row,$field)>0) { $hasInput=true; } }
+        foreach (['account_id','product_id','tax_code_id','original_line_number','pack_id'] as $field) { if (pl_web_id($row,$field)>0) { $hasInput=true; } }
         if (!$hasInput) { continue; }
-        $result[]=['description'=>pl_web_text($row,'description'),'quantity'=>pl_web_text($row,'quantity'),
+        // Trading fields (1.2 M3). Neutral when the editor does not send them, so a screen
+        // written before this milestone produces exactly the line it produced before.
+        $packId=pl_web_id($row,'pack_id')?:null;
+        $line=['description'=>pl_web_text($row,'description'),'quantity'=>pl_web_text($row,'quantity'),
             'unit_price'=>pl_web_text($row,'unit_price'),'account_id'=>pl_web_id($row,'account_id'),
-            'product_id'=>pl_web_id($row,'product_id')?:null,'tax_code_id'=>pl_web_id($row,'tax_code_id')?:null,'original_line_number'=>pl_web_id($row,'original_line_number')?:null];
+            'product_id'=>pl_web_id($row,'product_id')?:null,'tax_code_id'=>pl_web_id($row,'tax_code_id')?:null,'original_line_number'=>pl_web_id($row,'original_line_number')?:null,
+            'discount_percent'=>pl_web_text($row,'discount_percent','0')?:'0','is_free_goods'=>pl_web_text($row,'is_free_goods')==='1'];
+        if ($packId!==null) {
+            $line+=['pack_id'=>$packId,'pack_quantity'=>pl_web_text($row,'pack_quantity','0')?:'0','unit_quantity'=>pl_web_text($row,'unit_quantity','0')?:'0'];
+        }
+        $result[]=$line;
     }
     return $result;
 }

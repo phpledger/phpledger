@@ -58,6 +58,7 @@ $suites[] = 'ar_preview_test.php';
 $suites[] = 'ar_list_test.php';
 $suites[] = 'print_test.php';
 $suites[] = 'document_series_test.php';
+$suites[] = 'trading_documents_test.php';
 // Translation groundwork and the pseudo-locale route sweep run last: the sweep starts its own
 // HTTP server and the helper tests restore English before any other suite could observe a locale.
 $suites[] = 'i18n_test.php';
@@ -82,6 +83,9 @@ if (($argv[1] ?? '') === '--suite=settlements') {
 }
 if (($argv[1] ?? '') === '--suite=print') {
     $suites = ['ledger_test.php','concurrency_test.php','open_item_test.php','settlement_test.php','print_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=trading') {
+    $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','inventory_test.php','tax_test.php','open_item_test.php','settlement_test.php','print_test.php','trading_documents_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=editors') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'editor_test.php'];

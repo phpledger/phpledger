@@ -25,6 +25,10 @@
         <?php if ($letterhead['logo'] !== null): ?><img class="print-logo" src="<?= pl_e($letterhead['logo']['url']) ?>" alt="" width="<?= (int) $letterhead['logo']['width'] ?>" height="<?= (int) $letterhead['logo']['height'] ?>"><?php endif; ?>
         <div class="print-issuer">
             <p class="print-company"><?= pl_e($letterhead['name']) ?></p>
+            <?php foreach ($letterhead['address'] ?? [] as $addressLine): ?><p class="print-company-meta"><?= pl_e($addressLine) ?></p><?php endforeach; ?>
+            <?php $contact = trim(implode(' · ', array_filter([$letterhead['phone'] ?? '', $letterhead['email'] ?? '']))); ?>
+            <?php if ($contact !== ''): ?><p class="print-company-meta"><?= pl_e($contact) ?></p><?php endif; ?>
+            <?php if (($letterhead['registrations'] ?? '') !== ''): ?><p class="print-company-meta"><?= pl_e($letterhead['registrations']) ?></p><?php endif; ?>
             <p class="print-company-meta"><?= pl_e(trim($letterhead['book'] . ' · ' . $letterhead['currency'], ' ·')) ?></p>
         </div>
         <div class="print-doc-title">
@@ -34,6 +38,7 @@
     </header>
     <?php require $view; ?>
     <footer class="print-footnote">
+        <?php if (($letterhead['terms'] ?? '') !== ''): ?><p><?= pl_e($letterhead['terms']) ?></p><?php endif; ?>
         <p>This is a computer-generated document from <?= pl_e($letterhead['name']) ?>. Posted entries are preserved; corrections use a linked reversal.</p>
     </footer>
 </div>

@@ -100,7 +100,30 @@ function pl_web_starter_ar(int $actorId,int $companyId,int $bookId,array $user,a
         'recordJournal'=>$document && $document['journal_id']?pl_get_journal($actorId,$companyId,$bookId,$document['journal_id']):null,
         'selectionJournal'=>$selection && $selection['journal_id']?pl_get_journal($actorId,$companyId,$bookId,$selection['journal_id']):null,
         'accounts'=>pl_starter_accounts($actorId,$companyId,$bookId),'parties'=>pl_starter_parties($actorId,$companyId,$bookId),
+        // Trading context (1.2 M3): packs, dimensions and the B37 policies the editor may offer,
+        // plus the read-only stock and balance strip. Empty and default when the module is off,
+        // so the screen is exactly the 1.1 screen and offers nothing the services would refuse.
+        'trading'=>$receivable?pl_trading_editor_context($actorId,$companyId,$bookId):['enabled'=>false,'packs'=>[],'packs_by_product'=>[],'sales_staff'=>[],'areas'=>[],'warehouses'=>[],'policies'=>pl_trading_policy_defaults()+['revision'=>0]],
+        'tradingReadout'=>$receivable&&$editing?pl_trading_editor_readout($actorId,$companyId,$bookId,
+            pl_web_id($form['input'],'party_id')?:(($original['party_id']??null)?:($document['party_id']??null)),
+            pl_web_readout_product($form['input'],$document),pl_web_id($form['input'],'warehouse_id')?:($document['warehouse_id']??null)):null,
         'priceMode'=>pl_tax_price_mode($actorId,$companyId,$bookId),'products'=>pl_list_inventory_products($actorId,$companyId,$bookId),'taxCodes'=>pl_list_tax_codes($actorId,$companyId,$bookId),'settlements'=>$settlements]);
+}
+
+/**
+ * The product the readout strip describes: the last line the person actually named, which is
+ * "the current line" of frame decision 6 without any client-side state.
+ */
+function pl_web_readout_product(array $input,?array $document): ?int
+{
+    $rows=is_array($input['lines']??null)?$input['lines']:($document['lines']??[]);
+    $productId=null;
+    foreach (is_array($rows)?$rows:[] as $row) {
+        if (!is_array($row)) { continue; }
+        $candidate=pl_web_id($row,'product_id');
+        if ($candidate>0) { $productId=$candidate; }
+    }
+    return $productId;
 }
 
 function pl_web_ar_editor_preview(int $actorId,int $companyId,int $bookId,int $id,array $values,string $kind): array
@@ -117,7 +140,12 @@ function pl_web_ar_editor_input(array $input,string $kind): array
     $data=['kind'=>$kind,'price_mode'=>pl_web_text($input,'price_mode')?:null,'party_id'=>pl_web_id($input,'party_id'),'date'=>pl_web_text($input,'date'),
         'due_date'=>pl_web_text($input,'due_date'),'currency'=>strtoupper(pl_web_text($input,'currency')),'reference'=>pl_web_text($input,'reference'),
         'terms'=>pl_web_text($input,'terms'),'notes'=>pl_web_text($input,'notes'),'creation_key'=>pl_web_text($input,'request_key'),
-        'rounding_account_id'=>pl_web_id($input,'rounding_account_id')?:null,'lines'=>pl_starter_lines($input)];
+        'rounding_account_id'=>pl_web_id($input,'rounding_account_id')?:null,'lines'=>pl_starter_lines($input),
+        // Trading dimensions and counter cash (1.2 M3). Every one is optional; an editor that
+        // does not send them produces the document it produced before this milestone.
+        'sales_staff_id'=>pl_web_id($input,'sales_staff_id')?:'','area_id'=>pl_web_id($input,'area_id')?:'',
+        'warehouse_id'=>pl_web_id($input,'warehouse_id')?:'',
+        'cash_received'=>pl_web_text($input,'cash_received','0')?:'0','cash_account_id'=>pl_web_id($input,'cash_account_id')?:''];
     if (in_array($kind,['customer_credit','supplier_credit'],true)) { $data['original_document_id']=pl_web_id($input,'original_document_id'); }
     return $data;
 }

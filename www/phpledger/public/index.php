@@ -55,7 +55,7 @@ $routes = [
     '/companies' => ['GET'], '/company/select' => ['POST'], '/sample-chooser' => ['GET', 'POST'], '/onboarding' => ['GET', 'POST'],
     '/setup/review' => ['GET', 'POST'], '/transactions' => ['GET'], '/transactions/detail' => ['GET'],
     '/opening-balances' => ['GET', 'POST'], '/periods' => ['GET', 'POST'], '/bank-reconciliation' => ['GET', 'POST'],
-    '/numbering' => ['GET', 'POST'],
+    '/numbering' => ['GET', 'POST'], '/accounting-policies' => ['GET', 'POST'], '/company-profile' => ['GET', 'POST'],
     '/transactions/new' => ['GET'], '/transactions/edit' => ['GET'], '/transactions/save' => ['POST'],
     '/transactions/post' => ['POST'], '/transactions/reverse' => ['POST'],
     '/reports/trial-balance' => ['GET'], '/reports/account' => ['GET'], '/journals/detail' => ['GET'], '/reports/export' => ['GET'],
@@ -371,6 +371,13 @@ try {
     if ($path === '/numbering') {
         require_once dirname(__DIR__) . '/includes/functions/document_series_web_functions.php';
         pl_web_numbering($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    if ($path === '/accounting-policies' || $path === '/company-profile') {
+        require_once dirname(__DIR__) . '/includes/functions/trading_web_functions.php';
+        if ($path === '/accounting-policies') {
+            pl_web_accounting_policies($actorId, $companyId, $bookId, $user, $company, $method);
+        }
+        pl_web_company_profile($actorId, $companyId, $bookId, $user, $company, $method);
     }
     if ($path === '/bank-reconciliation') {
         require_once dirname(__DIR__) . '/includes/functions/reconciliation_web_functions.php';

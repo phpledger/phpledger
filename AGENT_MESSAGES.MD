@@ -680,3 +680,56 @@ Migration numbers are assigned at merge in landing order (B62). File ownership b
 
 **From:** Claude. **To:** Codex and other sessions. **Status:** Documentation committed; no code, migration, issue edit or push.
 **Owner instruction:** fold the ownership register (issue #92, decision B63) into 1.2 instead of 1.3. B63 now reads "core, in 1.2"; the company-profile task extends the B64 profile (M3) with legal form, registration authority, incorporation date and financial year rather than creating a second profile. The 1.2 plan gains milestone **M8a** after the plugin runtime (hook points) and in parallel with M9 and M10 in a worktree (B62), 6–12 days, delivered in preview.3; the plan's sum is 69–132 days. `docs/ROADMAP.md` lists it under the 1.2 plan-and-status line and the 1.3 line is back to its original wording; module roadmap says "From 1.2"; platform roadmap row 8a and the architecture subsection cite M8a. Issue #92's body still says "Target: 1.3" — updating it is an owner-visible GitHub action left to the owner or an explicit request.
+## 2026-09-21 — Claude: 1.2 M3 trading documents complete on `m3/trading-documents` (handoff)
+
+**From:** Claude (M3 worktree). **To:** Codex, the M4 and M5 sessions and the releasing session. **Status:** built, green locally, committed on `m3/trading-documents`, not pushed.
+
+**Scope kept:** the AR document shape (`ar_ap_functions.php` document/line handling), the AR templates and editors, and the new `trading-documents` module. `inventory_functions.php` and the stock templates (M4) and `settlement_functions.php` / `open_item_functions.php` (M5) were **not edited** — the cash-on-invoice settlement and the party statement call those services, they do not change them. Free-goods stock is issued from `pl_ar_issue_invoice_stock()` in AR's own file, using the same source type, document, journal, reference and idempotency key the inventory service uses, so M4's existing reversal and credit-allocation readers find those movements unchanged.
+
+**Migration number: `037_trading_documents`** — the next free number at this branch point (`036_structured_account_codes` is M6's). Every place the number appears, for the releasing session if it renumbers in landing order (B62):
+1. `www/phpledger/install/migrations/037_trading_documents.php` (the file name)
+2. `resources/modules/trading-documents.json` → `"migrations": ["037_trading_documents"]`
+3. `tools/package-files.json` → the source/destination pair for the migration file
+4. `tests/trading_documents_test.php` → the manifest test asserts `['037_trading_documents']` and that the file exists
+5. `docs/ARCHITECTURE.md` → "migration 037" in the AR row and in the printing section
+6. `docs/MODULE-ROADMAP.md` → "migration `037_trading_documents`" in the trading-documents limits section
+
+**Shared files touched, for merge awareness:** `module_functions.php` (one registry id added), `print_functions.php` (two registry entries and the B64 letterhead), `templates/print/frame.php`, `public/index.php` (two routes), `templates/partials/ui/shell.php` (two nav entries, through `pl_t()` so the i18n backlog ceiling is not raised), `starter_web_functions.php` and `starter_ar_web_functions.php` (neutral pass-through of the new fields), `tests/run.php`, `tests/print_test.php` (`invoice` and `statement` are now registered types, so the unknown-type list was updated).
+
+**Decisions taken, with alternatives and reversal paths (B53):** recorded in `docs/accounting/examples/trading-document-policies.md` for the accountant (B30) and summarised in `docs/MODULE-ROADMAP.md`. The three that constrain other milestones: free goods are invoice-only (a returned bonus is a reviewed stock adjustment, not a credit line — widening it needs M5's credit residual model); a posted cash invoice is corrected by reversal rather than in place (the in-place path asserts no outstanding allocation, and the cash is exactly such an allocation); and the cash-on-invoice cap is a per-invoice amount with a recommended default of zero, not an authorisation model.
+
+**Evidence:** `docker compose --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` green, and `python tests/package-builder-test.py` green. Verbatim results are in the session handoff.
+
+### Addendum — M3 editor surface finished on the same branch
+
+The first M3 commit left the services complete and the invoice editor still rendering its 1.1 line
+row. That gap is now closed on `m3/trading-documents`, on files this branch owns.
+
+**Screen controls added.** `templates/partials/ui/commercial-lines.php` gains pack selection with
+pack-and-unit entry, a per-line discount percentage with the computed amount shown beside the row
+total, and a free-goods checkbox whose row is tinted and reads "Bonus, not charged"; the columns
+appear only for a customer document with the module enabled, so the bill and purchase editors are
+untouched. `ar-document-editor.php` gains the warehouse, sales-staff and area selectors, the cash
+panel (only when the owner has set a positive cap), the stock-and-balance readout strip of frame
+decision 6, and totals rows for line discounts, cash received and the balance receivable. Every
+new string goes through `pl_t()`.
+
+**Shared files touched beyond the first commit, for merge awareness:** `public/assets/app.js` (row
+renumbering, live pack/discount/free arithmetic, named totals rows), `resources/ui/app.css` plus
+the rebuilt `public/assets/app.css` (`npm run build:css` — the new arbitrary widths only exist if
+the stylesheet is rebuilt), `templates/partials/ui/components.php` (`pl_ui_totals()` takes an
+optional row-key map; every existing caller is unchanged), and `tests/starter_browser_fixture.php`
+(a `--trading` mode).
+
+**The browser check found five real defects, all fixed here.** Three in the editor: a checkbox
+nested inside its label broke `app.js`'s row renumbering so every added line stayed `lines[0]`; the
+totals block was written by counting `<dd>` elements and corrupted the new rows; and the live row
+amount ignored packs, discounts and the free flag. Two in the prints: the seven-column invoice
+table forced a page-level horizontal scroll at 390, and the statement's long reference pushed the
+letterhead past the sheet. Full detail and the per-width results are in
+`docs/design/1.2-2026-09/forms-and-reports/M3-BROWSER-CHECK.md`.
+
+**Still not reachable from the screen, and why:** van stock per salesman (a van is M4's warehouse
+kind and no salesman-to-van link exists), and a date range on the printed statement (the print
+route carries only a document id, which is M2's contract). Both are recorded as limits in
+`docs/MODULE-ROADMAP.md` and stated on the screen itself rather than faked.

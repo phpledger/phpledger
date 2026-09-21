@@ -1225,6 +1225,42 @@
     {
       "source": "resources/coa/core-starter-1.1.0.json",
       "destination": "resources/coa/core-starter-1.1.0.json"
+    },
+    {
+      "source": "resources/modules/trading-documents.json",
+      "destination": "resources/modules/trading-documents.json"
+    },
+    {
+      "source": "www/phpledger/includes/functions/trading_functions.php",
+      "destination": "www/phpledger/includes/functions/trading_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/trading_web_functions.php",
+      "destination": "www/phpledger/includes/functions/trading_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/037_trading_documents.php",
+      "destination": "www/phpledger/install/migrations/037_trading_documents.php"
+    },
+    {
+      "source": "www/phpledger/templates/print/invoice-a4.php",
+      "destination": "www/phpledger/templates/print/invoice-a4.php"
+    },
+    {
+      "source": "www/phpledger/templates/print/invoice-80mm.php",
+      "destination": "www/phpledger/templates/print/invoice-80mm.php"
+    },
+    {
+      "source": "www/phpledger/templates/print/statement-a4.php",
+      "destination": "www/phpledger/templates/print/statement-a4.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/accounting-policies.php",
+      "destination": "www/phpledger/templates/views/accounting-policies.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/company-profile.php",
+      "destination": "www/phpledger/templates/views/company-profile.php"
     }
   ]
 }
