@@ -83,7 +83,8 @@ and not the `captain-definition-oneclick.yml` filename a reasonable guess produc
 mismatch in the set and it is unresolved. The addon is one shared MySQL server for every
 app on the box, not a per-app container, so `--log-bin-trust-function-creators=1` cannot
 be passed. Our migrations create triggers and functions under binary logging, which MySQL
-refuses without either that flag or every routine being marked `DETERMINISTIC`. The two
+refuses without either that flag or every routine being marked `DETERMINISTIC`. This is tracked as
+[#103](https://github.com/phpledger/phpledger/issues/103). The two
 real options are named in `cloudron/NOTES.md`: mark the routines correctly in the
 migrations, which is the proper fix and helps every engine, or ask a Cloudron operator to
 set the flag server-wide, which a package cannot request. **Do not submit the Cloudron
