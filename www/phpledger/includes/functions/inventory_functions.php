@@ -109,15 +109,27 @@ function pl_page_inventory_products(int $actorId,int $companyId,int $bookId,arra
     return ['rows'=>$rows,'total'=>$total,'page'=>$page,'pages'=>$pages];
 }
 
-/** Warehouse identity and default assignment are permanent; edits change name or active status only. */
+/**
+ * Warehouse identity, kind and default assignment are permanent; edits change name, the
+ * van's driver, vehicle and route, or active status only. A van is a warehouse of kind
+ * `mobile` (migration 037, DOCUMENT-MODEL.md §2); the book default is always `fixed`.
+ */
 function pl_get_inventory_warehouse(int $actorId, int $companyId, int $bookId, int $id): array
 {
     pl_require_company_access($actorId, $companyId); pl_ledger_book($companyId, $bookId);
-    $row = DB::queryFirstRow('SELECT id,company_id,book_id,code,name,is_default,is_active,revision,created_by,created_at FROM pl_inventory_warehouses WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', $id, $companyId, $bookId);
+    $row = DB::queryFirstRow('SELECT id,company_id,book_id,code,name,kind,driver_name,vehicle_reference,route_name,is_default,is_active,revision,created_by,created_at FROM pl_inventory_warehouses WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', $id, $companyId, $bookId);
     if (!$row) { throw new DomainException('This warehouse is not available in the selected company and book.'); }
     foreach (['id','company_id','book_id','revision','created_by'] as $field) { $row[$field] = (int) $row[$field]; }
+    foreach (['driver_name','vehicle_reference','route_name'] as $field) { $row[$field] = $row[$field] === null ? null : (string) $row[$field]; }
     $row['is_default'] = (bool) $row['is_default']; $row['is_active'] = (bool) $row['is_active'];
+    $row['is_mobile'] = $row['kind'] === 'mobile';
     return $row;
+}
+
+/** The kinds a stock location can have. A van is never the book default. */
+function pl_inventory_warehouse_kinds(): array
+{
+    return ['fixed' => 'Warehouse or store', 'mobile' => 'Van or mobile location'];
 }
 
 /** Includes inactive warehouses so historical stock remains visible. Reads never require the locations module. */
@@ -145,11 +157,26 @@ function pl_inventory_default_warehouse(int $actorId, int $companyId, int $bookI
     });
 }
 
-/** Input: code, name, is_active (bool), reason, idempotency_key; edits require the current revision. Needs the locations module. */
+/**
+ * Input: code, name, kind (`fixed` or `mobile`), driver_name, vehicle_reference, route_name,
+ * is_active (bool), reason, idempotency_key; edits require the current revision. Needs the
+ * locations module. A `mobile` location names its driver; a `fixed` one carries no driver.
+ */
 function pl_save_inventory_warehouse(int $actorId, int $companyId, int $bookId, array $input, ?int $id = null, ?int $revision = null): array
 {
     pl_demo_require_setup_action();
-    $data = ['code' => pl_ledger_text($input['code'] ?? null, 'Warehouse code', 60), 'name' => pl_ledger_text($input['name'] ?? null, 'Warehouse name', 160), 'is_active' => $input['is_active'] ?? true];
+    $data = ['code' => pl_ledger_text($input['code'] ?? null, 'Warehouse code', 60), 'name' => pl_ledger_text($input['name'] ?? null, 'Warehouse name', 160),
+        'kind' => $input['kind'] ?? 'fixed', 'is_active' => $input['is_active'] ?? true];
+    if (!is_string($data['kind']) || !isset(pl_inventory_warehouse_kinds()[$data['kind']])) { throw new DomainException('Choose whether this location is a warehouse or a van.'); }
+    foreach (['driver_name' => 'Driver or salesman', 'vehicle_reference' => 'Vehicle registration', 'route_name' => 'Route'] as $field => $label) {
+        $value = $input[$field] ?? null;
+        $data[$field] = $value === null || $value === '' ? null : pl_ledger_text($value, $label, $field === 'vehicle_reference' ? 60 : 160);
+    }
+    if ($data['kind'] === 'mobile') {
+        if ($data['driver_name'] === null) { throw new DomainException('A van needs the driver or salesman who carries its stock.'); }
+    } else {
+        foreach (['driver_name','vehicle_reference','route_name'] as $field) { $data[$field] = null; }
+    }
     if (!is_bool($data['is_active'])) { throw new DomainException('Choose a valid warehouse active status.'); }
     $reason = pl_ledger_text($input['reason'] ?? null, 'Warehouse change reason', 500);
     return pl_inventory_command($actorId, $companyId, $bookId, (string) ($input['idempotency_key'] ?? $input['creation_key'] ?? ''), ['warehouse', $id, $revision, $data, $reason],
@@ -160,6 +187,7 @@ function pl_save_inventory_warehouse(int $actorId, int $companyId, int $bookId, 
             if ($before) {
                 if ($before['revision'] !== $revision) { throw new DomainException('The warehouse revision changed. Reload before saving.'); }
                 if ($before['code'] !== $data['code']) { throw new DomainException('Warehouse identity is fixed. Create a separate warehouse for a different code.'); }
+                if ($before['kind'] !== $data['kind']) { throw new DomainException('A location cannot change between a warehouse and a van. Create a separate location instead.'); }
                 if ($before['is_default'] && !$data['is_active']) { throw new DomainException('The default warehouse must remain active.'); }
                 DB::update('pl_inventory_warehouses', $data + ['revision' => $before['revision'] + 1], 'id=%i AND company_id=%i AND book_id=%i', $id, $companyId, $bookId);
             } else {

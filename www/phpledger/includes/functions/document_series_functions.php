@@ -18,6 +18,12 @@ function pl_document_series_types(): array
         'bill' => ['label' => 'Supplier bill', 'prefix' => 'BILL'],
         'customer_credit' => ['label' => 'Customer credit note', 'prefix' => 'CR'],
         'supplier_credit' => ['label' => 'Supplier credit note', 'prefix' => 'SC'],
+        // Stock documents (1.2 M4, migration 037). Research decision 1: a separate series
+        // per document kind, with the prefix settable here in Admin > Numbering.
+        'stock_issue' => ['label' => 'Stock issue', 'prefix' => 'ISS'],
+        'stock_reissue' => ['label' => 'Stock re-issue', 'prefix' => 'RISS'],
+        'stock_return' => ['label' => 'Stock return from van', 'prefix' => 'RTN'],
+        'gate_pass' => ['label' => 'Gate pass', 'prefix' => 'GP'],
     ];
 }
 

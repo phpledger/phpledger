@@ -1261,6 +1261,46 @@
     {
       "source": "www/phpledger/templates/views/company-profile.php",
       "destination": "www/phpledger/templates/views/company-profile.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/038_stock_documents.php",
+      "destination": "www/phpledger/install/migrations/038_stock_documents.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/stock_document_functions.php",
+      "destination": "www/phpledger/includes/functions/stock_document_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/stock_document_web_functions.php",
+      "destination": "www/phpledger/includes/functions/stock_document_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/stock-documents.php",
+      "destination": "www/phpledger/templates/views/stock-documents.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/stock-document.php",
+      "destination": "www/phpledger/templates/views/stock-document.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/van-settlement.php",
+      "destination": "www/phpledger/templates/views/van-settlement.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/stock-by-location.php",
+      "destination": "www/phpledger/templates/views/stock-by-location.php"
+    },
+    {
+      "source": "www/phpledger/templates/print/stock-issue-a4.php",
+      "destination": "www/phpledger/templates/print/stock-issue-a4.php"
+    },
+    {
+      "source": "www/phpledger/templates/print/stock-issue-80mm.php",
+      "destination": "www/phpledger/templates/print/stock-issue-80mm.php"
+    },
+    {
+      "source": "www/phpledger/templates/print/gate-pass-a4.php",
+      "destination": "www/phpledger/templates/print/gate-pass-a4.php"
     }
   ]
 }

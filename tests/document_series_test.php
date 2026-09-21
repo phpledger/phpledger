@@ -31,14 +31,15 @@ function series_row(array $f, string $type): array
 test('every book carries the recommended default series per document type', function (): void {
     $f = series_fixture();
     $series = pl_list_document_series($f['actor_id'], $f['company_id'], $f['book_id']);
-    assert_same(['invoice', 'bill', 'customer_credit', 'supplier_credit'], array_column($series, 'document_type'));
+    // Trading documents first, then the stock documents added in 1.2 M4 (migration 037).
+    assert_same(['invoice', 'bill', 'customer_credit', 'supplier_credit', 'stock_issue', 'stock_reissue', 'stock_return', 'gate_pass'], array_column($series, 'document_type'));
     foreach ($series as $entry) {
         assert_same(6, $entry['padding']);
         assert_true($entry['year_segment']);
         assert_same('yearly', $entry['reset_rule']);
         assert_same(1, $entry['next_number']);
     }
-    assert_same(['INV', 'BILL', 'CR', 'SC'], array_column($series, 'prefix'));
+    assert_same(['INV', 'BILL', 'CR', 'SC', 'ISS', 'RISS', 'RTN', 'GP'], array_column($series, 'prefix'));
     assert_same('INV-' . gmdate('Y') . '-000001', $series[0]['example']);
 });
 

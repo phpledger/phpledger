@@ -61,6 +61,8 @@ $routes = [
     '/reports/trial-balance' => ['GET'], '/reports/account' => ['GET'], '/journals/detail' => ['GET'], '/reports/export' => ['GET'],
     '/reports' => ['GET'], '/reports/balance-sheet' => ['GET'], '/reports/profit-loss' => ['GET'], '/reports/cash-forecast' => ['GET', 'POST'],
     '/reports/ageing' => ['GET'],
+    '/stock-documents' => ['GET', 'POST'], '/stock-documents/detail' => ['GET', 'POST'], '/stock-documents/settlement' => ['GET', 'POST'],
+    '/reports/stock-by-location' => ['GET'],
     '/pos' => ['GET'], '/pos/review' => ['GET', 'POST'], '/pos/edit' => ['POST'], '/pos/checkout' => ['POST'], '/pos/retry' => ['POST'], '/pos/receipt' => ['GET'],
     '/sample-guide' => ['GET'], '/help' => ['GET'], '/modules' => ['GET', 'POST'], '/connections' => ['GET','POST'], '/oauth/authorize' => ['GET','POST'], '/tables' => ['GET'],
     '/accounts' => ['GET'], '/accounts/save' => ['POST'], '/logo' => ['GET'],
@@ -355,6 +357,14 @@ try {
     if (in_array($path, ['/ar','/ap','/parties','/inventory','/purchasing','/opening-conversion','/tax'], true)) {
         require_once dirname(__DIR__) . '/includes/functions/starter_web_functions.php';
         pl_web_starter($actorId,$companyId,$bookId,$user,$company,$path,$method);
+    }
+    if (str_starts_with($path, '/stock-documents')) {
+        require_once dirname(__DIR__) . '/includes/functions/stock_document_web_functions.php';
+        pl_web_stock_documents($actorId, $companyId, $bookId, $user, $company, $path, $method);
+    }
+    if ($path === '/reports/stock-by-location') {
+        require_once dirname(__DIR__) . '/includes/functions/stock_document_web_functions.php';
+        pl_web_stock_by_location($actorId, $companyId, $bookId, $user, $company);
     }
     if ($path === '/modules') {
         require_once dirname(__DIR__) . '/includes/functions/module_web_functions.php';

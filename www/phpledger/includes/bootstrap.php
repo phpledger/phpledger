@@ -87,6 +87,7 @@ require_once __DIR__ . '/functions/inventory_functions.php';
 require_once __DIR__ . '/functions/tax_functions.php';
 require_once __DIR__ . '/functions/document_series_functions.php';
 require_once __DIR__ . '/functions/trading_functions.php';
+require_once __DIR__ . '/functions/stock_document_functions.php';
 require_once __DIR__ . '/functions/ar_ap_functions.php';
 require_once __DIR__ . '/functions/purchasing_functions.php';
 require_once __DIR__ . '/functions/opening_conversion_functions.php';

@@ -1,6 +1,6 @@
 # Stock locations
 
-Stock locations is a bundled optional module (`resources/modules/inventory-locations.json`, migration `034_inventory_locations`) that extends the shared [[Inventory|Accounting-and-Reports]] service with further warehouses and vans, per-location balances and transfers between them. It shipped in 1.1.1 (unannounced; corrected in 1.1.2) and is documented here for 1.2.
+Stock locations is a bundled optional module (`resources/modules/inventory-locations.json`, migrations `034_inventory_locations` and `038_stock_documents`) that extends the shared [[Inventory|Accounting-and-Reports]] service with further warehouses and vans, per-location balances, transfers between them, and — from 1.2 — a numbered stock-document family, a van settlement review and the stock-by-location reports. It shipped in 1.1.1 (unannounced; corrected in 1.1.2); the 1.2 additions are described under [What 1.2 adds](#what-12-adds).
 
 ## What the module does
 
@@ -26,11 +26,74 @@ Stock locations is a bundled optional module (`resources/modules/inventory-locat
 
 Disabling follows the same screen and keeps every historical record described above.
 
-## What is planned in 1.2
+## What 1.2 adds
 
-- **Stock documents.** Transfers grow from a linked movement pair into a numbered stock-document family (stock issue, re-issue, stock return and gate passes), sharing the number series and print pipeline being built for trading documents (owner decision B33).
-- **Per-location reports.** The manifest's `stock-by-location` report — stock value and items by location, and aggregate reports across locations — is implemented, not removed (owner decision B35).
-- **Van distribution.** 1.2 must be able to simulate a multi-warehouse, multi-driver/van distribution business, including a POS for counter sales, so the module roadmap's later route/van/settlement plugin work moves into 1.2 as bundled behaviour over Stock locations (owner decision B34).
-- Warehouse selection on invoices and credits, and API/MCP read exposure of warehouses and transfers, move from 1.3 into 1.2 (owner decision B36).
+Migration `038_stock_documents` builds a document layer over the movements already described above. Nothing about transfers, carrying value or the default warehouse changes; what is new is numbering, printing and paperwork.
 
-See the [1.2 release plan](../strategy/RELEASE-PLAN-1.2.md) and the [[module roadmap|Module-Roadmap]] for the full sequence and gates.
+### A van is a location with a driver
+
+Every stock location now has a **kind**: a *warehouse or store* (`fixed`) or a *van or mobile location* (`mobile`). A van names the driver or salesman who carries its stock, and optionally the vehicle registration and the route it runs. The kind is permanent, exactly as the code is: a building never becomes a van, and a van never becomes a building — create a separate location instead. The book's default warehouse is always a building, so everything that relied on the default warehouse behaves exactly as before.
+
+A van's stock is still **your** stock. Issuing goods to a van does not reduce what the business owns, and it writes no ledger entry; only a sale from the van does.
+
+### Numbered stock documents
+
+| Document | What it does | Number |
+|---|---|---|
+| **Stock issue** | Loads a van from a warehouse. One transfer pair per line, at the warehouse's average cost. No journal. | `ISS-2026-000001` |
+| **Stock re-issue** | A mid-day top-up for the same van, linked to the morning's issue. | `RISS-2026-000001` |
+| **Stock return from van** | Unsold stock going back to the warehouse at the end of the route. | `RTN-2026-000001` |
+| **Gate pass** | A permission record for the security desk. **Moves no stock and posts nothing.** | `GP-2026-000001` |
+
+Each kind has its own running number, allocated from the same series machinery as invoices and bills. Set the prefix, the width, the year segment and the reset rule per business and book in **Admin → Numbering**, alongside the trading documents. A number is allocated once, recorded immutably, and never reused — and the document, its lines and its gate pass cannot be edited or deleted afterwards. Corrections are recorded as the opposite document, not as a change to the original.
+
+A **warehouse-to-warehouse** move remains the plain transfer on the Products & stock screen; the document family is for the van side of the business.
+
+### Gate passes
+
+A gate pass is paper, not bookkeeping. It names the stock document that actually moved the goods, states whether the goods are expected back (a returnable pass must say when), and carries the party, the vehicle, the driver and the purpose. The security desk stamps it out of the gate and back in, once each. It creates no stock movement, no journal and no document line — so the gate can verify a load without being shown the accounting record.
+
+Print it on its own A4 gate copy, which lists the items of the document it covers.
+
+### The driver's day
+
+1. **Morning load** — a stock issue from the warehouse to the van, with an outward returnable gate pass.
+2. **On the road** — the van's sales reduce its stock through the ordinary sale documents. A customer return in sellable condition goes straight back into van stock; damaged or expired stock comes back to the warehouse at the end of the day.
+3. **Mid-day re-issue** — a second issue against the same van, linked to the morning's load.
+4. **End of route** — a stock return from the van for whatever is left, matching the morning's outward pass.
+5. **Settlement** — **Inventory → Van settlement** shows one van and one day: opening, loaded, sold, customer returns, returned, the closing stock those explain, and the actual closing stock. Where they differ, the sheet says so per item.
+
+The settlement **posts nothing**. It reconciles the goods; the money is carried by the sale documents the van raised, which post through the ordinary posting service as they always did. A day that does not reconcile cannot be approved: record the stock count or adjustment that explains the difference first. A settlement is never allowed to absorb a difference silently.
+
+**Approving a settlement is a separate permission from recording one.** Until user permissions ship, only the business owner can approve; an accountant can record stock documents and review the day but not approve it. An approved settlement is immutable.
+
+### Reports
+
+**Inventory → Stock by location** (also on the All reports screen) lists every location — warehouses first, then vans — with its own subtotal, the aggregate quantity the business holds of each item everywhere, and a grand total. Filter it to a date, to warehouses or vans only, or to one item. Below the groups, the across-locations aggregate is reconciled to the grouped totals and to the inventory control accounts; only the unfiltered, all-locations view ties to the ledger, and the report says so when you filter it.
+
+*Low* marks a location holding less than a tenth of what all locations hold of that item. It is a derived attention flag: 1.2 has no reorder-level field, and the report does not invent one.
+
+**Cost columns are a separate permission.** Until user permissions ship, only the business owner sees value at cost and the ledger reconciliation; everyone else sees quantities and value at sale price. The cost figures are withheld by the service, not merely hidden on screen, so a machine read cannot see them either.
+
+### Printing
+
+- **Stock document, A4** — the warehouse's copy, with the gate pass alongside the items and signature lines for the store keeper, the driver and gate security.
+- **Stock document, 80 mm** — the van-facing load list, for the portable printer that travels with the driver.
+- **Gate pass, A4** — the gate copy.
+
+### Reading it from outside
+
+An authorised full-access connection can read `warehouses` (including each van's driver, vehicle and route) and `stock_transfers` (matched out/in pairs at carrying value, with the stock document number when one raised them) over the same API and MCP contract as every other read. A report-only connection cannot: these are transaction-level records. Both reads stay available when the module is disabled, like every other stock read.
+
+### When the module is disabled with van stock present
+
+Nothing is deleted, hidden or moved to the default warehouse. Existing stock documents, gate passes, settlements, van balances and the by-location report all stay readable. New stock documents, gate passes and settlement reviews are refused until the owner enables the module again, and the number series pick up exactly where they left off.
+
+## Still open
+
+- Van sales support both a cash receipt and a credit invoice, chosen per sale, and credit limits are checked at settlement rather than on the road (research decisions 3 and 4). The sale documents themselves are the trading-document work, not this module.
+- A standalone gate pass with no stock document behind it (a demo unit going out on loan) is not supported; the research recorded it as a gap for the pilot to confirm.
+- Automatic settlement for a batch with no exceptions stays out of 1.2 (research decision 6).
+- **Warehouse selection on an invoice** (owner decision B36) is already honoured on the stock side: an invoice line's `warehouse_id`, or the document's, decides which location the goods leave. The field on the invoice itself belongs to the trading-document work, which owns the document shape and its editor.
+
+See the [1.2 release plan](../strategy/RELEASE-PLAN-1.2.md), the [distribution research](../design/1.2-2026-09/distribution-research/RESEARCH.md) and its [document model](../design/1.2-2026-09/distribution-research/DOCUMENT-MODEL.md), and the [[module roadmap|Module-Roadmap]] for the full sequence and gates.

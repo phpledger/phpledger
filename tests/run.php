@@ -66,6 +66,7 @@ $suites[] = 'render_allowlist_test.php';
 $suites[] = 'account_code_test.php';
 $suites[] = 'report_tree_test.php';
 $suites[] = 'owner_test.php';
+$suites[] = 'stock_document_test.php';
 if (($argv[1] ?? '') === '--suite=ar-lists') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','ar_list_test.php','reconciliation_test.php','list_test.php','document_series_test.php'];
 }
@@ -125,6 +126,9 @@ if (($argv[1] ?? '') === '--suite=i18n') {
 }
 if (($argv[1] ?? '') === '--suite=modules') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'purchasing_test.php', 'pos_test.php', 'module_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=stock-documents') {
+    $suites = ['ledger_test.php', 'concurrency_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'stock_document_test.php'];
 }
 foreach ($suites as $suite) {
     if (is_file(__DIR__ . '/' . $suite)) {

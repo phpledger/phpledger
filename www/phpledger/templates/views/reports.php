@@ -16,6 +16,11 @@ $groups = [
         ['/ap','Bills','Track supplier bills and when they are due.','file-text'],
         ['/reports/ageing','Receivables & payables ageing','Current, 1–30, 31–60, 61–90 and over-90-day balances, reconciled to control accounts.','calendar'],
     ],
+    'Stock' => [
+        ['/reports/stock-by-location','Stock by location','Items and value in every warehouse and van, each subtotalled, with the aggregate across locations.','list'],
+        ['/stock-documents','Stock issues & returns','Numbered stock issues, re-issues, returns from a van and gate passes.','file-text'],
+        ['/stock-documents/settlement','Van settlement','One driver’s day: loaded, sold, returned, and whether it reconciles.','calendar'],
+    ],
     'Cash' => [
         ['/reports/cash-forecast','Cash forecast','Explore cash needs using your own expected money in and out. Scenario only; no posting.','arrow-right'],
         ['/bank-reconciliation','Bank reconciliation','Compare a bank statement with your posted entries.','building'],

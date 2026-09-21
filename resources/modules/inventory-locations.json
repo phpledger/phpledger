@@ -1,7 +1,7 @@
 {
   "id": "inventory-locations",
   "name": "Stock locations",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "contract": 1,
   "optional": true,
   "requires": {
@@ -10,21 +10,40 @@
   },
   "capabilities": [
     "inventory.locations",
-    "inventory.transfers"
+    "inventory.transfers",
+    "inventory.stock_documents",
+    "inventory.van_settlement"
   ],
   "migrations": [
-    "034_inventory_locations"
+    "034_inventory_locations",
+    "038_stock_documents"
   ],
-  "routes": [],
+  "routes": [
+    "/stock-documents",
+    "/stock-documents/detail",
+    "/stock-documents/settlement",
+    "/reports/stock-by-location"
+  ],
   "permissions": [
     "owner",
     "accountant"
   ],
-  "settings": [],
+  "settings": [
+    "stock_issue",
+    "stock_reissue",
+    "stock_return",
+    "gate_pass"
+  ],
   "reports": [
     "stock-by-location"
   ],
-  "api_operations": [],
-  "mcp_operations": [],
-  "history": "Every book has a permanent default warehouse; movements recorded before this module carry it implicitly. Additional warehouses and vans, per-location carrying values and transfers at carrying value require the enabled module. Historical movements stay readable when it is disabled."
+  "api_operations": [
+    "warehouses",
+    "stock_transfers"
+  ],
+  "mcp_operations": [
+    "ledger_warehouses",
+    "ledger_stock_transfers"
+  ],
+  "history": "Every book has a permanent default warehouse; movements recorded before this module carry it implicitly. Additional warehouses and vans, per-location carrying values and transfers at carrying value require the enabled module. 1.2 adds warehouse kinds (a van is a mobile location with a driver), numbered stock documents — stock issue, re-issue, return from van and gate passes — over the same movements, the van settlement review, and the stock-by-location report. Historical movements, documents and reports stay readable when it is disabled; only new writes are refused. The number series live in Admin > Numbering and are listed here as settings."
 }

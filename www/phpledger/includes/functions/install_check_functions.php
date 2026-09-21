@@ -291,6 +291,7 @@ function pl_install_step_label(string $version): string
         '033_installation_logo' => 'Making room for your logo',
         '034_inventory_locations' => 'Adding stock locations',
         '036_structured_account_codes' => 'Renumbering the chart of accounts',
+        '038_stock_documents' => 'Adding stock documents, vans and gate passes',
     ];
     if (isset($labels[$version])) {
         return $labels[$version];
