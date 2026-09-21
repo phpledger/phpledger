@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source /usr/share/yunohost/helpers
+
+#=================================================
+# REMOVE SYSTEM CONFIGURATIONS
+#=================================================
+ynh_script_progression "Removing system configurations related to $app..."
+
+ynh_config_remove_nginx
+
+ynh_config_remove_phpfpm
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Removal of $app completed"

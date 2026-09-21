@@ -1,0 +1,78 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
+packaging_format = 2
+
+id = "phpledger"
+name = "PHP Ledger"
+description.en = "Double-entry accounting that runs on your own PHP hosting"
+
+version = "1.2.1~ynh1"
+
+maintainers = []
+
+[upstream]
+license = "AGPL-3.0-or-later"
+website = "https://phpledger.com/"
+code = "https://github.com/phpledger/phpledger"
+userdoc = "https://github.com/phpledger/phpledger#readme"
+
+[integration]
+yunohost = ">= 12.1.38"
+helpers_version = "2.1"
+architectures = "all"
+multi_instance = true
+
+ldap = false
+sso = false
+
+disk = "50M"
+ram.build = "10M"
+ram.runtime = "50M"
+
+[install]
+    [install.domain]
+    type = "domain"
+
+    [install.path]
+    type = "path"
+    default = "/phpledger"
+
+    [install.init_main_permission]
+    help.en = "PHP Ledger has its own sign-in page and does not use YunoHost's SSO. This controls who can reach that sign-in page at all."
+    type = "group"
+    default = "visitors"
+
+    [install.admin]
+    type = "user"
+    help.en = "This YunoHost user's name and email are used to create the first PHP Ledger administrator account. A random password is generated for it; retrieve it after install with: yunohost app setting phpledger password"
+
+[resources]
+
+    [resources.sources.main]
+    url = "https://github.com/phpledger/phpledger/releases/download/v1.2.1/phpledger-1.2.1.zip"
+    sha256 = "e983add7d909daf2b78151f6bc1d2195c2603fd57a711bf88e1ffb42c9c214b7"
+    autoupdate.strategy = "latest_github_release"
+    autoupdate.asset = "^phpledger-.*\\.zip$"
+
+    [resources.system_user]
+    allow_email = true
+
+    [resources.install_dir]
+    group = "www-data:r-x"
+
+    [resources.permissions]
+    main.url = "/"
+
+    [resources.apt]
+    packages = [
+        "mariadb-server",
+        "php8.3-fpm",
+        "php8.3-common",
+        "php8.3-mysql",
+        "php8.3-bcmath",
+        "php8.3-mbstring",
+        "php8.3-curl",
+    ]
+
+    [resources.database]
+    type = "mysql"
