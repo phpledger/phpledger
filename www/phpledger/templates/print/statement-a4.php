@@ -16,29 +16,29 @@ $receivable = $statement['direction'] === 'receivable';
 ?>
 <section class="print-parties">
     <div class="print-party">
-        <h2><?= $receivable ? 'Customer' : 'Supplier' ?></h2>
+        <h2><?= pl_e($receivable ? pl_t('Customer') : pl_t('Supplier')) ?></h2>
         <p class="print-party-name"><?= pl_e((string) $party['legal_name']) ?></p>
         <?php foreach ($addressLines as $line): ?><p><?= pl_e($line) ?></p><?php endforeach; ?>
     </div>
     <div class="print-party">
-        <h2>Statement</h2>
+        <h2><?= pl_e(pl_t('Statement')) ?></h2>
         <dl class="print-facts">
-            <dt>From</dt><dd><?= pl_e(pl_date_label((string) $statement['from'])) ?></dd>
-            <dt>To</dt><dd><?= pl_e(pl_date_label((string) $statement['to'])) ?></dd>
-            <dt>Currency</dt><dd><?= pl_e((string) $statement['currency']) ?></dd>
-            <dt>Opening balance</dt><dd><?= pl_e(pl_money((string) $statement['opening_balance'])) ?></dd>
+            <dt><?= pl_e(pl_t('From')) ?></dt><dd><?= pl_e(pl_date_label((string) $statement['from'])) ?></dd>
+            <dt><?= pl_e(pl_t('To')) ?></dt><dd><?= pl_e(pl_date_label((string) $statement['to'])) ?></dd>
+            <dt><?= pl_e(pl_t('Currency')) ?></dt><dd><?= pl_e((string) $statement['currency']) ?></dd>
+            <dt><?= pl_e(pl_t('Opening balance')) ?></dt><dd><?= pl_e(pl_money((string) $statement['opening_balance'])) ?></dd>
         </dl>
     </div>
 </section>
 <div class="print-lines-scroll">
 <table class="print-lines">
-    <caption>Activity <?= pl_e(pl_date_label((string) $statement['from'])) ?> to <?= pl_e(pl_date_label((string) $statement['to'])) ?></caption>
+    <caption><?= pl_e(pl_t('Activity {from} to {to}', ['from' => pl_date_label((string) $statement['from']), 'to' => pl_date_label((string) $statement['to'])])) ?></caption>
     <thead><tr>
-        <th scope="col">Date</th><th scope="col">Type</th><th scope="col">Document</th>
-        <th scope="col" class="print-num">Debit</th><th scope="col" class="print-num">Credit</th><th scope="col" class="print-num">Balance</th>
+        <th scope="col"><?= pl_e(pl_t('Date')) ?></th><th scope="col"><?= pl_e(pl_t('Type')) ?></th><th scope="col"><?= pl_e(pl_t('Document')) ?></th>
+        <th scope="col" class="print-num"><?= pl_e(pl_t('Debit')) ?></th><th scope="col" class="print-num"><?= pl_e(pl_t('Credit')) ?></th><th scope="col" class="print-num"><?= pl_e(pl_t('Balance')) ?></th>
     </tr></thead>
     <tbody>
-    <tr><th scope="row" colspan="5">Opening balance, <?= pl_e(pl_date_label((string) $statement['from'])) ?></th><td class="print-num"><?= pl_e(pl_money((string) $statement['opening_balance'])) ?></td></tr>
+    <tr><th scope="row" colspan="5"><?= pl_e(pl_t('Opening balance, {date}', ['date' => pl_date_label((string) $statement['from'])])) ?></th><td class="print-num"><?= pl_e(pl_money((string) $statement['opening_balance'])) ?></td></tr>
     <?php foreach ($statement['rows'] as $row): ?>
         <tr>
             <th scope="row"><?= pl_e(pl_date_label((string) $row['date'])) ?></th>
@@ -51,13 +51,13 @@ $receivable = $statement['direction'] === 'receivable';
     <?php endforeach; ?>
     </tbody>
     <tfoot>
-        <tr><th scope="row" colspan="5">Closing balance, <?= pl_e(pl_date_label((string) $statement['to'])) ?><?= bccomp((string) $statement['unapplied'], '0', 4) > 0 ? ' · includes ' . pl_e(pl_money((string) $statement['unapplied'])) . ' held as an unapplied advance' : '' ?></th><td class="print-num"><?= pl_e(pl_money((string) $statement['closing_balance'])) ?></td></tr>
+        <tr><th scope="row" colspan="5"><?= pl_e(pl_t('Closing balance, {date}', ['date' => pl_date_label((string) $statement['to'])])) ?><?= bccomp((string) $statement['unapplied'], '0', 4) > 0 ? pl_e(pl_t(' · includes {amount} held as an unapplied advance', ['amount' => pl_money((string) $statement['unapplied'])])) : '' ?></th><td class="print-num"><?= pl_e(pl_money((string) $statement['closing_balance'])) ?></td></tr>
     </tfoot>
 </table>
 </div>
 <section class="print-totals">
-    <div class="print-total-row"><span>Opening balance</span><span class="print-num"><?= pl_e(pl_money((string) $statement['opening_balance'])) ?></span></div>
-    <div class="print-total-row"><span><?= $receivable ? 'Invoiced this period' : 'Billed this period' ?></span><span class="print-num"><?= pl_e(pl_money((string) $statement['invoiced'])) ?></span></div>
-    <div class="print-total-row"><span><?= $receivable ? 'Received this period' : 'Paid this period' ?></span><span class="print-num"><?= pl_e(pl_money((string) $statement['received'])) ?></span></div>
-    <div class="print-total-row print-total-grand"><span>Closing balance (<?= pl_e((string) $statement['currency']) ?>)</span><span class="print-num"><?= pl_e(pl_money((string) $statement['closing_balance'])) ?></span></div>
+    <div class="print-total-row"><span><?= pl_e(pl_t('Opening balance')) ?></span><span class="print-num"><?= pl_e(pl_money((string) $statement['opening_balance'])) ?></span></div>
+    <div class="print-total-row"><span><?= pl_e($receivable ? pl_t('Invoiced this period') : pl_t('Billed this period')) ?></span><span class="print-num"><?= pl_e(pl_money((string) $statement['invoiced'])) ?></span></div>
+    <div class="print-total-row"><span><?= pl_e($receivable ? pl_t('Received this period') : pl_t('Paid this period')) ?></span><span class="print-num"><?= pl_e(pl_money((string) $statement['received'])) ?></span></div>
+    <div class="print-total-row print-total-grand"><span><?= pl_e(pl_t('Closing balance ({currency})', ['currency' => (string) $statement['currency']])) ?></span><span class="print-num"><?= pl_e(pl_money((string) $statement['closing_balance'])) ?></span></div>
 </section>

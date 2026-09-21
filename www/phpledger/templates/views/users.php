@@ -210,7 +210,7 @@ $actorId = (int) $user['id'];
                                         <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?>
                                         <input type="hidden" name="action" value="revoke_invitation">
                                         <input type="hidden" name="invitation_id" value="<?= (int) $invitation['id'] ?>">
-                                        <input type="hidden" name="reason" value="Revoked from Admin > Users.">
+                                        <input type="hidden" name="reason" value="<?= pl_e(pl_t('Revoked from Admin > Users.')) ?>">
                                         <button class="btn btn-ghost btn-sm" type="submit"><?= pl_e(pl_t('Revoke')) ?></button>
                                     </form>
                                 <?php endif; ?>

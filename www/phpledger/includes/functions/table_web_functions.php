@@ -45,36 +45,39 @@ function pl_table_data(int $actor, array $company, string $kind, array $input): 
         $total = $list['records_total'];
         $filtered = $list['total'];
         foreach ($list['documents'] as $row) {
-            $rows[] = [pl_table_link('/transactions/detail', $row['id'], pl_date_label($row['date']) . ' · ' . $row['number'], pl_filters($input)), pl_e($row['counterparty'] ?: 'No name entered') . '<span class="row-secondary muted">' . pl_e(ucfirst($row['kind'])) . '</span>', pl_e(pl_money($row['amount'])), pl_e(ucfirst($row['status']))];
+            $rows[] = [pl_table_link('/transactions/detail', $row['id'], pl_date_label($row['date']) . ' · ' . $row['number'], pl_filters($input)), pl_e($row['counterparty'] ?: pl_t('No name entered')) . '<span class="row-secondary muted">' . pl_e(ucfirst($row['kind'])) . '</span>', pl_e(pl_money($row['amount'])), pl_e(ucfirst($row['status']))];
         }
-        $summary = $filtered . ' matching records · Total ' . $company['currency'] . ' ' . pl_money($list['total_amount']);
+        $summary = pl_t('{count} matching records · Total {currency} {amount}',
+            ['count' => $filtered, 'currency' => $company['currency'], 'amount' => pl_money($list['total_amount'])]);
     } elseif ($kind === 'general-journals') {
         $list = pl_list_general_drafts($actor, $companyId, $bookId, $options['page'], $options);
         $total = $list['records_total'];
         $filtered = $list['total'];
         foreach ($list['rows'] as $row) {
-            $rows[] = [pl_table_link('/general-journals/detail', $row['id'], $row['number'] . ' · ' . pl_date_label($row['document_date'])), pl_e($row['description']) . '<span class="row-secondary muted">' . pl_e($row['reference']) . '</span>', pl_e(ucfirst($row['status'])), pl_e(pl_money($row['totals']['debit'])), pl_e(pl_money($row['totals']['credit'])), $row['totals']['balanced'] ? 'Balanced' : 'Needs balancing'];
+            $rows[] = [pl_table_link('/general-journals/detail', $row['id'], $row['number'] . ' · ' . pl_date_label($row['document_date'])), pl_e($row['description']) . '<span class="row-secondary muted">' . pl_e($row['reference']) . '</span>', pl_e(ucfirst($row['status'])), pl_e(pl_money($row['totals']['debit'])), pl_e(pl_money($row['totals']['credit'])), pl_e($row['totals']['balanced'] ? pl_t('Balanced') : pl_t('Needs balancing'))];
         }
     } elseif ($kind === 'account') {
         $list = pl_account_activity($actor, $companyId, $bookId, pl_web_id($input, 'account_id'), pl_web_text($input, 'as_of'), $options['page'], pl_web_text($input, 'from') ?: null, $options);
         $total = $list['total'];
         $filtered = $list['filtered_total'];
         foreach ($list['movements'] as $row) {
-            $source = $row['document_id'] !== null ? pl_table_link('/transactions/detail', $row['document_id'], 'View transaction') : ($row['general_id'] !== null ? pl_table_link('/general-journals/detail', $row['general_id'], 'View general journal') : pl_e(ucfirst($row['source_type'])));
+            $source = $row['document_id'] !== null ? pl_table_link('/transactions/detail', $row['document_id'], pl_t('View transaction')) : ($row['general_id'] !== null ? pl_table_link('/general-journals/detail', $row['general_id'], pl_t('View general journal')) : pl_e(ucfirst($row['source_type'])));
             $balance = $row['running_balance'];
             $signed = bccomp($balance, '0', 4);
             $rows[] = [pl_e(pl_date_label($row['date'])), pl_table_link('/journals/detail', $row['journal_id'], $row['journal_reference']), pl_e($row['description']), $source, pl_e(pl_money($row['debit'])), pl_e(pl_money($row['credit'])), pl_e(pl_money($signed < 0 ? substr($balance, 1) : $balance) . ($signed < 0 ? ' Cr' : ($signed > 0 ? ' Dr' : '')))];
         }
-        $summary = 'Running balances use date, journal and line order across the full period. Searching and display sorting do not change them. ' . $filtered . ' matching entries of ' . $total . '.';
+        // One literal, not two joined: a split key is invisible to any string extractor.
+        $summary = pl_t('Running balances use date, journal and line order across the full period. Searching and display sorting do not change them. {filtered} matching entries of {total}.', ['filtered' => $filtered, 'total' => $total]);
     } else {
         $list = pl_bank_get_statement($actor, $companyId, $bookId, pl_web_id($input, 'statement_id'), $options);
         $total = $list['records_total'];
         $filtered = $list['filtered_total'];
         foreach ($list['rows'] as $row) {
-            $match = $row['journal_line_id'] === null ? 'Unmatched' : pl_table_link('/journals/detail', (int) $row['journal_id'], 'Journal ' . $row['journal_id'] . ' · line ' . $row['journal_line_id']);
+            $match = $row['journal_line_id'] === null ? pl_e(pl_t('Unmatched')) : pl_table_link('/journals/detail', (int) $row['journal_id'],
+                pl_t('Journal {journal} · line {line}', ['journal' => $row['journal_id'], 'line' => $row['journal_line_id']]));
             if (pl_can_write($company) && $list['status'] === 'draft') {
-                if ($row['journal_line_id'] === null) { $match = pl_table_link('/bank-reconciliation', $list['id'], 'Review matches', ['row' => (int) $row['id']]); }
-                else { $match .= '<form method="post" action="' . pl_e(pl_url('/bank-reconciliation')) . '">' . pl_csrf_field() . pl_scope_fields($company) . '<input type="hidden" name="action" value="unmatch"><input type="hidden" name="statement_id" value="' . $list['id'] . '"><input type="hidden" name="row_id" value="' . (int) $row['id'] . '"><input type="hidden" name="revision" value="' . (int) $list['revision'] . '"><button class="button">Remove match</button></form>'; }
+                if ($row['journal_line_id'] === null) { $match = pl_table_link('/bank-reconciliation', $list['id'], pl_t('Review matches'), ['row' => (int) $row['id']]); }
+                else { $match .= '<form method="post" action="' . pl_e(pl_url('/bank-reconciliation')) . '">' . pl_csrf_field() . pl_scope_fields($company) . '<input type="hidden" name="action" value="unmatch"><input type="hidden" name="statement_id" value="' . $list['id'] . '"><input type="hidden" name="row_id" value="' . (int) $row['id'] . '"><input type="hidden" name="revision" value="' . (int) $list['revision'] . '"><button class="button">' . pl_e(pl_t('Remove match')) . '</form>'; }
             }
             $rows[] = [pl_e($row['transaction_date']), pl_e($row['reference']) . '<span class="row-secondary muted">' . pl_e($row['description']) . '</span>', pl_e(pl_money((string) $row['money_in'])), pl_e(pl_money((string) $row['money_out'])), $match];
         }

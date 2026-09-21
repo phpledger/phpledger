@@ -28,18 +28,18 @@ $groups = [
 ];
 ?>
 <div class="flex flex-col gap-6 py-5">
-<?php pl_ui_page_header('Reports','Your business in numbers · '.$company['name'].($hasOverview?' · Through '.pl_date_label($overview['as_of']):''),static function () use ($company): void { if (pl_can_write($company)): ?>
-<a class="btn btn-primary" href="<?= pl_e(pl_url('/transactions/new')) ?>"><?= pl_icon('plus') ?> New transaction</a>
+<?php pl_ui_page_header(pl_t('Reports'),$hasOverview?pl_t('Your business in numbers · {company} · Through {date}',['company'=>$company['name'],'date'=>pl_date_label($overview['as_of'])]):pl_t('Your business in numbers · {company}',['company'=>$company['name']]),static function () use ($company): void { if (pl_can_write($company)): ?>
+<a class="btn btn-primary" href="<?= pl_e(pl_url('/transactions/new')) ?>"><?= pl_icon('plus') ?> <?= pl_e(pl_t('New transaction')) ?></a>
 <?php endif; }); ?>
 <?php if ($hasOverview): ?>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden rounded-panel border border-border bg-border" aria-label="Posted business balances">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden rounded-panel border border-border bg-border" aria-label="<?= pl_e(pl_t('Posted business balances')) ?>">
 <?php foreach (['cash'=>['Cash & bank','/reports/balance-sheet'],'income'=>['Income YTD','/reports/profit-loss'],'expenses'=>['Costs & expenses YTD','/reports/profit-loss'],'profit'=>['Net profit / loss YTD','/reports/profit-loss']] as $key=>[$label,$path]): ?>
-<a class="bg-surface px-4 py-3 hover:bg-surface-subtle" href="<?= pl_e(pl_url($path,$key==='cash'?['as_of'=>$overview['as_of']]:['preset'=>'custom','from'=>$overview['period_from'],'to'=>$overview['as_of']])) ?>"><span class="text-xs text-ink-muted"><?= pl_e($label) ?></span><p class="amount-lg mt-1"><?= pl_e(pl_money($overview[$key])) ?></p></a>
+<a class="bg-surface px-4 py-3 hover:bg-surface-subtle" href="<?= pl_e(pl_url($path,$key==='cash'?['as_of'=>$overview['as_of']]:['preset'=>'custom','from'=>$overview['period_from'],'to'=>$overview['as_of']])) ?>"><span class="text-xs text-ink-muted"><?= pl_e(pl_t($label)) ?></span><p class="amount-lg mt-1"><?= pl_e(pl_money($overview[$key])) ?></p></a>
 <?php endforeach; ?></div>
-<p class="text-xs text-ink-muted">Amounts in <?= pl_e($company['currency']) ?> · Posted entries only, <?= pl_e(pl_date_label($overview['period_from']).' – '.pl_date_label($overview['as_of'])) ?>. Cash and bank is the balance through that date.</p>
+<p class="text-xs text-ink-muted"><?= pl_e(pl_t('Amounts in {currency} · Posted entries only, {from} – {to}. Cash and bank is the balance through that date.',['currency'=>$company['currency'],'from'=>pl_date_label($overview['period_from']),'to'=>pl_date_label($overview['as_of'])])) ?></p>
 <?php endif; ?>
-<?php foreach ($groups as $heading=>$links): ?><section><h2 class="section-title mb-2"><?= pl_e($heading) ?></h2><div class="rounded-panel border border-border bg-surface p-2"><ul class="flex flex-col">
-<?php foreach ($links as [$path,$label,$description,$icon]): ?><li><a class="flex items-center gap-3 rounded-control px-3 py-2.5 hover:bg-surface-subtle" href="<?= pl_e(pl_url($path)) ?>"><span class="inline-flex size-8 flex-none items-center justify-center rounded-full bg-surface-subtle text-ink-muted"><?= pl_icon($icon) ?></span><span class="min-w-0 flex-1"><span class="block text-sm font-semibold text-ink"><?= pl_e($label) ?></span><span class="block text-xs text-ink-muted"><?= pl_e($description) ?></span></span><?= pl_icon('chevron-right') ?></a></li><?php endforeach; ?>
+<?php foreach ($groups as $heading=>$links): ?><section><h2 class="section-title mb-2"><?= pl_e(pl_t($heading)) ?></h2><div class="rounded-panel border border-border bg-surface p-2"><ul class="flex flex-col">
+<?php foreach ($links as [$path,$label,$description,$icon]): ?><li><a class="flex items-center gap-3 rounded-control px-3 py-2.5 hover:bg-surface-subtle" href="<?= pl_e(pl_url($path)) ?>"><span class="inline-flex size-8 flex-none items-center justify-center rounded-full bg-surface-subtle text-ink-muted"><?= pl_icon($icon) ?></span><span class="min-w-0 flex-1"><span class="block text-sm font-semibold text-ink"><?= pl_e(pl_t($label)) ?></span><span class="block text-xs text-ink-muted"><?= pl_e(pl_t($description)) ?></span></span><?= pl_icon('chevron-right') ?></a></li><?php endforeach; ?>
 </ul></div></section><?php endforeach; ?>
-<p class="text-xs text-ink-muted">Financial statements exclude drafts. Cash forecasts are scenarios based on your assumptions. Country-neutral statements are not statutory filing reports.</p>
+<p class="text-xs text-ink-muted"><?= pl_e(pl_t('Financial statements exclude drafts. Cash forecasts are scenarios based on your assumptions. Country-neutral statements are not statutory filing reports.')) ?></p>
 </div>

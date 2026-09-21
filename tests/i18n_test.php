@@ -206,8 +206,20 @@ test('the formatting seams exist and leave todays written amounts and dates unch
     $rules = pl_number_format_rules();
     assert_same(['grouping' => [3], 'group' => ',', 'decimal' => '.'], $rules);
     assert_same('d M Y', pl_date_format_pattern());
-    assert_same($rules, pl_number_format_rules('ur'));
-    assert_same('d M Y', pl_date_format_pattern('ur'));
+    // M11 fills the seams in. English is untouched; every locale that was not given a row is
+    // untouched; the locales that were given one are the ones a person chose deliberately.
+    $southAsian = ['grouping' => [3, 2], 'group' => ',', 'decimal' => '.'];
+    assert_same($southAsian, pl_number_format_rules('ur'));
+    assert_same($southAsian, pl_number_format_rules('ur-PK'), 'A region must inherit its language rules.');
+    assert_same($southAsian, pl_number_format_rules('en-PK'), 'English for a South Asian reader groups in lakhs.');
+    assert_same($rules, pl_number_format_rules('en'));
+    assert_same($rules, pl_number_format_rules('en-GB'), 'A region with no row of its own falls back to its language.');
+    assert_same($rules, pl_number_format_rules('ar'), 'Arabic has no reviewed rules yet and must not be guessed at.');
+    assert_same($rules, pl_number_format_rules('zu'));
+    assert_same('d F Y', pl_date_format_pattern('ur'));
+    assert_same('d F Y', pl_date_format_pattern('ur-PK'));
+    assert_same('d M Y', pl_date_format_pattern('en-PK'), 'Only the digits change for en-PK, not the month.');
+    assert_same('d M Y', pl_date_format_pattern('zu'));
     foreach (['0' => '0.00', '0.5' => '0.50', '12.3400' => '12.34', '1234.5678' => '1,234.5678', '-9876543.21' => '-9,876,543.21',
         '123456789' => '123,456,789.00', '1000' => '1,000.00', '999' => '999.00', 'not-an-amount' => 'not-an-amount'] as $amount => $expected) {
         assert_same($expected, pl_money((string) $amount));
@@ -228,6 +240,92 @@ test('the formatting seams exist and leave todays written amounts and dates unch
     $sweepStored = '9876543.2100';
     pl_money($sweepStored);
     assert_same('9876543.2100', $sweepStored, 'Formatting changed the value it was given.');
+});
+
+test('a right-to-left locale groups in lakhs, writes its own month and isolates every figure', function (): void {
+    // Deliberately no fixture catalogue: this runs against resources/lang/ur.php, the file that
+    // actually ships, so the assertions below are about the release and not about a stub.
+    try {
+        pl_i18n_reset();
+        pl_set_locale('ur');
+        assert_same('rtl', pl_text_direction());
+        // Grouped in the lakh/crore style and fenced off, so the sign, the separators and the
+        // decimal point cannot be reordered by the Urdu text around them.
+        assert_same("\u{2066}1,23,45,678.00\u{2069}", pl_money('12345678'));
+        assert_same("\u{2066}-9,87,654.32\u{2069}", pl_money('-987654.32'));
+        assert_same("\u{2066}0.50\u{2069}", pl_money('0.5'));
+        // What cannot be read as an amount is returned exactly as given, isolated or not.
+        assert_same('not-an-amount', pl_money('not-an-amount'));
+        // The date is written with the locale's own pattern and its month is translated; no date
+        // is parsed through a timezone and none moves a day.
+        assert_same("\u{2066}05 جنوری 2026\u{2069}", pl_date_label('2026-01-05'));
+        assert_same("\u{2066}31 دسمبر 2026\u{2069}", pl_date_label('2026-12-31'));
+        assert_same('not-a-date', pl_date_label('not-a-date'));
+        assert_same("\u{2066}4100\u{2069}", pl_ltr('4100'));
+        assert_same('', pl_bidi_isolate(''), 'An empty string has nothing to isolate.');
+        // The draft is a draft: what it has not reached renders as the English source string, per
+        // key, and never as a key name, a placeholder token or an empty label.
+        assert_same('An explanatory sentence this draft has not reached.', pl_t('An explanatory sentence this draft has not reached.'));
+        assert_same('آزمائشی میزان', pl_t('Trial balance'), 'The shipped draft does not translate a term it lists.');
+    } finally {
+        pl_i18n_reset();
+    }
+    // English is byte-for-byte what it was before M11: an isolate is added in one direction only.
+    assert_same('1,234.5678', pl_money('1234.5678'));
+    assert_same('-9,876,543.21', pl_money('-9876543.21'));
+    assert_same('05 Jan 2026', pl_date_label('2026-01-05'));
+    assert_same('4100', pl_ltr('4100'));
+    assert_same('x', pl_bidi_isolate('x', 'ltr'));
+    assert_same("\u{2066}x\u{2069}", pl_bidi_isolate('x', 'rtl'));
+});
+
+test('the language switch offers a short honest list and says which wording is only a draft', function (): void {
+    pl_i18n_reset();
+    $offered = pl_i18n_offered_locales();
+    assert_true(!array_key_exists(PL_LOCALE_PSEUDO, $offered), 'The pseudo-locale must never be offered to a person.');
+    assert_same('source', $offered['en']['review']);
+    assert_same('draft', $offered['ur']['review'], 'Urdu is an unreviewed draft until a named reviewer has passed it.');
+    foreach ($offered as $tag => $entry) {
+        assert_same(strtolower((string) $tag), pl_normalize_locale((string) $tag), 'An offered locale must be a valid tag.');
+        assert_true($entry['label'] !== '' && $entry['english'] !== '', 'Offered locale ' . $tag . ' has no name to show.');
+        assert_true(in_array($entry['review'], ['source', 'draft', 'reviewed'], true), 'Offered locale ' . $tag . ' has no review state.');
+    }
+    // Nothing claims a reviewed translation. That claim belongs to a named person, not to a test.
+    assert_same([], array_filter($offered, static fn (array $entry): bool => $entry['review'] === 'reviewed'));
+    assert_same('draft', pl_locale_review_state('ur-PK'), 'A region is exactly as reviewed as its language.');
+    assert_same('source', pl_locale_review_state('en-GB'));
+    assert_same('unknown', pl_locale_review_state('zu'));
+});
+
+test('the bundled Urdu draft is a well-formed catalogue that only uses the forms Urdu has', function (): void {
+    pl_i18n_reset();
+    $path = PL_ROOT . '/resources/lang/ur.php';
+    assert_true(is_file($path), 'The draft Urdu catalogue is missing.');
+    $catalogue = pl_i18n_catalogue('ur');
+    assert_true(count($catalogue) > 100, 'The draft Urdu catalogue is too thin to be worth shipping: ' . count($catalogue) . ' keys.');
+    $forms = pl_i18n_plural_table()['ur']['forms'];
+    foreach ($catalogue as $key => $value) {
+        assert_true($key !== '', 'The catalogue has an empty key.');
+        if (is_array($value)) {
+            assert_same($forms, array_keys($value), 'Plural key "' . $key . '" does not state exactly the forms Urdu uses.');
+            foreach ($value as $text) {
+                assert_true(is_string($text) && trim($text) !== '', 'Plural key "' . $key . '" has an empty form.');
+            }
+            continue;
+        }
+        assert_true(is_string($value) && trim($value) !== '', 'Key "' . $key . '" has an empty translation.');
+    }
+    // It is a draft, and the file says so where a translator and a packager will both see it.
+    $source = (string) file_get_contents($path);
+    assert_true(str_contains($source, 'UNREVIEWED'), 'The draft catalogue does not mark itself unreviewed.');
+    // A shipped file that is not in the package manifest is not in the release (repository rule).
+    $manifest = (string) file_get_contents(PL_ROOT . '/tools/package-files.json');
+    foreach (['resources/lang/ur.php', 'www/phpledger/public/assets/fonts/NotoNaskhArabic-arabic.woff2',
+        'www/phpledger/public/assets/fonts/NotoNaskhArabic-LICENSE.txt',
+        'www/phpledger/templates/partials/ui/locale-switch.php'] as $shipped) {
+        assert_true(str_contains($manifest, '"' . $shipped . '"'), $shipped . ' is not in tools/package-files.json.');
+    }
+    pl_i18n_reset();
 });
 
 test('every route renders under the pseudo-locale and the document language follows the locale', function (): void {
@@ -301,6 +399,9 @@ test('every route renders under the pseudo-locale and the document language foll
         // 1.2 M7: the Users module's screens. /invitation and /reset-password render without a
         // token as the empty form they are, which is what the sweep needs to see.
         '/users', '/roles', '/cost-visibility', '/profile', '/invitation', '/reset-password',
+        // 1.2 M11: the language switch. It is a POST, so a GET is a 405 carrying the shared
+        // unavailable document — which is itself a page whose lang and dir this sweep checks.
+        '/locale',
         '/no-such-route'];
     $rendered = 0;
     $translated = 0;
@@ -332,9 +433,31 @@ test('every route renders under the pseudo-locale and the document language foll
             if ($body === '' || !str_contains($body, '<html')) { continue; }
             ++$rendered;
             assert_true(str_contains($body, '<html lang="qps" dir="ltr"'), 'Route ' . $route . ' does not carry the active locale on its document element.');
-            assert_true(!str_contains($body, 'lang="en"'), 'Route ' . $route . ' still hard-codes an English document language.');
+            // The language menu is the one place an element legitimately declares a language of
+            // its own: each <option> states the language it offers, so an Urdu name renders right
+            // to left inside an English menu. Those options are removed before the check, and
+            // everything else on the page still has to be free of a hard-coded English language.
+            $withoutLanguageMenu = (string) preg_replace('#<option\b[^>]*>#i', ' ', $body);
+            assert_true(!str_contains($withoutLanguageMenu, 'lang="en"'), 'Route ' . $route . ' still hard-codes an English document language.');
             if ($usesHelper($body)) { ++$translated; }
         }
+
+        // 1.2 M11. The switch is not a decoration: choosing Urdu must actually turn the next
+        // document round, and clearing the choice must hand the interface back to the hosting
+        // default. This is the whole resolution chain — form, CSRF, route, stored preference,
+        // bootstrap — proved over HTTP rather than asserted about in isolation.
+        [, $body] = $request('/home');
+        assert_true(str_contains($body, 'name="locale"'), 'No language switch is reachable on a workspace screen.');
+        preg_match('/name="csrf" value="([a-f0-9]+)"/', $body, $match);
+        [$switched] = $request('/locale', http_build_query(['locale' => 'ur', 'return' => '/home', 'csrf' => $match[1] ?? '']));
+        assert_true(in_array($switched, [200, 302, 303], true), 'The language switch did not complete: status ' . $switched);
+        [, $body] = $request('/home');
+        assert_true(str_contains($body, '<html lang="ur" dir="rtl"'), 'Choosing Urdu did not turn the document round: '
+            . substr($body, 0, 200));
+        preg_match('/name="csrf" value="([a-f0-9]+)"/', $body, $match);
+        $request('/locale', http_build_query(['locale' => '', 'return' => '/home', 'csrf' => $match[1] ?? '']));
+        [, $body] = $request('/home');
+        assert_true(str_contains($body, '<html lang="qps" dir="ltr"'), 'Clearing the language did not return to the hosting default.');
     } finally {
         proc_terminate($server);
         proc_close($server);
@@ -358,7 +481,22 @@ test('every route renders under the pseudo-locale and the document language foll
  * exists to prevent: a new screen written in bare English goes through pl_t() instead.
  */
 test('the untranslated interface text in the source only falls', function (): void {
-    $ceiling = 1700;
+    // 1675 when M2 recorded this ratchet; 12 after M11 externalised the screens. The ceiling is
+    // now the exact count, with no headroom, because every run still counted is known and none of
+    // them is prose a translator would carry:
+    //
+    //   views/install.php          6  a document root, two configuration file paths, the database
+    //                                 account name `root`, a key filename and an example URL,
+    //                                 inside <code>. Translating a path would break the instruction.
+    //   views/opening-balances.php 4  two CSV header lines and the two `receivable`/`payable`
+    //                                 values the importer matches literally. Translating them
+    //                                 would tell a person to type words the parser rejects.
+    //   views/accounting-policies  1  a docs/ path in the repository.
+    //   views/owner.php            1  a docs/ path in the repository.
+    //
+    // A new screen written in bare English therefore fails this test immediately, which is the
+    // whole point of it. Put the strings through pl_t() rather than raising the number.
+    $ceiling = 12;
     $root = dirname(__DIR__) . '/www/phpledger/templates';
     $counts = [];
     $total = 0;

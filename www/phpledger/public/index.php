@@ -52,6 +52,9 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-sr
 $routes = [
     '/tax' => ['GET','POST'], '/ar' => ['GET','POST'], '/ap' => ['GET','POST'], '/parties' => ['GET','POST'], '/inventory' => ['GET','POST'], '/purchasing' => ['GET','POST'], '/opening-conversion' => ['GET','POST'],
     '/' => ['GET'], '/home' => ['GET'], '/login' => ['GET', 'POST'], '/logout' => ['POST'], '/start' => ['POST'],
+    // 1.2 M11: the language switch. POST only, like every other state change, and reachable
+    // without a session so the sign-in page can be read in the reader's own language.
+    '/locale' => ['POST'],
     '/companies' => ['GET'], '/company/select' => ['POST'], '/sample-chooser' => ['GET', 'POST'], '/onboarding' => ['GET', 'POST'],
     '/setup/review' => ['GET', 'POST'], '/transactions' => ['GET'], '/transactions/detail' => ['GET'],
     '/opening-balances' => ['GET', 'POST'], '/periods' => ['GET', 'POST'], '/bank-reconciliation' => ['GET', 'POST'],
@@ -119,13 +122,28 @@ try {
     pl_regional_suggestion();
     require_once dirname(__DIR__) . '/includes/bootstrap.php';
     $actorId = pl_current_user_id();
-    $user = $actorId ? DB::queryFirstRow('SELECT id, display_name, email, must_change_password FROM pl_users WHERE id = %i', $actorId) : null;
+    $user = $actorId ? DB::queryFirstRow('SELECT id, display_name, email, locale, must_change_password FROM pl_users WHERE id = %i', $actorId) : null;
+    // 1.2 M11. Every document rendered from here on carries this locale in its lang/dir, so the
+    // interface language is settled once, before any screen, notice or error message is written.
+    pl_web_apply_locale($user);
     if ($path === '/') {
         pl_redirect($actorId ? (!empty($_SESSION['company_id']) ? '/home' : '/companies') : '/login');
     }
     if ($method === 'POST') {
         pl_require_post();
         pl_require_csrf(pl_web_text($_POST, 'csrf'));
+    }
+    // The language switch runs before the sign-in gate on purpose: a person who cannot read the
+    // sign-in page has no way to sign in, so the one screen that must be switchable without an
+    // account is exactly that one. It changes a display preference and nothing accounting.
+    if ($path === '/locale') {
+        $return = pl_web_safe_return_path(pl_web_text($_POST, 'return', '/'));
+        try {
+            pl_web_set_locale_preference($actorId, pl_web_text($_POST, 'locale'));
+        } catch (DomainException $error) {
+            pl_form_failure($return, [], $error->getMessage());
+        }
+        pl_redirect($return);
     }
     if ($path === '/oauth/authorize') {
         require_once dirname(__DIR__) . '/includes/functions/connection_web_functions.php';

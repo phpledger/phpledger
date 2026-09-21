@@ -15,43 +15,43 @@ $isCredit = (bool) $invoice['is_credit'];
 ?>
 <section class="print-parties">
     <div class="print-party">
-        <h2><?= $isCredit ? 'Credit to' : 'Bill to' ?></h2>
+        <h2><?= pl_e($isCredit ? pl_t('Credit to') : pl_t('Bill to')) ?></h2>
         <p class="print-party-name"><?= pl_e((string) $party['legal_name']) ?></p>
         <?php foreach ($addressLines as $line): ?><p><?= pl_e($line) ?></p><?php endforeach; ?>
         <?php foreach ($registrationLines as $line): ?><p class="print-party-registration"><?= pl_e($line) ?></p><?php endforeach; ?>
     </div>
     <div class="print-party">
-        <h2>Delivery details</h2>
+        <h2><?= pl_e(pl_t('Delivery details')) ?></h2>
         <dl class="print-facts">
-            <dt>Dated</dt><dd><?= pl_e(pl_date_label((string) $invoice['document_date'])) ?></dd>
-            <dt>Due</dt><dd><?= pl_e(pl_date_label((string) $invoice['due_date'])) ?></dd>
-            <?php if ($document['warehouse'] !== null): ?><dt>Warehouse</dt><dd><?= pl_e($document['warehouse']['name'] . ' (' . $document['warehouse']['code'] . ')') ?></dd><?php endif; ?>
-            <?php if ($document['sales_staff'] !== null): ?><dt>Sales staff</dt><dd><?= pl_e((string) $document['sales_staff']['name']) ?></dd><?php endif; ?>
-            <?php if ($document['area'] !== null): ?><dt>Area / route</dt><dd><?= pl_e((string) $document['area']['name']) ?></dd><?php endif; ?>
-            <?php if ((string) $invoice['terms'] !== ''): ?><dt>Terms</dt><dd><?= pl_e((string) $invoice['terms']) ?></dd><?php endif; ?>
-            <?php if ((string) $invoice['reference'] !== ''): ?><dt>Reference</dt><dd><?= pl_e((string) $invoice['reference']) ?></dd><?php endif; ?>
+            <dt><?= pl_e(pl_t('Dated')) ?></dt><dd><?= pl_e(pl_date_label((string) $invoice['document_date'])) ?></dd>
+            <dt><?= pl_e(pl_t('Due')) ?></dt><dd><?= pl_e(pl_date_label((string) $invoice['due_date'])) ?></dd>
+            <?php if ($document['warehouse'] !== null): ?><dt><?= pl_e(pl_t('Warehouse')) ?></dt><dd><?= pl_e($document['warehouse']['name'] . ' (' . $document['warehouse']['code'] . ')') ?></dd><?php endif; ?>
+            <?php if ($document['sales_staff'] !== null): ?><dt><?= pl_e(pl_t('Sales staff')) ?></dt><dd><?= pl_e((string) $document['sales_staff']['name']) ?></dd><?php endif; ?>
+            <?php if ($document['area'] !== null): ?><dt><?= pl_e(pl_t('Area / route')) ?></dt><dd><?= pl_e((string) $document['area']['name']) ?></dd><?php endif; ?>
+            <?php if ((string) $invoice['terms'] !== ''): ?><dt><?= pl_e(pl_t('Terms')) ?></dt><dd><?= pl_e((string) $invoice['terms']) ?></dd><?php endif; ?>
+            <?php if ((string) $invoice['reference'] !== ''): ?><dt><?= pl_e(pl_t('Reference')) ?></dt><dd><?= pl_e((string) $invoice['reference']) ?></dd><?php endif; ?>
         </dl>
     </div>
 </section>
 <?php if ($invoice['payment_status'] === 'reversed'): ?>
-<p class="print-notice">This document has been reversed by a linked entry. It is kept for the record.</p>
+<p class="print-notice"><?= pl_e(pl_t('This document has been reversed by a linked entry. It is kept for the record.')) ?></p>
 <?php endif; ?>
 <div class="print-lines-scroll">
 <table class="print-lines">
-    <caption><?= $isCredit ? 'Credited items' : 'Items invoiced' ?></caption>
+    <caption><?= pl_e($isCredit ? pl_t('Credited items') : pl_t('Items invoiced')) ?></caption>
     <thead><tr>
-        <th scope="col">Item</th>
-        <th scope="col" class="print-num">Packs</th>
-        <th scope="col" class="print-num">Units</th>
-        <th scope="col" class="print-num">Unit price</th>
-        <th scope="col" class="print-num">Disc %</th>
-        <th scope="col" class="print-num">Tax %</th>
-        <th scope="col" class="print-num">Amount (<?= pl_e((string) $invoice['currency']) ?>)</th>
+        <th scope="col"><?= pl_e(pl_t('Item')) ?></th>
+        <th scope="col" class="print-num"><?= pl_e(pl_t('Packs')) ?></th>
+        <th scope="col" class="print-num"><?= pl_e(pl_t('Units')) ?></th>
+        <th scope="col" class="print-num"><?= pl_e(pl_t('Unit price')) ?></th>
+        <th scope="col" class="print-num"><?= pl_e(pl_t('Disc %')) ?></th>
+        <th scope="col" class="print-num"><?= pl_e(pl_t('Tax %')) ?></th>
+        <th scope="col" class="print-num"><?= pl_e(pl_t('Amount ({currency})', ['currency' => (string) $invoice['currency']])) ?></th>
     </tr></thead>
     <tbody>
     <?php foreach ($invoice['lines'] as $line): ?>
         <tr<?= $line['is_free_goods'] ? ' class="print-line-free"' : '' ?>>
-            <th scope="row"><?= pl_e((string) $line['description']) ?><?= $line['is_free_goods'] ? ' — free goods' : '' ?></th>
+            <th scope="row"><?= pl_e((string) $line['description']) ?><?= $line['is_free_goods'] ? ' — ' . pl_e(pl_t('free goods')) : '' ?></th>
             <td class="print-num"><?= $line['pack_id'] === null ? '–' : pl_e(pl_money((string) $line['pack_quantity'])) ?></td>
             <td class="print-num"><?= pl_e(pl_money((string) ($line['pack_id'] === null ? $line['quantity'] : $line['unit_quantity']))) ?></td>
             <td class="print-num"><?= $line['is_free_goods'] ? '–' : pl_e(pl_money((string) $line['unit_price'])) ?></td>
@@ -65,12 +65,12 @@ $isCredit = (bool) $invoice['is_credit'];
 </div>
 <?php if ($document['tax_summary'] !== []): ?>
 <table class="print-lines">
-    <caption>Tax summary by rate</caption>
-    <thead><tr><th scope="col">Rate</th><th scope="col" class="print-num">Taxable</th><th scope="col" class="print-num">Tax</th></tr></thead>
+    <caption><?= pl_e(pl_t('Tax summary by rate')) ?></caption>
+    <thead><tr><th scope="col"><?= pl_e(pl_t('Rate')) ?></th><th scope="col" class="print-num"><?= pl_e(pl_t('Taxable')) ?></th><th scope="col" class="print-num"><?= pl_e(pl_t('Tax')) ?></th></tr></thead>
     <tbody>
     <?php foreach ($document['tax_summary'] as $band): ?>
         <tr>
-            <th scope="row"><?= pl_e($band['label'] !== '' ? $band['label'] : 'Exempt or zero-rated') ?> · <?= pl_e(pl_money($band['rate'])) ?>%</th>
+            <th scope="row"><?= pl_e($band['label'] !== '' ? $band['label'] : pl_t('Exempt or zero-rated')) ?> · <?= pl_e(pl_money($band['rate'])) ?>%</th>
             <td class="print-num"><?= pl_e(pl_money($band['taxable'])) ?></td>
             <td class="print-num"><?= pl_e(pl_money($band['tax'])) ?></td>
         </tr>
@@ -80,24 +80,24 @@ $isCredit = (bool) $invoice['is_credit'];
 <?php endif; ?>
 <section class="print-totals">
     <?php $gross = bcadd((string) $invoice['subtotal'], (string) $invoice['discount_total'], 4); ?>
-    <div class="print-total-row"><span>Subtotal</span><span class="print-num"><?= pl_e(pl_money($gross)) ?></span></div>
+    <div class="print-total-row"><span><?= pl_e(pl_t('Subtotal')) ?></span><span class="print-num"><?= pl_e(pl_money($gross)) ?></span></div>
     <?php if (bccomp((string) $invoice['discount_total'], '0', 4) > 0): ?>
-        <div class="print-total-row"><span>Line discounts</span><span class="print-num">−<?= pl_e(pl_money((string) $invoice['discount_total'])) ?></span></div>
+        <div class="print-total-row"><span><?= pl_e(pl_t('Line discounts')) ?></span><span class="print-num">−<?= pl_e(pl_money((string) $invoice['discount_total'])) ?></span></div>
     <?php endif; ?>
-    <div class="print-total-row"><span>Tax</span><span class="print-num"><?= pl_e(pl_money((string) $invoice['tax_total'])) ?></span></div>
-    <div class="print-total-row print-total-grand"><span>Total (<?= pl_e((string) $invoice['currency']) ?>)</span><span class="print-num"><?= pl_e(pl_money((string) $invoice['total'])) ?></span></div>
+    <div class="print-total-row"><span><?= pl_e(pl_t('Tax')) ?></span><span class="print-num"><?= pl_e(pl_money((string) $invoice['tax_total'])) ?></span></div>
+    <div class="print-total-row print-total-grand"><span><?= pl_e(pl_t('Total ({currency})', ['currency' => (string) $invoice['currency']])) ?></span><span class="print-num"><?= pl_e(pl_money((string) $invoice['total'])) ?></span></div>
     <?php if (bccomp((string) $invoice['cash_received'], '0', 4) > 0): ?>
-        <div class="print-total-row"><span>Cash received</span><span class="print-num">−<?= pl_e(pl_money((string) $invoice['cash_received'])) ?></span></div>
-        <div class="print-total-row"><span>Balance due</span><span class="print-num"><?= pl_e(pl_money((string) $document['balance_due'])) ?></span></div>
+        <div class="print-total-row"><span><?= pl_e(pl_t('Cash received')) ?></span><span class="print-num">−<?= pl_e(pl_money((string) $invoice['cash_received'])) ?></span></div>
+        <div class="print-total-row"><span><?= pl_e(pl_t('Balance due')) ?></span><span class="print-num"><?= pl_e(pl_money((string) $document['balance_due'])) ?></span></div>
     <?php endif; ?>
     <?php if (bccomp((string) $invoice['free_tax_total'], '0', 4) > 0): ?>
-        <div class="print-total-row"><span>Output tax on free goods, borne by us</span><span class="print-num"><?= pl_e(pl_money((string) $invoice['free_tax_total'])) ?></span></div>
+        <div class="print-total-row"><span><?= pl_e(pl_t('Output tax on free goods, borne by us')) ?></span><span class="print-num"><?= pl_e(pl_money((string) $invoice['free_tax_total'])) ?></span></div>
     <?php endif; ?>
 </section>
 <?php if ((string) $invoice['notes'] !== ''): ?>
-<section class="print-parties"><div class="print-party"><h2>Terms &amp; notes</h2><p><?= pl_e((string) $invoice['notes']) ?></p></div></section>
+<section class="print-parties"><div class="print-party"><h2><?= pl_e(pl_t('Terms & notes')) ?></h2><p><?= pl_e((string) $invoice['notes']) ?></p></div></section>
 <?php endif; ?>
 <section class="print-signoff">
-    <div class="print-signature">Prepared by</div>
-    <div class="print-signature">Received in good order</div>
+    <div class="print-signature"><?= pl_e(pl_t('Prepared by')) ?></div>
+    <div class="print-signature"><?= pl_e(pl_t('Received in good order')) ?></div>
 </section>

@@ -197,6 +197,35 @@ function pl_update_profile(int $userId, array $input): array
 }
 
 /**
+ * Set only the interface language of your own account (1.2 M11, the language switch).
+ *
+ * This is deliberately NOT pl_update_profile(): that function is the whole profile form and
+ * rewrites display name, username, phone, job title and time zone from its input, so calling it
+ * with a language alone would blank the rest of the account. A switch in the top bar changes one
+ * column and says so in the audit trail.
+ *
+ * null or an empty tag clears the preference, which returns the account to the hosting default.
+ */
+function pl_set_user_locale(int $userId, ?string $locale): ?string
+{
+    $normalized = $locale === null || trim($locale) === '' ? null : pl_normalize_locale($locale);
+    return pl_ledger_transaction(function () use ($userId, $normalized): ?string {
+        $before = pl_user_row($userId);
+        if ($before === null) {
+            throw new DomainException('This account is not available.');
+        }
+        if (($before['locale'] ?? null) === $normalized) {
+            return $normalized;
+        }
+        DB::update('pl_users', ['locale' => $normalized], 'id = %i', $userId);
+        $after = (array) pl_user_row($userId);
+        pl_user_audit($userId, null, $userId, 'user', $userId, 'profile_updated',
+            'Interface language changed by its owner.', $before, $after);
+        return $normalized;
+    });
+}
+
+/**
  * Change your own password. The current password is required — an open session is not enough, so
  * a borrowed screen cannot be turned into a permanent takeover — and every OTHER session is
  * revoked, which is the point of server-side sessions.
