@@ -13,6 +13,6 @@ return [
     'title' => 'Cash and Cash Equivalents',
     'explanation' => 'The money the business can spend today: notes and coins in the till, the balance in each bank current account, and short-term deposits it can turn back into cash almost immediately. Nothing that needs time or a buyer to convert belongs here. A customer\'s unpaid invoice and the stock on the shelf do not.',
     'here' => 'An account marked Cash / bank here is what the home screen and the cash forecast add up.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/cash-and-cash-equivalents'],
+    'document' => ['label' => 'How to structure a chart of accounts', 'url' => 'https://phpledger.com/learn/chart-of-accounts/'],
     'review' => 'placeholder',
 ];

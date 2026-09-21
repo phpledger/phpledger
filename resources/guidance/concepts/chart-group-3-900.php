@@ -13,6 +13,6 @@ return [
     'title' => 'Drawings',
     'explanation' => 'Money or goods an owner takes out of the business for personal use. It is not a business expense and it never reduces profit: it reduces the owner\'s own stake. It is shown as a deduction inside equity, so what was put in and what was taken out both stay visible instead of being netted.',
     'here' => 'Each partner has a drawings account of their own, so a partner\'s position can be settled from posted figures.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/drawings'],
+    'document' => ['label' => 'Profit and loss versus balance sheet', 'url' => 'https://phpledger.com/learn/profit-and-loss-vs-balance-sheet/'],
     'review' => 'placeholder',
 ];

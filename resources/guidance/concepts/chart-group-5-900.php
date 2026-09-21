@@ -13,6 +13,6 @@ return [
     'title' => 'Purchase Returns and Discounts Received',
     'explanation' => 'Amounts that reduce what was bought: goods sent back to a supplier, an allowance for a short or damaged delivery, and a discount a supplier gave for early payment. They are shown as a deduction inside the expense section rather than as income, so the report shows the real cost of buying.',
     'here' => 'These are contra accounts: they are presented as subtractions inside expenses, never as revenue.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/purchase-returns'],
+    'document' => ['label' => 'How to structure a chart of accounts', 'url' => 'https://phpledger.com/learn/chart-of-accounts/'],
     'review' => 'placeholder',
 ];

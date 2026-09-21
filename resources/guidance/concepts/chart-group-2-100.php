@@ -13,6 +13,6 @@ return [
     'title' => 'Trade and Other Payables',
     'explanation' => 'What the business owes its suppliers and other short-term creditors: bills received for goods and services already taken but not yet paid, and smaller amounts owed for anything else. The cost is already in the profit and loss account; this group records that the money still has to go out.',
     'here' => 'Each supplier\'s unpaid bills are tracked as open items, so this control and the ageing report always agree.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/trade-and-other-payables'],
+    'document' => ['label' => 'Cash versus accrual bookkeeping', 'url' => 'https://phpledger.com/learn/cash-vs-accrual/'],
     'review' => 'placeholder',
 ];

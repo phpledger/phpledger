@@ -251,6 +251,28 @@ test('every heading has plain words for it, keyed the way the screens ask', func
         $external++;
     }
     assert_same([], $missing, 'Headings with no explanation: ' . implode(', ', $missing));
+    // Every article link points at a page that exists. A bubble with a good explanation and no
+    // link is fine; a bubble with a dead link teaches the reader that the help is broken, so the
+    // slugs are checked against the website source rather than against a list typed here. When a
+    // new article lands, adding a link is one line in the concept file and this keeps holding.
+    $pages = dirname(__DIR__) . '/www/website/src/pages';
+    assert_true(is_dir($pages), 'The website source moved; this guard against a dead /learn/ link needs re-pointing at it.');
+    $live = [];
+    foreach (glob($pages . '/learn-*.html') ?: [] as $path) {
+        $live[] = substr(basename($path, '.html'), strlen('learn-'));
+    }
+    assert_true(count($live) >= 10, 'Only ' . count($live) . ' learn articles were found; the guard is not proving anything.');
+    $dead = [];
+    foreach (array_keys(chart_heading_catalogue()) as $code) {
+        $document = pl_guidance_concept((string) pl_account_heading_concept($code))['document'];
+        $slug = trim((string) parse_url($document['href'], PHP_URL_PATH), '/');
+        $slug = substr($slug, strlen('learn/'));
+        if (!in_array($slug, $live, true)) { $dead[] = $code . ' -> /learn/' . $slug . '/'; }
+        // The link says where it goes, rather than "read more", so a reader knows before clicking.
+        assert_true(mb_strlen($document['label']) > 12 && !str_contains(strtolower($document['label']), 'click'),
+            $code . ' has a link label that does not name its destination.');
+    }
+    assert_same([], $dead, 'Help bubbles link to articles that do not exist: ' . implode(', ', $dead));
     assert_same(19, $external);
     // The id is derived from the code, not stored beside it, so these are the exact keys the
     // report tree and the chart of accounts screen will ask for.

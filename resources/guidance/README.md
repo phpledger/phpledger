@@ -35,16 +35,21 @@ return [
 `https://phpledger.com/learn/<slug>` article:
 
 ```php
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/drawings'],
+    'document' => ['label' => 'How to structure a chart of accounts', 'url' => 'https://phpledger.com/learn/chart-of-accounts/'],
 ```
+
+The slug must be one of the `learn-*.html` pages in `www/website/src/pages/`, which are served at
+`/learn/<slug>/`. Where none of them fits, leave `document` out rather than reserving a slug for an
+article that is yet to be written: a bubble with a good explanation and no link is fine, and a dead
+link teaches the reader that the help is broken. Make the label the destination's own title so the
+link says where it goes.
 
 That allowlist is enforced in `pl_guidance_concept()`, not by review: a guidance file that could
 name any destination would be a way to put an arbitrary link on every screen of the application.
 Anything else — another host, a query string, a fragment, a port — is dropped and the bubble simply
 has no link. An external article opens in its own tab with `rel="noopener noreferrer"`, so it gets
 neither `window.opener` nor the reader's own installation URL. A concept that names both keeps the
-in-application path. The `/learn/` pages are written by the website work; a concept may reserve its
-slug before the page exists.
+in-application path.
 
 `review` is `placeholder` until the guidance review has passed the wording; the bubble says so on
 screen. Every string here is an English source string for `pl_t()` — the component translates it,

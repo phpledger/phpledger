@@ -13,6 +13,6 @@ return [
     'title' => 'Loans and Borrowings',
     'explanation' => 'Money the business has borrowed and has to pay back: a bank loan, a vehicle finance agreement, or money the owner has lent the business. Only the amount still outstanding belongs here. Interest is not part of it. Interest is the cost of borrowing and goes to operating expenses as it is charged.',
     'here' => 'An owner\'s loan is a liability, not capital. It is money the business owes back, and it is repaid before any profit is shared.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/loans-and-borrowings'],
+    'document' => ['label' => 'Profit and loss versus balance sheet', 'url' => 'https://phpledger.com/learn/profit-and-loss-vs-balance-sheet/'],
     'review' => 'placeholder',
 ];

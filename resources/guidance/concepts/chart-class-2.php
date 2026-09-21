@@ -13,6 +13,6 @@ return [
     'title' => 'Liabilities',
     'explanation' => 'What the business owes to someone outside it: unpaid supplier bills, a bank loan, tax collected but not yet handed over, and money a customer has paid for goods not yet delivered. A liability is an obligation that will be settled later, usually by paying money out.',
     'here' => 'Liabilities and equity together equal the assets, which is why the balance sheet balances.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/liabilities'],
+    'document' => ['label' => 'Profit and loss versus balance sheet', 'url' => 'https://phpledger.com/learn/profit-and-loss-vs-balance-sheet/'],
     'review' => 'placeholder',
 ];

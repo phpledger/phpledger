@@ -13,6 +13,6 @@ return [
     'title' => 'Revenue',
     'explanation' => 'What the business has earned from its customers in the period: goods sold and services delivered. An amount is counted when the work is done or the goods are handed over, not when the invoice is paid, so a busy month with slow payers still shows the revenue it really earned.',
     'here' => 'Every posted sales invoice and every point-of-sale sale credits an account in this group.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/revenue'],
+    'document' => ['label' => 'Cash versus accrual bookkeeping', 'url' => 'https://phpledger.com/learn/cash-vs-accrual/'],
     'review' => 'placeholder',
 ];

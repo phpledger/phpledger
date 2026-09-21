@@ -13,6 +13,6 @@ return [
     'title' => 'Operating Expenses',
     'explanation' => 'The everyday costs of running the business: wages, rent, electricity, fuel, repairs, bank charges, insurance and professional fees. Each is counted in the period it relates to rather than the month it is paid. Anything bought to use for years belongs in Property, Plant and Equipment instead.',
     'here' => 'An expense account can be marked as cost of sales, which moves it into its own section of the profit and loss account.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/operating-expenses'],
+    'document' => ['label' => 'Cash versus accrual bookkeeping', 'url' => 'https://phpledger.com/learn/cash-vs-accrual/'],
     'review' => 'placeholder',
 ];

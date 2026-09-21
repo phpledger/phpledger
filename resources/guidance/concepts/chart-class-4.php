@@ -13,6 +13,6 @@ return [
     'title' => 'Revenue',
     'explanation' => 'What the business earns from its customers: the value of goods sold and services delivered, counted when the work is done rather than when the money arrives. Revenue is the top line of the profit and loss account, before any cost of goods or any running expense is taken off it.',
     'here' => 'Money a customer paid before you delivered is not revenue yet. It waits in Contract Liabilities and Customer Advances until it is earned.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/income'],
+    'document' => ['label' => 'Profit and loss versus balance sheet', 'url' => 'https://phpledger.com/learn/profit-and-loss-vs-balance-sheet/'],
     'review' => 'placeholder',
 ];

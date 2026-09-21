@@ -13,6 +13,6 @@ return [
     'title' => 'Property, Plant and Equipment',
     'explanation' => 'The things the business buys to use rather than to sell: premises, vehicles, machinery, furniture, computers. They are expected to last more than a year, so what they cost is not an expense in the month of purchase. The cost is recorded here and charged to profit over the years the thing is used.',
     'here' => 'The cost stays here in full. What has been used up is collected separately under Accumulated Depreciation and Impairment.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/property-plant-and-equipment'],
+    'document' => ['label' => 'How to structure a chart of accounts', 'url' => 'https://phpledger.com/learn/chart-of-accounts/'],
     'review' => 'placeholder',
 ];

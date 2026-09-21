@@ -13,6 +13,6 @@ return [
     'title' => 'Revenue Deductions',
     'explanation' => 'Amounts taken back off what was earned: goods a customer returned, an allowance given for a damaged delivery, and discounts allowed for early payment. They belong inside revenue as a subtraction rather than among the expenses, so the top line shows what was really kept and why it was reduced.',
     'here' => 'These are contra accounts: the profit and loss account shows them as deductions inside the income section.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/revenue-deductions'],
+    'document' => ['label' => 'How to structure a chart of accounts', 'url' => 'https://phpledger.com/learn/chart-of-accounts/'],
     'review' => 'placeholder',
 ];

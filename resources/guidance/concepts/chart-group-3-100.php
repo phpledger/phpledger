@@ -13,6 +13,6 @@ return [
     'title' => 'Capital and Reserves',
     'explanation' => 'What the owners have put into the business, and what it has earned and kept. Capital is money or goods an owner contributed; reserves are past profits left in rather than taken out. In a partnership each partner has an account of their own here, so every partner\'s stake can be read separately.',
     'here' => 'Capital introduced is recorded on the owner screen and posts through the same service a screen calls.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/capital-and-reserves'],
+    'document' => ['label' => 'Profit and loss versus balance sheet', 'url' => 'https://phpledger.com/learn/profit-and-loss-vs-balance-sheet/'],
     'review' => 'placeholder',
 ];

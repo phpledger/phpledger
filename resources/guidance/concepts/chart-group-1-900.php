@@ -13,6 +13,6 @@ return [
     'title' => 'Accumulated Depreciation and Impairment',
     'explanation' => 'The running total of the value already used up on the equipment above. The wear is collected here instead of being taken off the asset itself, so a reader can still see both what was paid for something and how much of that has been charged to profit so far.',
     'here' => 'It is a contra account: it is shown as a deduction inside the asset section, never as a liability.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/accumulated-depreciation'],
+    'document' => ['label' => 'How to structure a chart of accounts', 'url' => 'https://phpledger.com/learn/chart-of-accounts/'],
     'review' => 'placeholder',
 ];

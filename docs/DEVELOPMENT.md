@@ -481,11 +481,18 @@ return [
 - `document` is optional. It carries **either** an in-application `href`, which must start with `/`
   — a link into `docs/` would be dead in a browser — **or** an external `url`, which may only be a
   `https://phpledger.com/learn/<slug>` article:
-  `'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/drawings']`.
+  `'document' => ['label' => 'How to structure a chart of accounts', 'url' => 'https://phpledger.com/learn/chart-of-accounts/']`.
   That allowlist is enforced in `pl_guidance_concept()`, not by review: a guidance file that could
   name any destination would be a way to put an arbitrary link on every screen. Anything else is
   dropped and the bubble has no link at all. An external article opens in its own tab with
-  `rel="noopener noreferrer"`. A concept may reserve a slug before the page behind it exists.
+  `rel="noopener noreferrer"`.
+- **Link only to an article that exists.** The live slugs are the `learn-*.html` pages in
+  `www/website/src/pages/`, served at `/learn/<slug>/`. Where none of them fits, leave `document`
+  out: a bubble with a good explanation and no link is fine, and a dead link teaches the reader
+  that the help is broken. Do not reserve a slug for an article that is yet to be written — adding
+  the link later is one line. `tests/chart_headings_test.php` checks the heading concepts' links
+  against that directory. Make the label the destination's own title, not "read more", so the
+  reader knows where the link goes before following it.
 
 **Wire it to a screen.** `pl_ui_help('unapplied-credit')` beside the label, column heading or total
 it explains. A **chart heading** is the one case where the concept id is not a literal: the id is

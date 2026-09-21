@@ -13,6 +13,6 @@ return [
     'title' => 'Equity',
     'explanation' => 'What the business is worth to its owners: what they have put in, plus the profits it has kept, less what they have taken out. Equity is not cash in a drawer. It is the part of the assets left over once everything owed to outsiders has been settled.',
     'here' => 'Capital introduced, drawings and each partner\'s share are recorded on the owner screen and appear in this class.',
-    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/equity'],
+    'document' => ['label' => 'Profit and loss versus balance sheet', 'url' => 'https://phpledger.com/learn/profit-and-loss-vs-balance-sheet/'],
     'review' => 'placeholder',
 ];
