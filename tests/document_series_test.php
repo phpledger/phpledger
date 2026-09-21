@@ -135,10 +135,16 @@ test('simultaneous postings in one book take consecutive numbers with no duplica
 });
 
 test('a document posted before the series existed keeps its derived number', function (): void {
-    assert_same('INV-000042', pl_document_number_display(null, 42, 'invoice'));
-    assert_same('BILL-000042', pl_document_number_display('', 42, 'bill'));
-    assert_same('CR-000042', pl_ar_document_display_number(42, 'customer_credit'));
-    assert_same('SC-000042', pl_ar_document_display_number(42, 'supplier_credit'));
+    // Use an id no row can hold. The derived form is what a document shows when it has no
+    // series row, so the test needs an id that is genuinely absent. It used to hard-code 42,
+    // which was free until the samples grew enough to reach it: id 42 became a real supplier
+    // credit carrying a real series number, and the assertion failed on the data rather than
+    // on the behaviour. Deriving the id from the table cannot rot that way.
+    $absent = (int) DB::queryFirstField('SELECT COALESCE(MAX(id), 0) + 1000 FROM pl_ar_documents');
+    assert_same('INV-' . str_pad((string) $absent, 6, '0', STR_PAD_LEFT), pl_document_number_display(null, $absent, 'invoice'));
+    assert_same('BILL-' . str_pad((string) $absent, 6, '0', STR_PAD_LEFT), pl_document_number_display('', $absent, 'bill'));
+    assert_same('CR-' . str_pad((string) $absent, 6, '0', STR_PAD_LEFT), pl_ar_document_display_number($absent, 'customer_credit'));
+    assert_same('SC-' . str_pad((string) $absent, 6, '0', STR_PAD_LEFT), pl_ar_document_display_number($absent, 'supplier_credit'));
     assert_same(null, pl_document_number_lookup('invoice', 0));
     $f = series_fixture();
     $posted = series_post($f);
