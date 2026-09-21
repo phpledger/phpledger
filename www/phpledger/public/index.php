@@ -72,6 +72,8 @@ $routes = [
     '/users' => ['GET', 'POST'], '/roles' => ['GET', 'POST'], '/profile' => ['GET', 'POST'],
     '/cost-visibility' => ['GET', 'POST'], '/invitation' => ['GET', 'POST'], '/reset-password' => ['GET', 'POST'],
     '/sample-guide' => ['GET'], '/help' => ['GET'], '/modules' => ['GET', 'POST'], '/connections' => ['GET','POST'], '/oauth/authorize' => ['GET','POST'], '/tables' => ['GET'],
+    // 1.2 M8: Admin > Packages. Visible to the workspace, read-only without installation.admin.
+    '/packages' => ['GET', 'POST'],
     '/accounts' => ['GET'], '/accounts/save' => ['POST'], '/logo' => ['GET'],
     '/owner' => ['GET'], '/owner/post' => ['POST'], '/owner/reverse' => ['POST'],
     '/contra-review' => ['GET'], '/contra-review/confirm' => ['POST'],
@@ -318,6 +320,10 @@ try {
     if ($path === '/modules') {
         require_once dirname(__DIR__) . '/includes/functions/module_web_functions.php';
         pl_web_modules($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    if ($path === '/packages') {
+        require_once dirname(__DIR__) . '/includes/functions/package_web_functions.php';
+        pl_web_packages($actorId, $companyId, $bookId, $user, $company, $method);
     }
     if ($path === '/users' || $path === '/roles' || $path === '/cost-visibility') {
         require_once dirname(__DIR__) . '/includes/functions/user_web_functions.php';

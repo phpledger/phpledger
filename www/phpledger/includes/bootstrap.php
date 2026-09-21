@@ -59,6 +59,9 @@ pl_demo_acquire_maintenance_lock();
 require_once __DIR__ . '/functions/security_functions.php';
 require_once __DIR__ . '/functions/i18n_functions.php';
 require_once __DIR__ . '/functions/auth_functions.php';
+// 1.2 M8: the hook mechanism is loaded before the services that raise hooks, because
+// ledger_functions.php marks the book lock and queues the after-commit actions through it.
+require_once __DIR__ . '/functions/hook_functions.php';
 require_once __DIR__ . '/functions/currency_functions.php';
 require_once __DIR__ . '/functions/account_code_functions.php';
 require_once __DIR__ . '/functions/ledger_functions.php';
@@ -105,3 +108,9 @@ require_once __DIR__ . '/functions/opening_conversion_functions.php';
 // business can start from it. Loaded after the services it composes.
 require_once __DIR__ . '/functions/sample_structure_functions.php';
 require_once __DIR__ . '/functions/branding_functions.php';
+// 1.2 M8: the plugin runtime loads last, so every core service a package may call already
+// exists, and so a package can never shadow one. pl_plugin_boot() costs one is_dir() and one
+// scandir() on an installation with no packages, which is every installation until one is
+// installed; it touches the database only when the package directory holds something.
+require_once __DIR__ . '/functions/plugin_functions.php';
+pl_plugin_boot();

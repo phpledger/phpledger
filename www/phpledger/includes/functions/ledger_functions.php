@@ -61,6 +61,12 @@ function pl_ledger_transaction(callable $work): mixed
         try {
             $result = $work();
             DB::commit();
+            // 1.2 M8, plan decision 15: the database has released this transaction's row locks,
+            // so the actions queued during it may now run. They run outside every lock, they
+            // cannot abort anything, and nothing they do can un-post what has just committed.
+            if ($ownsTransaction) {
+                pl_hook_transaction_ended(true);
+            }
             return $result;
         } catch (Throwable $error) {
             $rolledBack = false;
@@ -74,6 +80,11 @@ function pl_ledger_transaction(callable $work): mixed
                 $rolledBack = true;
             } catch (Throwable) {
                 // Preserve the original failure rather than mask it with cleanup errors.
+            }
+            if ($ownsTransaction) {
+                // Nothing committed, so the queued actions describe work that never happened.
+                // A deadlock retry comes through here too, and starts from an empty queue.
+                pl_hook_transaction_ended(false);
             }
             $deadlock = false;
             for ($cause = $error; $cause !== null; $cause = $cause->getPrevious()) {
@@ -201,6 +212,12 @@ function pl_ledger_book(int $companyId, int $bookId, bool $lock = false): array
     if (!$book) {
         throw new DomainException('This book is not available in the selected company.');
     }
+    if ($lock) {
+        // 1.2 M8, plan decision 15: from here until the outermost transaction ends, no hook may
+        // run. pl_do_action() and pl_apply_filters() refuse while this is recorded, so a plugin
+        // can neither hold this book against other writers nor throw inside a half-written entry.
+        pl_hook_lock_acquired($companyId, $bookId);
+    }
     return $book;
 }
 
@@ -211,6 +228,15 @@ function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array
         $payload = pl_normalize_journal($payload);
         // This helper also checks permissions so future direct callers cannot bypass membership.
         pl_require_company_access($actorId, $companyId, true);
+        // The validation phase (1.2 M8, B45 and plan decision 15). A plugin filter runs HERE:
+        // after the draft is normalized and authorised, and before the book row below is taken
+        // FOR UPDATE. A filter that vetoes refuses cleanly; a filter that throws aborts before
+        // the lock exists, so it cannot leave a half-posted entry or block another writer.
+        //
+        // It runs only at the outermost posting. A nested call — an invoice, a settlement, a
+        // stock document — reaches this line with the book already locked by the flow that owns
+        // the operation, and pl_apply_filters() refuses to run inside that lock by design.
+        $payload = pl_hook_posting_draft($actorId, $companyId, $bookId, $payload, $reversalOf);
         $book = pl_ledger_book($companyId, $bookId, true);
         pl_require_book_ready($companyId);
         if ($book['currency'] !== $payload['currency']) {
@@ -293,8 +319,45 @@ function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array
         }
         pl_correction_track_posting($actorId, $companyId, $bookId, $journalId, $payload, $reversalOf);
         pl_open_item_track_posting($companyId, $bookId, $journalId, $payload, $reversalOf, $settlementAllocations);
-        return pl_get_journal($actorId, $companyId, $bookId, $journalId);
+        $journal = pl_get_journal($actorId, $companyId, $bookId, $journalId);
+        // Queued, not fired: the book row is locked at this point and stays locked until this
+        // transaction commits. pl_ledger_transaction() runs the queue afterwards, outside every
+        // lock, and a plugin that fails there cannot turn a posted journal into a failed request.
+        pl_hook_after_commit('journal.posted', [$journal, ['company_id' => $companyId, 'book_id' => $bookId,
+            'actor_id' => $actorId, 'source_type' => $payload['source_type'], 'reversal_of_id' => $reversalOf]]);
+        return $journal;
     });
+}
+
+/**
+ * Run the validation-phase filter over a normalized journal draft and return what core will post.
+ *
+ * Whatever a filter returns is normalized again by core, so a plugin cannot post an unbalanced,
+ * malformed or out-of-currency journal however it rewrites the draft. Four fields are frozen on
+ * top of that: `idempotency_key`, `source_type`, `source_reference` and `currency` are the
+ * caller's identity and the replay contract, and a plugin that could change them could make one
+ * request record a different operation than the one that was asked for. A filter may change the
+ * date, the description and the lines.
+ *
+ * @param array<string, mixed> $payload
+ * @return array<string, mixed>
+ */
+function pl_hook_posting_draft(int $actorId, int $companyId, int $bookId, array $payload, ?int $reversalOf): array
+{
+    if (pl_hook_lock_held() || pl_hook_callbacks('journal.validate') === []) {
+        return $payload;
+    }
+    $filtered = pl_apply_filters('journal.validate', $payload, [['actor_id' => $actorId, 'company_id' => $companyId,
+        'book_id' => $bookId, 'reversal_of_id' => $reversalOf]]);
+    if (!is_array($filtered)) {
+        throw new DomainException('A package returned something that is not a journal from the posting filter.');
+    }
+    foreach (['idempotency_key', 'source_type', 'source_reference', 'currency'] as $frozen) {
+        if (($filtered[$frozen] ?? null) !== $payload[$frozen]) {
+            throw new DomainException('A package cannot change the ' . str_replace('_', ' ', $frozen) . ' of a posting it is reviewing.');
+        }
+    }
+    return pl_normalize_journal($filtered);
 }
 
 function pl_post_journal(int $actorId, int $companyId, int $bookId, array $payload): array

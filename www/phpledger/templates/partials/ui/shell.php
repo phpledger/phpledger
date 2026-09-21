@@ -48,9 +48,18 @@ $navGroups = [
         ['/users', pl_t('Users'), 'users', ['users'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'users.manage')],
         ['/roles', pl_t('Roles'), 'key', ['roles'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'roles.manage')],
         ['/cost-visibility', pl_t('Cost visibility'), 'lock', ['cost-visibility'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'reports.cost_settings.manage')],
+        // 1.2 M8. Packages is read-only for a business owner without `installation.admin`
+        // (B44, onboarding decision 10), so the item is shown and the controls are what the
+        // capability gates on the screen itself.
+        ['/packages', pl_t('Packages'), 'adjustments-horizontal', ['packages'], !pl_demo_enabled()],
         ['/connections', pl_t('Connections & API'), 'external-link', ['connections'], true],
     ],
 ];
+// 1.2 M8: an active package adds its own screens to the sidebar here. The nav is a hint, never
+// a gate; every screen repeats its own capability check, so a filtered entry grants nothing.
+if (function_exists('pl_plugin_navigation_groups')) {
+    $navGroups = pl_plugin_navigation_groups($navGroups, ['actor_id' => (int) $user['id'], 'company_id' => (int) $company['id'], 'view' => $view]);
+}
 $quickCreate = [
     ['/transactions/new?kind=expense', pl_t('Expense'), true],
     ['/transactions/new?kind=receipt', pl_t('Receipt'), true],
@@ -82,7 +91,7 @@ $quickCreate = [
         <a class="nav-item" href="<?= pl_e(pl_url('/home')) ?>" title="<?= pl_e(pl_t('Home')) ?>"<?= $view === 'home' ? ' aria-current="page"' : '' ?>><?= pl_icon('home') ?><span><?= pl_e(pl_t('Home')) ?></span></a>
         <?php foreach ($navGroups as $group => $items): ?>
             <?php $items = array_filter($items, static fn (array $item): bool => (bool)$item[4]); if ($items === []) { continue; } ?>
-            <?php if ($group === 'Setup'): ?><details class="nav-group-collapsible"<?= in_array($view, ['accounts','tax','opening-balances','opening-conversion','periods','modules','connections','users','roles','cost-visibility'], true) ? ' open' : '' ?>><summary class="nav-group-summary"><span><?= pl_e(pl_t('Setup')) ?></span><?= pl_icon('chevron-down') ?></summary><div class="nav-group-body"><?php else: ?><p class="nav-group-label"><?= pl_e(pl_t($group)) ?></p><?php endif; ?>
+            <?php if ($group === 'Setup'): ?><details class="nav-group-collapsible"<?= in_array($view, ['accounts','tax','opening-balances','opening-conversion','periods','modules','packages','connections','users','roles','cost-visibility'], true) ? ' open' : '' ?>><summary class="nav-group-summary"><span><?= pl_e(pl_t('Setup')) ?></span><?= pl_icon('chevron-down') ?></summary><div class="nav-group-body"><?php else: ?><p class="nav-group-label"><?= pl_e(pl_t($group)) ?></p><?php endif; ?>
             <?php foreach ($items as [$href, $label, $icon, $views]): ?>
                 <a class="nav-item" href="<?= pl_e(pl_url($href)) ?>" title="<?= pl_e($label) ?>"<?= in_array($view, $views, true) ? ' aria-current="page"' : '' ?>><?= pl_icon($icon) ?><span><?= pl_e($label) ?></span></a>
             <?php endforeach; ?>

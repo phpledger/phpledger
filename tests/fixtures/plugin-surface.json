@@ -1,0 +1,347 @@
+{
+    "api_version": "1.0.0",
+    "contract": 2,
+    "constants": [
+        "PL_PLUGIN_API_VERSION",
+        "PL_PLUGIN_CONTRACT"
+    ],
+    "classes": {
+        "PL_Hook_Veto": "DomainException"
+    },
+    "hook_points": {
+        "journal.posted": {
+            "kind": "action",
+            "args": [
+                "array journal",
+                "array context"
+            ],
+            "returns": "void",
+            "phase": "after-commit"
+        },
+        "journal.validate": {
+            "kind": "filter",
+            "args": [
+                "array payload",
+                "array context"
+            ],
+            "returns": "array",
+            "phase": "pre-lock"
+        },
+        "navigation.groups": {
+            "kind": "filter",
+            "args": [
+                "array groups",
+                "array context"
+            ],
+            "returns": "array",
+            "phase": "request"
+        },
+        "outbound.consumers": {
+            "kind": "filter",
+            "args": [
+                "array handlers",
+                "array context"
+            ],
+            "returns": "array",
+            "phase": "cli"
+        },
+        "period.closed": {
+            "kind": "action",
+            "args": [
+                "array period",
+                "array context"
+            ],
+            "returns": "void",
+            "phase": "after-commit"
+        },
+        "plugin.activated": {
+            "kind": "action",
+            "args": [
+                "string slug",
+                "array package"
+            ],
+            "returns": "void",
+            "phase": "after-commit"
+        },
+        "plugin.deactivated": {
+            "kind": "action",
+            "args": [
+                "string slug",
+                "array package"
+            ],
+            "returns": "void",
+            "phase": "after-commit"
+        }
+    },
+    "functions": {
+        "pl_add_action": {
+            "parameters": [
+                "string $hook",
+                "callable $callback",
+                "int $priority=",
+                "string $owner="
+            ],
+            "returns": "void"
+        },
+        "pl_add_filter": {
+            "parameters": [
+                "string $hook",
+                "callable $callback",
+                "int $priority=",
+                "string $owner="
+            ],
+            "returns": "void"
+        },
+        "pl_amount": {
+            "parameters": [
+                "string $amount"
+            ],
+            "returns": "string"
+        },
+        "pl_apply_filters": {
+            "parameters": [
+                "string $hook",
+                "mixed $value",
+                "array $args="
+            ],
+            "returns": "mixed"
+        },
+        "pl_dispatch_outbound_events": {
+            "parameters": [
+                "array $handlers",
+                "int $limit="
+            ],
+            "returns": "array"
+        },
+        "pl_do_action": {
+            "parameters": [
+                "string $hook",
+                "array $args="
+            ],
+            "returns": "void"
+        },
+        "pl_e": {
+            "parameters": [
+                "string $value"
+            ],
+            "returns": "string"
+        },
+        "pl_enqueue_outbound_event": {
+            "parameters": [
+                "int $companyId",
+                "int $bookId",
+                "string $type",
+                "string $entityType",
+                "int $entityId",
+                "int $revision",
+                "string $key"
+            ],
+            "returns": "int"
+        },
+        "pl_get_journal": {
+            "parameters": [
+                "int $actorId",
+                "int $companyId",
+                "int $bookId",
+                "int $journalId"
+            ],
+            "returns": "array"
+        },
+        "pl_hook_after_commit": {
+            "parameters": [
+                "string $hook",
+                "array $args="
+            ],
+            "returns": "void"
+        },
+        "pl_hook_callbacks": {
+            "parameters": [
+                "string $hook"
+            ],
+            "returns": "array"
+        },
+        "pl_hook_points": {
+            "parameters": [],
+            "returns": "array"
+        },
+        "pl_ledger_date": {
+            "parameters": [
+                "string $date"
+            ],
+            "returns": "string"
+        },
+        "pl_ledger_text": {
+            "parameters": [
+                "mixed $value",
+                "string $label",
+                "int $limit",
+                "bool $required="
+            ],
+            "returns": "string"
+        },
+        "pl_ledger_transaction": {
+            "parameters": [
+                "callable $work"
+            ],
+            "returns": "mixed"
+        },
+        "pl_outbound_acknowledge": {
+            "parameters": [
+                "int $deliveryId",
+                "string $token",
+                "bool $success"
+            ],
+            "returns": "bool"
+        },
+        "pl_outbound_claim": {
+            "parameters": [
+                "string $consumer",
+                "int $companyId",
+                "int $bookId"
+            ],
+            "returns": "?array"
+        },
+        "pl_plugin_option_all": {
+            "parameters": [
+                "string $slug",
+                "int $companyId="
+            ],
+            "returns": "array"
+        },
+        "pl_plugin_option_delete": {
+            "parameters": [
+                "int $actorId",
+                "string $slug",
+                "string $name",
+                "int $companyId="
+            ],
+            "returns": "void"
+        },
+        "pl_plugin_option_get": {
+            "parameters": [
+                "string $slug",
+                "string $name",
+                "int $companyId=",
+                "mixed $default="
+            ],
+            "returns": "mixed"
+        },
+        "pl_plugin_option_set": {
+            "parameters": [
+                "int $actorId",
+                "string $slug",
+                "string $name",
+                "mixed $value",
+                "int $companyId="
+            ],
+            "returns": "void"
+        },
+        "pl_plugin_outbound_handlers": {
+            "parameters": [
+                "int $companyId",
+                "int $bookId"
+            ],
+            "returns": "array"
+        },
+        "pl_plugin_table_prefix": {
+            "parameters": [
+                "string $slug"
+            ],
+            "returns": "string"
+        },
+        "pl_post_journal": {
+            "parameters": [
+                "int $actorId",
+                "int $companyId",
+                "int $bookId",
+                "array $payload"
+            ],
+            "returns": "array"
+        },
+        "pl_remove_hooks": {
+            "parameters": [
+                "string $owner"
+            ],
+            "returns": "int"
+        },
+        "pl_require_capability": {
+            "parameters": [
+                "int $actorId",
+                "int $companyId",
+                "string $capability",
+                "string $message"
+            ],
+            "returns": "void"
+        },
+        "pl_require_company_access": {
+            "parameters": [
+                "int $actorId",
+                "int $companyId",
+                "bool $write="
+            ],
+            "returns": "array"
+        },
+        "pl_require_module": {
+            "parameters": [
+                "int $actorId",
+                "int $companyId",
+                "int $bookId",
+                "string $id",
+                "bool $write="
+            ],
+            "returns": "void"
+        },
+        "pl_reverse_journal": {
+            "parameters": [
+                "int $actorId",
+                "int $companyId",
+                "int $bookId",
+                "int $journalId",
+                "?string $date",
+                "string $idempotencyKey",
+                "string $reason"
+            ],
+            "returns": "array"
+        },
+        "pl_t": {
+            "parameters": [
+                "string $english",
+                "array $vars="
+            ],
+            "returns": "string"
+        },
+        "pl_tn": {
+            "parameters": [
+                "string $one",
+                "string $other",
+                "int $count",
+                "array $vars="
+            ],
+            "returns": "string"
+        },
+        "pl_trial_balance": {
+            "parameters": [
+                "int $actorId",
+                "int $companyId",
+                "int $bookId",
+                "?string $asOf="
+            ],
+            "returns": "array"
+        },
+        "pl_url": {
+            "parameters": [
+                "string $path",
+                "array $query="
+            ],
+            "returns": "string"
+        },
+        "pl_user_can": {
+            "parameters": [
+                "int $actorId",
+                "int $companyId",
+                "string $capability"
+            ],
+            "returns": "bool"
+        }
+    }
+}

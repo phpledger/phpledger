@@ -408,6 +408,8 @@ test('every route renders under the pseudo-locale and the document language foll
         // draft has actually reached, and the sweep follows no redirect, so /onboarding is what
         // proves the screen renders; tests/onboarding_skeleton_test.php walks all five stages.
         '/onboarding', '/onboarding?stage=start', '/sample-chooser',
+        // 1.2 M8: Admin > Packages.
+        '/packages',
         '/no-such-route'];
     $rendered = 0;
     $translated = 0;
