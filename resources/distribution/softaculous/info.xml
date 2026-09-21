@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PHP Ledger - Softaculous custom package metadata.
+  Spec: https://www.softaculous.com/docs/developers/making-custom-package/
+  This is the "custom package" path (no approval needed), not the official
+  library listing (separate, slower, undocumented process - see NOTES.md).
+-->
+<info xmlns="http://www.softaculous.com">
+  <!-- Application version this package installs. Bump alongside every
+       release per resources/distribution/README.md's release-protocol
+       pattern; currently the latest tagged release. -->
+  <version>1.2.1</version>
+
+  <!-- Minimum Softaculous engine version the package was written against.
+       4.0.6 is the value the docs page itself uses as its example; we could
+       not confirm from a primary source whether phpledger specifically
+       requires a newer minimum, so this is carried over as a documented
+       placeholder - see NOTES.md. -->
+  <softversion>4.0.6</softversion>
+
+  <!-- Disk space required by the unzipped release, in bytes. Measured from the
+       published phpledger-1.2.1.zip: 1585 files, 10,261,509 bytes uncompressed.
+       Rounded up to leave room for the private storage directory the installer
+       creates and for the database the panel provisions separately. -->
+  <space>12582912</space>
+
+  <support>https://github.com/phpledger/phpledger/issues</support>
+  <demo>https://phpledger.com/demo/</demo>
+
+  <!-- Softaculous docs did not show a <ratings> example; omitted rather than
+       inventing a URL. -->
+
+  <!-- Translatable strings referenced elsewhere in this package via
+       {{key}} placeholders (install.xml, install.js, upgrade.xml). The
+       exact nesting Softaculous expects under <languages> (a language code
+       wrapping the keys, vs. keys each wrapping language codes) was not
+       shown verbatim in the fetched developer docs. This nesting - keys
+       directly under a language-code element - is our best-effort reading
+       of "Language strings using format: <language-key>Value</language-key>"
+       and should be checked against a real accepted package before
+       submission. See NOTES.md. -->
+  <languages>
+    <english>
+      <overview><![CDATA[
+        <p>PHP Ledger is self-hosted, double-entry accounting software for
+        small businesses: sales, purchases, cash, and the general ledger,
+        built on plain PHP and MySQL with no SaaS dependency.</p>
+      ]]></overview>
+      <features><![CDATA[
+        <ul>
+          <li>Double-entry general ledger with fixed-precision money</li>
+          <li>Sales, purchases, and point-of-sale cash entry</li>
+          <li>Company/book-scoped permissions and audit trail</li>
+          <li>Runs on ordinary PHP + MySQL hosting, no CLI required to use it</li>
+        </ul>
+      ]]></features>
+      <admin_settings>Administrator account</admin_settings>
+      <admin_email>Administrator email</admin_email>
+      <admin_email_exp>Used for sign-in and account recovery.</admin_email_exp>
+      <admin_name>Administrator name</admin_name>
+      <admin_name_exp>The display name for the first account.</admin_name_exp>
+      <admin_username>Administrator username (optional)</admin_username>
+      <admin_username_exp>Leave blank to sign in with the email address only.</admin_username_exp>
+      <admin_pass>Administrator password</admin_pass>
+      <admin_pass_exp>Used only to create the first account; never stored by this package.</admin_pass_exp>
+      <db_port>Database port</db_port>
+      <db_port_exp>Leave as 3306 unless the database server uses a different port.</db_port_exp>
+    </english>
+  </languages>
+</info>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PHP Ledger - Installatron application package, version-level init.xml
+  (installers/_installerid_/_version#_/init.xml per Installatron's own
+  documented layout).
+
+  Tag shapes below (<information>/<info>, <changelog>, <links>/<link>,
+  <requirements>/<requirement>, <archives>/<archive>, <skeleton>/<file>/
+  <table>, <fields>) are copied from verbatim examples fetched from
+  https://www.installatron.com/developer/apps/definitions and
+  https://www.installatron.com/developer/apps/fields on 2026-09-21 (both
+  state no login is required). The <install> block uses the documented
+  "PHP7 format" (install/upgrade code embedded directly in init.xml,
+  <install><?php ... ?></install>), which their docs describe as the
+  current format now that "PHP7 necessitated changes in the way that
+  Installatron installers worked" away from separate install.php files.
+
+  What is NOT confirmed and is marked inline: how database credentials and
+  the site's filesystem path are made available to the PHP code inside
+  <install>, and how that code is expected to signal success or failure
+  back to Installatron. The fetched docs describe every other element in
+  detail but explicitly do not document this for <install>/<upgrade>.
+-->
+<version xmlns="http://www.installatron.com">
+  <information>
+    <info id="version" value="1.2.1"/>
+    <info id="license" value="_apps_opensource"/>
+    <info id="date" value="2026-09-21"/>
+  </information>
+
+  <changelog url="https://github.com/phpledger/phpledger/releases/tag/v1.2.1">
+    <![CDATA[
+* Non-interactive install path (install/migrate.php, install/create-admin.php, install/complete.php)
+* See the GitHub release notes at the URL above for the full list
+    ]]>
+  </changelog>
+
+  <links>
+    <link id="admin" value="/"/>
+    <!-- The application's sign-in screen is the effective "admin" entry
+         point; there is no separate control panel path. -->
+    <link id="config" value="www/phpledger/includes/config.local.php"/>
+  </links>
+
+  <requirements>
+    <requirement id="itron" value="5.0.0"/>
+    <!-- Minimum Installatron core version this package was written
+         against - carried over from the docs' own example value; not
+         independently confirmed as the true minimum this package needs. -->
+    <requirement id="diskspace" value="10"/>
+    <!-- Megabytes; TODO see resources/distribution/softaculous/info.xml's
+         matching TODO - approximate, not measured against the actual
+         unzipped release. -->
+    <requirement id="php" value="8.2-"/>
+    <!-- "VERSION-RANGE-DEF" syntax is shown only as a placeholder in the
+         docs, with no worked example of how an open-ended lower bound
+         ("8.2 or newer") is actually written. "8.2-" is this package's
+         best-effort guess at that syntax and is flagged as an unconfirmed
+         TODO; the application's own install/preflight.php independently
+         enforces PHP 8.2+ regardless of what Installatron parses here. -->
+    <requirement id="mysql" value="8.4-"/>
+    <!-- Same caveat as php above. The application also accepts MariaDB
+         10.4+; the docs' requirement ids did not show a separate
+         "mariadb" id, so that alternative cannot be declared here without
+         guessing an id - left undeclared rather than invented. -->
+    <requirement id="php-bcmath" value="1"/>
+    <requirement id="php-pdo" value="1"/>
+    <requirement id="php-mbstring" value="1"/>
+    <requirement id="php-curl" value="1"/>
+    <requirement id="php-openssl" value="1"/>
+    <requirement id="php-fileinfo" value="1"/>
+    <!-- TODO: only "php-bcmath" was shown as a worked example in the docs;
+         the exact id spelling for pdo_mysql, session and the others above
+         is inferred by the same "php-<extension>" pattern, not individually
+         confirmed. -->
+  </requirements>
+
+  <archives>
+    <archive id="main" url="https://github.com/phpledger/phpledger/releases/download/v1.2.1/phpledger-1.2.1.zip" type="zip"/>
+    <!-- Confirmed reachable (HTTP 200, checked 2026-09-21). The docs show
+         an optional md5="{MD5}" attribute; the release protocol publishes a
+         SHA-256 checksum (phpledger-1.2.1.zip.sha256), not an MD5, so no
+         md5 attribute is set rather than fabricating one. TODO: compute and
+         publish an MD5 alongside the release if Installatron requires it in
+         practice. -->
+  </archives>
+
+  <skeleton>
+    <file id="index.php"/>
+    <file id=".htaccess"/>
+    <file id="www"/>
+    <file id="resources"/>
+    <file id="tools"/>
+    <file id="LICENSE"/>
+    <file id="README.txt"/>
+    <file id="www/phpledger/includes/config.local.php" isconfig="true"/>
+  </skeleton>
+
+  <fields>
+    <!-- Internal fields recognized by Installatron per
+         https://www.installatron.com/developer/apps/fields (fetched
+         2026-09-21, no login required): version (get-only), email
+         (get&set), login (get&set), passwd (set-only), sitetitle,
+         sitedescription, language. Declared here by id only, per the
+         docs ("Internal Fields ... require only the field ID"). -->
+    <field id="email"/>
+    <field id="login"/>
+    <field id="passwd"/>
+
+    <!-- Custom field: the application also requires a display NAME for the
+         first administrator account, distinct from login/email, which has
+         no matching internal field. Declared per the documented custom
+         "text" field shape (id + <get>/<set> PHP blocks); the docs show
+         that <get>/<set>/<verify> contain PHP code but do not show a full
+         worked example, so this is a best-effort reading, flagged as a
+         TODO to check in the Installer Editor before submission. -->
+    <field id="adminname" type="text">
+      <!-- TODO(installatron-api): confirmed only that <get>/<set> contain
+           PHP code for reading/writing this field's value; the actual
+           variable(s) or object such code is expected to use were not
+           shown in the fetched docs. -->
+      <set><![CDATA[
+        // TODO(installatron-api): store the submitted admin display name
+        // where <install> below can read it. Mechanism unconfirmed.
+      ]]></set>
+      <get><![CDATA[
+        // TODO(installatron-api): return the stored admin display name.
+        // Mechanism unconfirmed.
+      ]]></get>
+    </field>
+  </fields>
+
+  <install><![CDATA[
+<?php
+/**
+ * PHP Ledger - Installatron install step (PHP7 "embedded in init.xml"
+ * format per the docs).
+ *
+ * TWO THINGS BELOW ARE NOT CONFIRMED FROM ANY PRIMARY SOURCE and are left
+ * as explicit TODOs rather than invented, per this package's authoring
+ * rules:
+ *
+ *   1. How this code is expected to obtain: the site's filesystem install
+ *      path; the assigned MySQL host/database/user/password; the public
+ *      URL of the install. Installatron's fetched <install>/<upgrade> docs
+ *      state only that "database credentials are made available" without
+ *      specifying the mechanism (no object, superglobal, or function name
+ *      was shown).
+ *   2. How this code is expected to report success or failure back to
+ *      Installatron (return value? thrown exception? a specific function
+ *      call?). Not documented in the fetched pages.
+ *
+ * What IS certain, and is the actual work this step must do once those two
+ * gaps are resolved, is the application's own documented install contract
+ * (see resources/distribution/README.md and issue #101's table):
+ *
+ *   - write www/phpledger/includes/config.local.php as:
+ *       <?php
+ *       declare(strict_types=1);
+ *       return array('host'=>..., 'port'=>3306, 'database'=>..., 'user'=>...,
+ *           'password'=>..., 'public_url'=>...);
+ *   - create www/phpledger/storage/installation, mode 0700, before the
+ *     first request
+ *   - then run, via a documented shell mechanism if one exists in this
+ *     panel version, in order:
+ *       php www/phpledger/install/migrate.php
+ *       php www/phpledger/install/create-admin.php --email=<email>
+ *           --name=<adminname> [--username=<login>]
+ *         (password via PL_ADMIN_PASSWORD in the CHILD PROCESS ENVIRONMENT
+ *         ONLY - install/create-admin.php explicitly refuses a password
+ *         passed as a command argument)
+ *       php www/phpledger/install/complete.php
+ *
+ * TODO(installatron-api): replace this stub with real Installatron API
+ * calls once (1) and (2) above are confirmed - from the Installer Editor's
+ * own inline help, from Installatron support, or from an accepted sample
+ * package that already does a similar file-plus-exec install. Until then
+ * this file intentionally does not guess an API and does not silently
+ * pretend to succeed.
+ */
+throw new RuntimeException(
+    'This package is incomplete: the Installatron API for reading the '
+    . 'assigned database credentials/site path and for signalling '
+    . 'install success or failure inside <install> could not be confirmed '
+    . 'from Installatron\'s public documentation as of 2026-09-21. See '
+    . 'resources/distribution/installatron/NOTES.md.'
+);
+?>
+  ]]></install>
+
+  <languages>
+    <language id="en" file="../locale_en.php"/>
+  </languages>
+</version>
