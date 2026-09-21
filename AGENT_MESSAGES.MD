@@ -1581,3 +1581,23 @@ i18n backlog: 12 untranslated interface text runs in 4 template files (ceiling 1
 ```
 
 522 on `master` plus the nine added here. All nine pass, including the two the defect needs: a freshly created book shows no placeholder group on any report, and migration 045 names a converted chart while touching no posting account and running twice safely.
+
+## 2026-09-21 — Claude: all eleven distribution channels have manifests
+
+**Owner request:** manifests for the remaining six platforms in [#101](https://github.com/phpledger/phpledger/issues/101), plus auto-installer packages for Softaculous, Installatron and YunoHost, all under `resources/distribution/`, kept out of the release package, validated, documented, and reported on the issue without submitting anything upstream.
+
+**Done.** Eleven directories, 44 files. Nothing submitted anywhere; the README and the issue comment both say so.
+
+**Container catalogues:** `cloudron/`, `portainer/`, `umbrel/` join the existing `casaos/`, `caprover/`, `coolify/`. **Managed hosts:** `elestio/` and `pikapods/`, each a compose file plus a submission dossier, since neither publishes a schema. **Panels and native:** `softaculous/` (the full documented custom-package set), `installatron/`, and `yunohost/` (native Debian, so it drives the command-line install path rather than the image).
+
+**Verified independently of the four agents that wrote them.** Every JSON, YAML, TOML and XML file parses; every PHP file passes `php -l`; every JavaScript file `node --check`; every shell script `bash -n`. Each container manifest carries the full `compose.production.yaml` contract. No hardcoded secret anywhere across all eleven. Every referenced URL resolves, and only the four already-published assets are used. The 1.2.1 checksum was confirmed twice, against the published checksum file and by hashing the download. The GHCR digest Umbrel pins resolves live.
+
+**Requirement that the files never ship is now enforced, not assumed.** `resources/distribution/` was excluded only by not being listed. `tests/package-builder-test.py` now names the prefix, and the rule was confirmed to bite by adding a manifest entry and watching it fail.
+
+**One real blocker, filed as [#103](https://github.com/phpledger/phpledger/issues/103).** Cloudron's `mysql` addon is one shared server for every app on the box, so `--log-bin-trust-function-creators=1` cannot be passed to it, and 33 of 43 migrations create triggers under binary logging. The proper fix is to declare those routines' data access correctly, which removes the need for the flag on every engine and also touches decision P4's cloud database tiers. **Do not submit the Cloudron package until that lands**; its `NOTES.md` and the README both say so.
+
+**Quirks now recorded in `resources/distribution/README.md`** rather than rediscovered: the release archive wraps everything in one top-level directory, so the Softaculous package must be built with it stripped (YunoHost's helper strips it by default); CapRover names a flat file per app; CasaOS forbids `:latest`; Portainer's format has no branch or tag field, so the stack file tracks `master` and only the version is pinned, which means a structural change to `compose.production.yaml` reaches existing users immediately; Umbrel's compose deliberately fails `docker compose config` alone because `app_proxy` has no image until umbrelOS patches it; Installatron never documents how its embedded PHP receives credentials, so that block is a stub that throws rather than an invented API.
+
+**The npm reference was wired to the real package**, `https://www.npmjs.com/package/create-phpledger`, not to the organisation page. An unscoped package is owned by the publishing user account; npm's documentation says an organisation may manage unscoped packages and gives no mechanism, confirmed directly from their own page. Using the organisation URL would have looked broken.
+
+**Not done, deliberately:** no upstream pull request, no submission, no contact with any platform. **And the honest limit: none of these has been installed on its real platform.** They validate and follow formats read from those platforms' own repositories, which is not the same thing. Each wants one real install and one upgrade before its pull request goes out, which is what #101's acceptance criteria already ask.
