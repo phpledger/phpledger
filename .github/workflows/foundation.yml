@@ -34,6 +34,11 @@ jobs:
         run: docker compose --profile test run --rm test
       - name: Verify release channels and package boundaries
         run: python3 tests/package-builder-test.py
+      - name: Demo packs match their builder
+        # The builder drifted from its own committed output once and nothing noticed,
+        # because its check runs nowhere. A rebuild then broke all eleven packs. The
+        # test image has no Python, so this belongs here rather than in composer check.
+        run: python3 tools/build-demo-packs.py --check
       - name: Verify update modes, the version source and release-feed parsing
         run: docker compose --profile test run --rm test php tests/update-channel-test.php
       - name: Verify the phpledger.com release-feed generator
