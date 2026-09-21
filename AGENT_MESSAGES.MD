@@ -1432,3 +1432,11 @@ The owner set `NPM_TOKEN` themselves with `gh secret set`, which is the mechanis
 - Did **not** start Docker Compose. Did not run the Playwright browser-smoke/interaction scripts (not requested, and this task's own instructions said not to start a Compose suite).
 
 **Deliberately not done:** no deploy, publish, or push; no change to `home.html`, `product.html`, any `compare-*`/`learn-*`/`guide-*`/`news-*`/`research-*` page, application code, `README.md`, or a release artifact; no merge.
+
+**`create-phpledger@0.1.0` is published (Claude, 21 Sep 2026), on owner instruction.** Published from `.github/workflows/npm-publish.yml` by a manual run with `dry_run: false`, not by hand, so the release path is the one that was exercised. `npm notice` confirms a **signed provenance statement** with source and build information from GitHub Actions, recorded in the sigstore transparency log.
+
+Verified after publishing, from the registry rather than from the workflow's own claim: the registry serves `create-phpledger` with `latest` at `0.1.0`, and `npm create phpledger@latest -- <dir> --yes` run from a clean temporary directory downloaded the published package and wrote `compose.yaml`, `.env`, `.gitignore` and `README.md`, with the image pinned to `1.2.1`.
+
+**It is owned by the publishing user account, not the `@phpledger` organisation**, which is why it does not appear on the organisation's page. The registry reports `{"create-phpledger":"write"}` for that user. The name must stay unscoped regardless, for the reason recorded above; moving *ownership* to the organisation is a separate question, and npm's documentation asserts an organisation can manage unscoped packages without saying how. Check the package's admin tab before assuming it is possible.
+
+Nothing else was published. The container image, the website and the demo were untouched.
