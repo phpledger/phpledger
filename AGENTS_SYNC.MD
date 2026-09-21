@@ -158,6 +158,8 @@ Start fresh inspection with `python tools/hosting-status.py`. The product publis
 
 ## Handoff and remaining work
 
+- **1.2 M12 in progress (Claude, 21 Sep 2026 04:49 UTC):** `m12/container-image` from `master` `0bb6c7d`, not pushed or merged. Scope: the production container image and its GHCR/Docker Hub publication path (B42), per the message of the same time. Touches `www/phpledger/includes/functions/web_functions.php`, `install_web_functions.php`, `update_web_functions.php` and `update_functions.php`, plus new `docker/release/*`, `compose.production.yaml`, a new GitHub Actions workflow and `docs/CONTAINER.md`. No migration, no accounting/posting file, no `public/maintenance.php` byte change.
+
 - **Issue #90 fixed on a branch (Claude, 20 Sep 2026 20:35 UTC):** `fix/issue-90-updater-migrate` (`273de78` plus this record), not pushed or merged; VERSION 1.1.3 and the 1.1.3 release surfaces are on it. The in-app updater completes again: new `tests/update-migrate-test.php` and a 1.1.1 -> locally built 1.1.3 proof through `/maintenance.php` with a test key both reach `complete`. See the message of the same time. Owner items: review and merge, official signing, publication, README/wiki/website, receipt.
 
 - **1.1.0 is live (Claude, 19 Sep 2026 15:35 UTC):** release v1.1.0 (tag `af0f489`, signed metadata, key fingerprint `4e58a5f4…aa78e78`), demo `core-1.1.0-af0f4895f85a`, website `website-1-1-0-20260919-152351`, origin/master `97a26b4`. The sections above describing the 1.0.0 website and demo are now historical; see `docs/repository/PUBLICATION-2026-09-19-1.1.0.md` and the latest message. The main checkout is behind origin/master and still holds the SEO patch as uncommitted edits identical to the committed files.

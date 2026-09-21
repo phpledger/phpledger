@@ -9,6 +9,7 @@ require_once __DIR__ . '/install_exposure_functions.php';
 require_once __DIR__ . '/security_functions.php';
 require_once __DIR__ . '/i18n_functions.php';
 require_once __DIR__ . '/demo_functions.php';
+require_once __DIR__ . '/update_channel_functions.php';
 
 /** Browser setup is open until installation completes; the hosted demo never offers it. */
 function pl_install_available(): bool
@@ -389,6 +390,29 @@ function pl_install_secure_request(array $server): bool
     return (!empty($server['HTTPS']) && strtolower((string) $server['HTTPS']) !== 'off') || (int) ($server['SERVER_PORT'] ?? 0) === 443;
 }
 
+/**
+ * A container's own compose network names its database service by a hostname that is
+ * never "localhost", even though the operator who deployed it controls that private
+ * network as fully as a shared host controls its own loopback. `pl_database_local_host()`
+ * has no way to know that, so entering the exact host the image's own environment
+ * already configured would otherwise demand the remote-database setup-code proof
+ * (setup-code.txt), a file the operator can only reach by exec-ing into the container
+ * they already control - friction with no security benefit.
+ *
+ * This only ever widens trust when PL_UPDATE_MODE is explicitly "container" (set by
+ * the image, docs/RELEASE-PROTOCOL.md), and only for the literal PL_DB_HOST value that
+ * same environment configured. A managed ZIP install, or a container host entered for
+ * any other database, still counts as remote and still needs the setup code.
+ */
+function pl_install_trusted_environment_host(string $host): bool
+{
+    if (pl_update_mode() !== 'container') {
+        return false;
+    }
+    $configured = strtolower(trim((string) getenv('PL_DB_HOST')));
+    return $configured !== '' && strtolower(trim($host)) === $configured;
+}
+
 function pl_install_http(): never
 {
     require_once __DIR__ . '/web_functions.php';
@@ -491,7 +515,7 @@ function pl_install_http(): never
                     if ($action === 'database') {
                         $view = 'database';
                         $candidate = pl_install_database_input($_POST);
-                        if ($key === null && !pl_database_local_host($candidate['host'])) {
+                        if ($key === null && !pl_database_local_host($candidate['host']) && !pl_install_trusted_environment_host($candidate['host'])) {
                             $code = pl_install_remote_code();
                             $setupCodePath = pl_install_display_path(pl_install_directory() . '/setup-code.txt');
                             if (!pl_install_authorized($code, $_SESSION, time())) {

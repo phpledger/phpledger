@@ -151,6 +151,10 @@
       "source": "www/phpledger/includes/functions/web_functions.php"
     },
     {
+      "destination": "www/phpledger/install/complete.php",
+      "source": "www/phpledger/install/complete.php"
+    },
+    {
       "destination": "www/phpledger/install/create-admin.php",
       "source": "www/phpledger/install/create-admin.php"
     },

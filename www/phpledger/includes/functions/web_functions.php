@@ -101,15 +101,28 @@ function pl_web_local_http(array $server): bool
     return strlen($peer) === 4 ? ord($peer[0]) === 127 : $peer === str_repeat("\0", 15) . "\1";
 }
 
-/** A copy without database settings belongs in the browser installer. */
+/**
+ * A copy without database settings belongs in the browser installer. Local development
+ * and the test containers (docs/DEVELOPMENT.md) configure their database entirely
+ * through the environment and are migrated out of band with `install/migrate.php`;
+ * they never run the browser installer or write its completion receipt, so a supplied
+ * PL_DB_PASSWORD there means "already provisioned", not "installed". Everywhere else -
+ * including the container image before its entrypoint has run install/create-admin.php
+ * and install/complete.php, or before an operator has opened /install - a database
+ * password alone is not proof of a finished installation: only the browser installer's
+ * private configuration file or its completion receipt is.
+ */
 function pl_web_needs_installation(): bool
 {
-    if (getenv('PL_ENV') === 'demo' || (string) getenv('PL_DB_PASSWORD') !== '') {
+    if (getenv('PL_ENV') === 'demo') {
         return false;
     }
     require_once __DIR__ . '/installation_state_functions.php';
     try {
-        return !is_file(pl_install_config_path()) && !is_file(pl_install_directory() . '/installed.json');
+        if (is_file(pl_install_config_path()) || is_file(pl_install_directory() . '/installed.json')) {
+            return false;
+        }
+        return !(in_array(getenv('PL_ENV'), ['local', 'test'], true) && (string) getenv('PL_DB_PASSWORD') !== '');
     } catch (Throwable $error) {
         return false;
     }

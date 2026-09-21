@@ -31,7 +31,7 @@ try {
     // and a bootstrap that defers to the repository's real bootstrap for the fresh runtime probe.
     $functions = 'www/phpledger/includes/functions/';
     $tree = [];
-    foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'install_functions.php', 'runtime_functions.php'] as $name) {
+    foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'update_channel_functions.php', 'install_functions.php', 'runtime_functions.php'] as $name) {
         $tree[$functions . $name] = (string) file_get_contents($repository . '/' . $functions . $name);
     }
     foreach (glob($repository . '/www/phpledger/install/migrations/[0-9]*.php') ?: [] as $file) {
