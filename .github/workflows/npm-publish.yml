@@ -76,6 +76,19 @@ jobs:
             exit 1
           fi
 
+      - name: Check the token actually authenticates
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # A non-empty secret is not a working one. npm tokens expire, get
+          # revoked, and get pasted somewhere they should not be and replaced.
+          # Failing here names the cause; failing at publish does not.
+          if ! who=$(npm whoami 2>&1); then
+            echo "::error::NPM_TOKEN did not authenticate: ${who}. Create a new granular token with publish rights to create-phpledger and run: gh secret set NPM_TOKEN"
+            exit 1
+          fi
+          echo "authenticated as ${who}"
+
       - name: Verify the scaffolder before publishing it
         run: node --check bin/create-phpledger.mjs
 
