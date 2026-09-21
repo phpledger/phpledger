@@ -4,6 +4,23 @@ Each release's exact source revision is recorded in its `PACKAGE-MANIFEST.json` 
 
 PHP Ledger 1.0.0 was the first supported stable release of the restarted application. It preserves the lightweight BixiSoft PHP/MeekroDB structure while separating accounting functions, server permissions, templates and the public front controller. Read "Supported scope and limits" and "Assurance status" below before deployment; the dated preview sections further down record the historical, superseded scope of each earlier development release.
 
+## 1.2.0-preview.1: numbering, printing, trading and stock documents, advances, structured codes and owner transactions
+
+A **preview** on the preview channel, not a stable release. It never moves `latest` or the stable feed entry, and it carries no media kit: only a major release does. Its migrations, `035` through `039`, cannot be reverted, so it is published for engineering verification on disposable copies only: to prove the work is installable, upgrade-proven and signed. It is not a build for user or accountant testing; that review is booked on the release that ships with a refreshed demo. The current stable release remains 1.1.3, and the pilot stays on it; the hosted demo still runs 1.1.0. The new accounting behaviour below has not been reviewed.
+
+- **Document numbering.** A per-document-type number series, set in Admin › Numbering, with a prefix, a padding width, a year segment and a reset rule. A number is allocated inside posting, under the book lock, so numbers are gapless; drafts stay unnumbered until they post. Documents posted before a series existed keep the number they already had.
+- **Printing.** A print-route and template registry keyed by document type and format, serving the settlement receipt, the A4 invoice, the 80 mm counter receipt, the party statement, the stock issue and the gate pass.
+- **Trading documents**, a new optional bundled module (requires the accounting core, AR and Inventory). It adds product packs with pack-and-unit entry, per-line discounts, free-goods lines, sales-staff and area dimensions, cash received on the invoice, and warehouse selection on invoices and credits. An Admin › Accounting policies screen chooses, per company, how discounts post, how free goods are treated and what the cash-on-invoice cap is. Free goods are invoice-only lines; cash on the invoice stays off until a company sets a cap.
+- **The company profile**, carrying name, address, phone, email, tax registrations and footer terms, and printed on documents.
+- **Stock documents.** Numbered stock issues, re-issues and returns; gate passes that neither move stock nor post anything; vans as mobile warehouses with a driver reference, through to a reviewed settlement; and stock-by-location reporting with an aggregate view. Cost columns are withheld from anyone without cost-viewing authority, in the screens and in API/MCP reads alike.
+- **Advances and refunds.** On-account receipts with an oldest-first allocation planner; unapplied credit held as a customer- or supplier-advances control account rather than netted inside receivables or payables; later application of that credit; refunds; credit notes without an original invoice; and batch receipts that post one voucher per customer.
+- **Structured account codes, contra accounts, collapsible reports and owner transactions.** Account codes take the `X-XXX-XXXXX-XX` shape; every existing chart is converted by its current groups, with the old number kept in an immutable mapping. Contra accounts are marked and presented as deductions. The trial balance, profit and loss and balance sheet collapse from class to group to account. Capital introduced, owner loans and repayments, drawings and partner capital accounts are first class; the application posts no profit allocation of its own.
+- **Translation groundwork.** The translation helper, catalogue loader and locale handling are in place, but no translation ships in this preview: the interface is English throughout. Urdu is planned for a later 1.2 preview.
+
+**Not in this preview:** the plugin runtime and package directory, the full Users module, the pharmacy plugin and sample, the counter POS over real stock, the onboarding redesign, the ownership register, Urdu, and the container image.
+
+Install this preview only on a copy you can discard. See [UPGRADE.md](UPGRADE.md#from-113-to-120-preview1).
+
 ## 1.1.3: the in-app updater completes
 
 A patch release: one fix, no migration, no schema change, no change to any accounting behaviour, to the rules that guard posted data, or to the migration checksums. The publication date is recorded in its receipt under `docs/repository/`.

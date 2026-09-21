@@ -28,6 +28,14 @@ Keep the installed chain through 031 unchanged; 1.0.0 adds no new migration. Thi
 
 Use the backup/maintenance procedure below and run migrations before reopening traffic, exactly as for the 0.5.0-preview to 0.6.0-preview upgrade. Restore both matching code and database if rollback is needed; copying old PHP over an upgraded database is not a tested rollback.
 
+## From 1.1.3 to 1.2.0-preview.1
+
+**This is a preview, for disposable copies only.** It applies migrations `035` through `039`, and none of them can be reverted. Do not install it over a real installation's data; rehearse it on a copy you can discard.
+
+Install it from `/maintenance.php`, choosing the **Preview** channel, with the publisher key pinned; or replace the files and run `php www/phpledger/install/migrate.php` once. Either way, take a full backup first, per the manual procedure below.
+
+A preview installation is offered the next preview by the update feed. A stable installation is not offered previews at all; it only ever sees stable releases such as 1.1.3.
+
 ## From 1.1.2 to 1.1.3
 
 A files-only upgrade: no migration, no receipt change, no accounting change. It fixes the in-app updater ([issue #90](https://github.com/phpledger/phpledger/issues/90)), and the 1.1.2 notice below no longer applies from this release onward: install it from `/maintenance.php` with `phpledger-1.1.3.update.json` once that metadata is signed (the pinned publisher key applies; the fix is in the new release's files, so the copied runtime of your installed 1.1.2 completes the update), or replace the files with the manual procedure below. `public/maintenance.php` is unchanged.
