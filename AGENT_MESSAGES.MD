@@ -1226,3 +1226,43 @@ Findings worth carrying:
 - **No browser check of `/packages` at the three widths** and no HTTP smoke script for it; the route is exercised by the pseudo-locale sweep only. Definition-of-done item 2 is open for this screen, as it is for M2's, M6's and M7's.
 - **The statement check on a package migration is a boundary, not a sandbox.** It refuses any statement whose target is not `pl_<slug>_*`, but a package's PHP runs on the same database connection as core, and the Unverified confirmation says so in plain words.
 - Nothing from #71 (the demo-pack unbundling) and nothing from #72 beyond the manifest itself.
+
+## 2026-09-21 — Claude: what it would take to open each channel (assessment only)
+
+New file `docs/strategy/CHANNEL-UNBLOCKING-2026-09-21.md`, a follow-up to the proposal review. Assessment only: no code, no packaging files, no submissions, nothing committed.
+
+**The finding that matters for the distribution plan:** several of its gates predate M12 and are looser than it assumes. The non-interactive install path is complete in 1.2.1 (environment or `config.local.php`, then `install/migrate.php`, `install/create-admin.php`, `install/complete.php`), and `install/complete.php` says in its own header that it serves any scripted ZIP or Composer deployment, not only the container. That is the Tier 1 Softaculous prerequisite, already met on the application side.
+
+**Homebrew.** The plan gates the tap on SQLite. Measured on `master`: 33 of 43 migrations create triggers, 46 function files call `JSON_*`, 34 use `FOR UPDATE`. That is a release of work. A third-party tap has no review, so nothing external forces the SQLite route; `depends_on "mariadb"` plus a launcher is days of work, and local no-password accounts already work (issue #84). The one missing piece is the launcher itself, and `tests/browser_installer_test.php` already demonstrates the `php -S` plus `router.php` pattern it would use. Trade-off recorded for the owner, not resolved.
+
+**npm.** Prerequisite met. Scaffolder only, per the release protocol; `npx phpledger init` as an installer would misrepresent the channel.
+
+**Pages.** Recommended against a second promotional site: the website source holds 72 pages including the comparison pages that are the SEO strategy, so a duplicate competes with it. Three non-duplicative uses proposed instead: Cloudflare previews for website pull requests, a redirect claiming `phpledger.github.io`, and an unpointed standby copy.
+
+**One-click platforms.** Verified requirements for CasaOS, CapRover, Umbrel, Coolify, Cloudron, Portainer, YunoHost, Elestio and PikaPods. Proposed order puts CasaOS, CapRover and Coolify first, each being a single file over the existing `compose.production.yaml`. Two items for whoever takes this: CasaOS forbids `:latest` tags, and PikaPods' eligibility bar excludes applications that compete with the author's own paid hosting, which touches decision C7. YunoHost packages natively on Debian rather than from the image, so it consumes the command-line install path.
+
+**A real gap found, not fixed:** the release protocol's channel table says a hosting panel "runs `upgrade.php`", and no `upgrade.php` exists anywhere in the repository. Any panel package needs it written.
+
+Several external process and fee details could not be confirmed from primary sources and are marked unverified in the file: Coolify's canonical docs, Portainer's third-party submission path, and the terms for Elestio, PikaPods and CapRover. Softaculous's official-library process is likewise undocumented publicly and needs direct contact.
+
+## 2026-09-21 — Claude: badges live, npm scaffolder built, three issues filed
+
+**Owner instructions this round:** file a Homebrew feature request, build the npm package and document it, file an issue for the one-click channels and start on them, file an issue for the missing `upgrade.php`, and put the badge change live with more colour.
+
+**Published to `origin/master`.** This is the one live change. `origin/master` moved `106dcfb` to `9d71fba`, which is `a0e82b1` plus one new commit. **The `m8/plugin-runtime` merge was deliberately not published:** `a0e82b1` sits directly on the old `origin/master`, so the badge work was pushed as its own lineage with `git push origin 9d71fba:master`, and local `master` was then merged with it rather than rewritten. Whoever owns m8 still decides when it goes out.
+
+Note for the record: `a0e82b1` was made by another session and swept up uncommitted README and documentation work of mine along with its own 1.2.1 notes correction. Its message does not mention the badges. Nothing was lost and the content is intact.
+
+**Badges.** Eight badges, each now in the colour of the thing it names (Packagist orange, Docker blue, PHP purple, MySQL teal, MariaDB brown, GNU red) over the unchanged navy label, so they still read as a set. The checks badge lost its colour override so shields colours it by state: green while Foundation checks pass, red when they do not. Verified live from `raw.githubusercontent.com` and by pulling each rendered SVG and reading its fill values.
+
+**npm, commit `cbbf299`.** New `clients/js/create-phpledger` and `tests/create-phpledger-test.py`. It resolves the stable version from the live feed, pins it, generates the secrets rather than prompting, and starts nothing. Verified independently of the agent that wrote it: `node --check` clean, the suite runs **7 tests, OK**, and a real run against the live feed produced a compose file pinning `1.2.1` with a `.env` carrying generated values and a `.gitignore` listing it. **Not published to npm** — that needs the owner's account and a publish-on-tag step.
+
+One honest caveat: the `.env` is written with `chmod 0600`, which Windows ignores, so a local run shows 644. On Linux and macOS it applies.
+
+**Issues filed:** [#99](https://github.com/phpledger/phpledger/issues/99) Homebrew, [#100](https://github.com/phpledger/phpledger/issues/100) the missing `upgrade.php`, [#101](https://github.com/phpledger/phpledger/issues/101) the one-click channels.
+
+**Owner decision recorded in #101:** PikaPods' bar excluding applications that compete with the author's own paid hosting does not apply. PHP Ledger is self-hosted software and the project offers no hosted product. `CHANNEL-UNBLOCKING` was corrected accordingly; it previously flagged this against decision C7.
+
+**`docs/RELEASE-PROTOCOL.md` changed in four places:** the npm paragraph now records the scaffolder as built rather than planned; the Homebrew row no longer asserts that the SQLite adapter is required, because a third-party tap has no review and `depends_on "mariadb"` would work today; the panel row notes that `upgrade.php` does not exist; and the catalogues row points at `resources/distribution/`.
+
+**Still open for the owner:** publishing `create-phpledger` to npm; the GitHub About description and the README body below the hero both still say 1.1.3.
