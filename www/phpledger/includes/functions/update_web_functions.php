@@ -2,6 +2,10 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/update_probe_functions.php';
+// Copied into the recovery runtime alongside this file (pl_update_begin()) so an
+// installation that already runs in a non-file-owning mode never offers, mid-update,
+// the very upload form that mode must refuse.
+require_once __DIR__ . '/update_channel_functions.php';
 
 /** Minimal independent operator interface. No financial actor/session is consulted. */
 function pl_update_web(string $root): never
@@ -20,7 +24,15 @@ function pl_update_web(string $root): never
     session_start();
     $_SESSION['update_csrf'] ??= bin2hex(random_bytes(32));
     $csrf = $_SESSION['update_csrf']; $error = ''; $state = null; $authorized = false;
+    // Only a managed (ZIP, Windows bundle) installation owns its files. Container,
+    // Composer and panel installations (docs/RELEASE-PROTOCOL.md) are never modified in
+    // place; this page tells them how to upgrade on their own channel instead. Safe
+    // defaults here mean an unreadable PL_UPDATE_MODE falls through the ordinary error
+    // handling below instead of a raw fatal error before the page can render at all.
+    $mode = 'managed'; $fileOwned = true;
     try {
+        $mode = pl_update_mode();
+        $fileOwned = pl_update_mode_replaces_files($mode);
         $directory = pl_update_directory($root);
         $keyFile = $directory . '/operator.key';
         $fingerprint = is_file($keyFile) ? hash_file('sha256', $keyFile) : '';
@@ -36,6 +48,7 @@ function pl_update_web(string $root): never
             if (!$authorized) { throw new DomainException('Reauthenticate using the host installation operator key.'); }
             $action = $_POST['action'] ?? '';
             if ($action === 'begin') {
+                if (!$fileOwned) { throw new DomainException('This installation runs in ' . $mode . ' mode and does not own its files. See the upgrade steps below instead of uploading a release here.'); }
                 // Beginning a new operation always requires fresh proof, even with a session.
                 pl_update_operator_attempt($directory, (string) ($_POST['operator_key'] ?? ''), time());
                 $archive = $_FILES['archive'] ?? []; $metadata = $_FILES['metadata'] ?? [];
@@ -92,6 +105,16 @@ function pl_update_web(string $root): never
     if ($active) {
         echo '<form method="post" id="continue"><input type="hidden" name="csrf" value="' . $escape($csrf) . '"><input type="hidden" name="action" value="continue"><button>Continue update or recovery</button></form><p>Progress continues while this page is open. Reopen this page after a host interruption to resume safely.</p>';
         if ($error === '') { echo '<script nonce="' . $nonce . '">setTimeout(()=>document.getElementById("continue").requestSubmit(),1200);</script>'; }
+    } elseif (!$fileOwned) {
+        echo '<p>This installation runs in <strong>' . $escape($mode) . '</strong> mode: it does not own its files, so a release is never installed from this page.</p>';
+        echo '<p>Back up the database and the private data directory first.</p>';
+        echo match ($mode) {
+            'container' => '<p>Pull the new tag of <code>' . $escape(PL_RELEASE_IMAGE) . '</code> and restart the container. It applies pending migrations automatically when <code>PL_AUTO_MIGRATE=1</code> is set; otherwise run <code>php www/phpledger/install/migrate.php</code> in the container first.</p>',
+            'composer' => '<p>Run <code>composer create-project phpledger/phpledger</code> at the new version into a fresh folder, copy your private configuration and storage folder across, point the web root at its <code>www/phpledger/public</code> folder, then run <code>php www/phpledger/install/migrate.php</code>.</p>',
+            'panel' => '<p>Use your hosting panel\'s upgrade button for PHP Ledger.</p>',
+            default => '',
+        };
+        echo '<form method="post"><input type="hidden" name="csrf" value="' . $escape($csrf) . '"><label>Host installation operator key<input type="password" name="operator_key" required autocomplete="off" maxlength="256"></label><button name="action" value="authenticate">Check update or recovery status</button></form>';
     } else {
         echo '<form method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="' . $escape($csrf) . '"><label>Host installation operator key<input type="password" name="operator_key" required autocomplete="off" maxlength="256"></label>';
         echo '<button name="action" value="authenticate">Check update or recovery status</button><fieldset><legend>Start a signed update</legend><label>Release channel<select name="channel"><option value="stable">Stable</option><option value="preview">Preview, beta and release candidate</option></select></label><label>Package source<select name="source"><option value="upload">Upload ZIP</option><option value="official">Download official GitHub release</option></select></label><label>Release ZIP (upload source)<input type="file" name="archive" accept=".zip"></label><label>Signed metadata<input type="file" name="metadata" accept=".json"></label><button name="action" value="begin">Verify release and begin update</button></fieldset></form>';
