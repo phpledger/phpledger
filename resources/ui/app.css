@@ -19,6 +19,7 @@
 @import "./ext/sales.css";
 @import "./ext/reports.css";
 @import "./ext/records.css";
+@import "./ext/guidance.css";
 
 @font-face {
   font-family: "Inter Variable";

@@ -12,11 +12,11 @@ $hasFailure = pl_web_text($form, 'message') !== '';
 <?php }, 'owner-title'); ?>
 
 <div class="grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden rounded-panel border border-border bg-border">
-<?php foreach (['total_capital'=>pl_t('Capital introduced'),'total_drawings'=>pl_t('Drawings'),'total_owner_loans'=>pl_t('Owner loans outstanding'),'net_owner_equity'=>pl_t('Capital less drawings')] as $key=>$label): ?>
-<div class="bg-surface px-4 py-3"><p class="text-xs text-ink-muted"><?= pl_e($label) ?></p><p class="amount-lg mt-1"><?= pl_e(pl_money($movements[$key])) ?></p></div>
+<?php foreach ([['total_capital',pl_t('Capital introduced'),'owner-capital'],['total_drawings',pl_t('Drawings'),'drawings'],['total_owner_loans',pl_t('Owner loans outstanding'),''],['net_owner_equity',pl_t('Capital less drawings'),'']] as [$key,$label,$concept]): ?>
+<div class="bg-surface px-4 py-3"><div class="text-xs text-ink-muted"><?= pl_e($label) ?><?php if ($concept!==''): pl_ui_help($concept); endif; ?></div><p class="amount-lg mt-1"><?= pl_e(pl_money($movements[$key])) ?></p></div>
 <?php endforeach; ?>
 </div>
-<p class="text-xs text-ink-muted"><?= pl_e(pl_t('An owner\'s loan is money the business owes back, so it is a liability and is not part of equity. Drawings reduce equity and are never a business expense. Every figure here is read from posted journals.')) ?></p>
+<p class="text-xs text-ink-muted"><?= pl_e(pl_t('Every figure here is read from posted journals.')) ?></p>
 
 <?php if ($hasFailure): ?><div class="alert alert-danger" role="alert" tabindex="-1" data-form-error><strong><?= pl_e(pl_t('Nothing was posted.')) ?></strong><p><?= pl_e(pl_web_text($form, 'message')) ?></p><p><?= pl_e(pl_t('Your submitted values are retained.')) ?></p></div><?php endif; ?>
 

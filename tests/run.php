@@ -68,6 +68,8 @@ $suites[] = 'account_code_test.php';
 $suites[] = 'report_tree_test.php';
 $suites[] = 'owner_test.php';
 $suites[] = 'stock_document_test.php';
+// Reads the catalogue and the templates, then starts its own server for the rendered bubble.
+$suites[] = 'guidance_test.php';
 if (($argv[1] ?? '') === '--suite=ar-lists') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','ar_list_test.php','reconciliation_test.php','list_test.php','document_series_test.php'];
 }

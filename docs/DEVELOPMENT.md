@@ -358,6 +358,87 @@ preference, and the screen to choose one, are M11.
 
 The translation backlog is measured by `tests/i18n_test.php` from the template sources, not from rendered pages: a rendered page also carries data (document numbers, party and account names, rows that depend on the day), which no catalogue translates and which moved the number run to run. The source count needs no database or server, returns the same number on every machine, and its ceiling may only be lowered. A new screen written in bare English raises it, which is the failure; put the strings through `pl_t()` instead.
 
+## How to add a help concept or a jurisdiction note
+
+The in-app accounting guidance landed with M2b of the [1.2 release plan](strategy/RELEASE-PLAN-1.2.md)
+(decisions **B66** — the application teaches accounting where the work happens, no long text blocks
+on the page — and **B67** — the guidance covers the Middle East and Asia, not only Pakistan). The
+component is `pl_ui_help()`; the content is `resources/guidance/`; the reader is
+`www/phpledger/includes/functions/guidance_functions.php`.
+
+**Add the concept.** One file per concept, named after its id, in `resources/guidance/concepts/`:
+
+```php
+// resources/guidance/concepts/unapplied-credit.php
+return [
+    'title'       => 'Unapplied credit',
+    'explanation' => 'Money received that no invoice has claimed yet is not income …',
+    'here'        => 'Whatever is left after this payment is allocated is held on …',
+    'document'    => ['label' => 'Open the guide', 'href' => '/help'],
+    'review'      => 'placeholder',
+];
+```
+
+- **`explanation` is 40 to 70 words.** The test enforces both ends. Under 40 it explains nothing;
+  over 70 it is the long text block on the page that B66 exists to remove. `here` is optional, at
+  most 40 words, and says what *this screen* does with the concept.
+- **Every string is an English source string for `pl_t()`.** The component translates and escapes
+  it; the file itself never calls either. Write whole sentences and never concatenate — see "How to
+  add a translatable string" above.
+- **`review` stays `placeholder`** until the guidance review has passed the wording, and the bubble
+  says so on screen. Change it to `reviewed` in the same change that lands the reviewed copy.
+- `document` is optional and must be an in-application path; a link into `docs/` would be dead in a
+  browser.
+
+**Wire it to a screen.** `pl_ui_help('unapplied-credit')` beside the label, column heading or total
+it explains. Two placement rules, both of which exist because the application's CSP forbids inline
+styles and therefore forbids positioning the bubble from JavaScript:
+
+- `pl_ui_help($id)` hangs the bubble from the inline-start edge, `pl_ui_help($id, 'end')` from the
+  inline-end edge — use `end` when the trigger sits near the end of the screen — and
+  `pl_ui_help($id, 'sheet')` pins it to the corner of the viewport, which is what a trigger
+  **inside a `.table-wrap` or any other scrolling region** needs, because that ancestor's overflow
+  would otherwise clip an absolutely positioned bubble. Under 30rem every bubble becomes a sheet
+  anyway, so it cannot run off either edge of a 390px screen.
+- The component renders `<details>`, which is flow content: put the call beside a heading, a cell,
+  a `<div>` or a `<dt>`, and **never inside a `<p>`, a `<label>` or an `<h1>`–`<h6>`**, which take
+  phrasing content only and which the browser will silently close around it.
+
+**Add a jurisdiction note.** One file per country in `resources/guidance/jurisdictions/`, named
+`PK.php`, `AE.php` and so on, keyed by the same concept ids:
+
+```php
+return ['unapplied-credit' => [
+    'note'       => 'One or two sentences of local practice.',
+    'status'     => 'verified',
+    'source'     => 'The authority, the instrument and the paragraph.',
+    'checked_on' => '2026-09-21',
+]];
+```
+
+**Only a `verified` note with a source and a check date ever reaches a screen.** Anything else is
+dropped by `pl_guidance_note()`, so an unfinished or unsourced note is invisible rather than wrong:
+B67's rule that an unsourced local claim is worse than none is enforced in code, not left to
+review. Where a jurisdiction has no note, the bubble shows the shared explanation and nothing else,
+rather than implying that the shared text is that country's law. The thirteen jurisdictions are the
+countries behind `pl_base_currency_options()` plus AE, SA and OM; `pl_guidance_countries()` is the
+list, and a file named for anything else fails the test.
+
+**Which jurisdiction a reader gets.** `pl_render()` calls `pl_guidance_use_company()` once per
+request. The company record carries no country today, so the base currency chosen when the books
+were created selects the notes; a `country_code` on the company row wins as soon as the B63/B64
+registration profile provides one, and `pl_guidance_company_country()` is the only place that then
+has to change. An installation can add notes the shipped catalogue does not have by pointing
+`PL_GUIDANCE_PATH` at a directory of the same shape: it is searched first, and the tests use it.
+
+**Check it.** `php tests/run.php` in the test container runs `tests/guidance_test.php`: the length
+and shape of every entry, that every concept a screen asks for exists (and that asking for one that
+does not throws), that jurisdiction files are keyed by a covered country, that an unverified or
+unsourced note is dropped, and — over a real HTTP request — that the bubble renders, reads with
+JavaScript disabled and keeps its local note to its own jurisdiction. New files under
+`resources/guidance/` must also be added to `tools/package-files.json`, or they will not ship;
+`python tests/package-builder-test.py` checks that.
+
 ## Repository working boundaries
 
 ### Core CSV exports
