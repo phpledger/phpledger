@@ -189,7 +189,7 @@ $badge = static function (string $trust, string $status): void {
                 <tr><td><?= pl_e((string) $event['slug']) ?></td><td><?= pl_e(str_replace('_', ' ', (string) $event['action'])) ?></td>
                 <td><?= pl_e((string) $event['trust']) ?></td><td><?= pl_e((string) $event['reason']) ?></td>
                 <td><?= pl_e($event['display_name'] === null ? pl_t('This installation') : (string) $event['display_name']) ?></td>
-                <td><time data-local-time datetime="<?= pl_e(str_replace(' ', 'T', (string) $event['recorded_at']) . 'Z') ?>"><?= pl_e((string) $event['recorded_at']) ?> UTC</time></td></tr>
+                <td><time data-local-time datetime="<?= pl_e(str_replace(' ', 'T', (string) $event['recorded_at']) . 'Z') ?>"><?= pl_e(pl_t('{stamp} UTC', ['stamp' => (string) $event['recorded_at']])) ?></time></td></tr>
             <?php endforeach; ?>
             <?php if ($history === []): ?><tr><td colspan="6"><?= pl_e(pl_t('No package has been installed on this copy yet.')) ?></td></tr><?php endif; ?>
             </tbody>
