@@ -241,8 +241,10 @@ excluding VAT; **the rate of any cash discount offered**; the total VAT chargeab
 sterling; the unit price; and the margin-scheme, reverse-charge or free-zone reference where one
 applies.
 
-**The United Kingdom is the one jurisdiction researched so far where the invoice itself must carry a
-discount term.** On value, an unconditional discount reduces the tax value to the discounted amount;
+**The United Kingdom's requirement is unusually specific: the invoice must state the *rate* of any
+cash discount offered**, not merely the discount itself. Several other jurisdictions require the
+discount on the invoice in some form, so this is a difference of precision rather than a difference
+in kind. On value, an unconditional discount reduces the tax value to the discounted amount;
 a prompt-payment discount is based on the amount actually paid, but where VAT must be accounted for
 before take-up is known, it is declared on the undiscounted price; a contingent discount leaves the
 tax value at the full amount and is corrected later by credit note.
@@ -595,7 +597,14 @@ provides integration **free of charge** plus free downloadable software. A super
 1 August 2025 set the timetable: **all public companies, all other companies with turnover above
 Rs 1 billion, and all importers register by 10 August 2025, test by 25 August and issue electronic
 invoices from 1 September 2025**, with later rows stepping down by turnover through to December 2025
-and a catch-all row registering on 10 November 2025.
+and a catch-all row registering on 10 November 2025. The full table, second pass:
+
+| Category | Register | Test | Issue |
+|---|---|---|---|
+| Public companies; other companies above Rs 1bn turnover; all importers | 10 Aug 2025 | 25 Aug 2025 | 1 Sep 2025 |
+| Companies above Rs 100m and up to Rs 1bn; individuals and associations above Rs 100m | 10 Sep 2025 | 30 Sep 2025 | 1 Oct 2025 |
+| Companies up to Rs 100m | 10 Oct 2025 | 30 Oct 2025 | 1 Nov 2025 |
+| All other registered persons | 10 Nov 2025 | 30 Nov 2025 | 1 Dec 2025 |
 
 > **Two data-quality warnings.** The scan of the later rows of that notification interleaves its
 > columns and must be re-checked against a clean copy before any of those dates is published. And a
@@ -839,9 +848,14 @@ declaration.
 2. **Partner's salary flips between jurisdictions** — an appropriation in the United Kingdom and
    Singapore, a deductible guaranteed payment in the United States, added back in Germany, not
    deductible by statute in Sri Lanka. The shared concept text must not state a treatment.
-3. **The United Kingdom is the only jurisdiction researched so far that requires a discount term on
-   the invoice itself.** The European Union keys off whether the discount was granted, and Sri Lanka
-   has no display requirement at all. Oman makes display a condition of relief.
+3. **Whether a discount must appear on the invoice splits the jurisdictions three ways, and there is
+   no safe default.** Pakistan requires the discounted price **and the related tax** on the face of
+   the invoice, and the discount must conform to normal business practice. India requires it duly
+   recorded in the invoice when given at or before supply. Malaysia and Singapore mandate a discount
+   particular outright, and the United Kingdom goes further and wants the **rate** of any cash
+   discount. The European Union keys off whether the discount was granted rather than shown.
+   Bangladesh and Sri Lanka have **no display requirement at all**. Oman makes display a condition of
+   the relief.
 4. **Arabic is mandatory on the invoice in Saudi Arabia and Oman but not in the United Arab
    Emirates.** One template cannot serve the Gulf.
 5. **Three numbers in circulation are wrong.** Malaysia's e-invoice exemption is RM3,000,000, not
