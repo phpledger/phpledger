@@ -244,6 +244,138 @@ test('a credit note with no original invoice becomes unapplied credit against sa
     assert_true($applied['journal_id'] > 0);
 });
 
+/**
+ * The other side of an orphan credit note — 1.2 internal accounting review, finding 2.
+ *
+ * Until this guard the offset was screened only for "not a bank and not an open-item
+ * control", so the owner capital account, the owner's loan account and any ordinary
+ * expense account were all accepted. An expense offset grosses the profit and loss
+ * account up on both sides; an equity or loan offset takes the adjustment out of profit
+ * altogether. IFRS 15.70-72 and IAS 1.32: a goodwill credit to a customer is a reduction
+ * of revenue, and its supplier mirror a reduction of cost.
+ */
+function advance_credit_note_input(array $f, int $offsetAccountId, array $extra = []): array
+{
+    return ['side' => $f['side'], 'party_id' => $f['party_id'], 'offset_account_id' => $offsetAccountId,
+        'currency' => 'PKR', 'amount_fc' => '12', 'date' => '2026-03-02',
+        'source_reference' => 'Goodwill credit, no invoice', 'description' => 'Sample orphan credit note',
+        'idempotency_key' => bin2hex(random_bytes(16))] + $extra;
+}
+
+test('a customer credit note with no invoice takes income and refuses expense, equity and liability', function (): void {
+    $f = advance_fixture();
+    $post = static fn (string $code, array $extra = []): array => pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'],
+        advance_credit_note_input($f, $f['accounts'][$code], $extra));
+    // The reserved contra-income group is the offered default; ordinary income is still income.
+    foreach (['4-900-10001-00', '4-100-10001-00'] as $code) {
+        $posted = $post($code);
+        assert_true($posted['journal_id'] > 0);
+        assert_same(false, $posted['offset_override']);
+        assert_same($f['accounts'][$code], $posted['offset_account_id']);
+    }
+    // Each refusal names the type expected and the type offered, so the guard cannot be
+    // weakened without a test noticing.
+    foreach (['5-100-10001-00' => 'expense', '3-100-10001-00' => 'equity', '2-110-10001-00' => 'liability'] as $code => $type) {
+        assert_throws(fn () => $post($code), DomainException::class, 'must be an income account');
+        assert_throws(fn () => $post($code), DomainException::class, 'is of type ' . $type);
+        assert_throws(fn () => $post($code), DomainException::class, 'Sales returns and discounts allowed');
+    }
+    assert_true(pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id'])['balanced']);
+});
+
+test('a supplier credit note with no bill takes expense and refuses income', function (): void {
+    $f = advance_fixture(true);
+    $post = static fn (string $code, array $extra = []): array => pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'],
+        advance_credit_note_input($f, $f['accounts'][$code], $extra));
+    foreach (['5-900-10001-00', '5-100-10001-00'] as $code) {
+        $posted = $post($code);
+        assert_same('supplier', $posted['side']);
+        $journal = pl_get_journal($f['actor_id'], $f['company_id'], $f['book_id'], $posted['journal_id']);
+        // Dr supplier advances 12, Cr purchase returns 12 — the mirror of the customer side.
+        assert_same('12.0000', $journal['lines'][0]['debit']);
+        assert_same('12.0000', $journal['lines'][1]['credit']);
+    }
+    foreach (['4-100-10001-00' => 'income', '3-100-10001-00' => 'equity'] as $code => $type) {
+        assert_throws(fn () => $post($code), DomainException::class, 'must be an expense account');
+        assert_throws(fn () => $post($code), DomainException::class, 'is of type ' . $type);
+        assert_throws(fn () => $post($code), DomainException::class, 'Purchase returns and discounts received');
+    }
+    assert_true(pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id'])['balanced']);
+});
+
+test('a bank or a control account is never the other side, and no override buys one', function (): void {
+    $f = advance_fixture();
+    $override = ['allow_other_offset_account' => true, 'offset_override_reason' => 'Sample reviewed exception'];
+    foreach ([$f['accounts']['1000'], $f['control_account_id'], $f['advance_account_id']] as $forbidden) {
+        foreach ([[], $override] as $extra) {
+            assert_throws(fn () => pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'],
+                advance_credit_note_input($f, $forbidden, $extra)), DomainException::class, 'never has a bank or a control account');
+        }
+    }
+    // An inactive account is refused before anything else is considered.
+    $returns = $f['accounts']['4-900-10001-00'];
+    DB::update('pl_accounts', ['is_active' => 0], 'id = %i', $returns);
+    assert_throws(fn () => pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'],
+        advance_credit_note_input($f, $returns)), DomainException::class, 'Choose an active offset account');
+    DB::update('pl_accounts', ['is_active' => 1], 'id = %i', $returns);
+});
+
+test('another account is an explicit reviewed override: owner, a recorded reason, and it is on the line', function (): void {
+    $f = advance_fixture();
+    $expense = $f['accounts']['5-100-10001-00'];
+    $reason = 'Reviewed: this credit pays for a distinct advertising service the customer supplied';
+    $input = advance_credit_note_input($f, $expense, ['allow_other_offset_account' => true, 'offset_override_reason' => $reason]);
+    $posted = pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'], $input);
+    assert_same(true, $posted['offset_override']);
+    assert_same($reason, $posted['offset_override_reason']);
+    assert_same($expense, $posted['offset_account_id']);
+    // The named choice is on the posting itself, not only in the request that made it.
+    $journal = pl_get_journal($f['actor_id'], $f['company_id'], $f['book_id'], $posted['journal_id']);
+    assert_true(str_contains((string) $journal['lines'][1]['description'], 'reviewed offset override: ' . $reason));
+    // It is a durable command receipt like any other, and its payload covers the override.
+    assert_same($posted, pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'], $input));
+    assert_throws(fn () => pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'],
+        array_replace($input, ['offset_override_reason' => 'A different reason'])), DomainException::class, 'different content');
+    // The flag alone is not a choice, and it must be a real boolean.
+    assert_throws(fn () => pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'],
+        advance_credit_note_input($f, $expense, ['allow_other_offset_account' => true])), DomainException::class, 'Reason for this offset account');
+    assert_throws(fn () => pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'],
+        advance_credit_note_input($f, $expense, ['allow_other_offset_account' => 'yes'])), DomainException::class, 'must be chosen explicitly');
+    // And it is the owner's call, like every other deliberate accounting exception here.
+    $accountant = ledger_fixture('PKR');
+    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $accountant['actor_id'], 'role' => 'accountant']);
+    assert_throws(fn () => pl_recognize_unapplied_credit($accountant['actor_id'], $f['company_id'], $f['book_id'],
+        advance_credit_note_input($f, $expense, ['allow_other_offset_account' => true, 'offset_override_reason' => $reason])),
+        DomainException::class, 'Only the business owner');
+    assert_true(pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id'])['balanced']);
+});
+
+test('the posting funnel checks the offset itself, so no future screen can widen the rule', function (): void {
+    $f = advance_fixture();
+    // One real credit note first: the advances control is registered by the service.
+    pl_recognize_unapplied_credit($f['actor_id'], $f['company_id'], $f['book_id'], advance_credit_note_input($f, $f['accounts']['4-900-10001-00']));
+    $itemId = pl_advance_open_item($f['actor_id'], $f['company_id'], $f['book_id'], $f['party_id'], $f['advance_account_id'], 'payable', 'PKR', 'advance:probe-' . bin2hex(random_bytes(8)));
+    $snapshot = ['currency' => 'PKR', 'rate' => '1.000000000000', 'rate_type' => 'spot', 'rate_source_id' => null, 'rate_is_stale' => false, 'ic_counterparty_entity_id' => null];
+    $payload = static fn (int $offsetId): array => ['lines' => [
+        pl_oi_line($f['advance_account_id'], '5.0000', '5.0000', false, $snapshot, 'Sample funnel probe'),
+        pl_oi_line($offsetId, '5.0000', '5.0000', true, $snapshot, 'Sample funnel probe'),
+    ]];
+    $basis = static fn (array $extra = []): array => [0 => ['item_id' => $itemId, 'kind' => 'recognition'] + $extra];
+    $validate = static function (string $code, array $extra = []) use ($f, $payload, $basis): void {
+        pl_open_item_validate_direct_advance_basis($f['company_id'], $f['book_id'], $payload($f['accounts'][$code]), $basis($extra));
+    };
+    // Straight at the funnel's own validator, with no service in front of it.
+    $validate('4-900-10001-00');
+    assert_throws(fn () => $validate('3-100-10001-00'), DomainException::class, 'must be an income account');
+    assert_throws(fn () => $validate('5-100-10001-00'), DomainException::class, 'must be an income account');
+    assert_throws(fn () => $validate('1000'), DomainException::class, 'never has a bank or a control account');
+    // An override reaches the funnel as a named choice or not at all.
+    assert_throws(fn () => $validate('3-100-10001-00', ['offset_override' => true]), DomainException::class, 'record the reason');
+    assert_throws(fn () => $validate('3-100-10001-00', ['offset_override' => true, 'offset_override_reason' => '   ']), DomainException::class, 'record the reason');
+    $validate('3-100-10001-00', ['offset_override' => true, 'offset_override_reason' => 'Sample reviewed exception']);
+    assert_true(true);
+});
+
 test('supplier advances mirror the customer side through payment, application and refund', function (): void {
     $f = advance_fixture(true);
     $payment = pl_settle_open_items($f['actor_id'], $f['company_id'], $f['book_id'], advance_receipt_input($f, '25', [['item_id' => $f['items'][0], 'amount_fc' => '10']]));

@@ -154,12 +154,85 @@ A goodwill credit of PKR 12,000 is granted on 2 March with no invoice behind it.
 The contra-income account is the one reserved under B60, so the credit reduces
 reported sales as a visible deduction rather than being buried in a net figure.
 From this point the PKR 12,000 behaves like any other unapplied credit: it is
-applied to the customer's next invoice, or refunded. The other side of such a
-credit is never a bank account and never a control account; the application
-refuses both.
+applied to the customer's next invoice, or refunded.
 
 **The supplier mirror** debits `1-120-10001-00 Supplier advances` and credits
 `5-900-10001-00 Purchase returns and discounts received`.
+
+### What the application actually enforces on the other side
+
+A goodwill credit granted to a customer is consideration payable to that
+customer. Under **IFRS 15.70-72** it reduces the transaction price unless it
+buys a distinct good or service, and under **IAS 1.32** it may not be netted
+against something else. It is therefore a **reduction of revenue** — not a cost
+the business incurred, and not a movement in equity. The mirror, a credit
+received from a supplier, reduces the **cost** of what was bought.
+
+So the offset account is constrained by side:
+
+| Side | Offset account must be | Offered default |
+|---|---|---|
+| `customer` orphan credit | an account of type **income** | `4-900-10001-00` Sales returns and discounts allowed |
+| `supplier` orphan debit | an account of type **expense** | `5-900-10001-00` Purchase returns and discounts received |
+
+A **bank account and any open-item control account are refused outright** and no
+override buys either: paying the party is a *refund* and settling a document is
+an *application*, and each has its own service. An inactive account is refused
+before anything else is looked at. Every refusal names the type expected, the
+type offered and the reserved group that is the usual answer.
+
+The rule is applied twice — once by `pl_recognize_unapplied_credit()` as the
+credit note is entered, and again by
+`pl_open_item_validate_direct_advance_basis()` inside the posting funnel, where
+every other open-item rule lives. A future credit-note screen therefore cannot
+widen it by calling the funnel directly.
+
+### The reviewed override, and the alternatives rejected (B53)
+
+A business may genuinely need another account — most often when the credit is
+really payment for a distinct service the customer supplied, which IFRS 15.72
+treats as an ordinary purchase rather than a reduction of revenue. That is an
+**exception, not a default**, so it is taken as a named choice:
+
+* `allow_other_offset_account` must be an explicit `true`, and
+* `offset_override_reason` must carry the reason, and
+* the actor must be the **business owner**, as for every other deliberate
+  accounting exception in this application.
+
+The reason is recorded three times over: on the command receipt in
+`pl_open_item_commands` with its actor and timestamp, inside the payload hash
+that becomes the journal's own source reference, and in plain words on the
+offset journal line, so an accountant reading the ledger sees why that account
+was used. The override never relaxes the bank and control refusals, and it never
+applies to a posting that did not ask for it — the funnel refuses the flag
+unless the reason travels with it.
+
+**Getting back.** The override is per posting, so reversing one is the ordinary
+linked reversal of that journal; nothing is configured and nothing persists.
+Removing the whole constraint again is the reverse of one function,
+`pl_advance_assert_offset_account()` in `open_item_functions.php`, and its two
+call sites.
+
+**Alternatives considered and rejected:**
+
+1. **Leave the offset unconstrained** — what 1.2 did before this change, where
+   the only refusals were a bank and a control account. Rejected: it accepted an
+   expense account, which grosses the profit and loss account up on both sides
+   (revenue stays at its pre-credit figure and a cost appears that the business
+   never incurred), and it accepted the owner capital account and the owner's
+   loan account, which take a trading adjustment out of profit altogether. Two
+   of those are revenue misstatements, not clerical oddities.
+2. **Require the reserved contra group itself** (`4-900`/`5-900`) rather than the
+   account type. Rejected: the reserved bands are a documented convention that
+   nothing else in the application enforces, a converted chart may legitimately
+   carry its returns account elsewhere, and it would refuse a perfectly sound
+   chart for a numbering reason. The contra group stays the offered default.
+3. **Make it a book-level accounting policy** beside the B37 trading policies.
+   Rejected: a book-wide "any account is acceptable" switch is the present
+   permissiveness with a form in front of it. The exception is per credit note
+   and its reason belongs to that credit note, not to the book.
+4. **Warn instead of refusing.** Rejected: there is no screen yet to carry a
+   warning, and a warning in a service is a comment. The refusal is the rule.
 
 ## 6. Supplier advances
 
@@ -225,10 +298,15 @@ activity, explained in the closing-balance caption (design frame decision 9).
 1. **The representation itself.** The customer-advances control is the
    recommendation and it is what is built; confirm it, or ask for the
    credit-balance-inside-receivables alternative, which needs a new migration.
-2. **Where an orphan credit note's other side belongs.** The bundled chart's
-   contra-income account (sales returns and discounts allowed) is the default
-   offered. If a particular business should use a different income or expense
-   account, that is a chart choice, not a code change.
+2. **Where an orphan credit note's other side belongs.** Settled in code as of
+   the 1.2 internal accounting review: a customer credit takes an `income`
+   account and a supplier credit an `expense` account, the reserved contra
+   group being the offered default, with an owner-given reasoned override for
+   the genuine exception (section 5). *Which* income or expense account a
+   particular business uses remains a chart choice. What is still worth the
+   accountant's confirmation is the override itself — whether an owner should
+   be able to take such a credit outside its type at all, and whether IFRS
+   15.72's "distinct good or service" case is the only one that should.
 3. **Whether an aged unapplied credit should be written back to income**, and
    after how long. The application does not do this and will not do it
    automatically; it would be a reviewed journal.

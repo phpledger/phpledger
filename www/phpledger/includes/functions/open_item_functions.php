@@ -44,6 +44,74 @@ function pl_advance_side_for_direction(string $direction): string
     };
 }
 
+/**
+ * The account type that belongs opposite unapplied credit recognised with no document.
+ *
+ * A goodwill credit granted to a customer is consideration payable to that customer, so
+ * it reduces the transaction price rather than creating a cost (IFRS 15.70-72); the
+ * mirror, a credit received from a supplier, reduces the cost of what was bought. Taking
+ * either to equity, to an owner's loan or to an unrelated expense or income account
+ * misstates the profit and loss account, and IAS 1.32 forbids netting one against the
+ * other. `example` names the reserved contra group B60 puts in every chart, which is the
+ * offered default rather than the only permitted account.
+ *
+ * @return array{type:string, expected:string, example:string, reduces:string}
+ */
+function pl_advance_offset_contract(string $side): array
+{
+    return match ($side) {
+        'customer' => ['type' => 'income', 'expected' => 'an income account', 'reduces' => 'revenue',
+            'example' => 'the reserved contra-income group "Sales returns and discounts allowed"'],
+        'supplier' => ['type' => 'expense', 'expected' => 'an expense account', 'reduces' => 'cost',
+            'example' => 'the reserved contra-expense group "Purchase returns and discounts received"'],
+        default => throw new DomainException('Choose the customer or supplier advances side.'),
+    };
+}
+
+/**
+ * The one guard on the other side of an orphan credit note, applied by the recognition
+ * service and again by the posting funnel (1.2 internal accounting review, finding 2).
+ *
+ * A bank or a control account is refused outright and is **not** overridable: paying the
+ * party is a refund and settling a document is an application, and each has its own
+ * service. The account *type* is the accounting rule of the credit note itself, and it is
+ * the only part an owner may set aside, explicitly and with a recorded reason.
+ *
+ * @return array<string,mixed> the same account row, so a caller may use it without a
+ *                             second null check.
+ */
+function pl_advance_assert_offset_account(string $side, ?array $account, bool $overridden = false): array
+{
+    $contract = pl_advance_offset_contract($side);
+    if ($account === null || !(bool) $account['is_active']) {
+        throw new DomainException('Choose an active offset account for a credit note with no original invoice.');
+    }
+    if (in_array($account['role'], pl_open_item_control_roles(), true) || $account['role'] === 'cash_bank') {
+        throw new DomainException('A credit note with no original invoice never has a bank or a control account on its other side: paying the party is a refund and settling a document is an application. Choose ' . $contract['expected'] . ', normally ' . $contract['example'] . '.');
+    }
+    if ($account['type'] === $contract['type'] || $overridden) { return $account; }
+    throw new DomainException('A ' . $side . ' credit note with no original invoice reduces ' . $contract['reduces']
+        . ', so its other side must be ' . $contract['expected'] . ', normally ' . $contract['example'] . '. Account '
+        . $account['code'] . ' is of type ' . $account['type']
+        . '. Any other account needs an explicit reviewed override with a recorded reason.');
+}
+
+/**
+ * A reviewed override is a named choice, never a bare flag.
+ *
+ * The funnel accepts it only when the posting carries both the explicit election and the
+ * reason recorded with it, so a screen cannot widen the rule by setting one boolean.
+ */
+function pl_advance_offset_override_claimed(array $allocation): bool
+{
+    if (($allocation['offset_override'] ?? false) !== true) { return false; }
+    $reason = $allocation['offset_override_reason'] ?? null;
+    if (!is_string($reason) || trim($reason) === '') {
+        throw new DomainException('An offset account outside the expected type is a reviewed exception: record the reason for it.');
+    }
+    return true;
+}
+
 function pl_activate_open_item_account(int $actorId, int $companyId, int $bookId, int $accountId, string $reason): array
 {
     pl_demo_require_setup_action();
@@ -357,15 +425,27 @@ function pl_open_item_validate_batch_basis(int $companyId, int $bookId, array $p
 
 /**
  * Unapplied credit recognised without a receipt behind it: a credit note that has no
- * original invoice (B39). Exactly one advance line; every other line is an ordinary
- * offset such as sales returns, and none of them may be a tracked control.
+ * original invoice (B39). Exactly one advance line; every other line is an offset of the
+ * type that side of the credit belongs to - income for a customer credit, expense for a
+ * supplier debit - and none of them may be a bank or a tracked control.
  */
 function pl_open_item_validate_direct_advance_basis(int $companyId, int $bookId, array $payload, array $allocations): void
 {
     if (count($allocations)!==1 || !isset($allocations[0]) || ($allocations[0]['kind']??null)!=='recognition' || !is_int($allocations[0]['item_id']??null)) {
         throw new DomainException('A directly recognised advance has exactly one advance line.');
     }
-    pl_open_item_validate_advance_recognition_line($companyId,$bookId,pl_open_item_state($companyId,$bookId,$allocations[0]['item_id']),$payload['lines'][0]);
+    $item=pl_open_item_state($companyId,$bookId,$allocations[0]['item_id']);
+    pl_open_item_validate_advance_recognition_line($companyId,$bookId,$item,$payload['lines'][0]);
+    // Finding 2 of the 1.2 internal accounting review: the offset line was never looked at
+    // once the advance line had been checked, so equity, an owner's loan or an ordinary
+    // expense account all posted. The comment above claimed the rule; this enforces it, in
+    // the funnel, where every other open-item rule lives.
+    $side=pl_advance_side_for_direction($item['direction']==='payable'?'receivable':'payable');
+    $overridden=pl_advance_offset_override_claimed($allocations[0]);
+    foreach ($payload['lines'] as $index=>$line) {
+        if ($index===0) { continue; }
+        pl_advance_assert_offset_account($side,DB::queryFirstRow('SELECT id,code,type,role,is_active FROM pl_accounts WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE',$line['account_id'],$companyId,$bookId),$overridden);
+    }
 }
 
 /**
