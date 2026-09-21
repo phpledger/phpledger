@@ -232,3 +232,57 @@ function pl_account_code_matches_type(string $code, string $type): bool
 {
     return pl_account_code_parse($code)['class'] === pl_account_code_class_for_type($type);
 }
+
+/**
+ * Which of a chart's codes may receive a posting, answered for a whole chart at
+ * once: `code => bool`.
+ *
+ * The same rule as `pl_account_is_postable()` — only a leaf is posted to, so a
+ * class or group heading never is and an account stops being postable once it
+ * has sub-accounts — but derived from a list already in hand instead of one
+ * query per account. `pl_company_context()` loads every account of a book on
+ * every request, and a screen that has to leave headings out of an account
+ * picker should not pay a round trip per row to find that out. A code the
+ * conversion has not reached keeps the postable answer it has always had.
+ *
+ * @param array<int, string> $codes every code in the book
+ * @return array<string, bool>
+ */
+function pl_account_code_postable_map(array $codes): array
+{
+    $hasChildren = [];
+    foreach ($codes as $code) {
+        if (!pl_account_code_is_valid($code) || pl_account_code_level($code) !== 'sub_account') { continue; }
+        $hasChildren[pl_account_code_parent($code)] = true;
+    }
+    $postable = [];
+    foreach ($codes as $code) {
+        $postable[$code] = !pl_account_code_is_valid($code)
+            || (!pl_account_code_is_heading($code) && !isset($hasChildren[$code]));
+    }
+    return $postable;
+}
+
+/**
+ * The help-catalogue concept id that explains one heading code, or null when
+ * the code is not a heading.
+ *
+ * The id is derived from the code rather than stored beside it, so the report
+ * tree — which holds a code and nothing else — can ask for the explanation of a
+ * group without carrying the chart package around with it. `1-000-00000-00`
+ * becomes `chart-class-1`, and `1-100-00000-00` becomes `chart-group-1-100`.
+ *
+ * Deriving an id is not the same as promising it exists: a book may hold a
+ * heading the bundled catalogue has no words for. `pl_guidance_concept()`
+ * answers null for such an id rather than throwing, and every caller here asks
+ * before it renders, so an unexplained heading simply has no question mark.
+ */
+function pl_account_heading_concept(string $code): ?string
+{
+    if (!pl_account_code_is_valid($code)) { return null; }
+    return match (pl_account_code_level($code)) {
+        'class' => 'chart-class-' . pl_account_code_short($code),
+        'group' => 'chart-group-' . pl_account_code_short($code),
+        default => null,
+    };
+}

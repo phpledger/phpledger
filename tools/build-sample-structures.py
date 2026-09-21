@@ -63,8 +63,9 @@ SERIES_PREFIX = {
     "stock_issue": "ISS", "stock_reissue": "RISS", "stock_return": "RTN", "gate_pass": "GP",
 }
 
-# The starter chart every book is created with (resources/coa/core-starter-1.1.0.json), by the
-# legacy number a pack refers to it by. A structure never recreates these.
+# The starter chart every book is created with (resources/coa/core-starter-1.2.0.json), by the
+# legacy number a pack refers to it by. A structure never recreates these, and it never carries
+# the chart's class and group headings either: those come with the chart, not with a sample.
 STARTER_CODES = {"1000", "1100", "2000", "3000", "4000", "5000"}
 
 # Where a semantic account the sample's own chart does not carry falls back to, by the role the

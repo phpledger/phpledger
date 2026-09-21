@@ -1231,6 +1231,10 @@
       "destination": "resources/coa/core-starter-1.1.0.json"
     },
     {
+      "source": "resources/coa/core-starter-1.2.0.json",
+      "destination": "resources/coa/core-starter-1.2.0.json"
+    },
+    {
       "source": "resources/modules/trading-documents.json",
       "destination": "resources/modules/trading-documents.json"
     },
@@ -1341,6 +1345,82 @@
     {
       "source": "resources/guidance/concepts/unapplied-credit.php",
       "destination": "resources/guidance/concepts/unapplied-credit.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-class-1.php",
+      "destination": "resources/guidance/concepts/chart-class-1.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-class-2.php",
+      "destination": "resources/guidance/concepts/chart-class-2.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-class-3.php",
+      "destination": "resources/guidance/concepts/chart-class-3.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-class-4.php",
+      "destination": "resources/guidance/concepts/chart-class-4.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-class-5.php",
+      "destination": "resources/guidance/concepts/chart-class-5.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-1-100.php",
+      "destination": "resources/guidance/concepts/chart-group-1-100.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-1-110.php",
+      "destination": "resources/guidance/concepts/chart-group-1-110.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-1-120.php",
+      "destination": "resources/guidance/concepts/chart-group-1-120.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-1-200.php",
+      "destination": "resources/guidance/concepts/chart-group-1-200.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-1-900.php",
+      "destination": "resources/guidance/concepts/chart-group-1-900.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-2-100.php",
+      "destination": "resources/guidance/concepts/chart-group-2-100.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-2-110.php",
+      "destination": "resources/guidance/concepts/chart-group-2-110.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-2-120.php",
+      "destination": "resources/guidance/concepts/chart-group-2-120.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-3-100.php",
+      "destination": "resources/guidance/concepts/chart-group-3-100.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-3-900.php",
+      "destination": "resources/guidance/concepts/chart-group-3-900.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-4-100.php",
+      "destination": "resources/guidance/concepts/chart-group-4-100.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-4-900.php",
+      "destination": "resources/guidance/concepts/chart-group-4-900.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-5-100.php",
+      "destination": "resources/guidance/concepts/chart-group-5-100.php"
+    },
+    {
+      "source": "resources/guidance/concepts/chart-group-5-900.php",
+      "destination": "resources/guidance/concepts/chart-group-5-900.php"
     },
     {
       "source": "resources/guidance/jurisdictions/AE.php",
@@ -1529,6 +1609,10 @@
     {
       "source": "www/phpledger/templates/views/ownership-reports.php",
       "destination": "www/phpledger/templates/views/ownership-reports.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/045_chart_headings.php",
+      "destination": "www/phpledger/install/migrations/045_chart_headings.php"
     }
   ]
 }

@@ -1,0 +1,233 @@
+{
+  "id": "core-starter",
+  "version": "1.2.0",
+  "name": "Neutral starter chart",
+  "status": "prerelease-foundation",
+  "notice": "A small country-neutral chart for the accounting preview, numbered with structured account codes (X-XXX-XXXXX-XX). Every class and group carries a named heading account with a semantic key, so a report reads as accounting rather than as a code and a module can find a group without matching on its name or its number. It carries the owner's capital, owner loan and drawings accounts and the reserved contra groups. Package validation, country tax rules and industry modules remain pending.",
+  "headings": [
+    {
+      "code": "1-000-00000-00",
+      "name": "Assets",
+      "type": "asset",
+      "semantic_key": "core.class.asset"
+    },
+    {
+      "code": "2-000-00000-00",
+      "name": "Liabilities",
+      "type": "liability",
+      "semantic_key": "core.class.liability"
+    },
+    {
+      "code": "3-000-00000-00",
+      "name": "Equity",
+      "type": "equity",
+      "semantic_key": "core.class.equity"
+    },
+    {
+      "code": "4-000-00000-00",
+      "name": "Revenue",
+      "type": "income",
+      "semantic_key": "core.class.income"
+    },
+    {
+      "code": "5-000-00000-00",
+      "name": "Expenses",
+      "type": "expense",
+      "semantic_key": "core.class.expense"
+    },
+    {
+      "code": "1-100-00000-00",
+      "name": "Cash and Cash Equivalents",
+      "type": "asset",
+      "semantic_key": "core.group.asset.cash_equivalents"
+    },
+    {
+      "code": "1-110-00000-00",
+      "name": "Trade and Other Receivables",
+      "type": "asset",
+      "semantic_key": "core.group.asset.receivables"
+    },
+    {
+      "code": "1-120-00000-00",
+      "name": "Prepayments and Advances",
+      "type": "asset",
+      "semantic_key": "core.group.asset.prepayments"
+    },
+    {
+      "code": "1-200-00000-00",
+      "name": "Property, Plant and Equipment",
+      "type": "asset",
+      "semantic_key": "core.group.asset.ppe"
+    },
+    {
+      "code": "1-900-00000-00",
+      "name": "Accumulated Depreciation and Impairment",
+      "type": "asset",
+      "semantic_key": "core.group.asset.accumulated_depreciation"
+    },
+    {
+      "code": "2-100-00000-00",
+      "name": "Trade and Other Payables",
+      "type": "liability",
+      "semantic_key": "core.group.liability.payables"
+    },
+    {
+      "code": "2-110-00000-00",
+      "name": "Loans and Borrowings",
+      "type": "liability",
+      "semantic_key": "core.group.liability.borrowings"
+    },
+    {
+      "code": "2-120-00000-00",
+      "name": "Contract Liabilities and Customer Advances",
+      "type": "liability",
+      "semantic_key": "core.group.liability.contract_liabilities"
+    },
+    {
+      "code": "3-100-00000-00",
+      "name": "Capital and Reserves",
+      "type": "equity",
+      "semantic_key": "core.group.equity.capital"
+    },
+    {
+      "code": "3-900-00000-00",
+      "name": "Drawings",
+      "type": "equity",
+      "semantic_key": "core.group.equity.drawings"
+    },
+    {
+      "code": "4-100-00000-00",
+      "name": "Revenue",
+      "type": "income",
+      "semantic_key": "core.group.income.revenue"
+    },
+    {
+      "code": "4-900-00000-00",
+      "name": "Revenue Deductions",
+      "type": "income",
+      "semantic_key": "core.group.income.revenue_deductions"
+    },
+    {
+      "code": "5-100-00000-00",
+      "name": "Operating Expenses",
+      "type": "expense",
+      "semantic_key": "core.group.expense.operating"
+    },
+    {
+      "code": "5-900-00000-00",
+      "name": "Purchase Returns and Discounts Received",
+      "type": "expense",
+      "semantic_key": "core.group.expense.purchase_returns"
+    }
+  ],
+  "accounts": [
+    {
+      "code": "1-100-10001-00",
+      "legacy_code": "1000",
+      "name": "Cash and bank",
+      "type": "asset",
+      "semantic_key": "core.cash_bank",
+      "role": "cash_bank"
+    },
+    {
+      "code": "1-110-10001-00",
+      "legacy_code": "1100",
+      "name": "Accounts receivable",
+      "type": "asset",
+      "semantic_key": "core.receivables.trade",
+      "role": "receivables"
+    },
+    {
+      "code": "1-120-10001-00",
+      "name": "Supplier advances (prepayments)",
+      "type": "asset",
+      "semantic_key": "core.asset.supplier_advances",
+      "role": "supplier_advances",
+      "is_monetary": true
+    },
+    {
+      "code": "1-900-10001-00",
+      "name": "Accumulated depreciation",
+      "type": "asset",
+      "semantic_key": "core.asset.accumulated_depreciation",
+      "role": null,
+      "is_contra": true,
+      "is_monetary": false
+    },
+    {
+      "code": "2-100-10001-00",
+      "legacy_code": "2000",
+      "name": "Accounts payable",
+      "type": "liability",
+      "semantic_key": "core.payables.trade",
+      "role": "payables"
+    },
+    {
+      "code": "2-110-10001-00",
+      "name": "Owner's loan account",
+      "type": "liability",
+      "semantic_key": "core.liability.owner_loan",
+      "role": null,
+      "is_monetary": true
+    },
+    {
+      "code": "2-120-10001-00",
+      "name": "Customer advances (unapplied credit)",
+      "type": "liability",
+      "semantic_key": "core.liability.customer_advances",
+      "role": "customer_advances",
+      "is_monetary": true
+    },
+    {
+      "code": "3-100-10001-00",
+      "legacy_code": "3000",
+      "name": "Owner equity",
+      "type": "equity",
+      "semantic_key": "core.equity.owner",
+      "role": "owner_equity"
+    },
+    {
+      "code": "3-900-10001-00",
+      "name": "Owner drawings",
+      "type": "equity",
+      "semantic_key": "core.equity.drawings",
+      "role": null,
+      "is_contra": true,
+      "is_monetary": false
+    },
+    {
+      "code": "4-100-10001-00",
+      "legacy_code": "4000",
+      "name": "Sales and service income",
+      "type": "income",
+      "semantic_key": "core.income.sales",
+      "role": "income"
+    },
+    {
+      "code": "4-900-10001-00",
+      "name": "Sales returns and discounts allowed",
+      "type": "income",
+      "semantic_key": "core.income.sales_returns",
+      "role": null,
+      "is_contra": true,
+      "is_monetary": false
+    },
+    {
+      "code": "5-100-10001-00",
+      "legacy_code": "5000",
+      "name": "General expenses",
+      "type": "expense",
+      "semantic_key": "core.expense.general",
+      "role": "expense"
+    },
+    {
+      "code": "5-900-10001-00",
+      "name": "Purchase returns and discounts received",
+      "type": "expense",
+      "semantic_key": "core.expense.purchase_returns",
+      "role": null,
+      "is_contra": true,
+      "is_monetary": false
+    }
+  ]
+}

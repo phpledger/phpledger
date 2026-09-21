@@ -45,8 +45,14 @@ test('every help concept carries a title and a plain-language explanation within
         assert_true($entry['here'] === '' || pl_guidance_word_count($entry['here']) <= 40, 'The "how it works here" line for ' . $id . ' is too long to sit under the explanation.');
         assert_true(in_array($entry['review'], ['placeholder', 'reviewed'], true), 'Concept ' . $id . ' has an unknown review state.');
         if ($entry['document'] !== null) {
-            assert_true(str_starts_with($entry['document']['href'], '/') && $entry['document']['label'] !== '',
-                'The longer-document link on ' . $id . ' must be an in-application path with a label.');
+            assert_true($entry['document']['label'] !== '', 'The longer-document link on ' . $id . ' has no label.');
+            // Either an in-application path this installation serves, or the project's own
+            // /learn/ article. Nothing else may reach a screen: a guidance file that could name
+            // any destination would be a way to put an arbitrary link on every screen.
+            assert_true($entry['document']['external']
+                ? (bool) preg_match(PL_GUIDANCE_ARTICLE, $entry['document']['href'])
+                : str_starts_with($entry['document']['href'], '/'),
+                'The longer-document link on ' . $id . ' is neither an in-application path nor a phpledger.com/learn article.');
         }
     }
 });

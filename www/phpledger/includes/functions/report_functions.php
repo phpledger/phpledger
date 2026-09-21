@@ -168,6 +168,16 @@ function pl_cash_forecast(string $opening, string $weeklyIn, string $weeklyOut, 
  * directly under their classification, so no balance is ever dropped from a
  * report because its account has not been converted.
  *
+ * **An empty group is not on a report, deliberately.** The tree is built from
+ * the accounts that can hold a figure, and a heading only ever lends a name to
+ * a node those accounts created. A group the chart declares but nothing is
+ * posted under — `1-200 Property, Plant and Equipment` in a book that has not
+ * bought anything yet — therefore has no node and no zero line of its own. A
+ * report states what the book holds; the chart of accounts screen states what
+ * the book is allowed to hold, and that is where an empty group is visible and
+ * can be used. Adding the first account under it puts the group on the report
+ * with its name already attached.
+ *
  * @param array<int,array<string,mixed>> $rows
  * @param array<int,string> $measures decimal-string fields to aggregate
  * @return array<int,array<string,mixed>>
@@ -250,6 +260,11 @@ function pl_report_tree_node(string $code, array $headings, array $measures, int
     $level = pl_account_code_level($code);
     $label = $headings[$code] ?? '';
     if ($label === '') {
+        // Last resort, and it is meant to stay unreachable. The bundled chart names every class
+        // and group it defines, and migration 045 names them in a chart 036 converted, so a book
+        // reaches this line only for a group its own owner added without naming it.
+        // `tests/chart_headings_test.php` asserts that no node of a new book or of a converted one
+        // ever carries this label.
         $label = $level === 'class'
             ? pl_account_code_class_label(pl_account_code_parse($code)['class'])
             : 'Group ' . pl_account_code_short($code);

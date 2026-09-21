@@ -123,10 +123,40 @@ try {
             }
         }
     };
+    // Migration 045 names the classes and groups of a converted chart. Those rows are headings:
+    // they hold no posting and carry no purpose, so they are checked separately from the accounts
+    // a migration provisions, and an unexplained new *account* still fails the check below.
+    $requireNamedHeadings = static function (int $companyId, int $bookId, array $rows): array {
+        $accounts = [];
+        $headings = [];
+        foreach ($rows as $row) {
+            if (!pl_account_code_is_valid((string) $row['code']) || !pl_account_code_is_heading((string) $row['code'])) {
+                $accounts[] = $row;
+                continue;
+            }
+            if ((string) ($row['creation_key'] ?? '') !== 'migration-045-' . (string) $row['code']
+                || $row['semantic_key'] !== null || $row['role'] !== null || (int) $row['is_active'] !== 1) {
+                throw new RuntimeException('A chart heading in an upgraded book was not the one migration 045 writes: ' . $row['code']);
+            }
+            $headings[] = (string) $row['code'];
+        }
+        // Every class the book uses is named, because the class digit is the classification and
+        // nothing has to be inferred to say "Assets".
+        $classes = DB::queryFirstColumn("SELECT DISTINCT CONCAT(LEFT(code, 1), '-000-00000-00') FROM pl_accounts
+            WHERE company_id = %i AND book_id = %i AND code LIKE '_-___-_____-__' AND code NOT LIKE '_-000-00000-__' ORDER BY 1", $companyId, $bookId);
+        foreach ($classes as $class) {
+            if (!in_array((string) $class, $headings, true)) {
+                throw new RuntimeException('The upgrade left class ' . $class . ' unnamed, so its reports still read as a code.');
+            }
+        }
+        return $accounts;
+    };
     // Migration 039 provisions the two advances controls in every book that has neither the role nor
-    // the semantic key, so a prior book's chart grows by exactly those two and by nothing else.
-    $requireProvisionedAdvances = static function (int $companyId, int $bookId, array $seededIds): void {
-        $added = DB::query('SELECT role, semantic_key, is_active FROM pl_accounts WHERE company_id = %i AND book_id = %i AND id NOT IN %li ORDER BY semantic_key', $companyId, $bookId, $seededIds);
+    // the semantic key, so a prior book's chart grows by exactly those two accounts and by the
+    // heading names 045 writes, and by nothing else.
+    $requireProvisionedAdvances = static function (int $companyId, int $bookId, array $seededIds) use ($requireNamedHeadings): void {
+        $rows = DB::query('SELECT id, code, role, semantic_key, is_active, creation_key FROM pl_accounts WHERE company_id = %i AND book_id = %i AND id NOT IN %li ORDER BY semantic_key', $companyId, $bookId, $seededIds);
+        $added = $requireNamedHeadings($companyId, $bookId, $rows);
         if (array_column($added, 'semantic_key') !== ['core.asset.supplier_advances', 'core.liability.customer_advances']
             || array_column($added, 'role') !== ['supplier_advances', 'customer_advances']
             || array_filter($added, static fn(array $row): bool => (int) $row['is_active'] !== 1) !== []) {
@@ -469,10 +499,11 @@ try {
         || $beforeAccounts !== DB::query('SELECT id, company_id, book_id, code, name, type, is_active FROM pl_accounts WHERE id IN %li ORDER BY id', $seededIds)) {
         throw new RuntimeException('The additive upgrade changed prior accounting records.');
     }
-    // The chart may grow by exactly what the chain provisions and by nothing else. Checking the
-    // additions by name keeps the old blanket comparison's strength: an unexplained new account
-    // in a prior book still fails here.
-    $provisioned = DB::query('SELECT id, role, semantic_key, is_active FROM pl_accounts WHERE company_id = %i AND book_id = %i AND id NOT IN %li ORDER BY semantic_key', $company, $book, $seededIds);
+    // The chart may grow by exactly what the chain provisions, plus the class and group names
+    // migration 045 writes, and by nothing else. Checking the additions by name keeps the old
+    // blanket comparison's strength: an unexplained new account in a prior book still fails here.
+    $rows = DB::query('SELECT id, code, role, semantic_key, is_active, creation_key FROM pl_accounts WHERE company_id = %i AND book_id = %i AND id NOT IN %li ORDER BY semantic_key', $company, $book, $seededIds);
+    $provisioned = $requireNamedHeadings($company, $book, $rows);
     if (array_column($provisioned, 'semantic_key') !== $provisionedKeys
         || array_column($provisioned, 'role') !== ['supplier_advances', 'customer_advances']
         || array_filter($provisioned, static fn(array $row): bool => (int) $row['is_active'] !== 1) !== []) {

@@ -90,9 +90,28 @@ function pl_guidance_read(string $relative): ?array
 }
 
 /**
+ * The one public site a concept's longer article may point at.
+ *
+ * An allowlist, not a URL validator. A guidance file is interface copy, and copy that can name any
+ * destination is a way to put an arbitrary link on every screen of the application; the only link
+ * a concept is allowed to carry off the installation is the project's own `/learn/` article for it.
+ * The slug shape is fixed here too, so a `document` entry can never carry a query string, a
+ * fragment, credentials, a port or a different host.
+ */
+const PL_GUIDANCE_ARTICLE = '#^https://phpledger\.com/learn/[a-z0-9]+(?:-[a-z0-9]+)*/?$#D';
+
+/**
  * The shared explanation for one concept, or null when the catalogue has no such entry.
  *
- * @return array{id: string, title: string, explanation: string, here: string, document: array{label: string, href: string}|null, review: string}|null
+ * A concept's `document` is the "read more" link under the explanation. It carries EITHER an
+ * in-application `href` — a path this installation serves, which is what the 1.2.0 concepts use —
+ * OR an external `url`, which may only be a `https://phpledger.com/learn/<slug>` article. An entry
+ * that names both keeps the in-application path: a link the installation serves itself is always
+ * the safer of the two, and a concept file that names both is a mistake rather than a choice.
+ * `external` tells the component which it got, so the renderer does not have to re-parse the URL
+ * to decide whether the link leaves the application.
+ *
+ * @return array{id: string, title: string, explanation: string, here: string, document: array{label: string, href: string, external: bool}|null, review: string}|null
  */
 function pl_guidance_concept(string $id): ?array
 {
@@ -105,9 +124,12 @@ function pl_guidance_concept(string $id): ?array
     if ($title === '' || $explanation === '') { return $cache['concepts'][$id] = null; }
     $document = null;
     $link = $data['document'] ?? null;
-    if (is_array($link) && is_string($link['label'] ?? null) && is_string($link['href'] ?? null)
-        && $link['label'] !== '' && str_starts_with($link['href'], '/')) {
-        $document = ['label' => $link['label'], 'href' => $link['href']];
+    if (is_array($link) && is_string($link['label'] ?? null) && $link['label'] !== '') {
+        if (is_string($link['href'] ?? null) && str_starts_with($link['href'], '/')) {
+            $document = ['label' => $link['label'], 'href' => $link['href'], 'external' => false];
+        } elseif (is_string($link['url'] ?? null) && preg_match(PL_GUIDANCE_ARTICLE, $link['url'])) {
+            $document = ['label' => $link['label'], 'href' => $link['url'], 'external' => true];
+        }
     }
     return $cache['concepts'][$id] = [
         'id' => $id,
@@ -234,7 +256,7 @@ function pl_guidance_request_country(): ?string
  * Everything one bubble renders: the shared explanation, and the local note when the company's
  * jurisdiction has a verified one. Still English source strings; pl_ui_help() translates them.
  *
- * @return array{id: string, title: string, explanation: string, here: string, document: array{label: string, href: string}|null, review: string, note: array{country: string, country_name: string, note: string, source: string, checked_on: string}|null}
+ * @return array{id: string, title: string, explanation: string, here: string, document: array{label: string, href: string, external: bool}|null, review: string, note: array{country: string, country_name: string, note: string, source: string, checked_on: string}|null}
  */
 function pl_guidance_entry(string $id): array
 {

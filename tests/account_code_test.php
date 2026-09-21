@@ -62,7 +62,7 @@ test('the contra band is reserved above every group the conversion may allocate'
 test('the bundled starter chart is numbered, keeps every old number and carries the owner accounts', function (): void {
     $template = pl_starter_template();
     assert_same('core-starter', $template['id']);
-    assert_same('1.1.0', $template['version']);
+    assert_same('1.2.0', $template['version']);
     $legacy = [];
     foreach ($template['accounts'] as $definition) {
         assert_same(true, pl_account_code_is_valid($definition['code']), $definition['code'] . ' is not a structured code.');
@@ -92,7 +92,9 @@ test('a new book is born numbered and keeps each account reachable by its 1.0.0 
     $accounts = DB::query('SELECT id, code, legacy_code FROM pl_accounts WHERE company_id = %i ORDER BY code', $f['company_id']);
     $mapping = pl_account_code_mapping($accounts);
     assert_same($mapping['1-100-10001-00'], $mapping['1000']);
-    assert_same(19, count($mapping));
+    // Thirteen posting accounts, nineteen class and group headings, and the six numbers the 1.0.0
+    // chart used, which still resolve.
+    assert_same(13 + 19 + 6, count($mapping));
     foreach ($accounts as $row) {
         assert_same(true, pl_account_code_is_valid((string) $row['code']));
     }
@@ -106,9 +108,14 @@ test('headings and sub-accounts are created from the chart screen and only leave
             'code' => $code, 'name' => $name, 'type' => $type, 'role' => null, 'is_active' => true,
             'reason' => $reason, 'creation_key' => bin2hex(random_bytes(16))]);
     };
-    $class = $make($f, '5-000-00000-00', 'Expenses', 'expense');
+    // The class heading arrives with the chart now, named, so the screen never has to create it —
+    // and asking for the same code again is refused rather than duplicated.
+    $class = pl_get_account($f['actor_id'], $f['company_id'], $f['book_id'], (int) DB::queryFirstField(
+        'SELECT id FROM pl_accounts WHERE company_id = %i AND book_id = %i AND code = %s', $f['company_id'], $f['book_id'], '5-000-00000-00'));
     assert_same('class', $class['level']);
     assert_same(false, $class['is_postable']);
+    assert_same('Expenses', $class['name']);
+    assert_throws(fn () => $make($f, '5-000-00000-00', 'Expenses again', 'expense'), DomainException::class, 'already in use');
     $group = $make($f, '5-200-00000-00', 'Vehicle running costs', 'expense');
     assert_same('group', $group['level']);
     assert_same(false, $group['is_postable']);

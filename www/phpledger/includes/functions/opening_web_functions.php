@@ -36,7 +36,9 @@ function pl_web_opening(int $actorId, int $companyId, int $bookId, array $user, 
                 $balances = $balanceCsv !== '' ? pl_opening_csv($balanceCsv, ['account_code', 'debit', 'credit']) : [];
                 if ($balanceCsv === '') {
                     foreach ($company['accounts'] as $account) {
-                        if ($account['is_active']) {
+                        // A class or group heading aggregates; an opening balance belongs on the
+                        // account underneath it, and the posting funnel would refuse it anyway.
+                        if ($account['is_active'] && $account['is_postable']) {
                             $balances[] = ['account_code' => (string) $account['code'], 'debit' => pl_web_text($_POST, 'debit_' . $account['id'], '0') ?: '0', 'credit' => pl_web_text($_POST, 'credit_' . $account['id'], '0') ?: '0'];
                         }
                     }

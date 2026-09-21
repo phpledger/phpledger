@@ -32,6 +32,10 @@ function pl_export_report(int $actorId, int $companyId, int $bookId, string $kin
             if (count($report['accounts']) > 10000) { throw new DomainException('This export exceeds 10,000 accounts.'); }
             $rows[] = ['Account ID', 'Code', 'Name', 'Type', 'Debit', 'Credit', 'Signed balance'];
             foreach ($report['accounts'] as $a) {
+                // A trial balance lists the accounts that carry balances. A class or group heading
+                // is a name the report tree uses to title a section; exporting it as a row of
+                // zeros would be a line an accountant has to explain away.
+                if (in_array((string) ($a['level'] ?? 'account'), ['class', 'group'], true)) { continue; }
                 $rows[] = [(string) $a['id'], pl_csv_text($a['code']), pl_csv_text($a['name']), $a['type'], $a['debit'], $a['credit'], $a['balance']];
             }
             $rows[] = ['', '', 'Total', '', $report['total_debit'], $report['total_credit']];
@@ -55,7 +59,10 @@ function pl_export_report(int $actorId, int $companyId, int $bookId, string $kin
             $report = pl_profit_loss($actorId, $companyId, $bookId, $from, $to);
             $rows[] = ['Section', 'Account ID', 'Code', 'Name', 'Amount'];
             foreach (['income', 'cost_of_sales', 'expenses'] as $group) {
-                foreach ($report[$group] as $a) { $rows[] = [$group, (string) $a['id'], pl_csv_text($a['code']), pl_csv_text($a['name']), $a['amount']]; }
+                foreach ($report[$group] as $a) {
+                    if (in_array((string) ($a['level'] ?? 'account'), ['class', 'group'], true)) { continue; }
+                    $rows[] = [$group, (string) $a['id'], pl_csv_text($a['code']), pl_csv_text($a['name']), $a['amount']];
+                }
             }
             $rows[] = ['Total income', '', '', '', $report['total_income']];
             $rows[] = ['Total cost of sales', '', '', '', $report['total_cost_of_sales']];
@@ -66,7 +73,10 @@ function pl_export_report(int $actorId, int $companyId, int $bookId, string $kin
             $report = pl_balance_sheet($actorId, $companyId, $bookId, $to);
             $rows[] = ['Section', 'Account ID', 'Code', 'Name', 'Amount'];
             foreach (['assets', 'liabilities', 'equity'] as $group) {
-                foreach ($report[$group] as $a) { $rows[] = [$group, (string) $a['id'], pl_csv_text($a['code']), pl_csv_text($a['name']), $a['amount']]; }
+                foreach ($report[$group] as $a) {
+                    if (in_array((string) ($a['level'] ?? 'account'), ['class', 'group'], true)) { continue; }
+                    $rows[] = [$group, (string) $a['id'], pl_csv_text($a['code']), pl_csv_text($a['name']), $a['amount']];
+                }
             }
             foreach (['total_assets', 'total_liabilities', 'recorded_equity', 'earned_profit', 'total_equity', 'total_liabilities_equity'] as $key) { $rows[] = [$key, '', '', '', $report[$key]]; }
             $rows[] = ['Balanced', $report['balanced'] ? 'yes' : 'no'];

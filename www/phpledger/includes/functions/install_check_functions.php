@@ -298,6 +298,7 @@ function pl_install_step_label(string $version): string
         '043_sample_skeletons' => 'Recording businesses started from a sample structure',
         '042_plugin_runtime' => 'Adding the package and plugin runtime',
         '044_ownership_register' => 'Adding the ownership register and share ledger',
+        '045_chart_headings' => 'Naming the chart of accounts classes and groups',
     ];
     if (isset($labels[$version])) {
         return $labels[$version];

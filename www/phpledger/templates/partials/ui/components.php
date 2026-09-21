@@ -185,13 +185,38 @@ function pl_ui_help(string $concept, string $placement = 'start'): void
                 ['source' => $entry['note']['source'], 'date' => pl_date_label($entry['note']['checked_on'])])) . '</p></div>';
     }
     if ($entry['document'] !== null) {
-        echo '<a class="link" href="' . pl_e(pl_url($entry['document']['href'])) . '">'
-            . pl_e(pl_t($entry['document']['label'])) . '</a>';
+        // An external article opens in its own tab and is cut off from this one: `noopener` denies
+        // it `window.opener`, and `noreferrer` keeps the reader's installation URL — which is often
+        // a private host name — out of the request. `pl_guidance_concept()` has already held the
+        // destination to https://phpledger.com/learn/<slug>, so this is presentation, not the gate.
+        $external = $entry['document']['external'];
+        echo '<a class="link" href="' . pl_e($external ? $entry['document']['href'] : pl_url($entry['document']['href'])) . '"'
+            . ($external ? ' target="_blank" rel="noopener noreferrer"' : '') . '>'
+            . pl_e(pl_t($entry['document']['label']))
+            . ($external ? '<span class="sr-only"> ' . pl_e(pl_t('(opens phpledger.com in a new tab)')) . '</span>' : '')
+            . '</a>';
     }
     if ($entry['review'] !== 'reviewed') {
         echo '<p class="help-draft">' . pl_e(pl_t('Draft wording, pending the accounting guidance review.')) . '</p>';
     }
     echo '</div></details>';
+}
+
+/**
+ * The question mark beside a class or group heading, when the catalogue has words for it.
+ *
+ * The concept id is derived from the code (pl_account_heading_concept), so a screen that holds an
+ * account row can ask for the explanation of the heading on it without knowing which chart package
+ * the book was created from. A book may carry a heading nobody has written an explanation for —
+ * one its owner added, or one from a chart package newer than this catalogue — and that heading
+ * simply has no question mark: pl_ui_help() would throw for it, which is the right behaviour for a
+ * screen that names a concept literally and the wrong one for a name read out of a book.
+ */
+function pl_ui_heading_help(string $code, string $placement = 'start'): void
+{
+    $concept = pl_account_heading_concept($code);
+    if ($concept === null || pl_guidance_concept($concept) === null) { return; }
+    pl_ui_help($concept, $placement);
 }
 
 function pl_ui_pagination(string $path, array $filters, int $page, int $pages): void

@@ -478,11 +478,21 @@ return [
   add a translatable string" above.
 - **`review` stays `placeholder`** until the guidance review has passed the wording, and the bubble
   says so on screen. Change it to `reviewed` in the same change that lands the reviewed copy.
-- `document` is optional and must be an in-application path; a link into `docs/` would be dead in a
-  browser.
+- `document` is optional. It carries **either** an in-application `href`, which must start with `/`
+  — a link into `docs/` would be dead in a browser — **or** an external `url`, which may only be a
+  `https://phpledger.com/learn/<slug>` article:
+  `'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/drawings']`.
+  That allowlist is enforced in `pl_guidance_concept()`, not by review: a guidance file that could
+  name any destination would be a way to put an arbitrary link on every screen. Anything else is
+  dropped and the bubble has no link at all. An external article opens in its own tab with
+  `rel="noopener noreferrer"`. A concept may reserve a slug before the page behind it exists.
 
 **Wire it to a screen.** `pl_ui_help('unapplied-credit')` beside the label, column heading or total
-it explains. Two placement rules, both of which exist because the application's CSP forbids inline
+it explains. A **chart heading** is the one case where the concept id is not a literal: the id is
+derived from the account code (`pl_account_heading_concept()`, `1-100-00000-00` →
+`chart-group-1-100`), and `pl_ui_heading_help($code)` renders the bubble only when the catalogue
+has words for that heading — a book may hold a group its owner invented, and that group has no
+question mark rather than a fatal "Unknown help concept". Two placement rules, both of which exist because the application's CSP forbids inline
 styles and therefore forbids positioning the bubble from JavaScript:
 
 - `pl_ui_help($id)` hangs the bubble from the inline-start edge, `pl_ui_help($id, 'end')` from the

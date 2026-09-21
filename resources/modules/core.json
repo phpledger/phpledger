@@ -27,7 +27,8 @@
     "041_users_and_roles",
     "042_plugin_runtime",
     "043_sample_skeletons",
-    "044_ownership_register"
+    "044_ownership_register",
+    "045_chart_headings"
   ],
   "routes": [
     "/accounts",

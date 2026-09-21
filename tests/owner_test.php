@@ -40,6 +40,11 @@ function owner_converted_fixture(): array
 {
     $f = owner_fixture();
     DB::update('pl_accounts', ['is_contra' => 0], 'company_id = %i AND book_id = %i', $f['company_id'], $f['book_id']);
+    // 036 renumbered a chart and named none of its classes or groups; migration 045 is what adds
+    // the heading rows, and it runs after 040. A converted book at 040 therefore has no heading
+    // row at all, and leaving the chart's own headings here would put nineteen keyless names in
+    // front of the contra confirmation step as things to decide about.
+    DB::query("DELETE FROM pl_accounts WHERE company_id = %i AND book_id = %i AND code LIKE '_-___-00000-__'", $f['company_id'], $f['book_id']);
     $f['keyless'] = [
         'depreciation' => owner_account($f, '1-200-10001-00', 'Accumulated depreciation', 'asset', false),
         'allowances' => owner_account($f, '4-200-10001-00', 'Customer allowances', 'income', false),

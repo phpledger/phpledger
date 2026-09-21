@@ -30,6 +30,22 @@ return [
 ];
 ```
 
+`document` is the "read more" link under the explanation. It carries **either** an in-application
+`href`, which must start with `/`, **or** an external `url`, which may only be a
+`https://phpledger.com/learn/<slug>` article:
+
+```php
+    'document' => ['label' => 'Read the full article', 'url' => 'https://phpledger.com/learn/drawings'],
+```
+
+That allowlist is enforced in `pl_guidance_concept()`, not by review: a guidance file that could
+name any destination would be a way to put an arbitrary link on every screen of the application.
+Anything else — another host, a query string, a fragment, a port — is dropped and the bubble simply
+has no link. An external article opens in its own tab with `rel="noopener noreferrer"`, so it gets
+neither `window.opener` nor the reader's own installation URL. A concept that names both keeps the
+in-application path. The `/learn/` pages are written by the website work; a concept may reserve its
+slug before the page exists.
+
 `review` is `placeholder` until the guidance review has passed the wording; the bubble says so on
 screen. Every string here is an English source string for `pl_t()` — the component translates it,
 so keep it a complete sentence and do not concatenate.
