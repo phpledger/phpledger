@@ -149,4 +149,4 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
     $priorPack = $rich;
 }
 echo "Demo smoke passed: concurrent maintenance-lock denial, CSRF start, private visitor sessions, idempotent start, scoped posting/reversal, cross-visitor denial, setup/admin/delete/period/posted-edit denial, stale generation expiry, document and visitor limits.\n";
-echo "Four historical packs passed under restricted grants: 144 checkpoints, closed historical periods, assigned-company trigger protection, source isolation and twenty extra posted visitor records per company.\n";
+echo "Eleven historical packs passed under restricted grants: 396 checkpoints, closed historical periods, assigned-company trigger protection, source isolation and twenty extra posted visitor records per company.\n";
