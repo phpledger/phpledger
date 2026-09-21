@@ -56,7 +56,11 @@ gh secret set NPM_TOKEN
 
 `gh secret set` prompts for the value, so the token never reaches a command line, a shell history or a transcript. Decision B86 records why that rule exists. Without the secret the job fails with a clear message rather than skipping silently.
 
-**The token needs an expiry and will therefore stop working one day.** npm requires a date at least a day ahead, and the job fails at the publish step when it lapses. Renew it the same way, with `gh secret set NPM_TOKEN`. Scope it to the package, not to the organisation: npm's organisation scope on a granular token covers managing the organisation's settings, teams and users, not publishing its packages.
+**The token expires and must be rotated.** The one set on 21 September 2026 carries a 90-day expiry, so it lapses on **20 December 2026**. Renew it the same way, with `gh secret set NPM_TOKEN`, and update this date when you do.
+
+Two things catch a lapsed token rather than letting a release find it. The publish job checks `npm whoami` before it does anything else, so the failure names the cause at the top of the run. And the same workflow runs a weekly `token-expiry` job on a schedule whose only purpose is that check, so an expired token becomes a failed run and its notification while there is still time to act.
+
+Scope the token to the package, not to the organisation: npm's organisation scope on a granular token covers managing the organisation's settings, teams and users, not publishing its packages.
 
 **The package name must stay unscoped.** npm resolves `npm init foo` to `create-foo` and `npm init @scope/foo` to `@scope/create-foo`, so `npm create phpledger` only reaches this package while it is called `create-phpledger`. Scoping it to `@phpledger` would change the published command to `npm create @phpledger`. The organisation is the right home for the planned `@phpledger/api-client`. npm's own documentation says an organisation may also manage unscoped packages but does not document how, so check that in the organisation's settings after the first publish rather than assuming it. The API client is still planned.
 
