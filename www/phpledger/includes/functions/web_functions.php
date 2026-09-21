@@ -658,7 +658,13 @@ function pl_render(string $view, array $data = []): never
 {
     $allowed = ['home','ar','ap','parties','inventory','purchasing','tax','opening-conversion','login', 'companies', 'sample-chooser', 'onboarding', 'setup-review', 'transactions', 'editor',
         'trial-balance', 'account', 'journal', 'help', 'error', 'demo', 'reports', 'balance-sheet', 'profit-loss', 'cash-forecast', 'pos', 'ageing', 'settlement', 'stock-count', 'goods-receipt',
-        'accounts', 'general-journals', 'general-editor', 'general-detail', 'modules', 'opening-balances', 'periods', 'bank-reconciliation', 'connections', 'oauth-consent', 'sample-guide'];
+        'accounts', 'general-journals', 'general-editor', 'general-detail', 'modules', 'opening-balances', 'periods', 'bank-reconciliation', 'connections', 'oauth-consent', 'sample-guide',
+        // 1.2 M4 stock documents and their reports.
+        'stock-documents', 'stock-document', 'van-settlement', 'stock-by-location',
+        // Also 1.2: the M2 numbering screen and the M6 owner screen were added to their
+        // routes but never to this allowlist, so both answered 503. Found by
+        // tests/stock-http-smoke.py, which is why it drives every screen over HTTP.
+        'numbering', 'owner'];
     if (!in_array($view, $allowed, true)) {
         throw new LogicException('Unknown template.');
     }
