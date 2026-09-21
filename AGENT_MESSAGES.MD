@@ -1581,7 +1581,6 @@ i18n backlog: 12 untranslated interface text runs in 4 template files (ceiling 1
 ```
 
 522 on `master` plus the nine added here. All nine pass, including the two the defect needs: a freshly created book shows no placeholder group on any report, and migration 045 names a converted chart while touching no posting account and running twice safely.
-
 ## 2026-09-21 — Claude: all eleven distribution channels have manifests
 
 **Owner request:** manifests for the remaining six platforms in [#101](https://github.com/phpledger/phpledger/issues/101), plus auto-installer packages for Softaculous, Installatron and YunoHost, all under `resources/distribution/`, kept out of the release package, validated, documented, and reported on the issue without submitting anything upstream.
