@@ -90,6 +90,8 @@ $suites[] = 'ownership_test.php';
 // other suite and no child process the sweep starts ever sees a fixture package.
 $suites[] = 'plugin_test.php';
 $suites[] = 'plugin_surface_test.php';
+// 1.3 M14: the Fixed assets module.
+$suites[] = 'asset_test.php';
 if (($argv[1] ?? '') === '--suite=ar-lists') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','ar_list_test.php','reconciliation_test.php','list_test.php','document_series_test.php'];
 }
@@ -153,6 +155,9 @@ if (($argv[1] ?? '') === '--suite=i18n') {
 if (($argv[1] ?? '') === '--suite=plugins') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php',
         'module_test.php', 'outbound_test.php', 'capability_equivalence_test.php', 'plugin_test.php', 'plugin_surface_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=assets') {
+    $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php', 'module_test.php', 'asset_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=users') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php', 'module_test.php', 'capability_equivalence_test.php', 'users_test.php'];

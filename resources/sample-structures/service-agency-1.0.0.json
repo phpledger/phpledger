@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Cedar Studio",
   "business": "Professional services / agency",
-  "source_digest": "6183544bf9569355d089e133781a22cb051d7684183ac99cbba1de81338e7428",
+  "source_digest": "12b0a460af07789ae9f0921f2d6cc1784dcc963e5f0f3b1ea6cd6ff963c896fa",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {
@@ -124,10 +124,9 @@
       "role": "expense"
     },
     {
-      "code": "5800",
-      "name": "Loss on asset disposal",
-      "type": "expense",
-      "role": "expense"
+      "code": "4800",
+      "name": "Gain or loss on asset disposal",
+      "type": "income"
     },
     {
       "code": "3100",

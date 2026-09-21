@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Wheel & Spoke Workshop",
   "business": "Service workshop",
-  "source_digest": "d0c7cb8a371a764c013009138acd9366de578820dbd92429a5d552d6bd18ae24",
+  "source_digest": "e18e2bd161ad6ba2b55541d7931dc357186b7a331b07e1149768e0b001be1c22",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {
@@ -124,10 +124,9 @@
       "role": "expense"
     },
     {
-      "code": "5800",
-      "name": "Loss on asset disposal",
-      "type": "expense",
-      "role": "expense"
+      "code": "4800",
+      "name": "Gain or loss on asset disposal",
+      "type": "income"
     },
     {
       "code": "1400",

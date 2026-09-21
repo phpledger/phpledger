@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Lantern Finch Jewelry Studio",
   "business": "Jewelry studio",
-  "source_digest": "0001d0499ca25ecce3a4a39355419ef0bfa1d9993db217543feda1eac7344c06",
+  "source_digest": "1f835796e843d3fcdd0af554e97cbf16f15015350496cb6e9461e48a3ace011f",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {
@@ -124,10 +124,9 @@
       "role": "expense"
     },
     {
-      "code": "5800",
-      "name": "Loss on asset disposal",
-      "type": "expense",
-      "role": "expense"
+      "code": "4800",
+      "name": "Gain or loss on asset disposal",
+      "type": "income"
     },
     {
       "code": "1400",

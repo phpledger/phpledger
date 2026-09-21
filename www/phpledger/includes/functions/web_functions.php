@@ -798,7 +798,10 @@ function pl_render(string $view, array $data = []): never
         // 1.2.1 M8a: the ownership register (issue #92) and its reports. Two screens shipped
         // unreachable in 1.2 because a route was added without its entry here; tests/i18n_test.php
         // now requests both of these over HTTP and tests/render_allowlist_test.php reads this list.
-        'ownership', 'ownership-reports'];
+        'ownership', 'ownership-reports',
+        // 1.3 M14: the Fixed assets module. Its report is 'asset-register', on the route
+        // the manifest declares; every one of these is also in tests/i18n_test.php's sweep.
+        'assets', 'asset-detail', 'asset-depreciation', 'asset-register'];
     if (!in_array($view, $allowed, true)) {
         throw new LogicException('Unknown template.');
     }

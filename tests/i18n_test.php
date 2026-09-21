@@ -396,6 +396,9 @@ test('every route renders under the pseudo-locale and the document language foll
         // this loop fails on, but only for a route it actually asks for. A new screen belongs here.
         '/owner', '/numbering', '/accounting-policies', '/company-profile', '/contra-review',
         '/reports/stock-by-location', '/tables', '/sample-guide',
+        // 1.3 M14: the Fixed assets module's four screens. They render with the module
+        // disabled, which is what this fixture's company is, and say so.
+        '/fixed-assets', '/fixed-assets/detail', '/fixed-assets/depreciation', '/reports/asset-register',
         // 1.2 M7: the Users module's screens. /invitation and /reset-password render without a
         // token as the empty form they are, which is what the sweep needs to see.
         '/users', '/roles', '/cost-visibility', '/profile', '/invitation', '/reset-password',

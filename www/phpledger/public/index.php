@@ -66,6 +66,9 @@ $routes = [
     '/reports/ageing' => ['GET'],
     '/stock-documents' => ['GET', 'POST'], '/stock-documents/detail' => ['GET', 'POST'], '/stock-documents/settlement' => ['GET', 'POST'],
     '/reports/stock-by-location' => ['GET'],
+    // 1.3 M14: the Fixed assets module.
+    '/fixed-assets' => ['GET', 'POST'], '/fixed-assets/detail' => ['GET', 'POST'], '/fixed-assets/depreciation' => ['GET', 'POST'],
+    '/reports/asset-register' => ['GET'],
     '/pos' => ['GET'], '/pos/review' => ['GET', 'POST'], '/pos/edit' => ['POST'], '/pos/checkout' => ['POST'], '/pos/retry' => ['POST'], '/pos/receipt' => ['GET'],
     // 1.2 M7: the Users module. /invitation and /reset-password are reachable without a session,
     // because they are how an invited person and a reset password get their first sign-in.
@@ -319,6 +322,13 @@ try {
     if ($path === '/reports/stock-by-location') {
         require_once dirname(__DIR__) . '/includes/functions/stock_document_web_functions.php';
         pl_web_stock_by_location($actorId, $companyId, $bookId, $user, $company);
+    }
+    if ($path === '/fixed-assets' || $path === '/fixed-assets/detail' || $path === '/fixed-assets/depreciation' || $path === '/reports/asset-register') {
+        require_once dirname(__DIR__) . '/includes/functions/asset_web_functions.php';
+        if ($path === '/fixed-assets') { pl_web_assets($actorId, $companyId, $bookId, $user, $company, $method); }
+        if ($path === '/fixed-assets/detail') { pl_web_asset_detail($actorId, $companyId, $bookId, $user, $company, $method); }
+        if ($path === '/fixed-assets/depreciation') { pl_web_asset_depreciation($actorId, $companyId, $bookId, $user, $company, $method); }
+        pl_web_asset_register($actorId, $companyId, $bookId, $user, $company);
     }
     if ($path === '/modules') {
         require_once dirname(__DIR__) . '/includes/functions/module_web_functions.php';

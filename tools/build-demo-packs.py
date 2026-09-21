@@ -643,7 +643,7 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
         ("5400", "Insurance expense", "expense", "expense"),
         ("5500", "Depreciation expense", "expense", "expense"),
         ("5600", "Loan interest", "expense", "expense"),
-        ("5800", "Loss on asset disposal", "expense", "expense"),
+        ("4800", "Gain or loss on asset disposal", "income", None),
     ]
     if inventory:
         accounts += [("1400", "Stock - manual support schedule", "asset", None),
@@ -671,6 +671,11 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
     def journal(key, date, description, entries, reverse=False):
         rows = [line(*entry) for entry in entries]
         assert sum(D(r["debit"]) - D(r["credit"]) for r in rows) == 0, key
+        # pl_ledger_text() caps a journal description at 500 characters, so a pack that
+        # exceeds it builds cleanly and then fails at seed time in every pack at once, with
+        # "Journal description is missing or too long" and no clue which journal. Fail here,
+        # naming it, where the person writing the sentence is looking.
+        assert len(description) <= 500, f"{key}: description is {len(description)} characters, over the 500 the ledger accepts"
         events.append({"key": key, "kind": "general_journal", "date": date,
                        "reference": f"{slug}/{key}", "description": description,
                        "lines": rows, "reverse": reverse})
@@ -738,9 +743,9 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
     # each is an ordinary journal that gives the unbuilt feature something real to act on.
     journal("support-plan-advance", "2024-07-01", "Annual support plan collected a year in advance: 1200 held as deferred income and released at 100 a month to June 2025. Anticipates the deferred-income schedule planned for 1.3 (issue #94); nothing releases it automatically today",
             [("1000", 1200), ("2400", -1200, "Deferred income, released monthly by journal")])
-    journal("equipment-disposal", DISPOSAL_DATE, "Sell the fictional display counter: cost 600, accumulated depreciation 210 at disposal, proceeds 350 in cash, loss on disposal 40. Monthly depreciation falls from 40 to 30 afterwards. Anticipates the fixed-asset register planned for 1.3 (issue #95); there is no asset record behind this journal today",
-            [("1000", 350, "Disposal proceeds"), ("1390", 210, "Accumulated depreciation removed with the asset"),
-             ("5800", 40, "Loss on disposal"), ("1300", -600, "Cost of the disposed asset")])
+    journal("equipment-disposal", DISPOSAL_DATE, "Sell the fictional display counter: cost 600, accumulated depreciation 200 at disposal, proceeds 350 in cash, loss on disposal 50 to non-operating income. No depreciation is charged in the month an asset leaves, so its last charge is September 2025 and the monthly charge falls from 40 to 30 from October. Anticipates the fixed-asset register in 1.3 (issue #95); nothing replays a pack through that module yet",
+            [("1000", 350, "Disposal proceeds"), ("1390", 200, "Accumulated depreciation removed with the asset"),
+             ("4800", 50, "Loss on disposal"), ("1300", -600, "Cost of the disposed asset")])
     journal("staff-advance-2025-09", "2025-09-05", "Advance 200 to fictional staff against September pay; recovered in full in the September payroll run",
             [("1500", 200, "Staff advance, recovered from September net pay"), ("1000", -200)])
     journal(f"payroll-{PAYROLL_MONTH}", f"{PAYROLL_MONTH}-30", "September payroll as totals per element: gross pay, employer contributions, each deduction on its own payable account and the net owed to staff. The core keeps totals only and never an employee. Anticipates the payroll journal type planned for 1.3 (issue #98)",
@@ -774,7 +779,10 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
         release = 100 if ym in DEFERRED_MONTHS else 0
         if release:
             entries += [("2400", release, "Support plan earned this month"), ("4000", -release)]
-        depreciation = 0 if ym == "2024-01" else (30 if f"{ym}-01" > DISPOSAL_DATE else 40)
+        # Whole months: a full month in the month an asset enters service and none in the
+        # month it leaves, so the counter is charged February 2024 to September 2025 and
+        # October 2025 already carries the reduced 30.
+        depreciation = 0 if ym == "2024-01" else (30 if ym >= DISPOSAL_DATE[:7] else 40)
         if depreciation:
             entries += [("5500", depreciation), ("1390", -depreciation)]
         purchases, cost, units_in, units_out, unit_cost = inventory or (0, 0, 0, 0, 0)
@@ -853,6 +861,13 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
                                           "release_per_period": "100.0000", "periods": 12,
                                           "first_release": "2024-07-31", "final_release": "2025-06-30"}},
         "asset_register": {"issue": "#95", "status": "future_feature_data_not_implemented",
+                           # The 1.3 module exists, but nothing replays this block through it:
+                           # the journals below still carry the figures. The shared marker means
+                           # "groundwork data, not a working screen", which is still exactly true,
+                           # so it stays uniform across every block and the nuance goes in `note`.
+                           "convention": "A full month in the month an asset enters service, and none in the month it is disposed of",
+                           "gain_loss_account_is_non_operating_income": True,
+                           "note": "The 1.3 fixed-assets module posts an acquisition, each period's depreciation and a disposal itself. Replaying this block through it needs a pack-format asset section and an importer step; until that exists the journals above carry the same figures.",
                            "assets": [
                                {"reference": "SAMPLE-ASSET-1", "description": "Fictional shop fittings and equipment",
                                 "cost_account": "1300", "accumulated_depreciation_account": "1390",
@@ -863,9 +878,9 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
                                 "cost_account": "1300", "accumulated_depreciation_account": "1390",
                                 "expense_account": "5500", "acquired_on": "2024-02-01", "cost": "600.0000",
                                 "life_months": 60, "method": "straight_line", "monthly_charge": "10.0000",
-                                "disposed_on": DISPOSAL_DATE, "accumulated_at_disposal": "210.0000",
-                                "proceeds": "350.0000", "result_on_disposal": "-40.0000",
-                                "result_account": "5800", "status": "disposed"}]},
+                                "disposed_on": DISPOSAL_DATE, "accumulated_at_disposal": "200.0000",
+                                "proceeds": "350.0000", "result_on_disposal": "-50.0000",
+                                "result_account": "4800", "status": "disposed"}]},
         "loan_schedule": {"issue": "#96", "status": "future_feature_data_not_implemented",
                           "liability_account": "2200", "interest_account": "5600", "bank_account": "1000",
                           "principal": "6000.0000", "advanced_on": "2024-03-01", "method": "flat_rate",

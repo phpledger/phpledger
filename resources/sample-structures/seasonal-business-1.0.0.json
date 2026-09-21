@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Sunrise Garden Services",
   "business": "Seasonal business",
-  "source_digest": "576a8bb5ad64c35215853319d2be45bd9a2a01645e615289cc7de89cdf0145a4",
+  "source_digest": "12d9b9f868c4704b82ddc7c65ebe4bf5628ad686592430b17cb7e0c084a827a5",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {
@@ -124,10 +124,9 @@
       "role": "expense"
     },
     {
-      "code": "5800",
-      "name": "Loss on asset disposal",
-      "type": "expense",
-      "role": "expense"
+      "code": "4800",
+      "name": "Gain or loss on asset disposal",
+      "type": "income"
     },
     {
       "code": "4100",

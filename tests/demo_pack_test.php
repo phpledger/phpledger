@@ -144,9 +144,15 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
         assert_same('0.0000', $at2025['1100']); assert_same('0.0000', $at2025['2100']);
         assert_same('-550.0000', $at2025['2000']); assert_same('0.0000', $at2026['2000']);
         // The display counter leaves at 2025-10-31: cost 2400 - 600, and accumulated
-        // depreciation 840 - 210 removed with it, then two months at the reduced 30 (#95).
+        // depreciation of 200 removed with it (#95). No depreciation is charged in the month
+        // an asset leaves, so the counter's last charge is September 2025 and October already
+        // carries the reduced 30; the year-end accumulated is unchanged at 690 either way,
+        // because the same total is charged and 10 less of it is removed at disposal.
         assert_same('-3600.0000', $at2025['2200']); assert_same('-690.0000', $at2025['1390']);
-        assert_same('1800.0000', $at2025['1300']); assert_same('40.0000', $at2025['5800']);
+        assert_same('1800.0000', $at2025['1300']);
+        // The gain or loss on disposal is one non-operating income account carrying both
+        // signs, so a 50 loss is a debit in it rather than an operating expense.
+        assert_same('50.0000', $at2025['4800']);
         // Contra presentation (B60): a sales return is a deduction from income and a
         // purchase return a deduction from purchases, not an expense and not income.
         assert_same('180.0000', $at2025['4-900-10001-00']);
