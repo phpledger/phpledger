@@ -48,6 +48,26 @@ The [release protocol](../RELEASE-PROTOCOL.md) is walked for every publication. 
 
 If the owner cannot sign at the planned cadence, previews collapse to fewer walks without moving the stable date; this rule is recorded so the owner is not asked per preview.
 
+**The preview numbers run one ahead of this table from the first walk on.** `1.2.0-preview.1` was
+built from `4cb0100`, signed and then **held unpublished**: the internal accounting review returned
+five material findings against the code it contains (decision B68; the operator's own note sits
+beside the retained artifact at `.cache/release-1.2.0-preview.1/HELD.md`, which is outside the
+repository because `.cache` is not committed). The tag
+`v1.2.0-preview.1` had already been pushed, so the corrected first preview takes the next number
+rather than moving a public tag, and every later preview shifts with it:
+
+| This table's milestone | The number actually published |
+|---|---|
+| preview.1 (first walk, P1) | **1.2.0-preview.2** |
+| preview.2 (accountant handoff, P2) | 1.2.0-preview.3 |
+| preview.3 (plugins, P3) | 1.2.0-preview.4 |
+| preview.4 (Urdu and container, P4) | 1.2.0-preview.5 |
+
+The milestone names P1–P4 and the workstream targets below are unchanged; only the artifact numbers
+move. `1.2.0` itself is unaffected. The alternative — deleting the pushed tag and the draft release
+and re-cutting `preview.1` — was not taken, because a pushed tag is public history and a preview
+number costs nothing; it stays available to the owner if they prefer it.
+
 **Migration numbering** follows delivery order: 035 document series (core), 036 trading documents, 037 stock documents and warehouse kinds, 038 advances (AR and AP), 039 structured codes and contra groups, 040 users and capabilities with locale columns, 041 packages, plugin receipts and options. Owner transactions need chart-package data, not a schema change, unless M6 finds otherwise. 034 is never edited. Every migration shipped in a preview must be byte-identical at the stable tag (gate G5); a mistake found by a tester needs a new migration. Each migration also registers its label in `install_check_functions.php`, an owning manifest `migrations` entry, `tools/package-files.json` entries and the browser-installer fixture step count.
 
 ## Calendar and milestones
