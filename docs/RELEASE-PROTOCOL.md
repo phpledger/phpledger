@@ -54,7 +54,11 @@ Updated at the 1.1.2 patch. The rows record what is live now; the 19 September w
 gh secret set NPM_TOKEN
 ```
 
-`gh secret set` prompts for the value, so the token never reaches a command line, a shell history or a transcript. Decision B86 records why that rule exists. Without the secret the job fails with a clear message rather than skipping silently. The package name `create-phpledger` must stay unscoped for `npm create phpledger` to resolve to it; the `@phpledger` organisation is for the planned API client. The API client is still planned.
+`gh secret set` prompts for the value, so the token never reaches a command line, a shell history or a transcript. Decision B86 records why that rule exists. Without the secret the job fails with a clear message rather than skipping silently.
+
+**The token needs an expiry and will therefore stop working one day.** npm requires a date at least a day ahead, and the job fails at the publish step when it lapses. Renew it the same way, with `gh secret set NPM_TOKEN`. Scope it to the package, not to the organisation: npm's organisation scope on a granular token covers managing the organisation's settings, teams and users, not publishing its packages.
+
+**The package name must stay unscoped.** npm resolves `npm init foo` to `create-foo` and `npm init @scope/foo` to `@scope/create-foo`, so `npm create phpledger` only reaches this package while it is called `create-phpledger`. Scoping it to `@phpledger` would change the published command to `npm create @phpledger`. The organisation is the right home for the planned `@phpledger/api-client`. npm's own documentation says an organisation may also manage unscoped packages but does not document how, so check that in the organisation's settings after the first publish rather than assuming it. The API client is still planned.
 
 Bitnami is a request to a curated catalogue and follows the container path if accepted.
 
