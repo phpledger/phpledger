@@ -4,8 +4,8 @@
     "version": "1.0.0",
     "name": "Cedar Studio",
     "business": "Professional services / agency",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 87,
+    "journal_count": 85,
     "draft_count": 3,
     "status": "released_demo_only",
     "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -26,15 +26,15 @@
       ]
     },
     "file": "service-agency-1.0.0.json",
-    "sha256": "eb06c4d1588ab53c032acd05e3393512a1edecb6dcb501881a3fb1ce14f3e7ba"
+    "sha256": "6183544bf9569355d089e133781a22cb051d7684183ac99cbba1de81338e7428"
   },
   {
     "id": "retail-shop",
     "version": "1.0.0",
     "name": "Willow Corner Shop",
     "business": "Retail shop",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "released_demo_only",
     "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -55,15 +55,15 @@
       ]
     },
     "file": "retail-shop-1.0.0.json",
-    "sha256": "23c27760c40764e81e973d42aa40e6cae55a48d20920b12db2ae2991865d1a8d"
+    "sha256": "f66805e1fc2a19f81e3c840cc5f5e1fde97cda99d66ca57b0b2b89b2601acf94"
   },
   {
     "id": "seasonal-business",
     "version": "1.0.0",
     "name": "Sunrise Garden Services",
     "business": "Seasonal business",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "released_demo_only",
     "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -84,15 +84,15 @@
       ]
     },
     "file": "seasonal-business-1.0.0.json",
-    "sha256": "1db451d64684cd5563c4f5b960fc3b96b4f2dfda585b32c089fdcc9fda185ead"
+    "sha256": "576a8bb5ad64c35215853319d2be45bd9a2a01645e615289cc7de89cdf0145a4"
   },
   {
     "id": "distributor",
     "version": "1.0.0",
     "name": "Harbor Supply Company",
     "business": "Distribution",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "released_demo_only",
     "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -113,15 +113,15 @@
       ]
     },
     "file": "distributor-1.0.0.json",
-    "sha256": "0ca6cad1078cf37e204c2bb2a5569449bd9e467360eaaa54a04735da109eefc1"
+    "sha256": "e1b1456a63eb0b72ea763ccfd928e5683e26fbd9dd1e9ebb6fb9f340bf862338"
   },
   {
     "id": "trader",
     "version": "1.0.0",
     "name": "Harbour Trade",
     "business": "Wholesale / trader",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "preview_only",
     "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -142,15 +142,15 @@
       ]
     },
     "file": "trader-1.0.0.json",
-    "sha256": "9453019c095aded52b161ed8dd3fd8deb0712a307792fae79aa2c4ee8a065aca"
+    "sha256": "dbe274c89b8c1e466cb9b8f2970ca338e7c01e0a744a166320ea74f379c42fb8"
   },
   {
     "id": "restaurant",
     "version": "1.0.0",
     "name": "Cedar Table",
     "business": "Restaurant / cafe",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "preview_only",
     "capability_note": "Restaurant and catering bookkeeping example; tables, recipes, kitchen production and service operations are not implemented.",
@@ -171,15 +171,15 @@
       ]
     },
     "file": "restaurant-1.0.0.json",
-    "sha256": "72ba419a6075b6c0ace2cc9fa5a7705889f753b95e81b5a19e938922cf42af04"
+    "sha256": "a6ebaf99863cf45bc637878c00deb93427c640965b861274ca044ad65c442a6c"
   },
   {
     "id": "membership-club",
     "version": "1.0.0",
     "name": "Riverside Community Club",
     "business": "Membership club",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "preview_only",
     "capability_note": "Membership-income bookkeeping example; membership administration, renewals, charity status and dues compliance are not implemented.",
@@ -200,15 +200,15 @@
       ]
     },
     "file": "membership-club-1.0.0.json",
-    "sha256": "97f8455504b3b29b86b3f1c4a8fff762b8f4556cdeb2d1dbc1b67d6af97f8e72"
+    "sha256": "bd682b1b773de622ed49164263b65735186a98d4929c6c9f9d17501db4cbd7cb"
   },
   {
     "id": "pharmacy",
     "version": "1.0.0",
     "name": "Meadow Training Pharmacy",
     "business": "Non-medicinal training inventory",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "preview_only",
     "capability_note": "Non-medicinal training products only; no medicines, dispensing, patient records, expiry controls or pharmacy compliance are implemented.",
@@ -229,15 +229,15 @@
       ]
     },
     "file": "pharmacy-1.0.0.json",
-    "sha256": "5b8a7289c25adf775ded9b8349629e0f4451f688921852d22aed281a15d6dde3"
+    "sha256": "167e6b12542d369ce5a3d4caed08cf80923224892420d30cf07de347b6696489"
   },
   {
     "id": "jewelry-studio",
     "version": "1.0.0",
     "name": "Lantern Finch Jewelry Studio",
     "business": "Jewelry studio",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "preview_only",
     "capability_note": "Jewelry bookkeeping example; precious-metal, gemstone, job-costing and commodity accounting are not implemented.",
@@ -258,15 +258,15 @@
       ]
     },
     "file": "jewelry-studio-1.0.0.json",
-    "sha256": "53339df699068b5a1ec71da73abbf267c46a4e60dc33a15c8b03840c942433c3"
+    "sha256": "0001d0499ca25ecce3a4a39355419ef0bfa1d9993db217543feda1eac7344c06"
   },
   {
     "id": "light-manufacturing",
     "version": "1.0.0",
     "name": "Maple Bench Works",
     "business": "Light manufacturing",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "preview_only",
     "capability_note": "Light-manufacturing bookkeeping example; bills of material, production planning, work orders and recipes are not implemented.",
@@ -287,15 +287,15 @@
       ]
     },
     "file": "light-manufacturing-1.0.0.json",
-    "sha256": "d56ae63b11e56d15d93e0a770b7970e833750256fd33d3ad17b6072c555905c4"
+    "sha256": "e4be6d3a2b8825d8079f2e5c0dd804477137fafdc39547976efeaaddd6329d5d"
   },
   {
     "id": "service-workshop",
     "version": "1.0.0",
     "name": "Wheel & Spoke Workshop",
     "business": "Service workshop",
-    "source_count": 77,
-    "journal_count": 75,
+    "source_count": 85,
+    "journal_count": 83,
     "draft_count": 3,
     "status": "preview_only",
     "capability_note": "Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.",
@@ -316,6 +316,6 @@
       ]
     },
     "file": "service-workshop-1.0.0.json",
-    "sha256": "a4d13f82f52e670a30f4585b694efee7ddf77171e7f55368a5bd65af6db62e75"
+    "sha256": "d0c7cb8a371a764c013009138acd9366de578820dbd92429a5d552d6bd18ae24"
   }
 ]

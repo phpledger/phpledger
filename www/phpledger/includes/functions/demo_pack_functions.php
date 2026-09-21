@@ -31,9 +31,14 @@ function pl_demo_pack(string $id): array
     $raw = str_replace("\r\n", "\n", $raw);
     if (!hash_equals($entry['sha256'], hash('sha256', $raw))) { throw new RuntimeException('The selected sample changed; restore its pinned fixture.'); }
     $pack = json_decode($raw, true, 64, JSON_THROW_ON_ERROR);
+    // The source count is cross-checked against the catalog rather than pinned to one
+    // number here: a partnership splits capital and drawings per partner, so the packs no
+    // longer all carry the same number of sources. The floor keeps a truncated pack out.
+    $sources = count($pack['events']) + count($pack['drafts']);
     if ($pack['id'] !== $id || $pack['version'] !== $entry['version'] || $pack['demo_only'] !== true || !in_array($pack['status'], ['released_demo_only', 'preview_only'], true)
-        || $pack['start_date'] !== '2024-01-01' || count($pack['events']) + count($pack['drafts']) !== 77
-        || count($pack['checkpoints']) !== 36) { throw new RuntimeException('The selected sample has an invalid contract.'); }
+        || $pack['start_date'] !== '2024-01-01' || $sources < 85 || $sources !== (int) $entry['source_count'] || $sources !== (int) $pack['source_count']
+        || count($pack['checkpoints']) !== 36 || !is_array($pack['company_profile'] ?? null) || !is_array($pack['partners'] ?? null)
+        || !is_array($pack['anticipated_1_3'] ?? null)) { throw new RuntimeException('The selected sample has an invalid contract.'); }
     $pack['digest'] = $entry['sha256'];
     return $pack;
 }
@@ -616,6 +621,24 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
             ]);
             $mapping[$definition['code']] = $account['id'];
         }
+        // B64: a printed invoice, receipt or statement carries the seller's own block, and
+        // an empty profile prints the bare company name. Every sample fills it in.
+        pl_save_company_profile($actorId, $companyId, $pack['company_profile'] + [
+            'revision' => pl_company_profile($actorId, $companyId)['revision'],
+            'reason' => 'Sample company profile so printed documents carry a complete, entirely fictional seller block.',
+            'idempotency_key' => $prefix . 'company-profile',
+        ]);
+        // B61: where the sample is a partnership, each partner keeps their own capital and
+        // drawings account and the recorded profit share, and their movements say whose they are.
+        $partnerIds = [];
+        foreach ($pack['partners'] as $partner) {
+            $saved = pl_save_owner_partner($actorId, $companyId, $bookId, [
+                'name' => $partner['name'], 'profit_share' => $partner['profit_share'], 'is_active' => true,
+                'capital_account_id' => (int) $mapping[$partner['capital_code']],
+                'drawings_account_id' => (int) $mapping[$partner['drawings_code']],
+            ]);
+            $partnerIds[$partner['key']] = (int) $saved['id'];
+        }
         for ($month = 1; $month <= 12; $month++) {
             $start = sprintf('2025-%02d-01', $month);
             pl_create_period($actorId, $companyId, $bookId, ['start_date' => $start,
@@ -632,7 +655,7 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
                     'kind' => $event['owner_kind'], 'date' => $event['date'], 'amount' => $event['amount'],
                     'cash_account_id' => $mapping[$event['money_code']], 'owner_account_id' => $mapping[$event['owner_code']],
                     'description' => $event['description'], 'creation_key' => $prefix . $event['key'],
-                ]);
+                ] + (isset($event['partner_key']) ? ['partner_id' => $partnerIds[$event['partner_key']]] : []));
             } elseif ($event['kind'] === 'receipt') {
                 $source = pl_save_document($actorId, $companyId, $bookId, [
                     'kind' => 'receipt', 'date' => $event['date'], 'amount' => $event['amount'],

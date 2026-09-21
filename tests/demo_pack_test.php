@@ -54,22 +54,78 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
         assert_same('800.0000', $at2024['1100']); assert_same('-420.0000', $at2024['2100']);
         assert_same('0.0000', $at2025['1100']); assert_same('0.0000', $at2025['2100']);
         assert_same('-550.0000', $at2025['2000']); assert_same('0.0000', $at2026['2000']);
-        assert_same('-3600.0000', $at2025['2200']); assert_same('-920.0000', $at2025['1390']);
+        // The display counter leaves at 2025-10-31: cost 2400 - 600, and accumulated
+        // depreciation 840 - 210 removed with it, then two months at the reduced 30 (#95).
+        assert_same('-3600.0000', $at2025['2200']); assert_same('-690.0000', $at2025['1390']);
+        assert_same('1800.0000', $at2025['1300']); assert_same('40.0000', $at2025['5800']);
+        // Contra presentation (B60): a sales return is a deduction from income and a
+        // purchase return a deduction from purchases, not an expense and not income.
+        assert_same('180.0000', $at2025['4-900-10001-00']);
+        assert_same('-120.0000', $at2025['5-900-10001-00']);
+        $contra = [];
+        foreach (pl_trial_balance($actor, $id, $book, '2025-12-31')['accounts'] as $row) {
+            if ($row['is_contra']) { $contra[(string) (($row['legacy_code'] ?? '') !== '' ? $row['legacy_code'] : $row['code'])] = true; }
+        }
+        foreach (['1390', '4-900-10001-00', '5-900-10001-00'] as $code) {
+            assert_true(isset($contra[$code]), 'Contra account ' . $code . ' is not presented as a deduction.');
+        }
+        // Deferred income released a month at a time, fully earned by June 2025 (#94).
+        assert_same('-600.0000', $at2024['2400']); assert_same('0.0000', $at2025['2400']);
+        // One payroll month posted as totals per element with a payable each (#98).
+        assert_same('120.0000', $at2025['5150']); assert_same('0.0000', $at2025['1500']);
+        assert_same('0.0000', $at2025['2300']); assert_same('0.0000', $at2025['2310']);
+        $payrollAt = pack_balances(pl_trial_balance($actor, $id, $book, '2025-09-30'));
+        assert_same('-1135.0000', $payrollAt['2300']); assert_same('-90.0000', $payrollAt['2310']);
+        assert_same('-45.0000', $payrollAt['2320']); assert_same('-150.0000', $payrollAt['2330']);
+        assert_same('0.0000', $payrollAt['1500']);
+        // B64: the printed seller block is filled in and entirely fictional.
+        $profile = pl_company_profile($actor, $id);
+        assert_true(!$profile['is_empty'], 'The sample company profile is empty.');
+        assert_same($pack['company_profile']['legal_name'], $profile['legal_name']);
+        assert_true(str_ends_with($profile['email'], '.example.invalid'), 'The sample company email is not a reserved sample address.');
         // Owner history (B61): capital introduced, the owner's loan, a repayment and drawings.
-        assert_same('-25000.0000', $at2024['3000']);
+        $partners = pl_list_owner_partners($actor, $id, $book);
+        assert_same(count($pack['partners']), count($partners));
         assert_same('-3000.0000', $at2024['2-110-10001-00']);
         assert_same('-2000.0000', $at2025['2-110-10001-00']);
-        assert_same('0.0000', $at2024['3-900-10001-00']);
-        assert_same('800.0000', $at2025['3-900-10001-00']);
         $owner = pl_list_owner_transactions($actor, $id, $book);
-        assert_same(4, count($owner));
-        assert_same(['capital_introduced', 'drawings', 'owner_loan_received', 'owner_loan_repaid'],
-            (static function (array $rows): array { $kinds = array_map(static fn (array $row): string => $row['kind'], $rows); sort($kinds); return $kinds; })($owner));
+        $kinds = array_map(static fn (array $row): string => $row['kind'], $owner); sort($kinds);
+        if ($pack['partners'] === []) {
+            assert_same('-25000.0000', $at2024['3000']);
+            assert_same('0.0000', $at2024['3-900-10001-00']);
+            assert_same('800.0000', $at2025['3-900-10001-00']);
+            assert_same(4, count($owner));
+            assert_same(['capital_introduced', 'drawings', 'owner_loan_received', 'owner_loan_repaid'], $kinds);
+        } else {
+            // A partnership splits both sides: one capital and one drawings account each,
+            // no account serving two partners, and the recorded shares totalling one.
+            assert_same(6, count($owner));
+            assert_same(['capital_introduced', 'capital_introduced', 'drawings', 'drawings', 'owner_loan_received', 'owner_loan_repaid'], $kinds);
+            assert_true(pl_owner_shares_complete($actor, $id, $book), 'The sample partners do not share the whole result.');
+            $partnerAccounts = [];
+            foreach ($pack['partners'] as $partner) {
+                assert_same('-' . $partner['capital_introduced'], $at2024[$partner['capital_code']]);
+                assert_same($partner['drawings'], $at2025[$partner['drawings_code']]);
+                $partnerAccounts[] = $partner['capital_code'];
+                $partnerAccounts[] = $partner['drawings_code'];
+            }
+            assert_same(count($partnerAccounts), count(array_unique($partnerAccounts)));
+            assert_same('0.0000', $at2024['3000']);
+        }
         $movements = pl_owner_equity_movements($actor, $id, $book, '2025-12-31');
         assert_same('25000.0000', $movements['total_capital']);
         assert_same('800.0000', $movements['total_drawings']);
         assert_same('2000.0000', $movements['total_owner_loans']);
         assert_same('24200.0000', $movements['net_owner_equity']);
+        // The 1.3 groundwork is data, never a screen: it must say so on every block.
+        foreach ($pack['anticipated_1_3'] as $key => $block) {
+            if (is_array($block) && isset($block['status'])) {
+                assert_same('future_feature_data_not_implemented', $block['status']);
+                assert_true(preg_match('/^#9[3-8]$/D', (string) $block['issue']) === 1, 'Block ' . $key . ' names no tracked 1.3 issue.');
+            }
+        }
+        assert_same($pack['anticipated_1_3']['year_end']['net_result'],
+            pl_profit_loss($actor, $id, $book, '2025-01-01', '2025-12-31')['net_profit']);
         if ($packId === 'retail-shop') { assert_same('1200.0000', $at2025['1400']); }
         if ($packId === 'distributor') { assert_same('2400.0000', $at2025['1400']); }
         $drafts = pl_list_documents($actor, $id, $book, ['status' => 'draft']);
