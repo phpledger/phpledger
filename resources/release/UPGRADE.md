@@ -28,6 +28,18 @@ Keep the installed chain through 031 unchanged; 1.0.0 adds no new migration. Thi
 
 Use the backup/maintenance procedure below and run migrations before reopening traffic, exactly as for the 0.5.0-preview to 0.6.0-preview upgrade. Restore both matching code and database if rollback is needed; copying old PHP over an upgraded database is not a tested rollback.
 
+## From 1.2.0 to 1.2.1
+
+**Upgrade if you installed 1.2.0.** That release signed the owner out immediately after setup finished, so a fresh installation could not be used without signing in again by hand. 1.2.1 fixes it.
+
+It applies migrations `042` and `043`, and **neither can be reverted**. Take a full backup first.
+
+Install it from `/maintenance.php` with the publisher key pinned, or replace the files and run `php www/phpledger/install/migrate.php` once.
+
+Nothing in this upgrade changes an existing account, posted entry, period or chart. `042` adds the plugin runtime's own tables; `043` adds an immutable record of sample-structure imports. Neither touches accounting data.
+
+If you are still on 1.1.x, read the 1.2.0 section below first: the account renumbering it describes applies to you, and this release does not repeat it.
+
 ## From 1.1.3 to 1.2.0
 
 It applies migrations `035` through `041`, and **none of them can be reverted**. Take a full backup first, and rehearse the upgrade on a copy before running it anywhere that matters.
