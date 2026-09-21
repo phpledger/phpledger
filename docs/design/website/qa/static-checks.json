@@ -1033,9 +1033,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31343,
-        "eager": 342773,
-        "total": 431478
+        "html": 31294,
+        "eager": 342724,
+        "total": 431429
       },
       "budgets": {
         "eager": null,
@@ -1068,7 +1068,7 @@
         },
         {
           "file": "for/accountants/index.html",
-          "bytes": 31343
+          "bytes": 31294
         }
       ],
       "lazyAssets": [
@@ -1115,9 +1115,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 18504,
-        "eager": 329934,
-        "total": 418639
+        "html": 18461,
+        "eager": 329891,
+        "total": 418596
       },
       "budgets": {
         "eager": null,
@@ -1150,7 +1150,7 @@
         },
         {
           "file": "for/analysts/index.html",
-          "bytes": 18504
+          "bytes": 18461
         }
       ],
       "lazyAssets": [
@@ -1279,9 +1279,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29561,
-        "eager": 340991,
-        "total": 429696
+        "html": 29503,
+        "eager": 340933,
+        "total": 429638
       },
       "budgets": {
         "eager": null,
@@ -1314,7 +1314,7 @@
         },
         {
           "file": "for/small-businesses/index.html",
-          "bytes": 29561
+          "bytes": 29503
         }
       ],
       "lazyAssets": [
@@ -1361,9 +1361,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28996,
-        "eager": 340426,
-        "total": 429131
+        "html": 28939,
+        "eager": 340369,
+        "total": 429074
       },
       "budgets": {
         "eager": null,
@@ -1396,7 +1396,7 @@
         },
         {
           "file": "for/software-houses/index.html",
-          "bytes": 28996
+          "bytes": 28939
         }
       ],
       "lazyAssets": [
