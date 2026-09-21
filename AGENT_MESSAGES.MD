@@ -1498,3 +1498,52 @@ i18n backlog: 12 untranslated interface text runs in 4 template files (ceiling 1
 The nine tests added here: the chart names its classes and groups with the approved names and keys; a module finds a group by its key and says when it fell back; 045 names the same groups from the same purposes; every heading has plain words; everything shipped is in the manifest; **a freshly created book shows no placeholder group on any report**; an empty group is in the chart and not on a report; **045 names a converted chart, touches no posting account and runs twice safely**; 045 refuses to name a group holding two purposes. The two in bold are the regression guard the defect needs.
 
 **Deliberately not done:** no push, no merge, no `VERSION` bump, no release, no website, wiki, demo or deployment. No posting behaviour, balance, account type or `is_contra` changed. `resources/demo-packs/` and `tools/build-demo-packs.py` untouched, so `python tools/build-sample-structures.py --write` is not needed. `tools/verify-upgrade.php` was edited but not run. The `/learn/` articles do not exist yet, so those links 404 until the website work lands.
+
+## 2026-09-21 — Claude: m15/chart-headings corrections — real article links, the rebase, and 045 confirmed
+
+**From:** Claude (same worktree, branch `m15/chart-headings`, now **rebased onto `master` `bb739aa`**, four commits). Appended as a correction to the two m15 entries above rather than editing them.
+
+**Correction 1 — the `/learn/` articles exist, and the links now point at them.** The entry above said the pages "do not exist yet" and that the slugs were reserved. That was wrong: `www/website/src/pages/` carries ten `learn-*.html` articles, `learn.html` links them at `/learn/<slug>/`, and they are live. Nineteen bubbles that would have 404'd now point at the three articles that actually cover what a heading bubble explains, and the label names the destination instead of saying "read the full article":
+
+| Concept | Heading | Article |
+|---|---|---|
+| `chart-class-1` … `chart-class-5` | Assets, Liabilities, Equity, Revenue, Expenses | `/learn/profit-and-loss-vs-balance-sheet/` |
+| `chart-group-2-110` | Loans and Borrowings | `/learn/profit-and-loss-vs-balance-sheet/` |
+| `chart-group-3-100` | Capital and Reserves | `/learn/profit-and-loss-vs-balance-sheet/` |
+| `chart-group-3-900` | Drawings | `/learn/profit-and-loss-vs-balance-sheet/` |
+| `chart-group-1-110` | Trade and Other Receivables | `/learn/cash-vs-accrual/` |
+| `chart-group-1-120` | Prepayments and Advances | `/learn/cash-vs-accrual/` |
+| `chart-group-2-100` | Trade and Other Payables | `/learn/cash-vs-accrual/` |
+| `chart-group-2-120` | Contract Liabilities and Customer Advances | `/learn/cash-vs-accrual/` |
+| `chart-group-4-100` | Revenue | `/learn/cash-vs-accrual/` |
+| `chart-group-5-100` | Operating Expenses | `/learn/cash-vs-accrual/` |
+| `chart-group-1-100` | Cash and Cash Equivalents | `/learn/chart-of-accounts/` |
+| `chart-group-1-200` | Property, Plant and Equipment | `/learn/chart-of-accounts/` |
+| `chart-group-1-900` | Accumulated Depreciation and Impairment | `/learn/chart-of-accounts/` |
+| `chart-group-4-900` | Revenue Deductions | `/learn/chart-of-accounts/` |
+| `chart-group-5-900` | Purchase Returns and Discounts Received | `/learn/chart-of-accounts/` |
+
+The choices are made on what each article's own sections cover, not on the slug reading well. `profit-and-loss-vs-balance-sheet` asks "What question does each report answer?" and has sections named "What happens if the business borrows money?" and "How does owner funding differ?", which is why the five classes plus borrowings, capital and drawings go there. `cash-vs-accrual` has "Why is invoicing not always the recognition decision?" and "What about expenses and payments made in advance?", which is precisely what those six groups' explanations turn on. Everything else goes to `chart-of-accounts`, the parent article for the whole exercise. **Nothing was omitted, because `chart-of-accounts` fits every heading**; `bank-reconciliation` was considered for Cash and Cash Equivalents and rejected — it is about a process, not about what belongs in the group.
+
+**No slug is invented for an article yet to be written,** and that is now enforced rather than remembered. `tests/chart_headings_test.php` reads the live slugs out of `www/website/src/pages/` and fails on any heading link with no page behind it. A bubble with a good 40-to-70-word explanation and no link is fine; a bubble with a dead link teaches the reader that the help is broken. The allowlist in `pl_guidance_concept()` and `rel="noopener noreferrer"` are unchanged.
+
+**Correction 2 — migration `044` and the number this work keeps.** The scope entry above said 044 was taken by `m14/fixed-assets`. It was not: `044_ownership_register` is on `master`, and the rebase confirmed it. **This work keeps `045_chart_headings`**, per B62 (numbers in landing order) and because it is green while `m14` is still iterating; `m14` moves to `046`. Not renumbered here. 045 appears in the usual four places only — the file name, the installer label, one entry in `tools/package-files.json` and the `migrations` list in `resources/modules/core.json` — and the rebase merged all three shared lists so `044` and `045` now sit side by side in each.
+
+**Correction 3 — `views/packages.php` was not broken on master.** The entry above says master `57b4d49` fails `composer check` on a bare `UTC` in that file. It did at that commit, and it does not now: master fixed it independently as `{stamp} UTC`. **Master's version is kept and mine is dropped.** The i18n backlog was re-counted after the rebase with all nineteen concepts in and is **12 against the ceiling of 12** — unchanged, because a guidance concept file is not a template and contributes nothing to that count; every string in it goes through `pl_t()` at render time.
+
+**Worth keeping, because it would have shipped as a mysterious posting failure: no chart heading may carry a `role`.** A role names *where a posting goes*. `pl_ar_control()` (`ar_ap_functions.php:433`) and `pl_advance_control()` (`advance_functions.php:27`) each select the accounts holding a role and refuse unless there is **exactly one** — "there must be one unambiguous default". A heading account carrying `receivables`, `payables`, `customer_advances` or `supplier_advances` would therefore make the book refuse **every** customer and supplier document and every advance, with an error naming none of the causes. `pl_save_account()` (`core_functions.php`) already refuses a role on a heading code, which is the same rule stated at the chart screen; the chart package's loader now refuses one too, and a test asserts no heading in the database carries one. Five of the thirteen postable starter accounts carry a role and eight carry NULL, so NULL is the normal case, not an omission.
+
+**Rebase result.** `m15/chart-headings` rebased from `57b4d49` onto `bb739aa`, four commits. Five conflicts, all resolved by keeping both sides: `AGENT_MESSAGES.MD` and `AGENTS_SYNC.MD` (append-only — master's `m8a/ownership-register` checkpoint is left at the top of the sync file and this one sits directly under it), `resources/modules/core.json` and `install_check_functions.php` and `tools/package-files.json` (044 and 045 both listed; the manifest's ownership-register entries are all preserved and the file round-trips byte-identically through its own formatting). `views/packages.php` took master's version outright.
+
+**Evidence after the rebase**, own Compose project `plchartnames`, own subnet `10.215.15.0/24`, MySQL 8.4, `COMPOSER_PROCESS_TIMEOUT` inside the container, `down -v` afterwards. Exit 0:
+
+```
+PHP lint: 327 files, 0 failures.
+ [OK] No errors
+Sample data valid: {"packs":7,"events":77,"documents":42,"items":16}.
+i18n sweep: 47 of 50 routes rendered under the pseudo-locale; 47 of them show translated text.
+i18n backlog: 12 untranslated interface text runs in 4 template files (ceiling 12)
+531 tests, 0 failures.
+```
+
+522 on `master` plus the nine added here. All nine pass, including the two the defect needs: a freshly created book shows no placeholder group on any report, and migration 045 names a converted chart while touching no posting account and running twice safely.
