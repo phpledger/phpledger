@@ -56,6 +56,8 @@ function pl_print_templates(): array
             'record' => '/parties',
             'formats' => [
                 'a4' => ['label' => 'A4 page', 'view' => 'statement-a4.php', 'paper' => 'a4'],
+            ],
+        ],
         // Stock documents (1.2 M4). Research decision 7: A4 for the warehouse copy, 80 mm
         // for the van-facing load list the driver takes on the road.
         'stock-issue' => [
