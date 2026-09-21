@@ -29,6 +29,28 @@
   font-display: swap;
 }
 
+/* Arabic script, for Urdu (1.2 M11). Self-hosted beside Inter: font-src is 'self' in the
+   Content-Security-Policy, so a CDN face would simply be refused, and a hosted accounting
+   application should not tell a third party which pages its users open. The file is the Arabic
+   subset of Noto Naskh Arabic (SIL OFL 1.1, NotoNaskhArabic-LICENSE.txt in the same folder); the
+   unicode-range is the one the subset was cut to, so a Latin word inside an Urdu sentence still
+   renders in Inter and no Arabic-range glyph is asked of a font that does not have it.
+
+   Naskh, not Nastaliq. Nastaliq is the calligraphic style Urdu is normally set in and it is what
+   a reader would prefer, but its steep baseline needs roughly double the line height and it does
+   not fit a dense accounting table. Naskh is legible, metrically close to Inter and correct for
+   figures; a Nastaliq option is a design decision for a later release, not a silent default. */
+@font-face {
+  font-family: "Noto Naskh Arabic";
+  src: url("./fonts/NotoNaskhArabic-arabic.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF,
+    U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC,
+    U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF;
+}
+
 /* ---------------------------------------------------------------------
    1. Tokens — raw values live here. Dark mode (later) redefines only this
       block, under :root[data-theme="dark"] / prefers-color-scheme.
@@ -105,7 +127,10 @@
       bg-success-bg / text-success / … / rounded-control / rounded-panel / shadow-popover
    --------------------------------------------------------------------- */
 @theme {
-  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* "Noto Naskh Arabic" sits after Inter, not instead of it: the browser falls back per
+     character, so Latin stays Inter and only Arabic-range characters reach the Naskh face.
+     That is what makes a mixed Urdu sentence with a Latin account name look like one page. */
+  --font-sans: "Inter Variable", Inter, "Noto Naskh Arabic", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
@@ -1720,6 +1745,76 @@ a {
   /* Sample data notice ------------------------------------------------------------------------- */
   .sample-note { display: flex; align-items: center; gap: .375rem; font-size: .75rem; color: var(--ink-muted); }
   .sample-note .icon { width: 14px; height: 14px; color: var(--ink-faint); }
+}
+
+/* =====================================================================================
+   Right to left, and the language switch (1.2 M11)
+   The rest of this stylesheet is already written in logical properties, so a right-to-left
+   document mirrors itself: margins, padding, borders, radii, text alignment and the sidebar
+   all follow the inline axis without a single rule here. What is left is the handful of
+   things the inline axis does NOT fix.
+   ===================================================================================== */
+@layer components {
+  /* 1. Arrows and chevrons mean "back" and "forward", not "left" and "right". A logical
+        property cannot flip a picture, so the directional icons are flipped as pictures.
+        pl_icon() adds .icon-directional to exactly those names; a non-directional icon
+        (search, printer, a building) must never be mirrored, which is why this is an
+        allowlist in PHP and not a blanket rule on .icon. */
+  [dir="rtl"] .icon-directional { transform: scaleX(-1); }
+
+  /* 2. Urdu set in Naskh needs more vertical room than Latin at the same size: its
+        descenders and the dots below the baseline collide at Inter's 20px line box. */
+  [dir="rtl"] body,
+  [lang="ur"] { line-height: 1.7; }
+
+  /* 3. Fields that hold a left-to-right value. The text in them is a number, a code, a date
+        or an address, which is read left to right in every language; only the field's own
+        placement follows the page. `text-align: end` resolves against the element's own
+        direction, which these lines have just set to ltr, so the value still sits against
+        the edge the reader's eye starts from. Rendered values are isolated in PHP instead
+        (pl_bidi_isolate), because a run inside a sentence has no element to style. */
+  [dir="rtl"] input[inputmode="decimal"],
+  [dir="rtl"] input[type="number"],
+  [dir="rtl"] input[type="date"],
+  [dir="rtl"] input[type="time"],
+  [dir="rtl"] input[type="email"],
+  [dir="rtl"] input[type="tel"],
+  [dir="rtl"] input[type="url"],
+  [dir="rtl"] input[type="password"],
+  [dir="rtl"] .input-amount,
+  [dir="rtl"] .input-code {
+    direction: ltr;
+    text-align: end;
+  }
+
+  /* 4. Cells and readouts that are wholly a figure. unicode-bidi: plaintext lets each cell
+        take its direction from its own first strong character, so a figure stays a figure
+        and a word beside it stays a word. */
+  [dir="rtl"] .amount,
+  [dir="rtl"] .num,
+  [dir="rtl"] .tabular-nums,
+  [dir="rtl"] .print-num,
+  /* A secondary row line is usually an account code or a document number and sometimes a name;
+     plaintext lets each one take its direction from its own first strong character, so neither
+     case has to be guessed at here. */
+  [dir="rtl"] .row-sub,
+  [dir="rtl"] .row-secondary,
+  [dir="rtl"] .kbd,
+  [dir="rtl"] code,
+  [dir="rtl"] samp {
+    unicode-bidi: plaintext;
+  }
+
+  /* 5. The language switch. It lives inside the user menu in the top bar and at the foot of
+        the signed-out card, so it is laid out for both and is never the loudest thing on a
+        page a person is trying to read. */
+  .locale-switch { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem; }
+  .locale-switch-label { font-size: .6875rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted); flex-basis: 100%; }
+  .locale-switch-select { flex: 1 1 8rem; min-inline-size: 0; }
+  .locale-switch-note { flex-basis: 100%; font-size: .6875rem; color: var(--ink-muted); }
+  .locale-switch-menu { padding: .5rem .75rem; border-block-start: 1px solid var(--border); margin-block-start: .25rem; }
+  .locale-switch-auth { justify-content: center; margin-block-start: 1rem; }
+  .locale-switch-auth .locale-switch-label { text-align: center; }
 }
 
 /* =====================================================================================

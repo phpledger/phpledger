@@ -10,14 +10,14 @@ function pl_web_unavailable_page(int $status): void
     require_once __DIR__ . '/security_functions.php';
     require_once dirname(__DIR__, 2) . '/templates/partials/ui/components.php';
     $title = match ($status) {
-        404 => "We couldn't find that page.",
-        405 => 'That action needs a different request.',
-        default => 'PHP Ledger is temporarily unavailable.',
+        404 => pl_t("We couldn't find that page."),
+        405 => pl_t('That action needs a different request.'),
+        default => pl_t('PHP Ledger is temporarily unavailable.'),
     };
     $message = match ($status) {
-        404 => 'It may have moved, or the link may be out of date. Nothing was changed in your books.',
-        405 => "This link only works when it is submitted from its own form. Go back and use the on-screen button instead of visiting this address directly. Nothing was saved.",
-        default => 'Your request could not be completed. Please try again. If this is a new installation, check its setup and migration status.',
+        404 => pl_t('It may have moved, or the link may be out of date. Nothing was changed in your books.'),
+        405 => pl_t("This link only works when it is submitted from its own form. Go back and use the on-screen button instead of visiting this address directly. Nothing was saved."),
+        default => pl_t('Your request could not be completed. Please try again. If this is a new installation, check its setup and migration status.'),
     };
     require dirname(__DIR__, 2) . '/templates/partials/ui/unavailable.php';
 }
@@ -154,8 +154,8 @@ function pl_web_insecure_site_notice(): ?string
     }
     $host = strtolower((string) parse_url(pl_web_public_url(), PHP_URL_HOST));
     return in_array($host, ['127.0.0.1', 'localhost', '[::1]'], true) || str_ends_with($host, '.localhost')
-        ? 'Local test over plain HTTP. Connections (the API, MCP and app integrations) need an HTTPS address, so they stay unavailable here.'
-        : "This site is not using HTTPS. Sign-in details and accounting data travel unencrypted, and Connections (the API, MCP and app integrations) stay unavailable. Turn on SSL in your hosting panel, for example AutoSSL or Let's Encrypt, then reopen this site with https://.";
+        ? pl_t('Local test over plain HTTP. Connections (the API, MCP and app integrations) need an HTTPS address, so they stay unavailable here.')
+        : pl_t("This site is not using HTTPS. Sign-in details and accounting data travel unencrypted, and Connections (the API, MCP and app integrations) stay unavailable. Turn on SSL in your hosting panel, for example AutoSSL or Let's Encrypt, then reopen this site with https://.");
 }
 
 /** The insecure cookie exception is limited to an explicitly enabled, local demo. */
@@ -186,6 +186,84 @@ function pl_redirect(string $path): never
 {
     header('Location: ' . pl_url($path), true, 303);
     exit;
+}
+
+/**
+ * Which locale this request renders in (1.2 M11). In precedence order:
+ *
+ *   1. the signed-in account's stored preference, pl_users.locale, which migration 041 added;
+ *   2. a choice made with the language switch while signed out, held in the session, which is
+ *      what lets the sign-in page be read in Urdu before there is an account to read it for;
+ *   3. PL_LOCALE, the hosting default, which pl_locale() already reads;
+ *   4. English.
+ *
+ * The account beats the session deliberately. A shared computer hands the next person the session
+ * it was left with, and an account that has said what language it reads should not have to say it
+ * again. A stored value that is no longer a valid tag is discarded rather than allowed to take the
+ * interface down: an unreadable preference is a worse failure than an unwanted language.
+ */
+function pl_web_apply_locale(?array $user): string
+{
+    $stored = is_array($user) && is_string($user['locale'] ?? null) ? trim((string) $user['locale']) : '';
+    $session = isset($_SESSION['locale']) && is_string($_SESSION['locale']) ? trim($_SESSION['locale']) : '';
+    foreach ([$stored, $session] as $index => $candidate) {
+        if ($candidate === '') {
+            continue;
+        }
+        try {
+            return pl_set_locale($candidate);
+        } catch (DomainException) {
+            if ($index === 1) {
+                unset($_SESSION['locale']);
+            }
+        }
+    }
+    return pl_locale();
+}
+
+/**
+ * The language switch. It stores the choice on the account when there is one, so it follows the
+ * person to their next browser, and in the session when there is not, so the sign-in page can be
+ * switched at all. An empty value clears the choice and returns to the hosting default.
+ *
+ * It is a POST with a CSRF token like every other state change here, even though nothing
+ * accounting moves: the same rule, applied everywhere, is the one that does not get forgotten
+ * where it matters.
+ */
+function pl_web_set_locale_preference(int $actorId, string $locale): string
+{
+    // Any well-formed tag is accepted, exactly as the profile form already accepts one: an
+    // unlisted locale simply has no catalogue and renders English per key, which is the loader's
+    // designed behaviour and is safe. The curated menu is pl_i18n_offered_locales(); it is what a
+    // person is offered, not a wall the stored value has to get past. The pseudo-locale is the
+    // one refusal: it is a test device that brackets every string, never a language to read in.
+    $chosen = $locale === '' ? '' : pl_normalize_locale($locale);
+    if ($chosen === PL_LOCALE_PSEUDO) {
+        throw new DomainException(pl_t('Choose a language from the list.'));
+    }
+    $_SESSION['locale'] = $chosen;
+    // The public sample signs every visitor in as one shared account, so a choice there stays in
+    // the visitor's own session and never writes to the row the next visitor will read.
+    if ($actorId > 0 && !pl_demo_enabled()) {
+        pl_set_user_locale($actorId, $chosen === '' ? null : $chosen);
+    }
+    return $chosen === '' ? pl_locale() : pl_set_locale($chosen);
+}
+
+/**
+ * A same-origin path to come back to after a switch. Only a plain absolute path survives: no
+ * scheme, no host, no protocol-relative '//evil', no query string and no character outside a
+ * conservative set. Anything else becomes '/'. The query is dropped on purpose — a returned
+ * filter set is not worth carrying an attacker-shaped string back through a redirect.
+ */
+function pl_web_safe_return_path(string $candidate): string
+{
+    $path = (string) (parse_url($candidate, PHP_URL_PATH) ?: '');
+    $base = pl_base_path();
+    if ($base !== '' && ($path === $base || str_starts_with($path, $base . '/'))) {
+        $path = substr($path, strlen($base)) ?: '/';
+    }
+    return preg_match('#^/(?!/)[A-Za-z0-9._~/-]{0,200}$#D', $path) ? $path : '/';
 }
 
 function pl_notice(string $message): void
@@ -416,10 +494,14 @@ function pl_list_query(int $actorId, int $companyId, int $bookId, string $screen
 
 /**
  * Write an exact decimal amount for display. The separators and the digit grouping come from
- * pl_number_format_rules(), which returns today's Western rules for every locale, so this output
- * is unchanged; South Asian grouping (12,34,56,789) arrives in M11 by adding a row there, with no
- * call site touched. The string arithmetic is deliberate: the stored exact amount, the
- * transaction and base currency and the posting precision are not changed by writing it down.
+ * pl_number_format_rules(): Western grouping in English, South Asian grouping (1,23,45,678) in
+ * Urdu and in the en-PK style locales. The string arithmetic is deliberate: the stored exact
+ * amount, the transaction and base currency and the posting precision are not changed by writing
+ * it down, and nothing here rounds, parses or re-derives a figure.
+ *
+ * In a right-to-left locale the written amount is isolated (pl_bidi_isolate), so its minus sign,
+ * separators and decimal point keep their places inside an Urdu sentence. In a left-to-right
+ * locale the output is byte-for-byte what it was before M11.
  */
 function pl_money(string $amount): string
 {
@@ -429,20 +511,43 @@ function pl_money(string $amount): string
     $decimals = str_pad($match[3] ?? '', 4, '0');
     $decimals = substr($decimals, 2) === '00' ? substr($decimals, 0, 2) : $decimals;
     $rules = pl_number_format_rules();
-    return $match[1] . pl_group_digits($match[2], $rules['grouping'], $rules['group']) . $rules['decimal'] . $decimals;
+    return pl_bidi_isolate($match[1] . pl_group_digits($match[2], $rules['grouping'], $rules['group']) . $rules['decimal'] . $decimals);
 }
 
 /**
- * Write an accounting DATE for display. The pattern comes from pl_date_format_pattern(), which
- * returns today's 'd M Y' for every locale, so this output is unchanged; M11 adds locale patterns
- * and translated month names there. The value is a business calendar DATE: it is parsed with a
- * fixed Y-m-d pattern and reset ('!'), so no timezone arithmetic can move it into the
- * neighbouring day, and the date used for posting, period checks and reconciliation is untouched.
+ * Write an accounting DATE for display. The pattern comes from pl_date_format_pattern() and the
+ * month name it produced is then translated through pl_t(), so a catalogue can write the month in
+ * its own language without any date being parsed, converted or moved. The value is a business
+ * calendar DATE: it is parsed with a fixed Y-m-d pattern and reset ('!'), so no timezone
+ * arithmetic can move it into the neighbouring day, and the date used for posting, period checks
+ * and reconciliation is untouched. The written label is isolated in a right-to-left locale for
+ * the same reason an amount is.
  */
 function pl_date_label(string $date): string
 {
     $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date);
-    return $parsed ? $parsed->format(pl_date_format_pattern()) : $date;
+    if (!$parsed) {
+        return $date;
+    }
+    $written = $parsed->format(pl_date_format_pattern());
+    foreach (pl_i18n_month_names() as $month) {
+        if (str_contains($written, $month)) {
+            $written = str_replace($month, pl_t($month), $written);
+            break;
+        }
+    }
+    return pl_bidi_isolate($written);
+}
+
+/**
+ * Write a value that is read left to right whatever the interface language is: an account code, a
+ * document number, a reference, a quantity, a percentage, a bare figure. It is the same isolation
+ * pl_money() applies, exposed for the call sites that are not amounts. Plain text, unescaped, and
+ * a no-op in a left-to-right locale.
+ */
+function pl_ltr(string $value): string
+{
+    return pl_bidi_isolate($value);
 }
 
 function pl_icon(string $name): string
@@ -459,7 +564,13 @@ function pl_icon(string $name): string
     if (!in_array($name, $allowed, true)) {
         return '';
     }
-    return '<img class="icon" src="' . pl_e(pl_url('/assets/icons/' . $name . '.svg')) . '" alt="" width="20" height="20">';
+    // An arrow or a chevron says "back" and "forward", and in a right-to-left document those are
+    // the other way round. The stylesheet mirrors only what this list names: a printer, a
+    // building or a magnifying glass points at nothing and must never be flipped (1.2 M11).
+    $directional = ['chevron-left', 'chevron-right', 'arrow-left', 'arrow-right', 'arrow-back-up',
+        'logout', 'external-link', 'layout-sidebar-left-collapse', 'receipt-refund'];
+    $class = in_array($name, $directional, true) ? 'icon icon-directional' : 'icon';
+    return '<img class="' . $class . '" src="' . pl_e(pl_url('/assets/icons/' . $name . '.svg')) . '" alt="" width="20" height="20">';
 }
 
 function pl_csrf_field(): string

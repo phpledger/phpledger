@@ -45,14 +45,21 @@ test('setup shell exposes six focused decisions and an explicit chart choice', f
     $onboarding = file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/onboarding.php');
     $controller = file_get_contents(dirname(__DIR__) . '/www/phpledger/public/index.php');
     $chooser = file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/sample-chooser.php');
-    assert_true(is_string($onboarding) && str_contains($onboarding, 'Step <?= $preview ? \'5 of 6\''), 'Onboarding is not a six-step flow.');
+    // M11 externalised this label. It used to be built by concatenation, which is untranslatable
+    // and comes apart in a right-to-left locale, and it is now one pl_t() string with a {step}
+    // placeholder. The fact this assertion guards has not moved: the flow names six steps, and the
+    // preview is the fifth of them. The rendered English is byte-for-byte what it was.
+    assert_true(is_string($onboarding) && str_contains($onboarding, 'Step {step} of 6'), 'Onboarding is not a six-step flow.');
+    assert_true(is_string($onboarding) && str_contains($onboarding, "'step' => \$preview ? 5 : \$activeStep"), 'Onboarding preview is not the fifth of six steps.');
     assert_true(is_string($onboarding) && str_contains($onboarding, 'name="chart_choice"'), 'Neutral/bring-your-own chart choice is missing.');
     assert_true(is_string($onboarding) && str_contains($onboarding, 'data-fiscal-year-end-choice') && str_contains($onboarding, 'data-fiscal-custom-group'), 'Fiscal year-end choices do not provide the progressive disclosure hooks.');
     assert_true(is_string($controller) && str_contains($controller, "if (\$action === 'next')"), 'Onboarding step transitions are not server handled.');
     assert_true(is_string($controller) && str_contains($controller, "'/sample-chooser' => ['GET', 'POST']"), 'Local sample chooser route is missing.');
     assert_true(is_string($controller) && str_contains($controller, "pl_demo_sample(\$sampleId)"), 'Sample selection does not resolve through the bundled catalogue.');
     assert_true(is_string($chooser) && str_contains($chooser, 'name="sample_pack"') && str_contains($chooser, 'pl_demo_sample_choices()'), 'Sample chooser does not expose the bundled selection contract.');
-    assert_true(is_string($styles) && str_contains($styles, '.stepper-step') && str_contains($onboarding, 'pl_ui_stepper($steps, $activeStep)'), 'Setup does not use the styled shared progress component.');
+    // Same component, same step list, same active step; M11 put the labels through pl_t() on the
+    // way in, because pl_ui_stepper() escapes but does not translate.
+    assert_true(is_string($styles) && str_contains($styles, '.stepper-step') && str_contains($onboarding, "pl_ui_stepper(array_map('pl_t', \$steps), \$activeStep)"), 'Setup does not use the styled shared progress component.');
     ob_start();
     pl_ui_stepper(['Starting point','Business identity','Period and profile','Chart choice','Preview','Confirm'],5);
     $progress=(string)ob_get_clean();

@@ -152,6 +152,17 @@ The preview walk; upgrade proofs preview.2 → preview.3 and 1.1.3 → preview.3
 
 String freeze for everything before this milestone, with the pseudo-locale sweep as the detector. Externalise the pre-existing literals; locale switch on sign-in and in the shell; `lang` and `dir` in the four application documents; icon mirroring under `[dir=rtl]`; `bdi` wrapping of codes, numbers and dates; Noto Naskh Arabic self-hosted with its OFL licence on the RTL path only; Western digits with a South Asian grouping option in `pl_money` and localised month names in `pl_date_label`, stored values unchanged; draft catalogue (AI-assisted first pass with an accounting glossary); completeness test; package-builder test for the font, licence and catalogues; reviewer handoff pack.
 
+**Built (branch `m11/urdu-rtl`, for 1.2.1), with three deviations from the plan above.**
+`lang` and `dir` are in **five** documents, not four: the print frame was still hard-coding
+`lang="en"` and is now locale-driven like the rest. Isolation is done with the Unicode isolate
+characters U+2066/U+2069 inside `pl_money()`, `pl_date_label()` and `pl_ltr()`, **not** with `bdi`
+elements: the same values are written into attributes, CSV cells and the JSON table feed, where an
+element cannot go, and the control characters cost nothing a `bdi` would not. The font is served to
+every document rather than only on the right-to-left path, because it is reached by per-character
+fallback behind Inter and is cut to the Arabic range, so a Latin page downloads it only if it has
+Arabic-range text to draw. The reviewer handoff is the "Reviewing the Urdu draft" section of
+`resources/lang/README.md`.
+
 ### M12 — Container image on GHCR and Docker Hub (27 January – 4 February)
 
 `docker/release/Dockerfile` from the release ZIP with checksum verification, `php:8.3-apache`, non-root on 8080, `HEALTHCHECK`, read-only code; entrypoint (wait for the database, private directories on the volume, `PL_AUTO_MIGRATE=1`, optional first account from the environment); `compose.production.yaml`; the three installer fixes; the maintenance page honouring `pl_update_mode()` from `update_web_functions.php` while **`public/maintenance.php` stays byte-identical to its 1.1.3 bytes** (the updater pins and never replaces it); image workflow on `release: published`, multi-arch, GHCR with `GITHUB_TOKEN` and Docker Hub with the owner's token in repository secrets, tags `<version>`, `<major.minor>`, `<major>`, `latest` for stable and version-only for previews, digests in the job summary; `container-image-test.py` and `container-upgrade-test.py` in CI; `docs/CONTAINER.md`, INSTALL and UPGRADE sections, the website requirements page.

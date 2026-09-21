@@ -11,13 +11,13 @@ $to = $stock['to_warehouse'];
 $van = $to !== null && $to['kind'] === 'mobile' ? $to : ($from !== null && $from['kind'] === 'mobile' ? $from : null);
 ?>
 <section class="print-roll">
-    <div class="print-roll-row"><span>Document</span><span><?= pl_e((string) $stock['label']) ?></span></div>
-    <div class="print-roll-row"><span>Dated</span><span><?= pl_e(pl_date_label((string) $stock['document_date'])) ?></span></div>
-    <div class="print-roll-row"><span>From</span><span><?= pl_e($from === null ? '—' : $from['code']) ?></span></div>
-    <div class="print-roll-row"><span>To</span><span><?= pl_e($to === null ? '—' : $to['code']) ?></span></div>
-    <?php if ($van !== null && $van['driver_name'] !== null): ?><div class="print-roll-row"><span>Driver</span><span><?= pl_e((string) $van['driver_name']) ?></span></div><?php endif; ?>
-    <?php if ($van !== null && $van['route_name'] !== null): ?><div class="print-roll-row"><span>Route</span><span><?= pl_e((string) $van['route_name']) ?></span></div><?php endif; ?>
-    <?php if ($stock['reference'] !== ''): ?><div class="print-roll-row"><span>Reference</span><span><?= pl_e((string) $stock['reference']) ?></span></div><?php endif; ?>
+    <div class="print-roll-row"><span><?= pl_e(pl_t('Document')) ?></span><span><?= pl_e((string) $stock['label']) ?></span></div>
+    <div class="print-roll-row"><span><?= pl_e(pl_t('Dated')) ?></span><span><?= pl_e(pl_date_label((string) $stock['document_date'])) ?></span></div>
+    <div class="print-roll-row"><span><?= pl_e(pl_t('From')) ?></span><span><?= pl_e($from === null ? '—' : $from['code']) ?></span></div>
+    <div class="print-roll-row"><span><?= pl_e(pl_t('To')) ?></span><span><?= pl_e($to === null ? '—' : $to['code']) ?></span></div>
+    <?php if ($van !== null && $van['driver_name'] !== null): ?><div class="print-roll-row"><span><?= pl_e(pl_t('Driver')) ?></span><span><?= pl_e((string) $van['driver_name']) ?></span></div><?php endif; ?>
+    <?php if ($van !== null && $van['route_name'] !== null): ?><div class="print-roll-row"><span><?= pl_e(pl_t('Route')) ?></span><span><?= pl_e((string) $van['route_name']) ?></span></div><?php endif; ?>
+    <?php if ($stock['reference'] !== ''): ?><div class="print-roll-row"><span><?= pl_e(pl_t('Reference')) ?></span><span><?= pl_e((string) $stock['reference']) ?></span></div><?php endif; ?>
     <hr class="print-roll-rule">
     <?php foreach ($stock['lines'] as $line): ?>
         <div class="print-roll-item">
@@ -26,7 +26,7 @@ $van = $to !== null && $to['kind'] === 'mobile' ? $to : ($from !== null && $from
         </div>
     <?php endforeach; ?>
     <hr class="print-roll-rule">
-    <div class="print-roll-row print-roll-grand"><span>TOTAL QUANTITY</span><span><?= pl_e((string) $stock['total_quantity']) ?></span></div>
-    <div class="print-roll-row"><span>Value at sale (<?= pl_e($letterhead['currency']) ?>)</span><span><?= pl_e(pl_money((string) $stock['total_sale_value'])) ?></span></div>
-    <p class="print-roll-note">Internal stock movement, not a sale.<br>Check the count before the vehicle leaves.</p>
+    <div class="print-roll-row print-roll-grand"><span><?= pl_e(pl_t('TOTAL QUANTITY')) ?></span><span><?= pl_e((string) $stock['total_quantity']) ?></span></div>
+    <div class="print-roll-row"><span><?= pl_e(pl_t('Value at sale ({currency})',['currency'=>$letterhead['currency']])) ?></span><span><?= pl_e(pl_money((string) $stock['total_sale_value'])) ?></span></div>
+    <p class="print-roll-note"><?= pl_e(pl_t('Internal stock movement, not a sale.')) ?><br><?= pl_e(pl_t('Check the count before the vehicle leaves.')) ?></p>
 </section>

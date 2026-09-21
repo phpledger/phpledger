@@ -10,7 +10,7 @@
  */
 ?>
 <!doctype html>
-<html lang="en" data-print="<?= pl_e($template['type']) ?>">
+<html lang="<?= pl_e(pl_locale()) ?>" dir="<?= pl_e(pl_text_direction()) ?>" data-print="<?= pl_e($template['type']) ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -39,14 +39,14 @@
     <?php require $view; ?>
     <footer class="print-footnote">
         <?php if (($letterhead['terms'] ?? '') !== ''): ?><p><?= pl_e($letterhead['terms']) ?></p><?php endif; ?>
-        <p>This is a computer-generated document from <?= pl_e($letterhead['name']) ?>. Posted entries are preserved; corrections use a linked reversal.</p>
+        <p><?= pl_e(pl_t('This is a computer-generated document from {company}. Posted entries are preserved; corrections use a linked reversal.', ['company' => $letterhead['name']])) ?></p>
     </footer>
 </div>
-<nav class="print-controls" aria-label="Print formats">
+<nav class="print-controls" aria-label="<?= pl_e(pl_t('Print formats')) ?>">
     <?php foreach ($formats as $option): ?>
         <a class="print-control<?= $option['format'] === $template['format'] ? ' print-control-current' : '' ?>" href="<?= pl_e($option['url']) ?>"<?= $option['format'] === $template['format'] ? ' aria-current="page"' : '' ?>><?= pl_e($option['label']) ?></a>
     <?php endforeach; ?>
-    <a class="print-control" href="<?= pl_e(pl_url($template['record'], ['id' => $recordId])) ?>">Back to the record</a>
+    <a class="print-control" href="<?= pl_e(pl_url($template['record'], ['id' => $recordId])) ?>"><?= pl_e(pl_t('Back to the record')) ?></a>
 </nav>
 </body>
 </html>

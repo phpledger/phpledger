@@ -350,9 +350,9 @@ None of this is new application behaviour; it is the acceptance bar the M1 docum
 ## How to add a translatable string
 
 The translation helpers landed with M2 of the [1.2 release plan](strategy/RELEASE-PLAN-1.2.md)
-(decision B3: Urdu first, then Arabic, English as the fallback catalogue). The interface strings
-themselves are still hard-coded English: externalising them is M11, so most screens today have no
-`pl_t()` call at all. Any new string should use the helpers.
+(decision B3: Urdu first, then Arabic, English as the fallback catalogue) and M11 put the existing
+interface text through them. Every new string must use the helpers: the ratchet below fails a
+change that adds bare English to a template.
 
 **Write the call.** `www/phpledger/includes/functions/i18n_functions.php` is loaded by the
 bootstrap and by `web_functions.php`, so `pl_t()` is available wherever a screen is rendered.
@@ -399,10 +399,22 @@ i18n sweep: 27 of 29 routes rendered under the pseudo-locale; 2188 untranslated 
 That count is the M11 backlog. The ceiling in the test may be lowered as strings are externalised;
 raising it to make a change pass is not an acceptable fix.
 
-**Setting the locale.** `pl_set_locale()` selects the locale for the rest of the process, and
-`pl_locale()` reports it, defaulting to the `PL_LOCALE` environment value and then to English.
-Nothing in the application calls `pl_set_locale()` yet: resolving a user's or company's stored
-preference, and the screen to choose one, are M11.
+**Setting the locale.** `pl_set_locale()` selects the locale for the rest of the process and
+`pl_locale()` reports it. `pl_web_apply_locale()` in `web_functions.php` is what calls it on a real
+request, from `public/index.php`, in this order: the signed-in account's `pl_users.locale`, then a
+choice made while signed out and held in the session, then `PL_LOCALE`, then English. The person
+changes it with the language switch in the user menu and on the signed-out card
+(`templates/partials/ui/locale-switch.php`, `POST /locale`), which writes the account column
+through `pl_set_user_locale()` — never through `pl_update_profile()`, which would rewrite the whole
+profile from an empty form.
+
+**Writing a value that reads left to right.** An amount, a date, an account code or a document
+number reads left to right in every language. `pl_money()` and `pl_date_label()` already fence
+their output with `pl_bidi_isolate()`; for anything else, write `pl_ltr($value)`. In English these
+are no-ops and the output is unchanged; in Urdu they stop the surrounding text reordering a minus
+sign or a decimal point. Never concatenate a figure onto a sentence — pass it as a placeholder.
+
+**What is still English, deliberately.** `www/phpledger/public/assets/app.js` holds about thirty interface strings of its own — the command palette, the journal balance preview, the point-of-sale keypad and the copy-to-clipboard confirmations. They are not counted by the ratchet, which reads templates, and they are not translated: handing a catalogue to the browser is a separate mechanism (a string bundle or data attributes on the elements that need them) and it was left out of M11 rather than half-built. The script already handles direction correctly where it matters — the tab arrow keys read `getComputedStyle(nav).direction` — so a right-to-left page behaves; it just speaks English. The same is true of the browser installer's own screens, whose wording is translated but which have no language switch, because there is no account or session yet to remember a choice in; `PL_LOCALE` is the lever there.
 
 The translation backlog is measured by `tests/i18n_test.php` from the template sources, not from rendered pages: a rendered page also carries data (document numbers, party and account names, rows that depend on the day), which no catalogue translates and which moved the number run to run. The source count needs no database or server, returns the same number on every machine, and its ceiling may only be lowered. A new screen written in bare English raises it, which is the failure; put the strings through `pl_t()` instead.
 

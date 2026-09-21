@@ -1409,6 +1409,22 @@
     {
       "source": "www/phpledger/templates/views/account-access.php",
       "destination": "www/phpledger/templates/views/account-access.php"
+    },
+    {
+      "source": "www/phpledger/templates/partials/ui/locale-switch.php",
+      "destination": "www/phpledger/templates/partials/ui/locale-switch.php"
+    },
+    {
+      "source": "www/phpledger/public/assets/fonts/NotoNaskhArabic-arabic.woff2",
+      "destination": "www/phpledger/public/assets/fonts/NotoNaskhArabic-arabic.woff2"
+    },
+    {
+      "source": "www/phpledger/public/assets/fonts/NotoNaskhArabic-LICENSE.txt",
+      "destination": "www/phpledger/public/assets/fonts/NotoNaskhArabic-LICENSE.txt"
+    },
+    {
+      "source": "resources/lang/ur.php",
+      "destination": "resources/lang/ur.php"
     }
   ]
 }

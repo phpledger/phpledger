@@ -1,21 +1,32 @@
 # Interface translation catalogues
 
 This directory holds the interface translation catalogues read by
-`www/phpledger/includes/functions/i18n_functions.php`. It is the groundwork delivered in
-milestone M2 of [RELEASE-PLAN-1.2.md](../../docs/strategy/RELEASE-PLAN-1.2.md); the interface
-strings themselves are still hard-coded English and are externalised in M11.
+`www/phpledger/includes/functions/i18n_functions.php`. The loader was the groundwork delivered in
+milestone M2 of [RELEASE-PLAN-1.2.md](../../docs/strategy/RELEASE-PLAN-1.2.md); M11 put the
+existing interface text through `pl_t()` and added the first catalogue.
 
 ## What is here today
 
-Nothing but this file, deliberately.
+`ur.php`, a **draft, unreviewed** Urdu catalogue, and this file.
 
 - **English (`en`) is the source language.** Its keys are its strings, so it has no catalogue
   file and loads none. `pl_t('Save the invoice.')` returns `Save the invoice.`
 - **The pseudo-locale (`qps`) is generated, not stored.** `pl_i18n_pseudo()` brackets and
   lengthens every string it is given, so a test can see which text went through `pl_t()` and which
   is still hard-coded. It ships no catalogue and is never offered to a user.
-- **Urdu and Arabic** (decision B3) get their catalogues when the strings exist and the screens,
-  font coverage, dates and numbers have been reviewed. A language is not "supported" before that.
+- **Urdu (`ur`) is a draft and says so.** `pl_locale_review_state('ur')` answers `draft`, the
+  language switch labels it "(draft translation)" and repeats the warning on screen, and the file
+  itself is headed UNREVIEWED. It covers the vocabulary a person meets on every screen —
+  navigation, buttons, column headings, statuses, form labels, months — and deliberately leaves
+  the long explanatory sentences to fall back to English rather than guessing at them. Urdu also
+  drives South Asian digit grouping (`1,23,45,678`) through `pl_number_format_rules()` and the
+  `d F Y` date pattern with translated month names.
+- **A language is not "supported" until a named person has reviewed its wording**, on real screens,
+  with real figures and dates (decision B3). That review is a release gate this directory cannot
+  satisfy by itself. Nothing in the application claims a reviewed translation today.
+- **Arabic has no catalogue.** Its six CLDR plural forms are declared in `pl_i18n_plural_table()`
+  so the table shape is proven, and nothing else about it is guessed at: no number rules, no date
+  pattern, no wording.
 
 ## Adding a catalogue
 
@@ -55,3 +66,20 @@ core catalogue, so a module may add keys and restate the wording of its own scre
 manifest declares one yet: adding the key to a manifest changes that module's digest, and every
 company that has the module enabled would be asked to review the upgrade before its next
 operation.
+
+## Reviewing the Urdu draft
+
+1. Read the header of `ur.php` first. The key is the English source string and must never be
+   edited: editing a key orphans its translation silently, and the screen quietly falls back to
+   English.
+2. Switch the interface to اردو from the language menu (the user menu in the top bar, or the foot
+   of the sign-in card) and walk the screens. A string still in English is a gap in this file, not
+   a bug in the loader.
+3. Check the figures, not only the words. Amounts must group as `1,23,45,678`, must keep their
+   minus sign on the left, and must not reorder where they sit inside an Urdu sentence; dates must
+   read `05 جنوری 2026`. All of that is `pl_money()`, `pl_date_label()` and `pl_bidi_isolate()`,
+   not this file.
+4. When the wording passes, change `ur`'s `review` in `pl_i18n_offered_locales()` from `draft` to
+   `reviewed` **in the same change** that records who reviewed it, and update this file. The test
+   `tests/i18n_test.php` asserts today that nothing claims `reviewed`; that assertion is what will
+   tell you the claim has to be made deliberately.

@@ -112,6 +112,73 @@ function pl_text_direction(?string $locale = null): string
 }
 
 /**
+ * The locales the interface offers a person to choose from (1.2 M11). This is a shorter list than
+ * the locales the helpers accept: PL_LOCALE and a stored profile value may name any well-formed
+ * tag, and an unknown one still renders English per key. A locale earns a place here by having a
+ * catalogue, or by changing how amounts and dates are written, or both.
+ *
+ * `review` is the honest state of the wording, and the switch shows it:
+ *   'source'   English, the language every key is written in. Nothing to review.
+ *   'draft'    A catalogue exists but no named human reviewer has passed it. Anything the draft
+ *              does not cover falls back to English per key, which is the loader's behaviour.
+ *   'reviewed' A named reviewer has passed the wording. Nothing claims this yet.
+ *
+ * en-PK is deliberately on the list. It is English wording with South Asian digit grouping
+ * (12,34,56,789), which is the reading habit the lakh/crore option exists for; it lets a business
+ * in Pakistan or India have the grouping it writes cheques in without waiting for the Urdu review.
+ *
+ * @return array<string, array{label: string, english: string, review: string}>
+ */
+function pl_i18n_offered_locales(): array
+{
+    return [
+        'en'    => ['label' => 'English', 'english' => 'English', 'review' => 'source'],
+        'en-PK' => ['label' => 'English (South Asian numbers)', 'english' => 'English (South Asian numbers)', 'review' => 'source'],
+        // The endonym is written in its own script, as a language menu should be: a person who
+        // cannot read the current interface language has to recognise their own.
+        'ur'    => ['label' => 'اردو', 'english' => 'Urdu', 'review' => 'draft'],
+    ];
+}
+
+/**
+ * The review state of a locale's wording: 'source', 'draft', 'reviewed', or 'unknown' for a tag
+ * nothing has been said about. A region falls back to its base language, so ur-PK is as reviewed
+ * as ur is. Translation review is a release gate held by a named person, not by this function.
+ */
+function pl_locale_review_state(?string $locale = null): string
+{
+    $tag = $locale === null ? pl_locale() : pl_normalize_locale($locale);
+    $offered = [];
+    foreach (pl_i18n_offered_locales() as $key => $entry) {
+        $offered[strtolower($key)] = $entry['review'];
+    }
+    return $offered[$tag] ?? $offered[pl_locale_language($tag)] ?? 'unknown';
+}
+
+/**
+ * Isolate a left-to-right run inside right-to-left text.
+ *
+ * An amount, an account code, a document number and a written date are left-to-right sequences
+ * whatever the surrounding language is. Dropped into an Urdu sentence unmarked, the Unicode
+ * bidirectional algorithm reorders their neighbouring punctuation: "-12,345.67" loses its sign to
+ * the end of the run, "1000 · 2026-01-05" reverses, and a trailing full stop jumps to the left of
+ * the number. U+2066 LEFT-TO-RIGHT ISOLATE and U+2069 POP DIRECTIONAL ISOLATE fence the run off so
+ * the algorithm treats it as one neutral object and neither side leaks into the other.
+ *
+ * These are invisible formatting characters, not markup: they survive pl_e(), they are correct
+ * inside an attribute, a title, a CSV cell and a plain-text mail body, and they cost nothing that
+ * a <bdi> element would not. In a left-to-right locale this returns the string untouched, so
+ * every English byte of output is exactly what it was before M11.
+ */
+function pl_bidi_isolate(string $text, ?string $direction = null): string
+{
+    if ($text === '' || ($direction ?? pl_text_direction()) !== 'rtl') {
+        return $text;
+    }
+    return "\u{2066}" . $text . "\u{2069}";
+}
+
+/**
  * CLDR plural selection. Each locale names the forms it actually uses out of the six CLDR
  * categories (zero, one, two, few, many, other) and the rule that picks one for an integer count.
  * English and Urdu use one/other. Arabic is already in the table, with all six forms, so that the
@@ -369,24 +436,37 @@ function pl_tn(string $one, string $other, int $count, array $vars = []): string
 }
 
 /**
- * Presentation seam for grouped numbers (M11 extension point; see docs/ARCHITECTURE.md
- * "Locale and formatting preferences"). `grouping` is read right to left: [3] repeats groups of
- * three (123,456,789) and [3, 2] is South Asian grouping (12,34,56,789). Every locale returns
- * today's Western rules, so pl_money() output is unchanged; M11 adds rows here, and no call site
- * changes. This describes how an amount is WRITTEN. Stored exact amounts, the transaction and
- * base currency, posting precision and accounting DATE values are unaffected by anything here,
- * and parsing localized input back into an exact decimal is a separate, explicit step.
+ * Presentation seam for grouped numbers (see docs/ARCHITECTURE.md "Locale and formatting
+ * preferences"). `grouping` is read right to left: [3] repeats groups of three (123,456,789) and
+ * [3, 2] is South Asian grouping, the lakh/crore reading (1,23,45,678). A locale with no row
+ * returns today's Western rules, so nothing that was written one way before M11 is written
+ * another way now unless its locale was chosen deliberately.
+ *
+ * This describes how an amount is WRITTEN. Stored exact amounts, the transaction and base
+ * currency, posting precision and accounting DATE values are unaffected by anything here, and
+ * parsing localized input back into an exact decimal is a separate, explicit step.
+ *
+ * The lookup is full tag first, then base language, so en-PK is English wording with South Asian
+ * grouping while plain en is unchanged. Keys are lower case: pl_normalize_locale() lower-cases.
  *
  * @return array{grouping: list<int>, group: string, decimal: string}
  */
 function pl_number_format_rules(?string $locale = null): array
 {
-    $language = pl_locale_language($locale === null ? pl_locale() : pl_normalize_locale($locale));
+    $tag = $locale === null ? pl_locale() : pl_normalize_locale($locale);
+    $western = ['grouping' => [3], 'group' => ',', 'decimal' => '.'];
+    $southAsian = ['grouping' => [3, 2], 'group' => ',', 'decimal' => '.'];
     /** @var array<string, array{grouping: list<int>, group: string, decimal: string}> $rules */
     $rules = [
-        // 'ur' => ['grouping' => [3, 2], 'group' => ',', 'decimal' => '.'],   // M11, with reviewed screens
+        // Urdu, and English written for a South Asian reader. Latin digits and the Western
+        // separators are deliberate: Pakistani invoices, bank statements and tax returns are
+        // written 1,23,456.78, not with Eastern Arabic-Indic digits, and an accounting figure a
+        // person has to check against a bank statement must be written the way the statement is.
+        'ur' => $southAsian,
+        'en-pk' => $southAsian, 'en-in' => $southAsian, 'en-bd' => $southAsian,
+        'en-lk' => $southAsian, 'en-np' => $southAsian,
     ];
-    return $rules[$language] ?? ['grouping' => [3], 'group' => ',', 'decimal' => '.'];
+    return $rules[$tag] ?? $rules[pl_locale_language($tag)] ?? $western;
 }
 
 /**
@@ -417,18 +497,34 @@ function pl_group_digits(string $digits, array $grouping, string $separator): st
 }
 
 /**
- * Presentation seam for a written date (M11 extension point). Every locale returns today's
- * 'd M Y' pattern, so pl_date_label() output is unchanged; M11 adds locale patterns and
- * translated month names here. The value being written is an accounting DATE: it is formatted
- * as given, never parsed through a timezone, never shifted into the neighbouring day, and never
- * changed for posting, period checks or reconciliation.
+ * Presentation seam for a written date. A locale with no row returns today's 'd M Y'. Urdu uses
+ * the full month name, because Urdu has no settled three-letter abbreviation for a month and an
+ * invented one would be worse than the whole word.
+ *
+ * The value being written is an accounting DATE: it is formatted as given, never parsed through a
+ * timezone, never shifted into the neighbouring day, and never changed for posting, period checks
+ * or reconciliation. The lookup is full tag first, then base language, as in the number rules.
  */
 function pl_date_format_pattern(?string $locale = null): string
 {
-    $language = pl_locale_language($locale === null ? pl_locale() : pl_normalize_locale($locale));
+    $tag = $locale === null ? pl_locale() : pl_normalize_locale($locale);
     /** @var array<string, string> $patterns */
-    $patterns = [
-        // 'ur' => 'd F Y',   // M11, once Urdu month names are reviewed
-    ];
-    return $patterns[$language] ?? 'd M Y';
+    $patterns = ['ur' => 'd F Y'];
+    return $patterns[$tag] ?? $patterns[pl_locale_language($tag)] ?? 'd M Y';
+}
+
+/**
+ * The month names a written date may contain, as English source strings for the catalogue.
+ * pl_date_label() formats the date with the locale's pattern and then puts whichever of these
+ * names the pattern produced through pl_t(), so a catalogue translates months without any date
+ * ever being parsed, converted or moved. The long names come first: replacing 'January' before
+ * 'Jan' is what stops a substring replacement eating the start of the longer name.
+ *
+ * @return list<string>
+ */
+function pl_i18n_month_names(): array
+{
+    return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+        'October', 'November', 'December',
+        'Jan', 'Feb', 'Mar', 'Apr', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 }

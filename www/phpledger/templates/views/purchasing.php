@@ -24,8 +24,8 @@ $billRows = array_values(array_filter($receiptRows, static fn(array $r): bool =>
 if ($editing && $write) { require dirname(__DIR__).'/partials/ui/purchase-order-editor.php'; return; }
 ?>
 <div class="flex flex-col gap-4 py-5">
-<?php if ($form['message']!==''): ?><div class="alert alert-danger" role="alert" tabindex="-1" data-form-error><?= pl_e($form['message']) ?><p>Your entered values are retained.</p></div><?php endif; ?>
-<?php if (!$enabled): ?><div class="alert alert-info">Purchasing is disabled for new operations. Orders, receipt history and reconciliation remain available. <a class="link" href="<?= pl_e(pl_url('/modules')) ?>">Review modules</a>.</div><?php endif; ?>
+<?php if ($form['message']!==''): ?><div class="alert alert-danger" role="alert" tabindex="-1" data-form-error><?= pl_e($form['message']) ?><p><?= pl_e(pl_t('Your entered values are retained.')) ?></p></div><?php endif; ?>
+<?php if (!$enabled): ?><div class="alert alert-info"><?= pl_e(pl_t('Purchasing is disabled for new operations. Orders, receipt history and reconciliation remain available.')) ?> <a class="link" href="<?= pl_e(pl_url('/modules')) ?>"><?= pl_e(pl_t('Review modules')) ?></a>.</div><?php endif; ?>
 <?php if ($order) { require dirname(__DIR__).'/partials/ui/purchase-order-record.php'; } else { require dirname(__DIR__).'/partials/ui/purchase-order-list.php'; }
 require dirname(__DIR__).'/partials/ui/purchase-operations.php'; ?>
 </div>

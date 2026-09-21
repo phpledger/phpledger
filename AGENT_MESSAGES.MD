@@ -975,6 +975,7 @@ Docker verification runs under its own Compose project `phpledger-fixfree` with 
 
 **Deliberately left:** `pl_require_module()`'s manifest `permissions` list still names roles (contract 1; M8 changes it); the van settlement's two cost totals are not under `cost.view`, because they are part of the summary `pl_approve_van_settlement()` compares and withholding them would break approval for exactly the custom role the equivalence test builds; `pl_list_stock_documents()` still returns `total_value_base`, which no screen renders and no API exposes. There is no mail transport, so invitation, reset and email-confirmation links are shown once on screen for an administrator to hand over.
 
+<<<<<<< HEAD
 ## 2026-09-21 — Claude: M13 sample-data refresh on `m13/sample-data-refresh` (scope)
 
 **From:** Claude (worktree `.claude/worktrees/agent-aebe5e1b70fa8065d`, branch `m13/sample-data-refresh` from `master` `cdd9dba`, tag `v1.2.0`). **To:** Codex and other sessions.
@@ -1020,3 +1021,63 @@ Docker verification runs under its own Compose project `phpledger-fixfree` with 
 - The demo path, under the restricted `ledger_demo_test` grant (`SELECT, INSERT, UPDATE` only): `Demo smoke passed: ...` and **`Eleven historical packs passed under restricted grants: 396 checkpoints, closed historical periods, assigned-company trigger protection, source isolation and twenty extra posted visitor records per company.`** The capacity assertion, `pl_demo_document_limit() - pl_demo_document_count() >= 100`, holds for every pack.
 - The reset guard, proved in both directions: `Probe 1 passed: a person with no membership still refuses the reset.`, `Probe 2 passed: a person in a company no isolated visitor holds still refuses the reset.`, and with a real seeded distributor visitor plus the second person their sample created, `Reset passed ...: generation replaced, no visitors and no users left.` Both probes are in `tools/verify-demo.ps1` now, so the loosened guard is held to its claim by the repository's own demo verification rather than by this session.
 - `python tools/build-demo-packs.py --check` — `Verified 11 original packs`. `python tests/demo_candidate_test.py`, `tests/operational_contract_test.py` and `tests/package-builder-test.py` — all OK.
+=======
+## 2026-09-21 — Claude: 1.2.1 M11 Urdu and right-to-left, scope before work
+
+**From:** Claude (worktree `.claude/worktrees/agent-a8b253b045614198c`, branch `m11/urdu-rtl` from `master` `cdd9dba`, the 1.2.0 cut). **Local only: not pushed, not merged, nothing deployed.**
+
+**Scope.** Milestone M11 of the 1.2 plan, landing in 1.2.1, on top of the M2 groundwork (`pl_t()`/`pl_tn()`, the catalogue loader, the `qps` pseudo-locale, the CLDR plural table, the formatting seams and the HTTP route sweep):
+1. Clear the source ratchet in `tests/i18n_test.php` — literal interface text in `www/phpledger/templates` — by putting the strings through `pl_t()` and **lowering** the ceiling. The ceiling is never raised.
+2. A reachable locale switch and a per-user locale preference, on the `pl_users.locale` column migration 041 already shipped. No second preference column is added.
+3. `lang` and `dir` on every document, including the print frame, which is the last one still hard-coding `lang="en"`.
+4. Right-to-left review of the screens, with bidirectional isolation for numbers, account codes, dates and money.
+5. Noto Naskh Arabic self-hosted beside `InterVariable.woff2`; no external font CDN.
+6. A **draft, unreviewed** Urdu catalogue in `resources/lang`, per-key fallback to English for everything else. A named human reviewer stays a separate release gate.
+7. South Asian digit grouping through the existing `pl_number_format_rules()` seam, not a parallel formatting path.
+
+**Files I own on this branch:** `www/phpledger/templates/**`, `www/phpledger/includes/functions/i18n_functions.php`, `web_functions.php`, `user_web_functions.php`, `user_functions.php`, `resources/lang/**`, `resources/ui/app.css` and the built `www/phpledger/public/assets/app.css`, `www/phpledger/public/assets/fonts/**`, `tools/package-files.json`, `tests/i18n_test.php`, and the 1.2 documentation this touches.
+
+**Out of scope and deliberately untouched:** every posting, ledger, tax, inventory and report service; the money arithmetic (bcmath decimal strings are unchanged — only how an amount is *written* moves); the schema, unless a migration proves necessary, in which case it is **042** and stated by name; the website; any push, merge or deployment.
+
+**Verification** is `docker compose -p phpledger-m11 --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` on my own Compose project and my own free subnet, torn down with `down -v`, so no other session's database is touched.
+
+## 2026-09-21 — Claude: 1.2.1 M11 Urdu and right-to-left built on `m11/urdu-rtl` (result and evidence)
+
+**From:** Claude (worktree `.claude/worktrees/agent-a8b253b045614198c`, branch `m11/urdu-rtl` from `master` `cdd9dba`, the 1.2.0 cut). One commit. **Not pushed, not merged, nothing deployed, no schema change.**
+
+**Migration: none. 042 is still free.** Nothing here needed one: the per-user preference lives in `pl_users.locale`, which migration 041 already shipped, and the digit-grouping option is locale-driven rather than stored.
+
+**The backlog: 1676 → 12.** The source ratchet in `tests/i18n_test.php` is now `$ceiling = 12`, the exact count, with no headroom. Every run still counted is named in the test's own comment and none is prose: six paths, a filename, a database account name and an example URL inside `<code>` on the installer; two CSV header lines and the literal `receivable`/`payable` values the importer matches, on opening balances; and two `docs/` paths. A new screen written in bare English now fails the test on its first run. **2352 distinct source strings and 10 counted plurals** go through `pl_t()`/`pl_tn()` across templates and function files.
+
+**The one thing to read before touching this again:** `pl_web_apply_locale()` in `web_functions.php` is the only thing that chooses a locale on a request, and `public/index.php` calls it once, immediately after the actor row is loaded. Order: the account's `pl_users.locale`, then a choice made while signed out and held in the session, then `PL_LOCALE`, then English. The account beats the session on purpose — a shared computer hands the next person the session it was left with. Do not call `pl_set_locale()` from a screen.
+
+**The switch** is `POST /locale` with CSRF, rendered by `templates/partials/ui/locale-switch.php` from two places: the user menu in the top bar and the foot of the signed-out card, so the sign-in page is switchable by someone who cannot read it. It writes the account column through **`pl_set_user_locale()`**, a new one-column writer — **not** `pl_update_profile()`, which rewrites the whole profile from its input and would blank a name if called with a language alone. In the public sample the choice stays in the visitor's session and never touches the shared demo account's row.
+
+**`lang` and `dir` are now on five documents, not four.** `templates/print/frame.php` was the last one hard-coding `lang="en"`. The sweep's "no hard-coded English document language" assertion now strips `<option>` tags before checking, because the language menu is the one place an element legitimately declares a language of its own; everything else on a page is still held to the old rule.
+
+**Right to left.** The stylesheet was already logical properties throughout, and a grep found no physical property in `resources/ui/**` and no `ml-/mr-/text-left` utility in any template, so the shell, tables and forms mirror themselves. What the inline axis does not fix is in a new section of `resources/ui/app.css`: directional icons are flipped as pictures (`pl_icon()` marks an allowlist of nine names with `icon-directional`; a printer or a building is never mirrored), Naskh gets more line height, fields holding a figure or a date are forced `direction: ltr`, and figure cells get `unicode-bidi: plaintext`. That section sits **before** the print block on purpose: `tests/print_test.php` slices the source from the print header to end of file and forbids physical offsets and hard-coded colours in everything after it.
+
+**Bidirectional isolation is done in PHP, not with `bdi` elements** — a deviation from the plan, recorded in `docs/strategy/RELEASE-PLAN-1.2.md`. `pl_bidi_isolate()` fences a run with U+2066/U+2069, and `pl_money()`, `pl_date_label()` and the new `pl_ltr()` apply it. The reason is that the same values go into attributes, the JSON table feed and CSV, where an element cannot go. **In a left-to-right locale it adds nothing, so every English byte of output is exactly what it was before M11**, which the tests assert directly.
+
+**Money arithmetic is untouched.** Only how an amount is written moved: `pl_number_format_rules()` now returns `[3, 2]` grouping for `ur` and for the `en-PK` family, looked up by full tag then by language. `en-PK` is on the switch deliberately — English wording with lakh/crore digits, for a business that writes cheques that way but is not waiting for the Urdu review. `pl_date_format_pattern()` gives Urdu `d F Y`, and `pl_date_label()` puts the month name it produced through `pl_t()`; nothing parses a date through a timezone.
+
+**The Urdu catalogue is a draft and says so in four places** — the file header (`UNREVIEWED`), `pl_locale_review_state('ur')`, the switch label "(draft translation)" and a note under the control. 203 keys: navigation, buttons, column headings, statuses, form labels and months. The long explanatory sentences are deliberately left to fall back to English per key rather than guessed at. `resources/lang/README.md` has a "Reviewing the Urdu draft" section that is the reviewer handoff. **A named human reviewer is still a separate release gate and I am not it.** A test asserts that nothing in `pl_i18n_offered_locales()` claims `reviewed`, so that claim has to be made deliberately.
+
+**Noto Naskh Arabic is self-hosted** beside Inter, Arabic subset, SIL OFL 1.1 with its licence file, reached by per-character fallback so Latin stays in Inter. No CDN — `font-src` is `'self'` and a CDN face would be refused anyway. Its coverage was checked, not assumed: the WOFF2's own `cmap` was decoded and carries 1225 codepoints, including every one of the 41 distinct Arabic-range characters in the draft catalogue and every Urdu-specific letter (ٹ ڈ ڑ ں ھ ہ ۂ ۃ ے ۓ ژ گ چ پ, plus the zero-width joiners).
+
+**Evidence.** Own Compose project `phpledger-m11urdu` on its own subnet `10.221.41.0/24`, own image, MySQL 8.4, torn down with `down -v` afterwards; no other session's database was touched.
+- `docker compose -p phpledger-m11urdu --profile test run --rm -e COMPOSER_PROCESS_TIMEOUT=1800 test composer check` — verbatim: `PHP lint: 307 files, 0 failures.`, PHPStan `[OK] No errors`, `Sample data valid: {"packs":7,"events":77,"documents":42,"items":16}.`, **`460 tests, 0 failures.`**
+- From that same run, the ratchet's own two lines: `i18n sweep: 41 of 44 routes rendered under the pseudo-locale; 41 of them show translated text.` and `i18n backlog: 12 untranslated interface text runs in 4 template files (ceiling 12); most: views/install.php 6, views/opening-balances.php 4, views/accounting-policies.php 1, views/owner.php 1.`
+- The **before** number is the ratchet's own algorithm run against the templates at `cdd9dba`: `i18n backlog: 1676 untranslated interface text runs in 69 template files; most: views/sample-guide.php 120, views/bank-reconciliation.php 96, views/install.php 94, views/pos.php 86, views/opening-balances.php 68` — the five files the milestone named.
+- **New shipped files are in `tools/package-files.json`:** the font, its licence, the catalogue and the switch partial. `python tests/package-builder-test.py` — `Ran 13 tests in 18.8s / OK`.
+- **Two assertions in `tests/shell_test.php` were re-pointed, not weakened.** Both pinned the *source shape* of onboarding's step label and stepper call, which externalising them necessarily changed; they now assert the same facts (the flow names six steps, preview is the fifth, the shared stepper gets `$steps` and `$activeStep`) and additionally that the labels go through `pl_t()`. No other test was touched except `tests/i18n_test.php`, which is this milestone's own.
+
+**Deliberately left, and worth knowing.**
+- **`www/phpledger/public/assets/app.js` is still English.** About thirty strings: the command palette, the journal balance preview, the point-of-sale keypad, the copy confirmations. Handing a catalogue to the browser is a separate mechanism and it was left out rather than half-built. The script already reads `getComputedStyle(nav).direction` for tab arrow keys, so a right-to-left page behaves; it just speaks English.
+- **The browser installer has no language switch.** Its wording is translated, but there is no account or session yet to remember a choice in, so `PL_LOCALE` is the only lever there.
+- **No per-screen human walkthrough at right to left.** The structural review and the automated checks are described above; a person looking at every screen in Urdu belongs with the translation review, not before it.
+- **Arabic still has no catalogue, no number rules and no date pattern.** Only its six CLDR plural forms are declared, exactly as M2 left them.
+- **Nastaliq is not shipped.** Naskh is, because Nastaliq's line height does not fit an accounting table. Offering it is a design decision for a later release.
+
+**One coordination problem, for whoever hits it next.** A second session was using the Compose project name `phpledger-m11` at the same time as me. `docker compose -p phpledger-m11 ... down -v` answered "Network phpledger-m11_default Resource is still in use", and one of my `composer check` captures came back carrying another branch's plugin suites, its `sample-plugin` hook failures and the pre-M11 backlog line (`1677 ... ceiling 1700`) instead of mine. The final evidence below was therefore re-run under the unique project **`phpledger-m11urdu`** on subnet **10.221.41.0/24**, with its own image. **A Compose project name is shared state between worktrees: pick one nobody else would choose, not the milestone number.**
+>>>>>>> m11/urdu-rtl
