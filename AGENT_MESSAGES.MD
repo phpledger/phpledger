@@ -1371,3 +1371,39 @@ Each format was read from the catalogue's own shipped apps, not inferred. Two pl
 **Left alone, unrelated:** the working tree already carried an uncommitted change to `docs/ROADMAP.md` from another session when this branch was cut; it is untouched and not part of this branch's diff.
 
 **Deliberately not done:** no merge, push, tag or deploy; no GitHub issue opened or closed; no change to any already-published release note or to any page outside the two named.
+
+**npm publication set up, `d92c861` (Claude, same session). A credential note belongs with this entry, because it is where it happened.**
+
+The owner pasted an **npm account username and password into the chat transcript**. It was not stored, not written to any file, not committed, and not used to authenticate. **The password should be changed at npm**, because a transcript is not a safe place for it and deleting a message does not unsay it. This is the second time a registry credential has reached a transcript; decision B86 records the first, a Docker Hub token, and the rule it set: any registry credential goes in through `gh secret set`, which prompts and never puts the value in a command line, a shell history or a transcript. That rule was followed here.
+
+An account password is also the wrong credential for this. `.github/workflows/npm-publish.yml` authenticates with an **npm granular access token** in the `NPM_TOKEN` repository secret, scoped to publish `create-phpledger` and nothing else. A token can be revoked without touching the account, and it cannot sign anyone in.
+
+**Owner steps, neither of which anyone else can do:** create the granular token on npm with publish rights to `create-phpledger`, then run `gh secret set NPM_TOKEN` and paste it at the prompt. Until then the workflow fails loudly rather than skipping.
+
+The workflow fires on `release: published`, mirroring `container-image.yml`. It re-checks syntax, runs `tests/create-phpledger-test.py`, prints the pack listing and refuses a version already on the registry, then publishes with `--provenance`. A manual run defaults to a dry run.
+
+`create-phpledger` is **unclaimed on the registry** (404 as of 21 September 2026) and must stay **unscoped**, because `npm create phpledger` resolves to `create-phpledger`; the `@phpledger` organisation the owner holds is for the planned API client. The `actions/setup-node` pin has no precedent in this repository, so it was checked against the upstream `v4` tag and matches.
+
+**npm naming, and a branch collision cleaned up (Claude, 21 Sep 2026).**
+
+**The scaffolder must stay unscoped.** npm resolves `npm init foo` to `create-foo` and `npm init @scope/foo` to `@scope/create-foo`, confirmed from npm's CLI documentation. So `npm create phpledger` only reaches this package while it is named `create-phpledger`. Moving it under the `@phpledger` organisation would change the published command to `npm create @phpledger`. The organisation is the right home for the planned `@phpledger/api-client`, not for this. npm's documentation says an organisation may also manage unscoped packages but gives no mechanism, so confirm that in the organisation's settings after the first publish rather than assuming it. `create-phpledger` was unclaimed on the registry as of this date.
+
+**The publish token needs an expiry**, which npm requires, so the workflow will fail one day and the token has to be renewed with `gh secret set NPM_TOKEN`. Scope it to the package: npm's organisation scope on a granular token covers organisation settings, teams and users, not publishing. Both points are now in `docs/RELEASE-PROTOCOL.md`.
+
+**Branch collision, caused by me and cleaned up.** The shared checkout was switched to `m16/housekeeping` by another session while I was working, and two of my commits (the npm publish workflow and its coordination entry) landed on that branch instead of `master`. I cherry-picked them onto `master` in a scratch worktree, pushed `master` from `3fc315d` to `d32df52`, and reset `m16/housekeeping` back to its own tip `990cbd8`. **That branch keeps all of its own work** (`a121917` and `990cbd8`, `docs/ROADMAP.md` and its `AGENT_MESSAGES.MD` entry) and no longer carries anything of mine. Verified before resetting: my two commits were the only ones above `990cbd8`, and their content was already identical on `master`.
+
+While resolving the cherry-pick I kept only my own entry and dropped the `m16/housekeeping` entry that came with it, so that entry reaches `master` when that branch merges, once, from its own author.
+
+**npm publication is live end to end (Claude, 21 Sep 2026). `origin/master` at `b1acfda`.**
+
+The owner set `NPM_TOKEN` themselves with `gh secret set`, which is the mechanism B86 asks for. A dispatched dry run proves the whole path works: the token authenticates, `node --check` passes, `tests/create-phpledger-test.py` passes, and `npm pack` lists `create-phpledger@0.1.0`. Nothing was published; the publish step is gated on a release event or an explicit `dry_run: false`.
+
+**Token rotation.** The token carries a 90-day expiry and lapses on **20 December 2026**, recorded in `docs/RELEASE-PROTOCOL.md`. Two things catch it: the publish job calls `npm whoami` before anything else, so a lapse names itself at the top of the run rather than surfacing as a publish failure several steps later; and a weekly `token-expiry` job does nothing but that check, so an expired token becomes a failed run and its notification while there is still time. The two jobs are gated on the event so the schedule can never publish and the publish job never runs on the schedule. Verified: on a dispatched run, `publish` succeeded and `token-expiry` skipped.
+
+**A credential caution that belongs in the record, as B86's does.** An npm account password and, separately, an npm access token were both pasted into a chat transcript during this work. Neither was stored, written to a file, committed, or used to authenticate. **Both should be treated as exposed and replaced at npm**, and the account password changed: a transcript is not a safe place for either, and deleting a message does not unsay it. Deleting a repository secret also does not invalidate the underlying credential, which is the same trap B86 recorded about the Docker Hub token.
+
+**Resolved the same day:** the owner confirmed they rotated the credentials before setting the secret, so the token now in `NPM_TOKEN` is a fresh one and the exposed pair are no longer valid. The dry run that authenticated as `dearmansoor` was therefore exercising the replacement, not the exposed token.
+
+**A gap that follows from the above, filed as [#102](https://github.com/phpledger/phpledger/issues/102):** the project has a rotation procedure for the signing key and a preventive rule in B86, but no procedure for what to do once an operational credential is exposed. The non-obvious parts are worth writing down once rather than during an incident.
+
+**Also for the record:** `create-phpledger` must stay unscoped, because npm resolves `npm init foo` to `create-foo`; the `@phpledger` organisation is for the planned API client. See the entry above.

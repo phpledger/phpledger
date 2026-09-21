@@ -1,0 +1,132 @@
+name: npm publish
+
+# Publishes clients/js/create-phpledger to the public npm registry when a GitHub
+# Release is published, so the scaffolder never drifts behind the release it
+# scaffolds. It publishes the scaffolder only; the application itself is not an
+# npm package and never will be (docs/RELEASE-PROTOCOL.md).
+#
+# Authentication is an npm granular access token in the NPM_TOKEN repository
+# secret, never an account password. The owner sets it with `gh secret set
+# NPM_TOKEN`, which prompts for the value and so keeps it out of the command
+# line, the shell history and any transcript (decision B86 records why that rule
+# exists). Without the secret the job fails with a clear message rather than
+# skipping silently.
+#
+# --provenance publishes a signed attestation linking the tarball to this
+# workflow run, which is why id-token: write is requested below.
+
+on:
+  release:
+    types: [published]
+  schedule:
+    # The token expires (set for 90 days on 21 September 2026, so 20 December
+    # 2026). A weekly check turns that into a failed run and its notification
+    # while there is still time, instead of a surprise on release day.
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Published release tag to publish for (e.g. v1.2.1)'
+        required: true
+      dry_run:
+        description: 'Pack and validate without publishing'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  token-expiry:
+    # Weekly only. Proves the credential still works, and nothing else.
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Check NPM_TOKEN still authenticates
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if ! who=$(npm whoami 2>&1); then
+            echo "::error::NPM_TOKEN no longer authenticates: ${who}. It is set to expire 20 December 2026. Create a new granular token with publish rights to create-phpledger and run: gh secret set NPM_TOKEN"
+            exit 1
+          fi
+          echo "authenticated as ${who}"
+
+  publish:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: clients/js/create-phpledger
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Require the publish token
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "${NPM_TOKEN}" ]; then
+            echo "::error::NPM_TOKEN is not set. Create a granular access token on npm with publish rights to create-phpledger, then run: gh secret set NPM_TOKEN"
+            exit 1
+          fi
+
+      - name: Check the package version matches the release
+        if: github.event_name == 'release'
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          # The scaffolder carries its own version, which may legitimately sit
+          # behind the application's. Refuse only the case that is certainly
+          # wrong: a version already on the registry, which npm would reject
+          # anyway, but later and with a worse message.
+          version=$(node -p "require('./package.json').version")
+          echo "scaffolder ${version}, release ${RELEASE_TAG}"
+          if npm view "create-phpledger@${version}" version >/dev/null 2>&1; then
+            echo "::error::create-phpledger@${version} is already published. Bump the version in clients/js/create-phpledger/package.json."
+            exit 1
+          fi
+
+      - name: Check the token actually authenticates
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # A non-empty secret is not a working one. npm tokens expire, get
+          # revoked, and get pasted somewhere they should not be and replaced.
+          # Failing here names the cause; failing at publish does not.
+          if ! who=$(npm whoami 2>&1); then
+            echo "::error::NPM_TOKEN did not authenticate: ${who}. Create a new granular token with publish rights to create-phpledger and run: gh secret set NPM_TOKEN"
+            exit 1
+          fi
+          echo "authenticated as ${who}"
+
+      - name: Verify the scaffolder before publishing it
+        run: node --check bin/create-phpledger.mjs
+
+      - name: Run its test suite
+        working-directory: .
+        run: python3 tests/create-phpledger-test.py
+
+      - name: Show what would be published
+        run: npm pack --dry-run
+
+      - name: Publish
+        if: github.event_name == 'release' || inputs.dry_run == false
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
