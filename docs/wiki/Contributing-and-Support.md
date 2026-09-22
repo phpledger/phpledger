@@ -1,4 +1,4 @@
-# Help make the first release useful
+# Help PHP Ledger grow
 
 The most valuable early contributions connect a real business task to a clear, testable outcome. PHP Ledger needs owner/bookkeeper feedback, accounting review, interface testing, installation experience and focused technical work.
 
@@ -32,6 +32,8 @@ For project, pilot or support enquiries:
 
 ## Supporting development
 
-Funding will focus on one achievable milestone at a time, including design/usability work, development tools, infrastructure, accounting review, security and documentation. Receiving jurisdiction, platform eligibility and the costed campaign must be verified before money is collected. No donation campaign or payment commitment is active through this Wiki.
+If PHP Ledger is useful to you and you can afford to help, a voluntary donation can support development, documentation, testing and project infrastructure. Donations are optional. Trying a workflow, reporting a reproducible issue, improving a translation or sharing the project also helps.
+
+The project owner is confirming the donation destination for the 1.3.0 release. No payment link is published here yet. A donation is support for the project; paid installation or support work requires its own agreed scope.
 
 [[First package|First-Package]] · [[Roadmap]] · [[Architecture]]

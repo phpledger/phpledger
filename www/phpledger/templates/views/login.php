@@ -2,6 +2,13 @@
 <section class="auth-panel" aria-labelledby="login-title">
     <h1 class="page-title text-center" id="login-title"><?= pl_e(pl_t('Sign in')) ?></h1>
     <p class="mt-1.5 text-center text-sm text-ink-muted"><?= pl_e(pl_t('Sign in to work with your business books.')) ?></p>
+    <?php if (pl_shared_demo_enabled()): $demoAccount = pl_shared_demo_account(); ?>
+        <div class="alert alert-info mt-4" role="note">
+            <p><?= pl_e(pl_t('Everyone shares this demo. Use fictional information; all work resets hourly.')) ?></p>
+            <p><?= pl_e(pl_t('Username')) ?>: <code><?= pl_e($demoAccount['username']) ?></code><br>
+            <?= pl_e(pl_t('Password')) ?>: <code><?= pl_e($demoAccount['password']) ?></code></p>
+        </div>
+    <?php endif; ?>
     <?php if ($form['message'] !== ''): ?>
         <div class="alert alert-danger mt-4" role="alert" tabindex="-1" id="login-error" data-form-error>
             <h2><?= pl_e(pl_t('We could not sign you in')) ?></h2>

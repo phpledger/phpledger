@@ -1,5 +1,15 @@
 # Upgrade and recovery — PHP Ledger
 
+## Command-line upgrade entry point
+
+After backing up matching application files, private configuration and the database, stop application traffic and scheduled writers, then replace the application files using the manual procedure below. Run:
+
+```sh
+php www/phpledger/install/upgrade.php
+```
+
+This command uses the existing runtime/database preflight and migration engine. It refuses an empty target, checks historical receipts, applies pending migrations and verifies the resulting schema. A current installation prints an explicit no-op message and exits successfully; a failed check or migration exits nonzero. It does not download a release, take a backup, stop traffic or implement rollback. Keep traffic stopped after a failure and follow the recovery procedure below. Fresh installations use the browser installer; `install/migrate.php` remains available for low-level installation and recovery tooling.
+
 ## Operator-initiated automatic updates
 
 This release adds `/maintenance.php`, an independent installation-operator interface for publisher-signed releases. It is not a certified shared-host recovery service: automated and fault-injection tests, and exact-artifact installation/upgrade/recovery checks have passed, but independent security review and real restricted-host fault recovery have not been evidenced (see RELEASE-NOTES.md "Assurance status"). The manual procedure below remains the expert recovery path and is required for the first upgrade from a published 0.6.0-preview installation, which predates this updater.

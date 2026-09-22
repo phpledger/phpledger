@@ -8,7 +8,8 @@ done
 MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -u root <<SQL
 CREATE DATABASE IF NOT EXISTS phpledger_demo CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 CREATE USER 'ledger_demo_web'@'%' IDENTIFIED BY '${PL_DEMO_WEB_PASSWORD}';
-GRANT SELECT, INSERT, UPDATE ON phpledger_demo.* TO 'ledger_demo_web'@'%';
+-- The real installer needs DDL on its one disposable database. No global grants.
+GRANT ALL PRIVILEGES ON phpledger_demo.* TO 'ledger_demo_web'@'%';
 CREATE USER 'ledger_demo_reset'@'%' IDENTIFIED BY '${PL_DEMO_RESET_PASSWORD}';
 GRANT ALL PRIVILEGES ON phpledger_demo.* TO 'ledger_demo_reset'@'%';
 SQL

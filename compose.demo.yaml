@@ -1,5 +1,18 @@
 name: phpledger-demo
 services:
+  demo-proxy:
+    image: nginx:1.28-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PL_DEMO_PORT:-18202}:80"
+    volumes:
+      - ./docker/shared-demo-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      default:
+        ipv4_address: ${PL_DEMO_INTERNAL_PROXY_IP:-10.204.82.10}
+      edge: {}
+    depends_on:
+      - demo-web
   demo-web:
     image: phpledger-demo-app:${PL_DEMO_RELEASE:-local}
     build:
@@ -7,25 +20,27 @@ services:
       args:
         PHP_VERSION: ${PL_PHP_VERSION:-8.3.33}
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:${PL_DEMO_PORT:-18202}:80"
     environment:
-      PL_ENV: demo
+      PL_ENV: demo-install
       PL_BASE_PATH: /demo
       PL_DB_HOST: demo-db
       PL_DB_NAME: phpledger_demo
       PL_DB_USER: ledger_demo_web
       PL_DB_PASSWORD: ${PL_DEMO_WEB_PASSWORD:?Set a dedicated demo runtime password}
-      PL_TRUSTED_PROXY_IPS: ${PL_DEMO_TRUSTED_PROXY_IPS:-10.204.82.1}
+      PL_TRUSTED_PROXY_IPS: ${PL_DEMO_INTERNAL_PROXY_IP:-10.204.82.10}
       PL_DEMO_LOCAL_HTTP: ${PL_DEMO_LOCAL_HTTP:-0}
       PL_PUBLIC_URL: ${PL_DEMO_PUBLIC_URL:-https://phpledger.com/demo}
       PL_ALLOWED_ORIGINS: ${PL_ALLOWED_ORIGINS:-}
-      PL_OAUTH_KEY_DIRECTORY: /var/lib/phpledger/oauth
+      PL_OAUTH_KEY_DIRECTORY: /var/lib/phpledger/runtime/oauth
+      PL_INSTALL_DIRECTORY: /var/lib/phpledger/runtime/installation
+      PL_INSTALL_CONFIG_PATH: /var/lib/phpledger/runtime/config.local.php
     volumes:
       - ./www/phpledger:/var/www/phpledger/www/phpledger:ro
       - ./resources:/var/www/phpledger/resources:ro
       - ./docker/demo-apache.conf:/etc/apache2/sites-available/000-default.conf:ro
-      - demo_private:/var/lib/phpledger:ro
+      - ./docker/shared-demo-guard.php:/opt/phpledger-demo/request-guard.php:ro
+      - ./docker/shared-demo.ini:/usr/local/etc/php/conf.d/shared-demo.ini:ro
+      - shared_demo_private:/var/lib/phpledger
     depends_on:
       demo-db:
         condition: service_healthy
@@ -39,7 +54,7 @@ services:
       PL_DEMO_WEB_PASSWORD: ${PL_DEMO_WEB_PASSWORD:?Set a dedicated demo runtime password}
       PL_DEMO_RESET_PASSWORD: ${PL_DEMO_RESET_PASSWORD:?Set a dedicated scheduler password}
     volumes:
-      - demo_data:/var/lib/mysql
+      - shared_demo_data:/var/lib/mysql
       - ./docker/demo-db-init.sh:/docker-entrypoint-initdb.d/01-demo-users.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -u root --silent"]
@@ -54,7 +69,7 @@ services:
         PHP_VERSION: ${PL_PHP_VERSION:-8.3.33}
     profiles: ["maintenance"]
     environment:
-      PL_ENV: demo
+      PL_ENV: demo-install
       PL_DB_HOST: demo-db
       PL_DB_NAME: phpledger_demo
       PL_DB_USER: ledger_demo_reset
@@ -64,21 +79,24 @@ services:
       - ./www/phpledger:/var/www/phpledger/www/phpledger:ro
       - ./resources:/var/www/phpledger/resources:ro
       - ./tools:/var/www/phpledger/tools:ro
+      - shared_demo_private:/var/lib/phpledger
     depends_on:
       demo-db:
         condition: service_healthy
-    entrypoint: ["php", "tools/demo-reset.php"]
+    entrypoint: ["php", "tools/shared-demo-reset.php"]
   demo-scheduler:
     extends:
       service: demo-reset
     profiles: []
     restart: unless-stopped
-    entrypoint: ["sh", "tools/demo-scheduler.sh"]
+    entrypoint: ["sh", "tools/shared-demo-scheduler.sh"]
 volumes:
-  demo_data:
-  demo_private:
+  shared_demo_data:
+  shared_demo_private:
 networks:
+  edge: {}
   default:
+    internal: true
     ipam:
       config:
         - subnet: ${PL_DEMO_DOCKER_SUBNET:-10.204.82.0/24}

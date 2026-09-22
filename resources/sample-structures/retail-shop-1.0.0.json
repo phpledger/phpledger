@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Willow Corner Shop",
   "business": "Retail shop",
-  "source_digest": "5df40c8ea3e89f0e03ad0cac2d0fc936e41c56d91c2d29306374ea05a98e4103",
+  "source_digest": "c02858466fcdf3f0f29eeff625781da6896ce88387bc7ff9fe01151adf2037b3",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

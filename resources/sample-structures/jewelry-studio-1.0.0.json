@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Lantern Finch Jewelry Studio",
   "business": "Jewelry studio",
-  "source_digest": "f9f4db604b8ab4f04ebfbc5b82fc9bd30d641acad18177ccfaae642784eb403b",
+  "source_digest": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

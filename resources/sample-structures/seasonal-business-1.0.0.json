@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Sunrise Garden Services",
   "business": "Seasonal business",
-  "source_digest": "b4c9d8c1aad89c37fb443a67c5b2e5e9545b8eaab73122a336f46135eec71d7a",
+  "source_digest": "0651cb9099abd22345b1b2c4efb9cc1d6ad5a482f6e31f92051e930129319817",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

@@ -71,6 +71,10 @@
       "source": "www/phpledger/includes/functions/demo_functions.php"
     },
     {
+      "destination": "www/phpledger/includes/functions/shared_demo_functions.php",
+      "source": "www/phpledger/includes/functions/shared_demo_functions.php"
+    },
+    {
       "destination": "www/phpledger/includes/functions/document_functions.php",
       "source": "www/phpledger/includes/functions/document_functions.php"
     },
@@ -161,6 +165,10 @@
     {
       "destination": "www/phpledger/install/migrate.php",
       "source": "www/phpledger/install/migrate.php"
+    },
+    {
+      "destination": "www/phpledger/install/upgrade.php",
+      "source": "www/phpledger/install/upgrade.php"
     },
     {
       "destination": "www/phpledger/install/migrations/001_foundation.php",

@@ -1,4 +1,22 @@
-# Restricted public demo operations
+# Public demo operations
+
+## 1.3 shared installer demo
+
+The 1.3 hosting configuration uses one disposable installation (`PL_ENV=demo-install`). Visitors complete the real installer and normal onboarding; everyone then shares that installation until the next UTC hour. This section describes the release candidate. The publication receipt is the authority for what is live.
+
+- The database stage remains in the installer, but hosting supplies every connection field. No database name, username, password, host, port or configuration download is shown or accepted from visitors. Forged fields cannot change the connection.
+- The application account is public: **demo / DemoLedger123!**. It is displayed at login and during account setup. Its identity, password and installation access remain fixed so subsequent visitors can sign in. These are public application credentials, not database credentials.
+- Visitors use ordinary company onboarding and accounting workflows with fictional data. A banner explains the shared workspace and hourly reset. Hosting isolates outbound services and keeps application code read-only; installing executable extensions is a self-hosted operation.
+- `compose.demo.yaml` gives the application access only to its dedicated database. An edge proxy exposes the app while the app and database stay on an internal network. The root-owned host directory holds the generation marker and reset lock; the web user can write only disposable runtime storage.
+- The hosting-only PHP prepend holds a shared lock through application shutdown and PHP session persistence. The reset process takes an exclusive lock, marks the generation unavailable, recreates only `phpledger_demo`, removes private configuration, installer receipts and sessions, then opens a new generation. A failed reset leaves access closed. An unmarked nonempty database is refused.
+- The scheduler runs at each UTC hour. For an intentional operator reset, run `docker compose -f compose.demo.yaml --profile maintenance run --rm demo-reset --now`. Do not reuse this command against another environment or bypass its ownership checks. No app request can invoke the reset account.
+- `/demo/health` checks the pinned database connection before installation and reports `installer-ready`; after installation it checks the application dependencies. It returns unavailable during reset.
+
+Candidate evidence: all six installer stages and ordinary onboarding completed; forged database/account fields were ignored, configuration download was refused, a second visitor signed in, and a reset rejected an old session/CSRF token even after a new account reused its numeric ID. Nine desktop/tablet/phone screenshots passed overflow checks. A live local HTTP shutdown/session race confirmed that reset waited and removed all old-generation files. These checks are local, not proof of public deployment.
+
+## Historical deployments and restricted-demo operations
+
+The sections below retain previous deployment receipts and the older `PL_ENV=demo` model. Their visitor-isolation, restricted-account and seeded-reset instructions do not describe the 1.3 shared installer configuration.
 
 ## Pending demo wording patch — 19 September 2026
 

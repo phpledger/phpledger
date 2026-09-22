@@ -4,15 +4,18 @@ name: Container image
 # owner has already uploaded the signed archive over release.yml's draft asset and
 # published it (release.yml itself never runs this - it only drafts). Downloads that
 # exact published ZIP and its checksum, builds docker/release/Dockerfile from it
-# (never from the working tree), and pushes to GHCR and Docker Hub (decision B42).
+# (never from the working tree), and pushes to GHCR and Docker Hub (owner, 23 Sep 2026).
 #
 # Tags: <version>, <major>.<minor>, <major> and latest for a stable release; only
-# <version> for a prerelease. latest never moves for a prerelease. Docker Hub is
-# pushed only when the owner has supplied DOCKERHUB_NAMESPACE and DOCKERHUB_TOKEN as
-# repository secrets; without them the job fails with a clear message rather than
-# silently skipping or hard-coding a namespace.
+# <version> for a prerelease. latest never moves for a prerelease. Both registries
+# are required. Docker Hub uses the existing DOCKERHUB_USERNAME/TOKEN credentials.
 
 on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
   release:
     types: [published]
   workflow_dispatch:
@@ -73,14 +76,11 @@ jobs:
       - name: Check Docker Hub credentials
         id: dockerhub
         env:
-          DOCKERHUB_NAMESPACE: ${{ secrets.DOCKERHUB_NAMESPACE }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          if [ -z "$DOCKERHUB_NAMESPACE" ] && [ -z "$DOCKERHUB_TOKEN" ]; then
-            echo "::warning::DOCKERHUB_NAMESPACE and DOCKERHUB_TOKEN repository secrets are not set. Decision B42 wants both GHCR and Docker Hub; publishing to GHCR only until the owner supplies the Docker Hub account. Record this in the release receipt."
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-          elif [ -z "$DOCKERHUB_NAMESPACE" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
-            echo "::error::Only one of DOCKERHUB_NAMESPACE and DOCKERHUB_TOKEN is set. Set both repository secrets, or neither to publish to GHCR only."
+          if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
+            echo "::error::Both DOCKERHUB_USERNAME and DOCKERHUB_TOKEN are required for the two-registry release."
             exit 1
           else
             echo "enabled=true" >> "$GITHUB_OUTPUT"
@@ -103,7 +103,7 @@ jobs:
         if: steps.dockerhub.outputs.enabled == 'true'
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
-          username: ${{ secrets.DOCKERHUB_NAMESPACE }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Compute image tags
@@ -114,7 +114,7 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
           DOCKERHUB_ENABLED: ${{ steps.dockerhub.outputs.enabled }}
-          DOCKERHUB_NAMESPACE: ${{ secrets.DOCKERHUB_NAMESPACE }}
+          DOCKERHUB_NAMESPACE: phpledger
           GHCR_IMAGE: ghcr.io/${{ github.repository }}
         run: |
           images="$GHCR_IMAGE"
@@ -140,6 +140,14 @@ jobs:
             RELEASE_ZIP=build/release/phpledger-${{ steps.version.outputs.version }}.zip
             RELEASE_SHA256=${{ steps.archive.outputs.sha256 }}
           tags: ${{ steps.tags.outputs.tags }}
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: phpledger/phpledger
+          short-description: Open-source, self-hosted accounting and cash POS for small businesses
 
       - name: Record the published tags and digest
         env:

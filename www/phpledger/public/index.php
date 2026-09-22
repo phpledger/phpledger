@@ -36,9 +36,17 @@ if ($path === '/health') {
         exit;
     }
     try {
-        require_once dirname(__DIR__) . '/includes/bootstrap.php';
+        $installerReady = pl_shared_demo_enabled() && pl_web_needs_installation();
+        if ($installerReady) {
+            // The hourly reset intentionally removes the schema. Probe the pinned
+            // connection without loading application services that need its tables.
+            require_once dirname(__DIR__) . '/includes/functions/install_web_functions.php';
+            pl_install_connect(pl_shared_demo_database());
+        } else {
+            require_once dirname(__DIR__) . '/includes/bootstrap.php';
+        }
         DB::queryFirstField('SELECT 1');
-        echo json_encode(['status' => 'ok', 'stage' => 'working-accounting-preview']);
+        echo json_encode(['status' => 'ok', 'stage' => $installerReady ? 'installer-ready' : 'working-accounting-preview']);
     } catch (Throwable $error) {
         http_response_code(503);
         error_log('PHP Ledger health dependency unavailable (' . get_class($error) . ').');

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Wheel & Spoke Workshop",
   "business": "Service workshop",
-  "source_digest": "7510c8ea6052243ad7aa0b70049adef0fa6d7a44a5af3431be9338536a068ea9",
+  "source_digest": "8d8aa2dd5c4ea227ac29d8597cccc51711ffc9ac165a6846d75e82abfeeb6d2f",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

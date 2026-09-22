@@ -10,6 +10,7 @@ require_once __DIR__ . '/security_functions.php';
 require_once __DIR__ . '/i18n_functions.php';
 require_once __DIR__ . '/demo_functions.php';
 require_once __DIR__ . '/update_channel_functions.php';
+require_once __DIR__ . '/shared_demo_functions.php';
 
 /** Browser setup is open until installation completes; the hosted demo never offers it. */
 function pl_install_available(): bool
@@ -118,6 +119,9 @@ function pl_install_suggested_public_url(array $server): string
  */
 function pl_install_database_input(array $input): array
 {
+    if (pl_shared_demo_enabled()) {
+        return pl_shared_demo_database();
+    }
     $get = static function (string $name) use ($input): string {
         $value = $input[$name] ?? '';
         return is_string($value) ? $value : '';
@@ -326,6 +330,13 @@ function pl_install_verify_runtime(array $config): void
  */
 function pl_install_finish(array $schemaConfig, array $runtimeConfig, string $email, string $name, string $password, array $state, string $username = '', ?array $logo = null): array
 {
+    if (pl_shared_demo_enabled()) {
+        $demoAccount = pl_shared_demo_account();
+        $email = $demoAccount['email'];
+        $name = $demoAccount['name'];
+        $password = $demoAccount['password'];
+        $username = $demoAccount['username'];
+    }
     require_once __DIR__ . '/auth_functions.php';
     pl_install_check_target($schemaConfig, $state);
     pl_install_verify_runtime($runtimeConfig);
@@ -472,6 +483,9 @@ function pl_install_http(): never
             if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 pl_require_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null);
                 $action = pl_web_text($_POST, 'action');
+                if (pl_shared_demo_enabled() && $action === 'download_config') {
+                    throw new DomainException('Database credentials stay private in the shared demonstration.');
+                }
                 if ($action === 'unlock' && $key !== null) {
                     pl_install_verify_key($key, pl_web_text($_POST, 'setup_key'), time());
                     if (!session_regenerate_id(true)) {
@@ -515,7 +529,7 @@ function pl_install_http(): never
                     if ($action === 'database') {
                         $view = 'database';
                         $candidate = pl_install_database_input($_POST);
-                        if ($key === null && !pl_database_local_host($candidate['host']) && !pl_install_trusted_environment_host($candidate['host'])) {
+                        if (!pl_shared_demo_enabled() && $key === null && !pl_database_local_host($candidate['host']) && !pl_install_trusted_environment_host($candidate['host'])) {
                             $code = pl_install_remote_code();
                             $setupCodePath = pl_install_display_path(pl_install_directory() . '/setup-code.txt');
                             if (!pl_install_authorized($code, $_SESSION, time())) {
@@ -541,7 +555,7 @@ function pl_install_http(): never
                         // automatic recovery. Hardening after installation belongs to the operator
                         // and to INSTALL.md, not to a checkbox on a first install.
                         $runtime = $candidate;
-                        $runtime['public_url'] = pl_install_public_url(pl_web_text($_POST, 'public_url'));
+                        $runtime['public_url'] = pl_install_public_url(pl_shared_demo_enabled() ? pl_shared_demo_public_url() : pl_web_text($_POST, 'public_url'));
                         $runtime['oauth_key_directory'] = pl_install_private_path((string) (getenv('PL_OAUTH_KEY_DIRECTORY') ?: pl_install_directory() . '/oauth'));
                         $runtime['installation_directory'] = pl_install_directory();
                         pl_install_check_existing_configuration($runtime);
@@ -583,7 +597,7 @@ function pl_install_http(): never
                                 pl_install_save_state($state);
                             }
                         } elseif ($action === 'save_config' || $action === 'download_config') {
-                            $runtimeConfig['public_url'] = pl_install_public_url(pl_web_text($_POST, 'public_url', (string) ($runtimeConfig['public_url'] ?? '')));
+                            $runtimeConfig['public_url'] = pl_install_public_url(pl_shared_demo_enabled() ? pl_shared_demo_public_url() : pl_web_text($_POST, 'public_url', (string) ($runtimeConfig['public_url'] ?? '')));
                             $runtimeConfig['oauth_key_directory'] = pl_install_private_path((string) (getenv('PL_OAUTH_KEY_DIRECTORY') ?: ($runtimeConfig['oauth_key_directory'] ?? pl_install_directory() . '/oauth')));
                             $runtimeConfig['installation_directory'] = pl_install_directory();
                             $_SESSION['install_runtime'] = $runtimeConfig;
@@ -602,15 +616,15 @@ function pl_install_http(): never
                             $state['phase'] = 'account';
                             pl_install_save_state($state);
                         } else {
-                            $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
-                            if (!hash_equals($password, is_string($_POST['password_confirm'] ?? null) ? $_POST['password_confirm'] : '')) {
+                            $password = pl_shared_demo_enabled() ? pl_shared_demo_account()['password'] : (is_string($_POST['password'] ?? null) ? $_POST['password'] : '');
+                            if (!pl_shared_demo_enabled() && !hash_equals($password, is_string($_POST['password_confirm'] ?? null) ? $_POST['password_confirm'] : '')) {
                                 throw new InvalidArgumentException('The two passwords do not match. Type the same password in both fields.');
                             }
                             require_once __DIR__ . '/branding_functions.php';
                             $logo = pl_logo_from_upload($_FILES['logo'] ?? null);
                             $user = pl_install_finish($sessionConfig, $runtimeConfig, pl_web_text($_POST, 'email'), pl_web_text($_POST, 'name'), $password, $state, pl_web_text($_POST, 'username'), $logo);
                             // Itemise what was built before the setup session is cleared.
-                            $completion = pl_install_completion_lines(pl_web_text($_POST, 'username'), pl_install_database_check());
+                            $completion = pl_install_completion_lines(pl_shared_demo_enabled() ? pl_shared_demo_account()['username'] : pl_web_text($_POST, 'username'), pl_install_database_check());
                             // 1.2 M7 made a sign-in durable: a server-side session row, not just the
                             // cookie, is what pl_current_user_id() accepts. pl_login_session() only
                             // opens that row when pl_session_open() exists, and it lives in

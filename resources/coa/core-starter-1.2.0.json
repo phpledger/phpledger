@@ -126,6 +126,48 @@
       "name": "Cash over and short",
       "type": "expense",
       "semantic_key": "core.expense.cash_over_short"
+    },
+    {
+      "code": "5-100-10003-00",
+      "name": "Salaries and wages",
+      "type": "expense",
+      "semantic_key": "core.payroll.gross_pay"
+    },
+    {
+      "code": "5-100-10004-00",
+      "name": "Employer contributions",
+      "type": "expense",
+      "semantic_key": "core.payroll.employer_contribution"
+    },
+    {
+      "code": "2-100-10002-00",
+      "name": "Net salaries payable",
+      "type": "liability",
+      "semantic_key": "core.payroll.net_pay"
+    },
+    {
+      "code": "2-100-10003-00",
+      "name": "Payroll withholding payable",
+      "type": "liability",
+      "semantic_key": "core.payroll.withholding"
+    },
+    {
+      "code": "2-100-10004-00",
+      "name": "Social security payable",
+      "type": "liability",
+      "semantic_key": "core.payroll.social_security"
+    },
+    {
+      "code": "2-100-10005-00",
+      "name": "Pension or provident fund payable",
+      "type": "liability",
+      "semantic_key": "core.payroll.pension"
+    },
+    {
+      "code": "1-110-10002-00",
+      "name": "Staff advances",
+      "type": "asset",
+      "semantic_key": "core.payroll.staff_advance"
     }
   ],
   "accounts": [

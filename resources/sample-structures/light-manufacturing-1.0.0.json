@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Maple Bench Works",
   "business": "Light manufacturing",
-  "source_digest": "db334ecd674b99317e15482f0ac04e1e80736a9863195787bb64599f881fe480",
+  "source_digest": "9c63c622878ecf3e69a89f392ba3b673635ba951bd9e3757a2ce31aa80111b26",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

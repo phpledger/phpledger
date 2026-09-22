@@ -22,6 +22,44 @@ function installer_process(string $script, array $arguments = [], string $input 
     return ['status' => proc_close($process), 'output' => $output];
 }
 
+test('shared installer ignores submitted database credentials and requires its fixed host database', function (): void {
+    $names = ['PL_ENV', 'PL_DB_NAME', 'PL_DB_HOST', 'PL_DB_USER', 'PL_DB_PASSWORD', 'PL_DB_PORT'];
+    $saved = [];
+    foreach ($names as $name) {
+        $saved[$name] = getenv($name);
+    }
+    try {
+        putenv('PL_ENV=demo-install');
+        putenv('PL_DB_NAME=phpledger_demo');
+        putenv('PL_DB_HOST=demo-db');
+        putenv('PL_DB_USER=demo_test_identity');
+        putenv('PL_DB_PASSWORD=synthetic-database-password');
+        putenv('PL_DB_PORT=3306');
+        $config = pl_install_database_input(['database' => 'another_database', 'host' => 'untrusted.example',
+            'user' => 'root', 'password' => 'submitted-password', 'port' => '1234']);
+        assert_same(['host' => 'demo-db', 'port' => 3306, 'database' => 'phpledger_demo',
+            'user' => 'demo_test_identity', 'password' => 'synthetic-database-password'], $config);
+        assert_true(pl_shared_demo_account()['password'] !== $config['password']);
+        putenv('PL_DB_NAME=another_database');
+        assert_throws(static fn () => pl_install_database_input([]), DomainException::class);
+        putenv('PL_DB_NAME=phpledger_demo');
+        putenv('PL_DB_USER=root');
+        assert_throws(static fn () => pl_install_database_input([]), DomainException::class);
+    } finally {
+        foreach ($saved as $name => $value) {
+            putenv($value === false ? $name : $name . '=' . $value);
+        }
+    }
+});
+
+test('upgrade CLI verifies a current installation without changing migration receipts', function (): void {
+    $before = DB::query('SELECT * FROM pl_schema_migrations ORDER BY version');
+    $result = installer_process(dirname(__DIR__) . '/www/phpledger/install/upgrade.php');
+    assert_same(0, $result['status'], $result['output']);
+    assert_true(str_contains($result['output'], 'Already up to date'));
+    assert_same($before, DB::query('SELECT * FROM pl_schema_migrations ORDER BY version'));
+});
+
 test('installer prerequisites identify missing runtime, extensions and dependencies', function (): void {
     foreach ([80200, 80233, 80300, 80333, 80425, 80510] as $version) {
         assert_same([], pl_install_runtime_issues($version, ['bcmath', 'mbstring', 'PDO', 'pdo_mysql', 'session', 'curl', 'openssl', 'fileinfo'], true));
@@ -160,6 +198,7 @@ test('missing autoload and invalid local configuration produce safe installer fa
     mkdir($root . '/vendor', 0700);
     $files = [
         $install . '/preflight.php' => dirname(__DIR__) . '/www/phpledger/install/preflight.php',
+        $install . '/upgrade.php' => dirname(__DIR__) . '/www/phpledger/install/upgrade.php',
         $includes . '/bootstrap.php' => dirname(__DIR__) . '/www/phpledger/includes/bootstrap.php',
         $includes . '/functions/runtime_functions.php' => dirname(__DIR__) . '/www/phpledger/includes/functions/runtime_functions.php',
         $includes . '/functions/install_functions.php' => dirname(__DIR__) . '/www/phpledger/includes/functions/install_functions.php',
@@ -187,6 +226,11 @@ test('missing autoload and invalid local configuration produce safe installer fa
         $thrown = installer_process($install . '/preflight.php');
         assert_same(1, $thrown['status']);
         assert_true(!str_contains($thrown['output'], $secret));
+        $upgrade = installer_process($install . '/upgrade.php');
+        assert_same(1, $upgrade['status']);
+        assert_true(str_contains($upgrade['output'], 'Upgrade failed'));
+        assert_true(!str_contains($upgrade['output'], $secret));
+        assert_true(!str_contains($upgrade['output'], 'Stack trace'));
         unlink($includes . '/functions/install_functions.php');
         $missingService = installer_process($install . '/preflight.php');
         assert_same(1, $missingService['status']);

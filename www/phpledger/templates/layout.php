@@ -14,9 +14,9 @@ $workspace = $user !== null && $company !== null && !in_array($view, ['oauth-con
     <link rel="icon" href="<?= pl_e(pl_url('/assets/brand/phpledger-horizontal.png')) ?>" type="image/png">
     <title><?= pl_e(pl_t('{page} · PHP Ledger', ['page' => $title])) ?></title>
     <link rel="preload" href="<?= pl_e(pl_url('/assets/fonts/InterVariable.woff2')) ?>" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="<?= pl_e(pl_url('/assets/app.css', ['v' => 'redesign-foundation'])) ?>">
+    <link rel="stylesheet" href="<?= pl_e(pl_url('/assets/app.css', ['v' => pl_app_version()])) ?>">
 
-    <script src="<?= pl_e(pl_url('/assets/app.js', ['v' => '20260916-setup'])) ?>" defer></script>
+    <script src="<?= pl_e(pl_url('/assets/app.js', ['v' => pl_app_version()])) ?>" defer></script>
 
 
 </head>

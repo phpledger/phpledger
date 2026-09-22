@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/shared_demo_functions.php';
+
 final class PlDemoUnavailable extends DomainException {}
 
 function pl_demo_enabled(): bool
@@ -15,6 +17,17 @@ function pl_demo_reset_process(): bool
 
 function pl_demo_validate_configuration(array $configuration): void
 {
+    if (pl_shared_demo_enabled()) {
+        foreach (pl_shared_demo_database() as $key => $value) {
+            if ((string) ($configuration[$key] ?? '') !== (string) $value) {
+                throw new RuntimeException('The shared demonstration must use its assigned database connection.');
+            }
+        }
+        if (getenv('PL_DEMO_RESET_MODE') === '1') {
+            throw new RuntimeException('Shared demo maintenance credentials cannot run the application.');
+        }
+        return;
+    }
     if (!pl_demo_enabled()) {
         if (($configuration['database'] ?? null) === 'phpledger_demo') {
             throw new RuntimeException('The isolated demo database cannot be opened as a normal application.');
@@ -98,7 +111,7 @@ function pl_demo_require_setup_action(): void
  */
 function pl_sample_companies_allowed(): bool
 {
-    return in_array(getenv('PL_ENV'), ['local', 'test'], true) || (pl_demo_enabled() && pl_demo_provisioning());
+    return in_array(getenv('PL_ENV'), ['local', 'test'], true) || pl_shared_demo_enabled() || (pl_demo_enabled() && pl_demo_provisioning());
 }
 
 function pl_require_sample_companies_allowed(): void

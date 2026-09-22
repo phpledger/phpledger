@@ -972,6 +972,11 @@ a {
     .gauge-grid { grid-template-columns: minmax(0, 1fr); }
     .field-pair, .field-pair.uneven { grid-template-columns: minmax(0, 1fr); }
   }
+  @media (max-width: 30rem) {
+    .bench-chrome { flex-wrap: wrap; }
+    .bench-tray { flex-basis: 100%; justify-content: space-between; }
+    .tray-slot { flex: 0 1 44px; }
+  }
 
   .alert {
     display: flex;

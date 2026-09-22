@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Meadow Training Pharmacy",
   "business": "Non-medicinal training inventory",
-  "source_digest": "6bcdc83cf502201ce308233a819b8994fc6937e4e0353f7bafc531b5e91ec7b2",
+  "source_digest": "235b95787c529afd428c99e85a72c31eb387bef9763346aa5e49278e3163f95e",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

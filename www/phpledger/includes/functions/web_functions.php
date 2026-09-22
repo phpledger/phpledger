@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/i18n_functions.php';
+require_once __DIR__ . '/shared_demo_functions.php';
 
 /** Web presentation helpers. Financial rules remain in the existing services. */
 function pl_web_unavailable_page(int $status): void
@@ -119,6 +120,9 @@ function pl_web_needs_installation(): bool
     }
     require_once __DIR__ . '/installation_state_functions.php';
     try {
+        if (pl_shared_demo_enabled()) {
+            return !is_file(pl_install_directory() . '/installed.json');
+        }
         if (is_file(pl_install_config_path()) || is_file(pl_install_directory() . '/installed.json')) {
             return false;
         }

@@ -1,4 +1,7 @@
 <?php declare(strict_types=1); ?>
+<?php if (pl_shared_demo_enabled()): ?>
+<div class="demo-banner"><span><strong><?= pl_e(pl_t('Shared public demo')) ?></strong> · <?= pl_e(pl_t('Everyone uses the same installation. Use fictional information. All work resets hourly.')) ?></span></div>
+<?php endif; ?>
 <?php if (pl_demo_enabled() && $view !== 'error'): $demoState = DB::queryFirstRow('SELECT next_reset_at FROM pl_demo_state WHERE id = 1'); ?>
 <div class="demo-banner"><span><strong><?= pl_e(pl_t('Public demo')) ?></strong> · <?= pl_e(pl_t('Separate sample data for each visitor. Destructive actions are disabled.')) ?></span><span><?= pl_e(pl_t('Resets')) ?> <time data-local-time datetime="<?= pl_e(str_replace(' ', 'T', $demoState['next_reset_at']) . 'Z') ?>"><?= pl_e(pl_t('{time} UTC', ['time' => $demoState['next_reset_at']])) ?></time> · <span data-demo-expiry="<?= pl_e(str_replace(' ', 'T', $demoState['next_reset_at']) . 'Z') ?>"><?= pl_e(pl_tn('{count} minute remaining', '{count} minutes remaining', max(0, (int) ceil((strtotime($demoState['next_reset_at'] . ' UTC') - time()) / 60)), ['count' => max(0, (int) ceil((strtotime($demoState['next_reset_at'] . ' UTC') - time()) / 60))])) ?></span></span></div>
 <?php endif; ?>

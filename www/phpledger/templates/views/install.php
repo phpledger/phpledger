@@ -27,6 +27,7 @@ $remoteProof = $remoteProof ?? false;
 $setupCodePath = $setupCodePath ?? '';
 $requirements = $requirements ?? [];
 $databasePorts = $databasePorts ?? [];
+$sharedDemo = pl_shared_demo_enabled();
 $completion = $completion ?? [];
 $styleNonce = $styleNonce ?? '';
 $reviewConfig = $_SESSION['install_database'] ?? [];
@@ -65,6 +66,7 @@ $blocking = array_values(array_filter($requirements, static fn (array $check): b
 <?php endif; ?>
 </div>
 <?php if ($error !== ''): ?><div class="alert alert-danger" role="alert" tabindex="-1"><p><?= pl_e($error) ?></p></div><?php endif; ?>
+<?php if ($sharedDemo): ?><div class="alert alert-info" role="note"><p><?= pl_e(pl_t('Shared public demo: complete the real installer with protected database settings and a fixed application login. Everyone shares the results until the hourly reset. Use fictional information.')) ?></p></div><?php endif; ?>
 <?php if ($insecureHttp && !in_array($view, ['locked', 'blocked'], true)): ?><div class="alert alert-warning" role="note"><p><strong><?= pl_e(pl_t('This address is not using HTTPS.')) ?></strong> <?= pl_e(pl_t('What you type here travels unencrypted. Setup continues so that you can try PHP Ledger; before you keep real books, turn on SSL in your hosting panel and open the site again with https://.')) ?></p></div><?php endif; ?>
 <?php $exposureLink = $exposureWarning && !in_array($view, ['locked', 'blocked'], true) ? pl_install_exposure_check_link() : null; ?>
 <?php if ($exposureLink !== null): ?><div class="alert alert-warning" role="note"><p><?= pl_e(pl_t('Setup could not confirm that PHP Ledger\'s private folders are hidden. Open')) ?> <a href="<?= pl_e($exposureLink) ?>" target="_blank" rel="noopener"><?= pl_e(pl_t('this check link')) ?></a> <?= pl_e(pl_t('in a new tab. It should show “Not Found” or “Forbidden”. If you can read a message instead, point the website\'s document root at')) ?> <code>www/phpledger/public</code>.</p></div><?php endif; ?>
@@ -142,6 +144,9 @@ $blocking = array_values(array_filter($requirements, static fn (array $check): b
 <div class="bench-body"><div class="bench-split">
 <form class="flex flex-col gap-3 bench-main" id="database-form" method="post" action="<?= pl_e(pl_url('/install')) ?>"><input type="hidden" name="csrf_token" value="<?= pl_e($csrf) ?>"><input type="hidden" name="action" value="database">
 <?php if ($remoteProof): ?><div class="field"><label class="field-label" for="setup-code"><?= pl_e(pl_t('Setup code from {file}', ['file' => basename($setupCodePath)])) ?></label><input class="input" id="setup-code" name="setup_code" type="password" required autocomplete="off" maxlength="256" aria-describedby="setup-code-hint"><p class="field-hint" id="setup-code-hint"><?= pl_e(pl_t('Your database is on another server, so setup asks for this one-time code. Open')) ?> <span class="snip"><?= pl_e($setupCodePath) ?></span> <?= pl_e(pl_t('with your hosting file manager and copy the code inside.')) ?></p></div><?php endif; ?>
+<?php if ($sharedDemo): ?>
+<div class="alert alert-info" role="note"><p><?= pl_e(pl_t('The demo database is already assigned. Its connection settings are fixed and private. Continue to run the same connection checks as a normal installation.')) ?></p></div>
+<?php else: ?>
 <div class="field"><label class="field-label" for="public-url"><?= pl_e(pl_t('This site\'s address')) ?></label><input class="input" id="public-url" name="public_url" type="url" value="<?= pl_e($field('public_url', (string) (getenv('PL_PUBLIC_URL') ?: pl_install_suggested_public_url($_SERVER)))) ?>" placeholder="https://books.example.com" required maxlength="480" autocomplete="url"></div>
 <div class="field-pair">
 <div class="field"><label class="field-label" for="db-host"><?= pl_e(pl_t('Database host')) ?></label><input class="input" id="db-host" name="host" value="<?= pl_e($field('host', 'localhost')) ?>" required maxlength="253" autocomplete="off"></div>
@@ -153,10 +158,15 @@ $blocking = array_values(array_filter($requirements, static fn (array $check): b
 <div class="field"><label class="field-label" for="db-user"><?= pl_e(pl_t('Database user')) ?></label><input class="input" id="db-user" name="user" value="<?= pl_e($field('user')) ?>" required maxlength="128" autocomplete="off"></div>
 <div class="field"><label class="field-label" for="db-password"><?= pl_e(pl_t('Database password')) ?></label><input class="input" id="db-password" name="password" type="password" autocomplete="new-password" maxlength="1024" placeholder="<?= pl_e(pl_t('Leave empty on this computer')) ?>"></div>
 </div>
+<?php endif; ?>
 </form>
 <div class="bench-side">
+<?php if ($sharedDemo): ?>
+<div class="tip-module"><h2><?= pl_e(pl_t('Installing on your own hosting?')) ?></h2><p><?= pl_e(pl_t('On your own installation, enter the database connection settings supplied by your host. This shared demo supplies those settings privately.')) ?></p></div>
+<?php else: ?>
 <div class="tip-module"><h2><?= pl_e(pl_t('Setting up on your own computer?')) ?></h2>
 <p><?= pl_e(pl_t('XAMPP, Laragon and MAMP already create a')) ?> <span class="snip">root</span> <?= pl_e(pl_t('account with no password. Leave the password empty and setup does the rest, including creating the database itself.')) ?></p></div>
+<?php endif; ?>
 <?php if ($requirements !== []): [$summary, $wording] = $summaryWording($requirements); ?>
 <span class="recap-pill"><?= $tick ?><?= pl_e(pl_t('Server checks: {status}', ['status' => $wording])) ?></span>
 <?php endif; ?>
@@ -177,8 +187,12 @@ $blocking = array_values(array_filter($requirements, static fn (array $check): b
 <div class="reward-card reveal">
 <span class="reward-badge"><?= $tick ?><?= pl_e(pl_t('Connected')) ?></span>
 <h1 class="reward-title"><?= pl_e(pl_t($headings['review'])) ?></h1>
+<?php if ($sharedDemo): ?>
+<p class="reward-detail"><?= pl_e(pl_t('The shared demonstration database is connected and ready.')) ?></p>
+<?php else: ?>
 <p class="reward-detail"><?= pl_e(pl_t('{database} on {host}:{port}', ['database' => (string) ($reviewConfig['database'] ?? ''), 'host' => (string) ($reviewConfig['host'] ?? ''), 'port' => (int) ($reviewConfig['port'] ?? 3306)])) ?></p>
 <p class="reward-note"><?= pl_e(pl_t($reviewNoteKey, ['user' => $reviewSignInUser])) ?></p>
+<?php endif; ?>
 </div>
 <ul class="next-row reveal"><li class="next-chip"><?= pl_e(pl_t('Chart of accounts')) ?></li><li class="next-chip"><?= pl_e(pl_t('Protections')) ?></li><li class="next-chip"><?= pl_e(pl_t('Reports')) ?></li><li class="next-chip"><?= pl_e(pl_t('Your account')) ?></li></ul>
 </div></div>
@@ -222,13 +236,21 @@ $blocking = array_values(array_filter($requirements, static fn (array $check): b
 <div class="bench-actions"><span class="fine-print"><?= pl_e(pl_t('{status}. Next, the settings are saved outside the folder visitors can reach.', ['status' => ucfirst($wording)])) ?></span>
 <form method="post" action="<?= pl_e(pl_url('/install')) ?>"><input type="hidden" name="csrf_token" value="<?= pl_e($csrf) ?>"><input type="hidden" name="public_url" value="<?= pl_e((string) ($_SESSION['install_runtime']['public_url'] ?? '')) ?>">
 <button class="btn btn-primary" name="action" value="save_config" type="submit"><?= pl_e(pl_t('Save private configuration')) ?></button></form></div>
+<?php if (!$sharedDemo): ?>
 <details class="text-sm"><summary><?= pl_e(pl_t('My host does not allow PHP to write this file')) ?></summary><p class="field-hint"><?= pl_e(pl_t('Download the private configuration and upload it with your hosting panel as')) ?> <span class="snip">www/phpledger/includes/config.local.php</span><?= pl_e(pl_t(', outside')) ?> <span class="snip">public/</span><?= pl_e(pl_t('. Restrict its permissions, delete the downloaded copy, then refresh this page. Setup never overwrites an existing file.')) ?></p>
-<form method="post" action="<?= pl_e(pl_url('/install')) ?>"><input type="hidden" name="csrf_token" value="<?= pl_e($csrf) ?>"><input type="hidden" name="public_url" value="<?= pl_e((string) ($_SESSION['install_runtime']['public_url'] ?? '')) ?>"><button class="btn btn-secondary" name="action" value="download_config" type="submit"><?= pl_e(pl_t('Download private configuration')) ?></button></form></details>
+<form method="post" action="<?= pl_e(pl_url('/install')) ?>"><input type="hidden" name="csrf_token" value="<?= pl_e($csrf) ?>"><input type="hidden" name="public_url" value="<?= pl_e((string) ($_SESSION['install_runtime']['public_url'] ?? '')) ?>"><button class="btn btn-secondary" name="action" value="download_config" type="submit"><?= pl_e(pl_t('Download private configuration')) ?></button></form></details><?php endif; ?>
 
 <?php elseif ($view === 'account'): ?>
 <div class="bench-head"><h1 class="bench-heading"><?= pl_e(pl_t($headings['account'])) ?></h1><p class="bench-sub"><?= pl_e(pl_t('The last step before your first business.')) ?></p></div>
 <div class="bench-body"><div class="bench-split">
 <form class="flex flex-col gap-3 bench-main-wide" id="account-form" method="post" action="<?= pl_e(pl_url('/install')) ?>" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="<?= pl_e($csrf) ?>"><input type="hidden" name="action" value="finish">
+<?php if ($sharedDemo): $demoAccount = pl_shared_demo_account(); ?>
+<div class="alert alert-info" role="note">
+<p><?= pl_e(pl_t('Create the shared demo account. Its sign-in stays fixed so everyone can use this installation.')) ?></p>
+<p><?= pl_e(pl_t('Username')) ?>: <code><?= pl_e($demoAccount['username']) ?></code><br>
+<?= pl_e(pl_t('Password')) ?>: <code><?= pl_e($demoAccount['password']) ?></code></p>
+</div>
+<?php else: ?>
 <div class="field-pair">
 <div class="field"><label class="field-label" for="owner-name"><?= pl_e(pl_t('Your name')) ?></label><input class="input" id="owner-name" name="name" value="<?= pl_e($field('name')) ?>" required maxlength="120" autocomplete="name"></div>
 <div class="field"><label class="field-label" for="owner-username"><?= pl_e(pl_t('Username')) ?></label><input class="input" id="owner-username" name="username" value="<?= pl_e($field('username', (string) ($state['owner_username'] ?? ''))) ?>" required minlength="3" maxlength="60" autocomplete="username" autocapitalize="none" spellcheck="false" aria-describedby="username-hint"></div>
@@ -240,6 +262,7 @@ $blocking = array_values(array_filter($requirements, static fn (array $check): b
 <div class="field"><label class="field-label" for="owner-password-confirm"><?= pl_e(pl_t('Type it again')) ?></label><input class="input" id="owner-password-confirm" name="password_confirm" type="password" required minlength="12" maxlength="72" autocomplete="new-password"></div>
 </div>
 <p class="field-hint" id="password-hint"><?= pl_e(pl_t('At least 12 characters. You will sign in with your username or your email address.')) ?></p>
+<?php endif; ?>
 <div class="field"><label class="field-label" for="owner-logo"><?= pl_e(pl_t('Your logo (optional)')) ?></label><input class="input" id="owner-logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="logo-hint"><p class="field-hint" id="logo-hint"><?= pl_e(pl_t('PNG, JPEG or WebP up to 1 MB. It replaces the PHP Ledger logo in the menu and on the sign-in page.')) ?></p></div>
 </form>
 <div class="bench-side-narrow">
