@@ -15,6 +15,7 @@ from datetime import date, timedelta
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / "resources" / "demo-packs"
 PROFILE_CATALOG = json.loads((ROOT / "resources" / "coa" / "industry-profiles-0.5.0.json").read_text(encoding="utf-8"))
+STARTER_PROVISIONS = json.loads((ROOT / "resources" / "coa" / "core-starter-1.2.0.json").read_text(encoding="utf-8")).get("provisions", [])
 D = Decimal
 
 # The one month every pack runs payroll by element rather than as a single salary line (#98).
@@ -665,6 +666,8 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
              "1-120-10001-00": "asset", "2-120-10001-00": "liability",
              "1-900-10001-00": "asset", OWNER_LOAN: "liability", DRAWINGS: "equity",
              "4-900-10001-00": "income", "5-900-10001-00": "expense",
+             # Postable chart provisions must also reconcile explicitly, even when unused.
+             **{a["code"]: a["type"] for a in STARTER_PROVISIONS},
              **{a[0]: a[2] for a in accounts}}
     events = []
 

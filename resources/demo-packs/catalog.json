@@ -26,7 +26,7 @@
       ]
     },
     "file": "service-agency-1.0.0.json",
-    "sha256": "12b0a460af07789ae9f0921f2d6cc1784dcc963e5f0f3b1ea6cd6ff963c896fa"
+    "sha256": "ef5dc27ba100dbcdb61e034e7093d4b6ba081b8fc1b06b92fd1fae02445d1d94"
   },
   {
     "id": "retail-shop",
@@ -55,7 +55,7 @@
       ]
     },
     "file": "retail-shop-1.0.0.json",
-    "sha256": "c46799314eb46abb7c69b08fa75ca63e7734a8b49cf69455b6331f842bc258cf"
+    "sha256": "5df40c8ea3e89f0e03ad0cac2d0fc936e41c56d91c2d29306374ea05a98e4103"
   },
   {
     "id": "seasonal-business",
@@ -84,7 +84,7 @@
       ]
     },
     "file": "seasonal-business-1.0.0.json",
-    "sha256": "12d9b9f868c4704b82ddc7c65ebe4bf5628ad686592430b17cb7e0c084a827a5"
+    "sha256": "b4c9d8c1aad89c37fb443a67c5b2e5e9545b8eaab73122a336f46135eec71d7a"
   },
   {
     "id": "distributor",
@@ -113,7 +113,7 @@
       ]
     },
     "file": "distributor-1.0.0.json",
-    "sha256": "3afba0d917f1672374088ca9d5eaa49033e26d9aba0cd43204e25b08c23fd71e"
+    "sha256": "b39e3061b05720949bb273e37d3b1ed08563049987a224ef88f952b224d48f85"
   },
   {
     "id": "trader",
@@ -142,7 +142,7 @@
       ]
     },
     "file": "trader-1.0.0.json",
-    "sha256": "12b6af5bd7a3e03bc8dccb86358c7b5ec82ef27025d7dcf29ebc36158db645fc"
+    "sha256": "edba8f2a3ba21b09efbb04e797ca50cbb86724de68a43def196df8c0066f994d"
   },
   {
     "id": "restaurant",
@@ -171,7 +171,7 @@
       ]
     },
     "file": "restaurant-1.0.0.json",
-    "sha256": "6efa8db6c3b273a473eae5ffbc956f1cf06d4b1f7e8438bc9688b57746f73045"
+    "sha256": "bb6565319d6738661e858fbd53a6808c8d419ff52d4b78f35a017d1be6999967"
   },
   {
     "id": "membership-club",
@@ -200,7 +200,7 @@
       ]
     },
     "file": "membership-club-1.0.0.json",
-    "sha256": "5b377a06970d4be50ecbf065399970aa74050d5d40d0be988e551a9adb987152"
+    "sha256": "11f3df030b8bd2199efd085dc496abb59d6f54937f07928542c869378c16841b"
   },
   {
     "id": "pharmacy",
@@ -229,7 +229,7 @@
       ]
     },
     "file": "pharmacy-1.0.0.json",
-    "sha256": "4168593a26aada2644e9f5294cd63d3761c184a393b6f9ba7413f0e6801795a1"
+    "sha256": "6bcdc83cf502201ce308233a819b8994fc6937e4e0353f7bafc531b5e91ec7b2"
   },
   {
     "id": "jewelry-studio",
@@ -258,7 +258,7 @@
       ]
     },
     "file": "jewelry-studio-1.0.0.json",
-    "sha256": "1f835796e843d3fcdd0af554e97cbf16f15015350496cb6e9461e48a3ace011f"
+    "sha256": "f9f4db604b8ab4f04ebfbc5b82fc9bd30d641acad18177ccfaae642784eb403b"
   },
   {
     "id": "light-manufacturing",
@@ -287,7 +287,7 @@
       ]
     },
     "file": "light-manufacturing-1.0.0.json",
-    "sha256": "6beef422ad37528f88000cab351ae09c9b9641ec5c3815887eedf31b9dea63fa"
+    "sha256": "db334ecd674b99317e15482f0ac04e1e80736a9863195787bb64599f881fe480"
   },
   {
     "id": "service-workshop",
@@ -316,6 +316,6 @@
       ]
     },
     "file": "service-workshop-1.0.0.json",
-    "sha256": "e18e2bd161ad6ba2b55541d7931dc357186b7a331b07e1149768e0b001be1c22"
+    "sha256": "7510c8ea6052243ad7aa0b70049adef0fa6d7a44a5af3431be9338536a068ea9"
   }
 ]

@@ -155,6 +155,9 @@ test('the conversion migration renumbers a populated chart without touching iden
     $f = ledger_fixture();
     $company = $f['company_id'];
     $book = $f['book_id'];
+    // Migration 047's provision cannot exist before migration 036 in a real upgrade.
+    // Remove that later-only row before reconstructing the historical chart.
+    DB::delete('pl_accounts', 'company_id = %i AND semantic_key = %s', $company, 'core.expense.cash_over_short');
     // Put the book back the way a 1.1.x installation actually looks: the six chart accounts that
     // existed before 1.2 carry their old numbers and nothing has been converted yet.
     DB::query('UPDATE pl_accounts SET code = legacy_code, legacy_code = NULL WHERE company_id = %i AND legacy_code IS NOT NULL', $company);
