@@ -90,6 +90,7 @@ function pl_period_core_checklist_items(): array
         // agrees records nothing at all, so "counts agreed for every location" cannot be
         // computed from the books. It is attested with a reason instead, and the locations are
         // listed so none is forgotten.
+        'core.payroll' => ['label' => 'Payroll posted for this period', 'hint' => 'Confirm all payroll totals, or record why payroll is not applicable. Unpaid payroll liabilities carry forward normally.', 'severity' => 'soft', 'computed' => false],
         'core.stock_counts' => [
             'label' => 'Stock has been counted and agreed for every location',
             'hint' => 'Recorded by attestation: a count that agrees with the book quantity posts nothing, so the books hold no evidence that it happened.',
@@ -293,6 +294,7 @@ function pl_period_checklist_build(int $actorId, int $companyId, int $bookId, in
             'core.drafts' => ['satisfied' => $drafts === [], 'detail' => $drafts],
             'core.reversals' => ['satisfied' => $reversals === [], 'detail' => $reversals],
             'core.cash_bank_reconciled' => ['satisfied' => $unreconciled === [], 'detail' => $unreconciled],
+            'core.payroll' => ['satisfied' => false, 'detail' => [pl_payroll_close_review($actorId,$companyId,$bookId,$period['start_date'],$period['end_date'])]],
             'core.stock_counts' => ['satisfied' => false, 'detail' => $locations],
             'core.opening_cutover' => ['satisfied' => $opening === null, 'detail' => $opening === null ? [] : [$opening]],
         ];

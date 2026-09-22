@@ -158,7 +158,7 @@ test('a counter credit sale over the recorded limit is refused at the counter, a
     // The same sale from a van is recorded: the device may be offline, so decision 4 puts the
     // check at settlement. tests/distribution_simulation_test.php proves it binds there.
     $van = pl_save_inventory_warehouse(...array_merge($args, [['code' => 'VAN-COUNTER', 'name' => 'Sample till van', 'kind' => 'mobile',
-        'driver_name' => 'Sample driver', 'is_active' => true, 'reason' => 'Sample van', 'idempotency_key' => bin2hex(random_bytes(16))]]));
+        'driver_employee_id' => sample_assignment_employee($f['actor_id'],$f['company_id']), 'driver_name' => 'Sample driver', 'is_active' => true, 'reason' => 'Sample van', 'idempotency_key' => bin2hex(random_bytes(16))]]));
     pl_post_stock_document(...array_merge($args, [['kind' => 'stock_issue', 'date' => '2026-01-09',
         'from_warehouse_id' => $f['default_warehouse_id'], 'to_warehouse_id' => (int) $van['id'],
         'reason' => 'Sample load', 'lines' => [['product_id' => $f['product_id'], 'quantity' => '20']],
@@ -176,7 +176,7 @@ test('the till catalogue reads the chosen location only, and withholds cost with
     $f = counter_located_fixture();
     $args = [$f['actor_id'], $f['company_id'], $f['book_id']];
     $van = pl_save_inventory_warehouse(...array_merge($args, [['code' => 'VAN-CAT', 'name' => 'Sample catalogue van', 'kind' => 'mobile',
-        'driver_name' => 'Sample driver', 'is_active' => true, 'reason' => 'Sample van', 'idempotency_key' => bin2hex(random_bytes(16))]]));
+        'driver_employee_id' => sample_assignment_employee($f['actor_id'],$f['company_id']), 'driver_name' => 'Sample driver', 'is_active' => true, 'reason' => 'Sample van', 'idempotency_key' => bin2hex(random_bytes(16))]]));
     pl_post_stock_document(...array_merge($args, [['kind' => 'stock_issue', 'date' => '2026-01-09',
         'from_warehouse_id' => $f['default_warehouse_id'], 'to_warehouse_id' => (int) $van['id'],
         'reason' => 'Sample load', 'lines' => [['product_id' => $f['product_id'], 'quantity' => '30']],

@@ -277,6 +277,7 @@ function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array
         // the operation, and pl_apply_filters() refuses to run inside that lock by design.
         $payload = pl_hook_posting_draft($actorId, $companyId, $bookId, $payload, $reversalOf);
         $book = pl_ledger_book($companyId, $bookId, true);
+        pl_payroll_validate_posting($actorId, $companyId, $bookId, $payload, $reversalOf);
         pl_require_book_ready($companyId);
         if ($book['currency'] !== $payload['currency']) {
             throw new DomainException('Journal header currency must be the book functional currency; transaction currencies belong on lines.');

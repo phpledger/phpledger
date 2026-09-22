@@ -243,3 +243,6 @@ The product owner decides scope and release; technical leadership supplies imple
 ## M17 local continuation — 23 September 2026
 
 Period close checklists, B89 synchronous reversing journals and cash counts are implemented locally with migration 047, alongside employee master 048 and encrypted plugin secret storage 049. The [implementation contract](design/1.2-2026-09/PERIOD-CLOSE.md) records the required/advisory defaults, immutable schedule metadata, stock-count attestation limitation and cash over/short treatment. [Combined verification](repository/M17-TAKEOVER-2026-09-23.md) passed 597 tests on each of MySQL and MariaDB, populated upgrades, the exact fresh-install ZIP and responsive browser workflows. Accountant acceptance and deployment remain separate; no release or live change is implied.
+
+
+1.3 implementation detail: aggregate payroll accrual/payment accounting and explicit employee-to-sales/driver/trade links are documented in [PAYROLL-ACCOUNTING.md](design/1.2-2026-09/PAYROLL-ACCOUNTING.md). These do not constitute individual payroll calculation, payslips, statutory compliance or a bank connector. Real-book/accountant acceptance remains the 2.0 gate under B81; internal worked examples are the 1.3 evidence.

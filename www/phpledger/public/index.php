@@ -94,7 +94,7 @@ $routes = [
     '/ownership' => ['GET', 'POST'], '/ownership/export' => ['GET'], '/reports/ownership' => ['GET'],
     // 1.3 M17: the employee master (issue #98's blocker). 'employees' is not a directory under
     // www/phpledger/public (only 'assets' is), so this does not repeat B90.
-    '/employees' => ['GET', 'POST'],
+    '/employees' => ['GET', 'POST'], '/employees/links' => ['GET', 'POST'], '/payroll' => ['GET', 'POST'],
     '/contra-review' => ['GET'], '/contra-review/confirm' => ['POST'],
     '/general-journals' => ['GET'], '/general-journals/new' => ['GET'], '/general-journals/edit' => ['GET'],
     '/general-journals/detail' => ['GET'], '/general-journals/save' => ['POST'], '/general-journals/post' => ['POST'], '/general-journals/reverse' => ['POST'],
@@ -401,6 +401,14 @@ try {
         pl_web_reconciliation($actorId, $companyId, $bookId, $user, $company, $method);
     }
     // 1.3 M17: the employee master (issue #98's blocker).
+    if ($path === '/payroll') {
+        require_once dirname(__DIR__) . '/includes/functions/payroll_web_functions.php';
+        pl_web_payroll($actorId,$companyId,$bookId,$user,$company,$method);
+    }
+    if ($path === '/employees/links') {
+        require_once dirname(__DIR__) . '/includes/functions/employment_link_web_functions.php';
+        pl_web_employee_links($actorId,$companyId,$bookId,$user,$company,$method);
+    }
     if ($path === '/employees') {
         require_once dirname(__DIR__) . '/includes/functions/employee_web_functions.php';
         pl_web_employees($actorId, $companyId, $bookId, $user, $company, $method);

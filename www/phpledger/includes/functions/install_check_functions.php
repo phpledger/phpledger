@@ -302,6 +302,7 @@ function pl_install_step_label(string $version): string
         '045_chart_headings' => 'Naming the chart of accounts classes and groups',
         '049_secret_store' => 'Adding the encrypted secret store for package credentials',
         '046_fixed_assets' => 'Adding the fixed-asset register',
+        '053_payroll_accounting' => 'Adding aggregate payroll accounting',
         '048_employee_master' => 'Adding the employee register',
     ];
     if (isset($labels[$version])) {

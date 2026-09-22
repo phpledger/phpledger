@@ -133,7 +133,7 @@ $result = pl_ledger_transaction(function () use ($p): array {
         $products[] = ['id' => (int) $product['id'], 'name' => $product['name'], 'sku' => $product['sku']];
     }
     $default = pl_inventory_default_warehouse($owner, $companyId, $bookId);
-    $van = pl_save_inventory_warehouse($owner, $companyId, $bookId, ['code' => 'VAN-1', 'name' => 'Sample van one', 'kind' => 'mobile',
+    $van = pl_save_inventory_warehouse($owner, $companyId, $bookId, ['code' => 'VAN-1', 'name' => 'Sample van one', 'kind' => 'mobile', 'driver_employee_id' => pl_save_employee($owner,$companyId,['full_name'=>'Sample driver','employment_type'=>'full_time','employment_status'=>'active','hire_date'=>'2026-01-01','reason'=>'Explicit fictional HTTP sample'])['id'],
         'driver_name' => 'Sample driver', 'vehicle_reference' => 'SAMPLE-4471', 'route_name' => 'Sample route',
         'is_active' => true, 'reason' => 'Sample stock acceptance', 'idempotency_key' => bin2hex(random_bytes(16))]);
     foreach ($products as $index => $product) {

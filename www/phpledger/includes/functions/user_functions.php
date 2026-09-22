@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/shared_demo_functions.php';
 
 /**
  * The Users module (release plan 1.2, milestone M7; owner decisions B17, B44, B53).
@@ -67,6 +68,7 @@ function pl_user_meta_get(int $userId, string $key, ?string $default = null): ?s
 
 function pl_user_meta_set(int $userId, string $key, ?string $value): void
 {
+    if (in_array($key, ['password_reset','email_change'], true) && $value !== null) { pl_shared_demo_require_mutable_account($userId); }
     if (!preg_match('/^[a-z][a-z0-9_:.-]{0,188}$/D', $key)) {
         throw new InvalidArgumentException('Invalid user meta key.');
     }
@@ -181,6 +183,7 @@ function pl_update_profile(int $userId, array $input): array
         if ($before === null) {
             throw new DomainException('This account is not available.');
         }
+        if ($username !== $before['username']) { pl_shared_demo_require_mutable_account($userId); }
         if ($username !== null && $username !== $before['username']
             && DB::queryFirstField('SELECT id FROM pl_users WHERE username = %s AND id <> %i', $username, $userId) !== null) {
             throw new DomainException('That username is already taken. Choose another one.');
@@ -232,6 +235,7 @@ function pl_set_user_locale(int $userId, ?string $locale): ?string
  */
 function pl_change_own_password(int $userId, string $current, string $new, ?string $keepTokenHash = null): void
 {
+    pl_shared_demo_require_mutable_account($userId);
     $hash = DB::queryFirstField('SELECT password_hash FROM pl_users WHERE id = %i AND is_active = 1', $userId);
     if (!is_string($hash) || !pl_verify_password($current, $hash)) {
         throw new DomainException('That is not your current password.');
@@ -255,6 +259,7 @@ function pl_change_own_password(int $userId, string $current, string $new, ?stri
  */
 function pl_request_email_change(int $userId, string $email): array
 {
+    pl_shared_demo_require_mutable_account($userId);
     $email = strtolower(trim($email));
     if (strlen($email) > 254 || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
         throw new DomainException('Enter a valid email address.');
@@ -281,6 +286,7 @@ function pl_request_email_change(int $userId, string $email): array
 /** Present the token to complete the change. Every session is revoked: the sign-in name moved. */
 function pl_confirm_email_change(int $userId, string $token): array
 {
+    pl_shared_demo_require_mutable_account($userId);
     $raw = pl_user_meta_get($userId, 'email_change');
     if ($raw === null) {
         throw new DomainException('There is no email change waiting for confirmation.');
@@ -349,6 +355,7 @@ function pl_admin_update_user(int $actorId, int $companyId, int $userId, array $
 /** Suspend or reactivate an account. Reversible, and it keeps every record the person posted. */
 function pl_set_user_active(int $actorId, int $companyId, int $userId, bool $active, string $reason): array
 {
+    if (!$active) { pl_shared_demo_require_mutable_account($userId); }
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($reason, 'Reason', 500);
     return pl_ledger_transaction(function () use ($actorId, $companyId, $userId, $active, $reason): array {
@@ -379,6 +386,7 @@ function pl_set_user_active(int $actorId, int $companyId, int $userId, bool $act
  */
 function pl_remove_company_member(int $actorId, int $companyId, int $userId, string $reason): void
 {
+    pl_shared_demo_require_mutable_account($userId);
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($reason, 'Reason', 500);
     pl_ledger_transaction(function () use ($actorId, $companyId, $userId, $reason): void {
@@ -405,6 +413,7 @@ function pl_remove_company_member(int $actorId, int $companyId, int $userId, str
  */
 function pl_anonymise_user(int $actorId, int $companyId, int $userId, string $reason): array
 {
+    pl_shared_demo_require_mutable_account($userId);
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($reason, 'Reason', 500);
     return pl_ledger_transaction(function () use ($actorId, $companyId, $userId, $reason): array {
@@ -444,6 +453,7 @@ function pl_anonymise_user(int $actorId, int $companyId, int $userId, string $re
  */
 function pl_force_password_reset(int $actorId, int $companyId, int $userId, string $reason): array
 {
+    pl_shared_demo_require_mutable_account($userId);
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($reason, 'Reason', 500);
     return pl_ledger_transaction(function () use ($actorId, $companyId, $userId, $reason): array {
@@ -474,6 +484,7 @@ function pl_complete_password_reset(string $signInName, string $token, string $p
             : 'SELECT id FROM pl_users WHERE username = %s',
         $signInName
     ) ?? 0);
+    pl_shared_demo_require_mutable_account($userId);
     $raw = $userId > 0 ? pl_user_meta_get($userId, 'password_reset') : null;
     $pending = null;
     if (is_string($raw)) {
@@ -612,6 +623,7 @@ function pl_accept_invitation(string $token, array $input): int
         }
         $capabilities = DB::queryFirstColumn('SELECT c.capability FROM pl_role_capabilities rc JOIN pl_capabilities c ON c.id = rc.capability_id WHERE rc.role_id = %i', $roleId);
         $enum = pl_role_enum_mirror(['slug' => (string) $role['slug'], 'is_system' => (bool) $role['is_system'], 'capabilities' => $capabilities]);
+        if ($enum !== 'owner') { pl_shared_demo_require_mutable_account($userId); }
         DB::insertUpdate('pl_company_members', ['company_id' => $companyId, 'user_id' => $userId, 'role' => $enum, 'role_id' => $roleId],
             ['role' => $enum, 'role_id' => $roleId]);
         DB::update('pl_user_invitations', ['accepted_at' => gmdate('Y-m-d H:i:s'), 'accepted_user_id' => $userId], 'id = %i', (int) $invitation['id']);

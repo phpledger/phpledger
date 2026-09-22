@@ -35,7 +35,7 @@ if (($argv[1] ?? '') === '--trading') {
         'address_line2'=>'Gulberg III, Lahore','address_line3'=>'','phone'=>'042-111-556-778','email'=>'sales@example.test',
         'tax_registrations'=>'NTN 3345678-9 . STRN 03-45-1234-567-89','footer_terms'=>'Goods once sold are exchangeable within seven days against a fresh purchase.',
         'revision'=>0,'reason'=>'Sample browser fixture','idempotency_key'=>'profile']);
-    $staff = pl_save_sales_staff($actor, $company, $book, ['code'=>'BILAL','name'=>'Bilal Ahmed','is_active'=>true,'reason'=>'Sample browser fixture']);
+    $staff = pl_save_sales_staff($actor, $company, $book, ['employee_id'=>pl_save_employee($actor,$company,['full_name'=>'Bilal Ahmed','employment_type'=>'full_time','employment_status'=>'active','hire_date'=>'2026-01-01','reason'=>'Fictional browser sample'])['id'],'code'=>'BILAL','name'=>'Bilal Ahmed','is_active'=>true,'reason'=>'Sample browser fixture']);
     $area = pl_save_area($actor, $company, $book, ['code'=>'GULBERG','name'=>'Gulberg route','is_active'=>true,'reason'=>'Sample browser fixture']);
     $pack = pl_save_product_pack($actor, $company, $book, ['product_id'=>$product['id'],'code'=>'CTN12','name'=>'Carton of 12','units_per_pack'=>'12','is_active'=>true,'reason'=>'Sample browser fixture']);
     pl_inventory_receive($actor, $company, $book, ['product_id'=>$product['id'],'quantity'=>'400','amount_base'=>'800','date'=>'2026-01-02',

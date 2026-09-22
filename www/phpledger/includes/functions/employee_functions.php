@@ -132,6 +132,7 @@ function pl_employee_emit(string $hook, array $payload): void
 function pl_employee_view(array $row): array
 {
     foreach (['id', 'company_id', 'revision', 'created_by'] as $field) { $row[$field] = (int) $row[$field]; }
+    $row['trade_party_id'] = ($row['trade_party_id'] ?? null) === null ? null : (int) $row['trade_party_id'];
     $row['ownership_party_id'] = $row['ownership_party_id'] === null ? null : (int) $row['ownership_party_id'];
     $row['status_label'] = pl_employment_statuses()[(string) $row['employment_status']] ?? (string) $row['employment_status'];
     $row['type_label'] = pl_employment_types()[(string) $row['employment_type']] ?? (string) $row['employment_type'];

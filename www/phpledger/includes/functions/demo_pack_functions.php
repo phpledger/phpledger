@@ -719,7 +719,7 @@ function pl_demo_showcase_trading(int $actorId, int $companyId, int $bookId, arr
         'cash_on_invoice_cap' => '500.0000', 'revision' => (int) $policies['revision'],
         'reason' => 'Sample accounting policy for this sample\'s trading-document examples.',
         'idempotency_key' => $prefix . 'showcase-trading-policy']);
-    $staff = pl_save_sales_staff($actorId, $companyId, $bookId, ['code' => 'SS01', 'name' => 'Sample sales representative',
+    $staff = pl_save_sales_staff($actorId, $companyId, $bookId, ['employee_id' => pl_save_employee($actorId,$companyId,['full_name'=>'Sample sales representative','employment_type'=>'full_time','employment_status'=>'active','hire_date'=>'2026-01-01','reason'=>'Explicit fictional demo employment'])['id'], 'code' => 'SS01', 'name' => 'Sample sales representative',
         'is_active' => true, 'reason' => 'Sample sales-staff dimension.']);
     $area = pl_save_area($actorId, $companyId, $bookId, ['code' => 'NORTH', 'name' => 'Sample northern area',
         'is_active' => true, 'reason' => 'Sample area dimension.']);
@@ -781,7 +781,7 @@ function pl_demo_showcase_van_day(int $actorId, int $companyId, int $bookId, arr
     $day = '2026-10-12';
     $warehouse = pl_inventory_default_warehouse($actorId, $companyId, $bookId);
     $van = pl_save_inventory_warehouse($actorId, $companyId, $bookId, ['code' => 'VAN01', 'name' => 'Sample route van',
-        'kind' => 'mobile', 'driver_name' => 'Sample driver', 'vehicle_reference' => 'SAMPLE-0001',
+        'kind' => 'mobile', 'driver_employee_id' => pl_save_employee($actorId,$companyId,['full_name'=>'Sample driver','employment_type'=>'full_time','employment_status'=>'active','hire_date'=>'2026-01-01','reason'=>'Explicit fictional demo employment'])['id'], 'driver_name' => 'Sample driver', 'vehicle_reference' => 'SAMPLE-0001',
         'route_name' => 'Sample northern route', 'is_active' => true, 'reason' => 'Sample van as a mobile stock location.',
         'idempotency_key' => $prefix . 'showcase-van']);
     pl_inventory_receive($actorId, $companyId, $bookId, ['product_id' => $productId, 'quantity' => '100', 'amount_base' => '1000.0000',

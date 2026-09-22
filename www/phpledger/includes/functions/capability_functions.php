@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/shared_demo_functions.php';
 
 /**
  * Capabilities and roles (release plan 1.2, milestone M7; owner decisions B17, B44, B53, B58).
@@ -84,6 +85,8 @@ function pl_capability_catalogue(): array
         // related-party marker is: reading a person's identity, employment status and pay terms
         // is sensitive personal data (owner decision B58), and the person who prepares a payroll
         // review is not always the person who may edit the register itself.
+        'payroll.view' => ['label' => 'Read payroll accounting', 'description' => 'Read aggregate payroll journals and payable elements; no individual pay.', 'scope' => 'company'],
+        'payroll.manage' => ['label' => 'Maintain payroll accounting', 'description' => 'Post aggregate payroll accruals and prepare reviewed payments. Requires payroll.view.', 'scope' => 'company'],
         'employee.view' => ['label' => 'See the employee register', 'description' => 'Read employee identity, employment status and dates, job title and static pay terms. Personal data is sensitive (owner decision B58).', 'scope' => 'company'],
         'employee.manage' => ['label' => 'Maintain the employee register', 'description' => 'Record and edit employee identity, employment status and dates, job title, pay terms and the explicit link to the ownership register.', 'scope' => 'company'],
 
@@ -274,6 +277,7 @@ function pl_user_installation_grants(int $userId): array
  */
 function pl_set_installation_grant(int $actorId, int $userId, string $capability, bool $granted, string $reason, bool $seeding = false): array
 {
+    if (!$granted) { pl_shared_demo_require_mutable_account($userId); }
     if (!$seeding) {
         pl_demo_require_setup_action();
         if (!pl_user_can($actorId, 0, 'installation.admin')) {
@@ -598,6 +602,7 @@ function pl_assign_company_role(int $actorId, int $companyId, int $userId, int $
         $role = pl_get_role($actorId, $companyId, $roleId);
         $before = DB::queryFirstRow('SELECT company_id, user_id, role, role_id FROM pl_company_members WHERE company_id = %i AND user_id = %i FOR UPDATE', $companyId, $userId);
         $enum = pl_role_enum_mirror($role);
+        if ($enum !== 'owner') { pl_shared_demo_require_mutable_account($userId); }
         if ($before && $before['role'] === 'owner' && $enum !== 'owner'
             && (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_company_members WHERE company_id = %i AND role = 'owner'", $companyId) < 2) {
             throw new DomainException('This company would be left without an owner. Give someone else the Owner role first.');

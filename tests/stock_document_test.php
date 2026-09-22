@@ -12,7 +12,7 @@ function stock_document_fixture(): array
     $args = [$f['actor_id'], $f['company_id'], $f['book_id']];
     // The fixture's SYNTH-VAN is a fixed location; this milestone's van is a mobile one.
     $van = pl_save_inventory_warehouse(...array_merge($args, [[
-        'code' => 'VAN-1', 'name' => 'Van 1', 'kind' => 'mobile', 'driver_name' => 'Sample driver',
+        'code' => 'VAN-1', 'name' => 'Van 1', 'kind' => 'mobile', 'driver_employee_id' => sample_assignment_employee($f['actor_id'],$f['company_id']), 'driver_name' => 'Sample driver',
         'vehicle_reference' => 'SAMPLE-4471', 'route_name' => 'Sample route', 'is_active' => true,
         'reason' => 'Sample van', 'idempotency_key' => bin2hex(random_bytes(16))]]));
     $second = pl_save_inventory_product(...array_merge($args, [array_replace(inventory_product_input($f), ['sku' => 'SYNTH-2ND-' . bin2hex(random_bytes(4)), 'name' => 'Sample second item'])]));
@@ -415,4 +415,12 @@ test('stock documents: the manifest declares the routes it now has', function ()
         assert_true(isset(pl_document_series_types()[$series]), 'The manifest declares the series ' . $series . ', which has no catalogue entry.');
     }
     assert_true(in_array('038_stock_documents', $manifest['migrations'], true));
+});
+
+test('posted stock documents retain driver snapshots while the operational register reflects corrected names',function():void{
+    $f=stock_document_fixture();$a=$f['actor_id'];$c=$f['company_id'];$b=$f['book_id'];
+    $doc=pl_post_stock_document($a,$c,$b,stock_document_input($f));$van=pl_get_inventory_warehouse($a,$c,$b,$f['van_id']);
+    $employee=pl_get_employee($a,$c,$van['driver_employee_id']);pl_save_employee($a,$c,array_replace($employee,['full_name'=>'Corrected driver name','reason'=>'Sample name correction']),$employee['id'],$employee['revision']);
+    assert_same('Corrected driver name',pl_get_inventory_warehouse($a,$c,$b,$f['van_id'])['driver_name']);
+    assert_same('Sample driver',pl_stock_document_summary($a,$c,$b,$doc['id'])['to_warehouse']['driver_name']);
 });

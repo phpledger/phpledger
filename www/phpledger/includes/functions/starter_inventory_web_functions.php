@@ -20,7 +20,7 @@ function pl_web_starter_inventory(int $actorId,int $companyId,int $bookId,array 
                 $result=pl_save_inventory_product($actorId,$companyId,$bookId,$input,$id?:null,$id?pl_web_id($_POST,'revision'):null); $id=(int)$result['id'];
             } elseif ($action==='warehouse') {
                 $input=['code'=>pl_web_text($_POST,'code'),'name'=>pl_web_text($_POST,'name'),'kind'=>pl_web_text($_POST,'kind','fixed'),
-                    'driver_name'=>pl_web_text($_POST,'driver_name')?:null,'vehicle_reference'=>pl_web_text($_POST,'vehicle_reference')?:null,'route_name'=>pl_web_text($_POST,'route_name')?:null,
+                    'driver_employee_id'=>pl_web_id($_POST,'driver_employee_id')?:null,'driver_name'=>pl_web_text($_POST,'driver_name')?:null,'vehicle_reference'=>pl_web_text($_POST,'vehicle_reference')?:null,'route_name'=>pl_web_text($_POST,'route_name')?:null,
                     'is_active'=>isset($_POST['is_active']),'reason'=>pl_web_text($_POST,'reason'),'idempotency_key'=>$key];
                 $warehouseId=pl_web_id($_POST,'warehouse_id');
                 pl_save_inventory_warehouse($actorId,$companyId,$bookId,$input,$warehouseId?:null,$warehouseId?pl_web_id($_POST,'revision'):null);
@@ -76,7 +76,7 @@ function pl_web_starter_inventory(int $actorId,int $companyId,int $bookId,array 
         'list'=>!$product && !isset($_GET['new'])?pl_list_query($actorId,$companyId,$bookId,'inventory',$filters):null,
         'form'=>pl_form_state(pl_url($path,$id?['id'=>$id,'return_filters'=>$filters]:(isset($_GET['new'])?['new'=>'1','return_filters'=>$filters]:$filters))),
         'enabled'=>pl_module_available($actorId,$companyId,$bookId,'inventory'),'accounts'=>pl_starter_accounts($actorId,$companyId,$bookId),
-        'locations'=>$locations,'warehouses'=>$locations?pl_list_inventory_warehouses($actorId,$companyId,$bookId):[],'warehouse_filter'=>$warehouseFilter,
+        'assignmentEmployees'=>pl_user_can($actorId,$companyId,'employee.view') && pl_user_can($actorId,$companyId,'employee.manage')?pl_list_employees($actorId,$companyId):[],'locations'=>$locations,'warehouses'=>$locations?pl_list_inventory_warehouses($actorId,$companyId,$bookId):[],'warehouse_filter'=>$warehouseFilter,
         'products'=>pl_list_inventory_products($actorId,$companyId,$bookId),'valuation'=>pl_inventory_valuation($actorId,$companyId,$bookId,$filters['as_of'],$warehouseFilter),
         'movements'=>pl_inventory_history($actorId,$companyId,$bookId,$id?:($selectionId?:null),$warehouseFilter),'preview'=>$preview,
         'balance'=>$product?pl_inventory_balance($actorId,$companyId,$bookId,$id,null,$warehouseFilter):null]);

@@ -120,7 +120,9 @@ require_once __DIR__ . '/functions/branding_functions.php';
 // register and calls into this file to do it; load order does not matter to PHP itself since
 // both are pure function declarations, but this keeps the dependency reading top to bottom.
 require_once __DIR__ . '/functions/employee_functions.php';
+require_once __DIR__ . '/functions/employment_link_functions.php';
 require_once __DIR__ . '/functions/account_payment_functions.php';
+require_once __DIR__ . '/functions/payroll_functions.php';
 // 1.2.1 M8a: the ownership register. It loads before the plugin runtime because a package may
 // register a listener on its hook points while it boots, so pl_ownership_on() has to exist by
 // then; and because a country company-secretarial package is exactly the caller B63 designed

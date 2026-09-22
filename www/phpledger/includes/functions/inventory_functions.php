@@ -117,11 +117,14 @@ function pl_page_inventory_products(int $actorId,int $companyId,int $bookId,arra
 function pl_get_inventory_warehouse(int $actorId, int $companyId, int $bookId, int $id): array
 {
     pl_require_company_access($actorId, $companyId); pl_ledger_book($companyId, $bookId);
-    $row = DB::queryFirstRow('SELECT id,company_id,book_id,code,name,kind,driver_name,vehicle_reference,route_name,is_default,is_active,revision,created_by,created_at FROM pl_inventory_warehouses WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', $id, $companyId, $bookId);
+    $row = DB::queryFirstRow('SELECT id,company_id,book_id,code,name,kind,driver_name,driver_employee_id,vehicle_reference,route_name,is_default,is_active,revision,created_by,created_at FROM pl_inventory_warehouses WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE', $id, $companyId, $bookId);
     if (!$row) { throw new DomainException('This warehouse is not available in the selected company and book.'); }
     foreach (['id','company_id','book_id','revision','created_by'] as $field) { $row[$field] = (int) $row[$field]; }
     foreach (['driver_name','vehicle_reference','route_name'] as $field) { $row[$field] = $row[$field] === null ? null : (string) $row[$field]; }
     $row['is_default'] = (bool) $row['is_default']; $row['is_active'] = (bool) $row['is_active'];
+    $row['driver_employee_id'] = $row['driver_employee_id'] === null ? null : (int) $row['driver_employee_id'];
+    $row['legacy_driver_name'] = $row['driver_name'];
+    if ($row['driver_employee_id'] !== null) { $row['driver_name'] = (string) DB::queryFirstField('SELECT full_name FROM pl_employees WHERE id=%i AND company_id=%i', $row['driver_employee_id'], $companyId); }
     $row['is_mobile'] = $row['kind'] === 'mobile';
     return $row;
 }
@@ -172,7 +175,17 @@ function pl_save_inventory_warehouse(int $actorId, int $companyId, int $bookId, 
         $value = $input[$field] ?? null;
         $data[$field] = $value === null || $value === '' ? null : pl_ledger_text($value, $label, $field === 'vehicle_reference' ? 60 : 160);
     }
+    $beforeAssignment = $id === null ? null : pl_get_inventory_warehouse($actorId, $companyId, $bookId, $id);
+    $data['driver_employee_id'] = null;
     if ($data['kind'] === 'mobile') {
+        $employeeId = $input['driver_employee_id'] ?? ($beforeAssignment['driver_employee_id'] ?? null);
+        if ($employeeId !== null) {
+            if (!is_int($employeeId) || $employeeId < 1) { throw new DomainException('Select an employee for the driver assignment.'); }
+            $employee = $beforeAssignment !== null && $beforeAssignment['driver_employee_id'] === $employeeId ? ['name'=>$beforeAssignment['driver_name']] : pl_employee_assignment($actorId, $companyId, $employeeId);
+            $data['driver_employee_id'] = $employeeId;
+            $data['driver_name'] = $beforeAssignment['legacy_driver_name'] ?? $employee['name'];
+        } elseif ($beforeAssignment === null) { throw new DomainException('Select an employee for the new driver assignment.'); }
+        else { $data['driver_name'] = $beforeAssignment['legacy_driver_name']; }
         if ($data['driver_name'] === null) { throw new DomainException('A van needs the driver or salesman who carries its stock.'); }
     } else {
         foreach (['driver_name','vehicle_reference','route_name'] as $field) { $data[$field] = null; }

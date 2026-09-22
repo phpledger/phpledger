@@ -227,6 +227,21 @@ test('employee HTTP screen renders, validates CSRF and company scope, saves safe
         [, $html] = $request('/employees?id=' . $rows[0]['id']);
         assert_same(1, count(pl_list_employees($f['actor_id'], $f['company_id'])));
         assert_true(str_contains($html, 'Updated sample department'));
+        [$status,$payHtml]=$request('/payroll');assert_same(200,$status,'Payroll route renders.');
+        [$status]=$request('/payroll',['action'=>'provision','company_id'=>$f['company_id'],'book_id'=>$f['book_id'],'csrf'=>'bad']);assert_same(403,$status);
+        $request('/payroll',['action'=>'provision','company_id'=>$f['company_id'],'book_id'=>$f['book_id'],'csrf'=>$csrf($payHtml)]);
+        [$status,$payHtml]=$request('/payroll');assert_same(200,$status);
+        assert_true(str_contains($payHtml,'net_pay'),'Payroll element controls render.');
+        $payAccounts=pl_payroll_provision_accounts($f['actor_id'],$f['company_id'],$f['book_id']);
+        $payData=['action'=>'preview','company_id'=>$f['company_id'],'book_id'=>$f['book_id'],'csrf'=>$csrf($payHtml),'period_from'=>'2026-01-01','period_to'=>'2026-01-31','date'=>'2026-01-31','external_reference'=>'HTTP payroll','description'=>'Reviewed aggregate HTTP sample','request_key'=>bin2hex(random_bytes(16)),
+            'elements'=>[['kind'=>'gross_pay','account_id'=>$payAccounts['gross_pay'],'amount'=>'100'],['kind'=>'net_pay','account_id'=>$payAccounts['net_pay'],'amount'=>'100']]];
+        [$status,$payHtml]=$request('/payroll',$payData);assert_same(200,$status,'Payroll preview renders.');
+        preg_match('/name="preview_hash" value="([a-f0-9]+)"/',$payHtml,$payHash);assert_true(isset($payHash[1]),'Payroll preview provides confirmation hash.');
+        [$status]=$request('/payroll',array_replace($payData,['action'=>'post','confirmed'=>'yes','preview_hash'=>$payHash[1],'csrf'=>$csrf($payHtml)]));assert_true(in_array($status,[302,303],true));
+        assert_same(1,(int)DB::queryFirstField('SELECT COUNT(*) FROM pl_payroll_journals WHERE company_id=%i AND journal_id IS NOT NULL',$f['company_id']));
+        [$status,$linkHtml]=$request('/employees/links');assert_same(200,$status,'Employee links route renders: '.substr(strip_tags($linkHtml),-600));
+        assert_true(str_contains($linkHtml,'employee bank details'),'Bank matching limitation is visible. '.substr((string)file_get_contents($log),-1200));
+        [$status]=$request('/employees/links',['action'=>'trade','employee_id'=>$rows[0]['id'],'revision'=>3,'company_id'=>$f['company_id'],'book_id'=>$f['book_id'],'csrf'=>'bad']);assert_same(403,$status);
         // A valid-scope failure can also become stale if context changes before its redirect.
         $request('/employees', array_replace($edit, ['revision' => 2, 'csrf' => $csrf($html)]));
         $other = pl_create_company($f['actor_id'], 'Sample second employee company', 'USD', '2026-01-01');

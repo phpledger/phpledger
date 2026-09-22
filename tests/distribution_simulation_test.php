@@ -28,7 +28,7 @@ function distribution_fixture(): array
     $f = counter_located_fixture();
     $args = [$f['actor_id'], $f['company_id'], $f['book_id']];
     $van = pl_save_inventory_warehouse(...array_merge($args, [['code' => 'VAN-SIM', 'name' => 'Route van 1', 'kind' => 'mobile',
-        'driver_name' => 'Sample driver', 'vehicle_reference' => 'SAMPLE-4471', 'route_name' => 'Sample route',
+        'driver_employee_id' => sample_assignment_employee($f['actor_id'],$f['company_id']), 'driver_name' => 'Sample driver', 'vehicle_reference' => 'SAMPLE-4471', 'route_name' => 'Sample route',
         'is_active' => true, 'reason' => 'Sample distributor van', 'idempotency_key' => bin2hex(random_bytes(16))]]));
     // Product B, at a carrying value of 3.0000: 100 units received into the warehouse a week
     // before the day, so the van's opening balance on the day itself is nil.

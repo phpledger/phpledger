@@ -11,6 +11,12 @@ require_once dirname(__DIR__) . '/www/phpledger/install/migrate.php';
 pl_migrate();
 
 $results = [];
+/** Explicit fictional employment for test operational assignments; never imports real identities. */
+function sample_assignment_employee(int $actor,int $company,string $name='Sample driver'): int
+{
+    return pl_save_employee($actor,$company,['full_name'=>$name,'employment_type'=>'full_time','employment_status'=>'active','hire_date'=>'2026-01-01','reason'=>'Explicit fictional employment fixture'])['id'];
+}
+
 function test(string $name, callable $action): void
 {
     global $results;
@@ -90,6 +96,7 @@ $suites[] = 'onboarding_skeleton_test.php';
 // a capability and the fixture grants them through the same role machinery.
 $suites[] = 'ownership_test.php';
 $suites[] = 'employee_test.php';
+$suites[] = 'payroll_test.php';
 // 1.2 M8: the plugin runtime. It runs last because it writes packages into a temporary package
 // directory of its own and points PL_PLUGIN_DIRECTORY at it; the last test clears both, so no
 // other suite and no child process the sweep starts ever sees a fixture package.
@@ -170,6 +177,7 @@ if (($argv[1] ?? '') === '--suite=plugins') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php',
         'module_test.php', 'outbound_test.php', 'capability_equivalence_test.php', 'plugin_test.php', 'secret_store_test.php', 'plugin_surface_test.php'];
 }
+if (($argv[1] ?? '') === '--suite=payroll') { $suites = ['employee_test.php','payroll_test.php']; }
 if (($argv[1] ?? '') === '--suite=employees') {
     $suites = ['employee_test.php'];
 }

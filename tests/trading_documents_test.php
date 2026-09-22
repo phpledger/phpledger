@@ -22,7 +22,7 @@ function trading_fixture(): array
         'role' => null, 'is_active' => true, 'reason' => 'Sample promotion expense', 'creation_key' => bin2hex(random_bytes(16))]);
     // Stock to sell and to give away: 200 base units at a carrying value of 2.00 each.
     pl_inventory_receive($f['actor_id'], $f['company_id'], $f['book_id'], inventory_move_input($f, '200', '400'));
-    $staff = pl_save_sales_staff($f['actor_id'], $f['company_id'], $f['book_id'], ['code' => 'BILAL', 'name' => 'Sample van salesman', 'is_active' => true, 'reason' => 'Sample staff']);
+    $staff = pl_save_sales_staff($f['actor_id'], $f['company_id'], $f['book_id'], ['employee_id' => sample_assignment_employee($f['actor_id'],$f['company_id'],'Sample van salesman'), 'code' => 'BILAL', 'name' => 'Sample van salesman', 'is_active' => true, 'reason' => 'Sample staff']);
     $area = pl_save_area($f['actor_id'], $f['company_id'], $f['book_id'], ['code' => 'GULBERG', 'name' => 'Sample area route', 'is_active' => true, 'reason' => 'Sample area']);
     $pack = pl_save_product_pack($f['actor_id'], $f['company_id'], $f['book_id'], ['product_id' => $f['product_id'], 'code' => 'CTN12',
         'name' => 'Carton of 12', 'units_per_pack' => '12', 'is_active' => true, 'reason' => 'Sample pack']);
@@ -656,4 +656,14 @@ test('the readout strip reads the customer balance and stock without posting any
     assert_same(null, $empty['party_balance']);
     assert_same(null, $empty['book_stock']);
     assert_same((string) $invoice['currency'], $empty['currency']);
+});
+
+test('posted invoices retain employee name snapshots after register corrections',function():void{
+    $f=trading_fixture();$a=$f['actor_id'];$c=$f['company_id'];$b=$f['book_id'];
+    $posted=trading_post($f,trading_invoice_input($f,['sales_staff_id'=>$f['staff_id']]));
+    $staff=pl_get_sales_staff($a,$c,$b,$f['staff_id']);$employee=pl_get_employee($a,$c,$staff['employee_id']);
+    pl_save_employee($a,$c,array_replace($employee,['full_name'=>'Corrected employee name','reason'=>'Sample name correction']),$employee['id'],$employee['revision']);
+    assert_same('Corrected employee name',pl_get_sales_staff($a,$c,$b,$f['staff_id'])['name']);
+    assert_same('Sample van salesman',pl_trading_invoice_print($a,$c,$b,$posted['id'])['sales_staff']['name']);
+    assert_throws(fn()=>DB::update('pl_employee_document_labels',['staff_name'=>'Changed history'],"source_kind='invoice' AND source_id=%i",$posted['id']),Throwable::class,'immutable');
 });

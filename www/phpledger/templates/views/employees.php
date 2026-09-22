@@ -11,6 +11,7 @@ declare(strict_types=1);
 $hasFailure = pl_web_text($form, 'message') !== '';
 $editing = $selected !== null;
 ?>
+<p><a class="link" href="<?= pl_e(pl_url('/employees/links')) ?>"><?= pl_e(pl_t('Employee operational and trade links')) ?></a></p>
 <section class="flex flex-col gap-4 py-5" aria-labelledby="employees-title">
     <div class="page-header">
         <div>

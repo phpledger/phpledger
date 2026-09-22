@@ -290,6 +290,11 @@ function pl_get_area(int $actorId, int $companyId, int $bookId, int $id): array
 function pl_trading_reference_row(array $row): array
 {
     foreach (['id', 'company_id', 'book_id', 'revision'] as $field) { $row[$field] = (int) $row[$field]; }
+    if (array_key_exists('employee_id', $row)) {
+        $row['employee_id'] = $row['employee_id'] === null ? null : (int) $row['employee_id'];
+        $row['legacy_name'] = $row['name'];
+        if ($row['employee_id'] !== null) { $row['name'] = (string) DB::queryFirstField('SELECT full_name FROM pl_employees WHERE id=%i AND company_id=%i', $row['employee_id'], $row['company_id']); }
+    }
     if (isset($row['product_id'])) { $row['product_id'] = (int) $row['product_id']; }
     $row['is_active'] = (bool) $row['is_active'];
     return $row;
@@ -310,6 +315,15 @@ function pl_list_areas(int $actorId, int $companyId, int $bookId): array
 
 function pl_save_sales_staff(int $actorId, int $companyId, int $bookId, array $input, ?int $id = null, ?int $revision = null): array
 {
+    $before = $id === null ? null : pl_get_sales_staff($actorId, $companyId, $bookId, $id);
+    $employeeId = $input['employee_id'] ?? ($before['employee_id'] ?? null);
+    if ($employeeId !== null) {
+        if (!is_int($employeeId) || $employeeId < 1) { throw new DomainException('Select an employee for the sales assignment.'); }
+        $employee = $before !== null && $before['employee_id'] === $employeeId ? ['name'=>$before['name']] : pl_employee_assignment($actorId, $companyId, $employeeId);
+        $input['name'] = $before['legacy_name'] ?? $employee['name'];
+    } elseif ($before === null) { throw new DomainException('Select an employee for the new sales assignment.'); }
+    else { $input['name'] = $before['legacy_name']; }
+    $input['employee_id'] = $employeeId;
     return pl_trading_save_reference($actorId, $companyId, $bookId, 'pl_sales_staff', 'sales_staff', $input, $id, $revision);
 }
 
@@ -321,6 +335,7 @@ function pl_save_area(int $actorId, int $companyId, int $bookId, array $input, ?
 function pl_trading_save_reference(int $actorId, int $companyId, int $bookId, string $table, string $entity, array $input, ?int $id, ?int $revision): array
 {
     $data = pl_trading_reference_input($input);
+    if ($entity === 'sales_staff') { $data['employee_id'] = $input['employee_id']; }
     $reason = pl_ledger_text($input['reason'] ?? null, 'Reason', 500);
     $reader = $entity === 'area' ? 'pl_get_area' : 'pl_get_sales_staff';
     return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $table, $entity, $data, $reason, $id, $revision, $reader): array {
@@ -330,7 +345,7 @@ function pl_trading_save_reference(int $actorId, int $companyId, int $bookId, st
         if ($before !== null) {
             if ($before['revision'] !== $revision) { throw new DomainException('This record changed. Reload it before saving.'); }
             if ($before['code'] !== $data['code']) { throw new DomainException('The code is fixed. Create a separate record for a different code.'); }
-            DB::update($table, ['name' => $data['name'], 'is_active' => $data['is_active'], 'revision' => $before['revision'] + 1], 'id=%i AND company_id=%i AND book_id=%i', $id, $companyId, $bookId);
+            DB::update($table, array_diff_key($data, ['code' => true]) + ['revision' => $before['revision'] + 1], 'id=%i AND company_id=%i AND book_id=%i', $id, $companyId, $bookId);
         } else {
             if (DB::queryFirstField('SELECT id FROM ' . $table . ' WHERE company_id=%i AND book_id=%i AND code=%s FOR SHARE', $companyId, $bookId, $data['code'])) {
                 throw new DomainException('This code is already in use in this book.');
@@ -631,7 +646,7 @@ function pl_trading_invoice_print(int $actorId, int $companyId, int $bookId, int
     krsort($taxSummary, SORT_STRING);
     return ['document' => $document, 'tax_summary' => array_values($taxSummary),
         'company_profile' => pl_company_profile($actorId, $companyId),
-        'sales_staff' => $document['sales_staff_id'] === null ? null : pl_get_sales_staff($actorId, $companyId, $bookId, (int) $document['sales_staff_id']),
+        'sales_staff' => pl_employee_invoice_staff($actorId, $companyId, $bookId, $document),
         'area' => $document['area_id'] === null ? null : pl_get_area($actorId, $companyId, $bookId, (int) $document['area_id']),
         'warehouse' => $document['warehouse_id'] === null ? null : pl_get_inventory_warehouse($actorId, $companyId, $bookId, (int) $document['warehouse_id']),
         'balance_due' => bcsub((string) $document['total'], (string) $document['cash_received'], 4)];

@@ -81,7 +81,7 @@ try {
     pl_save_product_pack(...array_merge($args, [['product_id' => $productA, 'code' => 'CTN12', 'name' => 'Carton of 12',
         'units_per_pack' => '12', 'is_active' => true, 'reason' => 'Distribution simulation']]));
     $warehouse = pl_inventory_default_warehouse(...$args);
-    $van = pl_save_inventory_warehouse(...array_merge($args, [['code' => 'VAN-1', 'name' => 'Route van 1', 'kind' => 'mobile',
+    $van = pl_save_inventory_warehouse(...array_merge($args, [['code' => 'VAN-1', 'name' => 'Route van 1', 'kind' => 'mobile', 'driver_employee_id' => pl_save_employee($owner,$companyId,['full_name'=>'Sample driver','employment_type'=>'full_time','employment_status'=>'active','hire_date'=>'2026-01-01','reason'=>'Explicit fictional simulation employment'])['id'],
         'driver_name' => 'Sample driver', 'vehicle_reference' => 'SAMPLE-4471', 'route_name' => 'Sample route',
         'is_active' => true, 'reason' => 'Distribution simulation', 'idempotency_key' => bin2hex(random_bytes(16))]]));
     $customer = static function (string $name, ?string $limit) use ($args): int {

@@ -1717,6 +1717,42 @@
     {
       "source": "www/phpledger/install/migrations/047_period_close.php",
       "destination": "www/phpledger/install/migrations/047_period_close.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/payroll.php",
+      "destination": "www/phpledger/templates/views/payroll.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/053_payroll_accounting.php",
+      "destination": "www/phpledger/install/migrations/053_payroll_accounting.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/payroll_functions.php",
+      "destination": "www/phpledger/includes/functions/payroll_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/payroll_web_functions.php",
+      "destination": "www/phpledger/includes/functions/payroll_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/employment_link_functions.php",
+      "destination": "www/phpledger/includes/functions/employment_link_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/employment_link_web_functions.php",
+      "destination": "www/phpledger/includes/functions/employment_link_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/employee-links.php",
+      "destination": "www/phpledger/templates/views/employee-links.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/account_payment_functions.php",
+      "destination": "www/phpledger/includes/functions/account_payment_functions.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/055_employee_links.php",
+      "destination": "www/phpledger/install/migrations/055_employee_links.php"
     }
   ]
 }

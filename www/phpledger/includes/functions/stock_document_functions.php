@@ -242,6 +242,8 @@ function pl_stock_document_summary(int $actorId, int $companyId, int $bookId, in
     $row['moves_stock'] = $kinds[$row['document_kind']]['moves'];
     $row['from_warehouse'] = $row['from_warehouse_id'] === null ? null : pl_get_inventory_warehouse($actorId, $companyId, $bookId, $row['from_warehouse_id']);
     $row['to_warehouse'] = $row['to_warehouse_id'] === null ? null : pl_get_inventory_warehouse($actorId, $companyId, $bookId, $row['to_warehouse_id']);
+    $labels = pl_employee_document_label('stock', (int) $row['id'], $companyId, $bookId);
+    if ($labels !== null) { foreach (['from','to'] as $side) { if ($row[$side.'_warehouse'] !== null) { $row[$side.'_warehouse']['driver_name'] = $labels[$side.'_driver_name']; } } }
     $row['lines'] = []; $row['total_quantity'] = '0.0000'; $row['total_value_base'] = '0.0000'; $row['total_sale_value'] = '0.0000';
     foreach (DB::query('SELECT l.*,p.sku,p.name AS product_name,p.base_unit,p.selling_price FROM pl_stock_document_lines l JOIN pl_products p ON p.id=l.product_id WHERE l.document_id=%i AND l.company_id=%i AND l.book_id=%i ORDER BY l.line_number', $id, $companyId, $bookId) as $line) {
         $line['id'] = (int) $line['id']; $line['line_number'] = (int) $line['line_number']; $line['product_id'] = (int) $line['product_id'];
@@ -314,7 +316,7 @@ function pl_list_stock_documents(int $actorId, int $companyId, int $bookId, arra
     if (!is_int($limit) || $limit < 1 || $limit > 500) { throw new DomainException('Read between 1 and 500 stock documents.'); }
     $args[] = $limit;
     $rows = DB::query('SELECT d.id,d.document_kind,d.document_number,d.document_date,d.from_warehouse_id,d.to_warehouse_id,d.reference,d.reason,'
-        . 'f.code AS from_code,f.name AS from_name,f.kind AS from_kind,t.code AS to_code,t.name AS to_name,t.kind AS to_kind,t.driver_name,'
+        . 'f.code AS from_code,f.name AS from_name,f.kind AS from_kind,t.code AS to_code,t.name AS to_name,t.kind AS to_kind,COALESCE((SELECT el.to_driver_name FROM pl_employee_document_labels el WHERE el.source_kind=\'stock\' AND el.source_id=d.id),t.driver_name) AS driver_name,'
         . 'COALESCE(l.line_total,0) AS line_count,COALESCE(l.quantity,0) AS total_quantity,COALESCE(l.value_base,0) AS total_value_base'
         . ' FROM pl_stock_documents d'
         . ' LEFT JOIN pl_inventory_warehouses f ON f.id=d.from_warehouse_id'
