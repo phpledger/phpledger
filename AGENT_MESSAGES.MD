@@ -1809,3 +1809,7 @@ Local handoff completed: master fast-forwarded from 0ff0211 to 4962ea6. All eigh
 ## 2026-09-23 — Codex: owner-authorized 1.3.0 completion and release scope
 
 Owner requested all remaining work and publication of 1.3.0 with its matching demo and website. Integration is isolated at codex/release-1.3.0; origin's two Docker workflow commits were merged without altering main or its eight dirty generated files. Read-only hosting check shows demo1.1.0 af0f4895, healthy, so demo needs a real code/data rollout. Plan and reserved migrations are recorded in docs/strategy/RELEASE-PLAN-1.3.md. Independent lanes plan and implement financial modules; coordinator alone owns release/platform/shared integration and live actions. Existing credential-safe signing/SSH paths will be used; no campaigns or stakeholder messages.
+
+## 2026-09-23 - Owner release follow-up: real-install demo and documentation
+
+Owner requests the actual installer and full onboarding in the public demo, ordinary application exploration and hourly reset to simplify release maintenance. Coordinator owns disposable installation hosting, visitor isolation, normal release artifact parity and reset evidence. Owner also requests README/Wiki cleanup encouraging trial and voluntary donations. Release plan updated before implementation; donation destination requested, not invented. Financial lanes continue independently. No live change yet.
