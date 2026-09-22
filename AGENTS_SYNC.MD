@@ -1,5 +1,9 @@
 # Shared Claude and Codex state
 
+## Active scope, 23 September 2026: complete and publish 1.3.0
+
+Owner explicitly authorized finishing 1.3.0 and releasing its demo and website. Coordinator owns `codex/release-1.3.0`; scope, migration reservations and publication gates are in [the 1.3 plan](docs/strategy/RELEASE-PLAN-1.3.md). Financial lanes reserve 050–052 scheduler/recurring/loans, 053/055 payroll/employee integration and 054 year-end. Shared registration and releases are serialized by coordinator. No lane may publish or deploy independently. Preserve main checkout changes and original worktree backups. This active plan supersedes the prior task's local-only boundary for these explicitly requested release actions, not for unrelated projects or campaigns.
+
 ## Latest checkpoint, 23 September 2026 (Codex): all three M17 continuations verified together
 
 - Period close/reversals/cash counts (047), employee master (048) and encrypted plugin secret storage (049) are complete and integrated into local `master` by fast-forward, with `codex/m17-takeover` retained. Source tested and packaged: `1683b899f64272f95d7af80fb23698097a960ae2`; subsequent handoff edits are documentation only. All eight pre-existing website files remain byte-identical to their verified backup; disposable task containers/networks are removed.
