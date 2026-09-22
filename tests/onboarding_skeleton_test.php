@@ -154,7 +154,7 @@ test('a skeleton gives a real business its structure and not one unit of money',
     }
     // The bundled chart's posting accounts, its class and group headings, and the structure's own
     // accounts: a skeleton adds the sample's chart and nothing else.
-    assert_same(count(pl_starter_template()['accounts']) + count(pl_starter_template()['headings']) + count($structure['accounts']),
+    assert_same(count(pl_starter_template()['accounts']) + count(pl_starter_template()['headings']) + count(pl_starter_template()['provisions']) + count($structure['accounts']),
         count($company['accounts']),
         'The skeleton created accounts its structure does not declare, or missed some it does.');
     // A structure never ships a chart of disabled accounts.

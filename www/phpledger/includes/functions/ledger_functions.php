@@ -171,6 +171,18 @@ function pl_create_company(int $actorId, string $name, string $currency, string 
                 + pl_currency_account_properties([]));
             $accounts[$heading['code']] = (int) DB::insertId();
         }
+        // 1.3 M17: the chart package's provisioned accounts. Real postable leaves that a module
+        // posts to — the first is cash over and short — carrying their own semantic_key and no
+        // role. Like the headings they stay out of `$mapping`: they are not starter purposes an
+        // owner maps onto an existing account, which is why pl_confirm_existing_setup() does not
+        // demand one for them and pl_cash_over_short_account() provisions on demand instead.
+        foreach ($template['provisions'] as $provision) {
+            DB::insert('pl_accounts', ['company_id' => $companyId, 'book_id' => $bookId,
+                'code' => $provision['code'], 'name' => $provision['name'], 'type' => $provision['type'],
+                'semantic_key' => $provision['semantic_key'], 'role' => null, 'is_active' => 1, 'is_contra' => 0]
+                + pl_currency_account_properties([]));
+            $accounts[$provision['code']] = (int) DB::insertId();
+        }
         pl_install_template_snapshot($actorId, $companyId, $bookId, $template, $mapping);
         // B44: the owner of the FIRST company on this installation becomes its administrator.
         // A no-op once anybody holds installation.admin, so the second company changes nothing.
@@ -241,10 +253,17 @@ function pl_ledger_book(int $companyId, int $bookId, bool $lock = false): array
     return $book;
 }
 
-/** Internal posting primitive; nested calls retain the outer transaction's book lock. */
-function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array $payload, ?int $reversalOf = null, ?int $settlementItemId = null, ?array $settlementAllocations = null): array
+/**
+ * Internal posting primitive; nested calls retain the outer transaction's book lock.
+ *
+ * @param bool $scheduledReversal 1.3 M17 (issue #93, owner decision B89). True only for a
+ *        reversal whose date was recorded in advance against the original journal and whose
+ *        period was then opened by a named person; see the backdated-reversal guard below for
+ *        why that case is distinguished, and pl_post_scheduled_reversal() for who sets it.
+ */
+function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array $payload, ?int $reversalOf = null, ?int $settlementItemId = null, ?array $settlementAllocations = null, bool $scheduledReversal = false): array
 {
-    return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $payload, $reversalOf, $settlementItemId, $settlementAllocations): array {
+    return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $payload, $reversalOf, $settlementItemId, $settlementAllocations, $scheduledReversal): array {
         $payload = pl_normalize_journal($payload);
         // This helper also checks permissions so future direct callers cannot bypass membership.
         pl_require_company_access($actorId, $companyId, true);
@@ -293,7 +312,24 @@ function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array
             if (function_exists('pl_purchasing_assert_reversal_allowed')) { pl_purchasing_assert_reversal_allowed($companyId, $bookId, $reversalOf); }
         }
         pl_correction_assert_posting_allowed($companyId, $bookId, $payload, $reversalOf);
-        if ($reversalOf !== null && $original['source_type'] !== 'opening_balance' && $payload['date'] < gmdate('Y-m-d')) {
+        // A reversal dated before today needs the backdated-reversal permission AND the original
+        // posting date, because the case this guard exists for is somebody quietly undoing an
+        // entry in an earlier open period after the fact.
+        //
+        // A SCHEDULED reversal (1.3 M17, B89) is the opposite case and is exempt. Its date was
+        // recorded against the original journal in advance, in `pl_journal_reversal_events`,
+        // which refuses UPDATE and DELETE; it posts only when the period holding that date is
+        // opened, which is an explicit, audited act by a named person; and the date is not the
+        // original's — an accrual dated 31 October reverses on 1 November by construction, so
+        // the second half of the condition could never be satisfied. Without this exemption a
+        // month opened on the 5th could never post the reversals that made it due, which is
+        // every real use of the feature. The exemption is narrow: it reaches this line only
+        // from pl_post_scheduled_reversal(), and the ordinary /transactions/reverse action
+        // cannot set it.
+        if ($scheduledReversal && ($reversalOf === null || DB::queryFirstField('SELECT journal_id FROM pl_journal_reversal_schedules WHERE journal_id = %i AND company_id = %i AND book_id = %i AND reverse_on = %s FOR UPDATE', $reversalOf, $companyId, $bookId, $payload['date']) === null)) {
+            throw new DomainException('A scheduled reversal must match its recorded schedule.');
+        }
+        if ($reversalOf !== null && !$scheduledReversal && $original['source_type'] !== 'opening_balance' && $payload['date'] < gmdate('Y-m-d')) {
             pl_require_company_access($actorId, $companyId, true);
             if (!pl_user_can($actorId, $companyId, 'journal.reverse_backdated') || $payload['date'] !== $original['journal_date']) {
                 throw new DomainException('Backdated reversals require the backdated-reversal permission, the original posting date and an open period.');
@@ -413,12 +449,17 @@ function pl_get_journal(int $actorId, int $companyId, int $bookId, int $journalI
     return $journal;
 }
 
-function pl_reverse_journal(int $actorId, int $companyId, int $bookId, int $journalId, ?string $date, string $idempotencyKey, string $reason): array
+/**
+ * The one linked-reversal service. 1.3 M17 reuses it rather than writing a second one.
+ *
+ * @param bool $scheduled see pl_post_journal_locked(); set only by pl_post_scheduled_reversal().
+ */
+function pl_reverse_journal(int $actorId, int $companyId, int $bookId, int $journalId, ?string $date, string $idempotencyKey, string $reason, bool $scheduled = false): array
 {
     $date ??= gmdate('Y-m-d');
     pl_ledger_date($date);
     $reason = pl_ledger_text($reason, 'Reversal reason', 400);
-    return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $journalId, $date, $idempotencyKey, $reason): array {
+    return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $journalId, $date, $idempotencyKey, $reason, $scheduled): array {
         pl_require_company_access($actorId, $companyId, true);
         $book = pl_ledger_book($companyId, $bookId, true);
         $original = pl_get_journal($actorId, $companyId, $bookId, $journalId);
@@ -443,7 +484,7 @@ function pl_reverse_journal(int $actorId, int $companyId, int $bookId, int $jour
             'date' => $date, 'currency' => (string) $book['currency'], 'source_type' => 'reversal', 'source_reference' => (string) $journalId,
             'idempotency_key' => $idempotencyKey, 'description' => 'Reversal of ' . $original['reference'] . ': ' . $reason, 'lines' => $lines,
         ]);
-        return pl_post_journal_locked($actorId, $companyId, $bookId, $payload, $journalId);
+        return pl_post_journal_locked($actorId, $companyId, $bookId, $payload, $journalId, null, null, $scheduled);
     });
 }
 

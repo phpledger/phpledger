@@ -94,7 +94,7 @@ test('a new book is born numbered and keeps each account reachable by its 1.0.0 
     assert_same($mapping['1-100-10001-00'], $mapping['1000']);
     // Thirteen posting accounts, nineteen class and group headings, and the six numbers the 1.0.0
     // chart used, which still resolve.
-    assert_same(13 + 19 + 6, count($mapping));
+    assert_same(14 + 19 + 6, count($mapping));
     foreach ($accounts as $row) {
         assert_same(true, pl_account_code_is_valid((string) $row['code']));
     }

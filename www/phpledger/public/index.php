@@ -57,7 +57,7 @@ $routes = [
     '/locale' => ['POST'],
     '/companies' => ['GET'], '/company/select' => ['POST'], '/sample-chooser' => ['GET', 'POST'], '/onboarding' => ['GET', 'POST'],
     '/setup/review' => ['GET', 'POST'], '/transactions' => ['GET'], '/transactions/detail' => ['GET'],
-    '/opening-balances' => ['GET', 'POST'], '/periods' => ['GET', 'POST'], '/bank-reconciliation' => ['GET', 'POST'],
+    '/opening-balances' => ['GET', 'POST'], '/periods' => ['GET', 'POST'], '/periods/schedule-reversal' => ['POST'], '/cash-counts' => ['GET', 'POST'], '/bank-reconciliation' => ['GET', 'POST'],
     '/numbering' => ['GET', 'POST'], '/accounting-policies' => ['GET', 'POST'], '/company-profile' => ['GET', 'POST'],
     '/transactions/new' => ['GET'], '/transactions/edit' => ['GET'], '/transactions/save' => ['POST'],
     '/transactions/post' => ['POST'], '/transactions/reverse' => ['POST'],
@@ -356,6 +356,22 @@ try {
     if ($path === '/opening-balances') {
         require_once dirname(__DIR__) . '/includes/functions/opening_web_functions.php';
         pl_web_opening($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    if ($path === '/cash-counts') {
+        require_once dirname(__DIR__) . '/includes/functions/cash_count_web_functions.php';
+        pl_web_cash_counts($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    if ($path === '/periods/schedule-reversal') {
+        $journalId = pl_web_id($_POST, 'journal_id');
+        $return = pl_url('/journals/detail', ['id' => $journalId]);
+        try {
+            pl_require_post($method);
+            pl_require_csrf(pl_web_text($_POST, 'csrf'));
+            pl_web_assert_scope($company, $_POST);
+            pl_schedule_journal_reversal($actorId, $companyId, $bookId, $journalId, pl_web_text($_POST, 'reverse_on') ?: null, pl_web_text($_POST, 'reason'));
+            pl_notice('Reversal schedule recorded. An open target period posts the reversal immediately.');
+            pl_redirect($return);
+        } catch (DomainException $error) { pl_form_failure($return, $_POST, $error->getMessage()); }
     }
     if ($path === '/periods') {
         require_once dirname(__DIR__) . '/includes/functions/period_web_functions.php';
@@ -809,7 +825,7 @@ try {
     $journal = pl_get_journal($actorId, $companyId, $bookId, pl_web_id($_GET, 'id'));
     $commercialSource = DB::queryFirstRow('SELECT d.id,d.kind,d.document_number FROM pl_ar_document_revisions r JOIN pl_ar_documents d ON d.id=r.document_id AND d.company_id=r.company_id AND d.book_id=r.book_id WHERE r.company_id=%i AND r.book_id=%i AND r.journal_id=%i', $companyId, $bookId, $journal['reversal_of_id'] ?? $journal['id']);
     if ($commercialSource) { $commercialSource['number'] = pl_document_number_display($commercialSource['document_number'], (int)$commercialSource['id'], $commercialSource['kind']); }
-    pl_render('journal', ['title' => 'Journal entry', 'user' => $user, 'company' => $company, 'journal' => $journal, 'commercialSource'=>$commercialSource]);
+    pl_render('journal', ['title' => 'Journal entry', 'user' => $user, 'company' => $company, 'journal' => $journal, 'commercialSource'=>$commercialSource, 'reversalHistory' => pl_journal_reversal_history($actorId, $companyId, $bookId, (int) $journal['id']), 'scheduleForm' => pl_form_state(pl_url('/journals/detail', ['id' => (int) $journal['id']]))]);
 } catch (PlDemoUnavailable $error) {
     http_response_code(503);
     header('Retry-After: 10');

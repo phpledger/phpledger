@@ -21,6 +21,7 @@ if (($argv[1] ?? '') === '--period-worker') {
         $result = match ($job['mode']) {
             'create' => pl_create_period($f['actor_id'], $f['company_id'], $f['book_id'], $job['input']),
             'close' => pl_change_period_status($f['actor_id'], $f['company_id'], $f['book_id'], $f['period_id'], 'closed', 1, 'Concurrent close', $job['key']),
+            'cash-count' => pl_record_cash_count($f['actor_id'], $f['company_id'], $f['book_id'], $job['input']),
             'post' => pl_post_journal($f['actor_id'], $f['company_id'], $f['book_id'], $job['payload']),
         };
         echo json_encode(['result' => $result], JSON_THROW_ON_ERROR);

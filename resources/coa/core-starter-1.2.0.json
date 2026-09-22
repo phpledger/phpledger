@@ -120,6 +120,14 @@
       "semantic_key": "core.group.expense.purchase_returns"
     }
   ],
+  "provisions": [
+    {
+      "code": "5-100-10002-00",
+      "name": "Cash over and short",
+      "type": "expense",
+      "semantic_key": "core.expense.cash_over_short"
+    }
+  ],
   "accounts": [
     {
       "code": "1-100-10001-00",

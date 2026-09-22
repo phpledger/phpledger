@@ -98,6 +98,11 @@ $suites[] = 'secret_store_test.php';
 $suites[] = 'plugin_surface_test.php';
 // 1.3 M14: the Fixed assets module.
 $suites[] = 'asset_test.php';
+$suites[] = 'period_close_test.php';
+$suites[] = 'cash_count_test.php';
+if (($argv[1] ?? '') === '--suite=period-close') {
+    $suites = ['ledger_test.php', 'period_test.php', 'period_close_test.php', 'cash_count_test.php'];
+}
 if (($argv[1] ?? '') === '--suite=ar-lists') {
     $suites = ['ledger_test.php','concurrency_test.php','ar_ap_test.php','ar_list_test.php','reconciliation_test.php','list_test.php','document_series_test.php'];
 }

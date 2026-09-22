@@ -1,5 +1,8 @@
 <?php
 declare(strict_types=1);
+$canWrite = pl_can_write($company);
+$reversalHistory = $reversalHistory ?? [];
+$scheduleForm = $scheduleForm ?? ['message' => '', 'input' => []];
 $documentSource = null;
 $generalSource = null;
 if (preg_match('/^document:([1-9][0-9]*)$/D', (string) $journal['source_reference'], $sourceMatch)) {
@@ -43,3 +46,14 @@ if ($journal['source_type'] === 'general_journal' && preg_match('/^general:([1-9
         </table>
     </div>
 </section>
+<?php if ($canWrite && $journal['reversal_of_id'] === null && in_array($journal['source_type'], ['general','general_journal','receipt','payment','adjustment'], true)): ?>
+<section class="rounded-panel border border-border bg-surface p-4 my-4"><h2 class="section-title"><?= pl_e(pl_t('Scheduled reversal')) ?></h2>
+<p><?= pl_e(pl_t('The linked reversal posts when its period opens. If that period is already open, saving the schedule posts it immediately. Leave the date blank to clear a pending schedule.')) ?></p>
+<?php if ($scheduleForm['message'] !== ''): ?><p class="alert alert-danger" role="alert"><?= pl_e($scheduleForm['message']) ?></p><?php endif; ?>
+<form method="post" action="<?= pl_e(pl_url('/periods/schedule-reversal')) ?>" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+<?= pl_csrf_field() ?><?= pl_scope_fields($company) ?><input type="hidden" name="journal_id" value="<?= (int) $journal['id'] ?>">
+<label><?= pl_e(pl_t('Reverse on')) ?><input class="input" type="date" name="reverse_on" value="<?= pl_e(pl_web_text($scheduleForm['input'],'reverse_on')) ?>"></label>
+<label><?= pl_e(pl_t('Reason')) ?><input class="input" name="reason" maxlength="400" required></label><button class="btn btn-secondary"><?= pl_e(pl_t('Save reversal schedule')) ?></button>
+</form></section>
+<?php endif; ?>
+<?php if ($reversalHistory !== []): ?><section class="rounded-panel border border-border bg-surface p-4 my-4"><h2 class="section-title"><?= pl_e(pl_t('Reversal schedule history')) ?></h2><ul><?php foreach ($reversalHistory as $event): ?><li><?= pl_e($event['event'] . ' · ' . ($event['reverse_on'] ?? '') . ' · ' . $event['actor_name'] . ' · ' . $event['created_at'] . ' UTC · ' . $event['reason']) ?></li><?php endforeach; ?></ul></section><?php endif; ?>

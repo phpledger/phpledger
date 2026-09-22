@@ -39,8 +39,60 @@ function pl_starter_template(): array
     }
     $template = json_decode($source, true, 512, JSON_THROW_ON_ERROR);
     $template['headings'] = pl_starter_template_headings($template);
+    $template['provisions'] = pl_starter_template_provisions($template);
     $template['digest'] = hash('sha256', $source);
     return $template;
+}
+
+/**
+ * The chart package's provisioned accounts: postable leaves a module posts to, that are not
+ * starter purposes an owner is asked to map.
+ *
+ * A package has three lists, and the difference between them is what each one is for.
+ * `accounts` are the starter purposes — the thirteen places the core itself posts, which
+ * `pl_confirm_existing_setup()` makes the owner of a prior-foundation book map one by one onto
+ * an account that book already has. `headings` are names (1.3 M15). `provisions` is the third:
+ * a real postable account a module needs somewhere to post, which a prior-foundation chart has
+ * no equivalent of and which it would therefore be wrong to demand a mapping for. Cash over and
+ * short is the first: an existing set of books has no such account, and forcing it onto General
+ * expenses in the review would silently misclassify every drawer difference from then on.
+ *
+ * They are created with a new book the same way the starter purposes are, they carry their own
+ * `semantic_key` (B88) and they stay out of the starter-purpose `$mapping`. A book that has none
+ * — a prior-foundation chart, or a hand-built one — provisions it on demand instead, the way
+ * `pl_asset_provision_accounts()` does.
+ *
+ * @param array<string, mixed> $template
+ * @return array<int, array{code: string, name: string, type: string, semantic_key: string}>
+ */
+function pl_starter_template_provisions(array $template): array
+{
+    $provisions = [];
+    $keys = array_merge(array_column($template['accounts'] ?? [], 'semantic_key'), array_column($template['headings'] ?? [], 'semantic_key'));
+    foreach ($template['provisions'] ?? [] as $definition) {
+        $code = (string) ($definition['code'] ?? '');
+        $name = trim((string) ($definition['name'] ?? ''));
+        $type = (string) ($definition['type'] ?? '');
+        $key = (string) ($definition['semantic_key'] ?? '');
+        // The opposite check to a heading's: this one IS posted to, so a heading code here would
+        // be refused by pl_account_is_postable() at every posting rather than at install time.
+        if (!pl_account_code_is_valid($code) || pl_account_code_is_heading($code) || !pl_account_code_matches_type($code, $type)) {
+            throw new RuntimeException('The bundled chart provisions ' . $code . ', which is not a postable account code of its classification.');
+        }
+        if ($name === '' || $key === '' || in_array($key, $keys, true)) {
+            throw new RuntimeException('The bundled chart provision ' . $code . ' needs a name and a semantic key of its own; a module finds it by that key, never by its name or its number.');
+        }
+        // B88 keeps `core.group.*` for headings, and a provisioned account is a leaf.
+        if (str_starts_with($key, 'core.group.') || str_starts_with($key, 'core.class.')) {
+            throw new RuntimeException('The bundled chart provision ' . $code . ' claims a heading namespace. A leaf account takes a leaf key.');
+        }
+        if (($definition['role'] ?? null) !== null) {
+            throw new RuntimeException('The bundled chart provision ' . $code . ' carries an operational role. pl_ar_control() and pl_advance_control() need exactly one account per role; a provisioned account is found by its key.');
+        }
+        $keys[] = $key;
+        $provisions[] = ['code' => $code, 'name' => $name, 'type' => $type, 'semantic_key' => $key];
+    }
+    return $provisions;
 }
 
 /**

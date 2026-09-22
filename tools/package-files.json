@@ -1689,6 +1689,26 @@
     {
       "source": "www/phpledger/templates/views/employees.php",
       "destination": "www/phpledger/templates/views/employees.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/period_close_functions.php",
+      "destination": "www/phpledger/includes/functions/period_close_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/cash_count_functions.php",
+      "destination": "www/phpledger/includes/functions/cash_count_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/cash_count_web_functions.php",
+      "destination": "www/phpledger/includes/functions/cash_count_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/cash-counts.php",
+      "destination": "www/phpledger/templates/views/cash-counts.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/047_period_close.php",
+      "destination": "www/phpledger/install/migrations/047_period_close.php"
     }
   ]
 }

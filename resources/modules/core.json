@@ -30,6 +30,7 @@
     "043_sample_skeletons",
     "044_ownership_register",
     "045_chart_headings",
+    "047_period_close",
     "048_employee_master",
     "049_secret_store"
   ],
@@ -47,7 +48,8 @@
     "/profile",
     "/ownership",
     "/reports/ownership",
-    "/employees"
+    "/employees",
+    "/cash-counts"
   ],
   "permissions": [
     "owner",

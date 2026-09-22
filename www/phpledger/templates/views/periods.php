@@ -55,14 +55,53 @@ $createInput = pl_web_text($periodInput, 'action') === 'create' ? $periodInput :
                             </form><button type="button" class="btn btn-ghost mt-3" data-confirmation-cancel hidden><?= pl_e(pl_t('Cancel')) ?></button></div>
                         </details>
                     <?php else: ?><span class="muted"><?= pl_e($period['status'] === 'closed' ? pl_t('Owner can reopen') : pl_t('Read only')) ?></span><?php endif; ?>
+                <details class="mt-3"><summary class="btn btn-ghost btn-sm"><?= pl_e(pl_t('Close checklist')) ?></summary>
+                    <?php $checklist = $checklists[$periodId]; ?>
+                    <p class="muted"><?= pl_e(pl_t('Required items block closing. Advisory items are warnings; record a reason when deliberately skipped.')) ?></p>
+                    <ul class="flex flex-col gap-3 mt-3">
+                    <?php foreach ($checklist['items'] as $item): ?>
+                        <li><strong><?= pl_e(pl_t($item['label'])) ?></strong>
+                        <p><?= pl_e(pl_t($item['resolved'] ? 'Complete' : ($item['severity'] === 'hard' ? 'Required: outstanding' : 'Advisory: outstanding'))) ?></p>
+                        <p class="muted"><?= pl_e(pl_t($item['hint'])) ?></p>
+                        <?php if ($item['detail'] !== []): ?><p><?= pl_e(pl_t('Outstanding records: {count}', ['count' => count($item['detail'])])) ?></p><?php endif; ?>
+                        <?php if ($item['tick']): ?><p><?= pl_e($item['tick']['actor_name'] . ' � ' . $item['tick']['ticked_at'] . ' UTC � ' . $item['tick']['reason']) ?></p><?php endif; ?>
+                        <?php if ($canManagePeriods && $period['status'] === 'open' && !($item['computed'] && $item['severity'] === 'hard')): ?>
+                        <form method="post" action="<?= pl_e(pl_url('/periods')) ?>" class="grid grid-cols-1 gap-2">
+                            <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?>
+                            <input type="hidden" name="action" value="tick"><input type="hidden" name="period_id" value="<?= $periodId ?>"><input type="hidden" name="item_key" value="<?= pl_e($item['key']) ?>"><input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(16))) ?>">
+                            <label><?= pl_e(pl_t('Checklist action')) ?><select class="input" name="state"><option value="done"><?= pl_e(pl_t('Done')) ?></option><option value="skipped"><?= pl_e(pl_t('Skipped with reason')) ?></option><option value="cleared"><?= pl_e(pl_t('Clear attestation')) ?></option></select></label>
+                            <label><?= pl_e(pl_t('Reason')) ?><input class="input" name="reason" maxlength="500" required></label><button class="btn btn-secondary btn-sm"><?= pl_e(pl_t('Record checklist action')) ?></button>
+                        </form><?php endif; ?>
+                        <?php if ($canManagePeriods && $period['status'] === 'open'): ?>
+                        <details class="mt-2"><summary><?= pl_e(pl_t('Book checklist policy')) ?></summary>
+                        <form method="post" action="<?= pl_e(pl_url('/periods')) ?>" class="flex flex-wrap gap-2">
+                            <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?><input type="hidden" name="action" value="severity"><input type="hidden" name="item_key" value="<?= pl_e($item['key']) ?>">
+                            <label><?= pl_e(pl_t('Severity for this book')) ?><select class="input" name="severity"><option value="hard" <?= $item['severity'] === 'hard' ? 'selected' : '' ?>><?= pl_e(pl_t('Required')) ?></option><option value="soft" <?= $item['severity'] === 'soft' ? 'selected' : '' ?>><?= pl_e(pl_t('Advisory')) ?></option></select></label>
+                            <button class="btn btn-secondary btn-sm"><?= pl_e(pl_t('Save book policy')) ?></button>
+                        </form></details><?php endif; ?>
+                        </li>
+                    <?php endforeach; ?>
+                    </ul>
+                </details>
                 </td></tr>
             <?php endforeach; ?>
         </tbody></table></div>
     </div>
+    <?php if ($canManagePeriods): ?>
+    <details class="rounded-panel border border-border bg-surface p-4"><summary><?= pl_e(pl_t('Add a company close checklist item')) ?></summary>
+        <form method="post" action="<?= pl_e(pl_url('/periods')) ?>" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+            <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?><input type="hidden" name="action" value="add_item">
+            <label><?= pl_e(pl_t('Item key')) ?><input class="input" name="item_key" placeholder="company.tax_review" maxlength="60" required></label>
+            <label><?= pl_e(pl_t('Label')) ?><input class="input" name="label" maxlength="200" required></label>
+            <label><?= pl_e(pl_t('Severity')) ?><select class="input" name="severity"><option value="soft"><?= pl_e(pl_t('Advisory')) ?></option><option value="hard"><?= pl_e(pl_t('Required')) ?></option></select></label>
+            <button class="btn btn-secondary"><?= pl_e(pl_t('Save checklist item')) ?></button>
+        </form>
+    </details><?php endif; ?>
+    <a class="btn btn-ghost" href="<?= pl_e(pl_url('/cash-counts')) ?>"><?= pl_e(pl_t('Cash counts and history')) ?></a>
     <div class="rounded-panel border border-border bg-surface p-4"><h2 class="section-title mb-2"><?= pl_e(pl_t('Recent administration history')) ?></h2><p class="muted"><?= pl_e(pl_t('Latest 100 actions. Periods created during initial business setup have no separate administration action.')) ?></p>
         <?php if ($history === []): ?><p><?= pl_e(pl_t('No period administration actions have been recorded.')) ?></p>
         <?php else: ?><ol class="flex flex-col gap-3 border-s border-border ps-3" aria-label="<?= pl_e(pl_t('Period administration history')) ?>">
-            <?php foreach ($history as $event): ?><li><div class="flex flex-wrap items-center gap-2"><?php pl_ui_badge($event['action']==='close'?'posted':'info',pl_t(['create'=>'Created open','close'=>'Closed','reopen'=>'Reopened'][$event['action']])); ?><p class="text-sm font-medium"><?= pl_e(pl_date_label($event['start_date']).' – '.pl_date_label($event['end_date'])) ?></p></div><p class="text-xs text-ink-muted mt-1"><?= pl_e($event['reason']) ?></p><p class="text-xs text-ink-muted"><time datetime="<?= pl_e(str_replace(' ', 'T', $event['created_at']) . 'Z') ?>" data-local-time><?= pl_e(pl_t('{when} UTC', ['when' => $event['created_at']])) ?></time> · <?= pl_e($event['actor_name']) ?></p></li><?php endforeach; ?>
+            <?php foreach ($history as $event): ?><li><div class="flex flex-wrap items-center gap-2"><?php pl_ui_badge($event['action']==='close'?'posted':'info',pl_t(['create'=>'Created open','close'=>'Closed','reopen'=>'Reopened','tick'=>'Checklist recorded','untick'=>'Checklist cleared'][$event['action']])); ?><p class="text-sm font-medium"><?= pl_e(pl_date_label($event['start_date']).' – '.pl_date_label($event['end_date'])) ?></p></div><p class="text-xs text-ink-muted mt-1"><?= pl_e($event['reason']) ?></p><p class="text-xs text-ink-muted"><time datetime="<?= pl_e(str_replace(' ', 'T', $event['created_at']) . 'Z') ?>" data-local-time><?= pl_e(pl_t('{when} UTC', ['when' => $event['created_at']])) ?></time> · <?= pl_e($event['actor_name']) ?></p></li><?php endforeach; ?>
         </ol><?php endif; ?>
     </div>
 </section>

@@ -59,6 +59,7 @@ function pl_hook_points(): array
         // After the outermost commit. The journal is posted and immutable by the time this runs.
         'journal.posted' => ['kind' => 'action', 'args' => ['array journal', 'array context'], 'returns' => 'void', 'phase' => 'after-commit'],
         // After the outermost commit of a period close.
+        'period.checklist' => ['kind' => 'filter', 'args' => ['array items', 'array context'], 'returns' => 'array', 'phase' => 'pre-lock'],
         'period.closed' => ['kind' => 'action', 'args' => ['array period', 'array context'], 'returns' => 'void', 'phase' => 'after-commit'],
         'period.checklist' => ['kind' => 'filter', 'args' => ['array items', 'array context'], 'returns' => 'array', 'phase' => 'pre-lock'],
         // Employee register changes publish the company and saved employee after commit.
