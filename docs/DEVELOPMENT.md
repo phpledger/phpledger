@@ -1,5 +1,16 @@
 # Local revival development
 
+## M17 takeover verification
+
+The M17 continuation adds migrations `047_period_close`, `048_employee_master` and `049_secret_store`. The [local integration receipt](repository/M17-TAKEOVER-2026-09-23.md) records the tested source, engines, package and browser evidence. These are local acceptance checks, not deployment commands.
+
+Two additional probes require CLI PHP, `PL_ENV=test`, host `db_test`, the disposable `phpledger_test` database and its root account, and check the effective connection after bootstrap. Each creates and removes only its own randomly named schema:
+
+- `php tools/verify-m17-upgrade.php seed /path/to/archived-v1.2.1` loads the archived release's implementation and fixture builders to create posted cash and a partly paid invoice. Provide that archive's Composer dependencies. Run `php tools/verify-m17-upgrade.php check` from the candidate checkout in the same container afterwards: the seed receipt is in `/tmp/phpledger-m17-upgrade.json`. The check applies the candidate migration chain, compares historical rows and migration receipts, reconciles totals and checks a no-op replay. A pending receipt blocks another seed; inspect it before retrying after a failure.
+- `php tools/verify-m17-package.php /path/to/extracted/phpledger` loads application code and production dependencies only from the extracted ZIP. Run the probe outside the archive. It verifies every package-manifest digest before and after a fresh install, then exercises employee creation, a posted cash-count difference, period checklist reads and encrypted secret round-trip. It checks balanced totals and no-op migration replay and removes its disposable private directory.
+
+Run financial suites serially within each database. Separate Compose projects, non-overlapping subnets and isolated databases allow MySQL and MariaDB verification concurrently. The Python package allowlist gate remains separate: `python tests/package-builder-test.py`.
+
 ## Stable-path installation and signed updates
 
 Browser installation and signed updates are published in **1.0.0**. The current [roadmap](ROADMAP.md#current-delivery-contract-first-stable-10) and [validation receipt](VALIDATION.md#100-publication--18-september-2026) separate implemented/tested behavior from independent review and pilot acceptance, which remain open post-release commitments. Browser setup shares the CLI migration/preflight service; installation state lives in private files, without a new accounting schema. The independent maintenance loader and its copied recovery worker run without the application version being replaced. Tests use random disposable databases and sample signing material.
