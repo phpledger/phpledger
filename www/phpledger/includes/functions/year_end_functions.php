@@ -271,9 +271,13 @@ function pl_year_end_change(int $actor,int $company,int $book,int $id,string $ac
             if(DB::queryFirstField("SELECT id FROM pl_fiscal_years WHERE book_id=%i AND end_date>%s AND status IN ('closed','locked') FOR SHARE",$book,$year['end_date'])){throw new DomainException('Reopen later closed fiscal years first.');}
             $last=DB::queryFirstField("SELECT payload FROM pl_year_end_actions WHERE year_id=%i AND action='close' ORDER BY id DESC LIMIT 1 FOR SHARE",$id);
             $receipt=json_decode($last,true,512,JSON_THROW_ON_ERROR);
-            DB::update('pl_fiscal_years',['status'=>'closing'],'id=%i',$id);
+            // The same book lock and transaction protect this temporary open state.
+            // Period reopening must run its due ordinary reversals before the
+            // final-adjustment-only closing guard applies again.
+            DB::update('pl_fiscal_years',['status'=>'open'],'id=%i',$id);
             $periods=pl_year_end_periods($year);$final=$periods[count($periods)-1];
             if($final['status']==='closed'){pl_change_period_status($actor,$company,$book,(int)$final['id'],'open',(int)$final['revision'],$note,'ye-reopen-period-'.substr(hash('sha256',$key),0,32));}
+            DB::update('pl_fiscal_years',['status'=>'closing'],'id=%i',$id);
             if($receipt['journal_id']!==null){
                 $original=pl_get_journal($actor,$company,$book,(int)$receipt['journal_id']);$lines=[];
                 foreach($original['lines'] as $line){$lines[]=['account_id'=>(int)$line['account_id'],'debit'=>(string)$line['credit'],'credit'=>(string)$line['debit'],'description'=>(string)$line['description']]+pl_currency_line_normalize($line,$original['currency'],$line['credit'],$line['debit']);}

@@ -112,6 +112,21 @@ test('year-end company closes profit once, preserves P&L, retries, reopens and r
     assert_throws(fn()=>DB::update('pl_year_end_actions',['payload'=>'{}'],'year_id=%i',$id),Throwable::class,'immutable');
 });
 
+test('year-end reopening drains pending ordinary reversals before returning to closing',function():void{
+    $f=year_fixture();
+    $original=pl_post_journal($f['actor_id'],$f['company_id'],$f['book_id'],ledger_payload($f,'100'));
+    $id=year_start($f);$closed=year_close($f,$id);
+    assert_throws(fn()=>pl_schedule_journal_reversal($f['actor_id'],$f['company_id'],$f['book_id'],$closed['journal_id'],'2027-01-01','Cannot bypass year-end'),DomainException::class,'only standalone');
+    $scheduled=pl_schedule_journal_reversal($f['actor_id'],$f['company_id'],$f['book_id'],$original['id'],'2026-12-31','Reviewed correction after close');
+    assert_same(null,$scheduled['reversal']);
+    $receipt=pl_year_end_change($f['actor_id'],$f['company_id'],$f['book_id'],$id,'reopen',3,'Apply pending correction','reopen-pending');
+    assert_same('closing',$receipt['status']);
+    assert_same(1,(int)DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE reversal_of_id=%i',$original['id']));
+    assert_same($receipt,pl_year_end_change($f['actor_id'],$f['company_id'],$f['book_id'],$id,'reopen',3,'Apply pending correction','reopen-pending'));
+    assert_same('0.0000',pl_profit_loss($f['actor_id'],$f['company_id'],$f['book_id'],'2026-01-01','2026-12-31')['net_profit']);
+    year_close($f,$id,'corrected-close');assert_same('0.0000',year_balance($f,$f['retained']));
+});
+
 test('year-end allocation distributes exact residuals symmetrically and rejects missing policy',function():void{
     $parts=[['partner_id'=>2,'ratio'=>'0.400000'],['partner_id'=>1,'ratio'=>'0.600000']];
     assert_same(['0.0001','0.0000'],array_column(pl_year_end_allocate('0.0001',$parts),'amount'));assert_same(['-0.0001','0.0000'],array_column(pl_year_end_allocate('-0.0001',$parts),'amount'));
