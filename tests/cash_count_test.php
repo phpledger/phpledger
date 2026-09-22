@@ -90,3 +90,13 @@ test('cash count retries read current receipts from a caller-owned old snapshot'
         assert_same($results[0]['result'],pl_record_cash_count($f['actor_id'],$f['company_id'],$f['book_id'],$input));
     } finally { DB::rollback(); }
 });
+
+test('cash counts exclude foreign-currency accounts and reject zero-difference foreign cash',function():void {
+    $f=ledger_fixture();
+    DB::update('pl_accounts',['currency'=>'EUR'],'id=%i',$f['accounts']['1000']);
+    assert_true(!in_array($f['accounts']['1000'],array_column(pl_cash_count_accounts($f['actor_id'],$f['company_id'],$f['book_id']),'id'),true));
+    assert_throws(fn()=>pl_record_cash_count($f['actor_id'],$f['company_id'],$f['book_id'],cash_count_input($f,'0','fx-zero')),DomainException::class,'functional-currency');
+    assert_same(0,(int)DB::queryFirstField('SELECT COUNT(*) FROM pl_cash_counts WHERE book_id=%i',$f['book_id']));
+    DB::update('pl_accounts',['currency'=>'USD'],'id=%i',$f['accounts']['1000']);
+    assert_same('agreed',pl_record_cash_count($f['actor_id'],$f['company_id'],$f['book_id'],cash_count_input($f,'0','base-zero'))['outcome']);
+});

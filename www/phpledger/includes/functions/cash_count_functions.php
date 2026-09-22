@@ -38,10 +38,11 @@ function pl_cash_count_accounts(int $actorId, int $companyId, int $bookId): arra
 {
     return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId): array {
         pl_require_company_access($actorId, $companyId);
-        pl_ledger_book($companyId, $bookId);
-        $rows = DB::query("SELECT id, code, name FROM pl_accounts WHERE company_id = %i AND book_id = %i AND role = 'cash_bank' AND type = 'asset' AND is_active = 1 ORDER BY code FOR SHARE", $companyId, $bookId);
+        $book = pl_ledger_book($companyId, $bookId);
+        $rows = DB::query("SELECT id, code, name, currency FROM pl_accounts WHERE company_id = %i AND book_id = %i AND role = 'cash_bank' AND type = 'asset' AND is_active = 1 ORDER BY code FOR SHARE", $companyId, $bookId);
         $accounts = [];
         foreach ($rows as $row) {
+            if ($row['currency'] !== null && $row['currency'] !== $book['currency']) { continue; }
             if (!pl_account_is_postable($companyId, $bookId, (string) $row['code'])) {
                 continue;
             }
@@ -194,10 +195,11 @@ function pl_record_cash_count(int $actorId, int $companyId, int $bookId, array $
             if (!hash_equals((string) $existing['payload_hash'], $hash)) { throw new DomainException('This request identity belongs to a different cash count.'); }
             return pl_get_cash_count($actorId, $companyId, $bookId, (int) $existing['id']);
         }
-        $account = DB::queryFirstRow("SELECT id, code, name FROM pl_accounts WHERE id = %i AND company_id = %i AND book_id = %i AND role = 'cash_bank' AND type = 'asset' AND is_active = 1 FOR SHARE", $accountId, $companyId, $bookId);
+        $account = DB::queryFirstRow("SELECT id, code, name, currency FROM pl_accounts WHERE id = %i AND company_id = %i AND book_id = %i AND role = 'cash_bank' AND type = 'asset' AND is_active = 1 FOR SHARE", $accountId, $companyId, $bookId);
         if (!$account) {
             throw new DomainException('A cash count belongs to an active cash or bank account in this book.');
         }
+        if ($account['currency'] !== null && $account['currency'] !== pl_ledger_book($companyId, $bookId)['currency']) { throw new DomainException('Cash counts currently support functional-currency accounts only.'); }
         if (!pl_account_is_postable($companyId, $bookId, (string) $account['code'])) { throw new DomainException('Choose a postable cash account.'); }
         $period = DB::queryFirstRow('SELECT status FROM pl_periods WHERE company_id = %i AND book_id = %i AND start_date <= %s AND end_date >= %s FOR UPDATE', $companyId, $bookId, $countDate, $countDate);
         if (!$period || $period['status'] !== 'open') { throw new DomainException('A cash count needs an open accounting period.'); }

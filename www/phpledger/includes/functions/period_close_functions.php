@@ -654,4 +654,3 @@ function pl_journal_reversal_history(int $actorId, int $companyId, int $bookId, 
         return DB::query('SELECT e.id, e.event, e.trigger_source, e.reverse_on, e.reversal_journal_id, e.reason, e.created_at, u.display_name AS actor_name FROM pl_journal_reversal_events e JOIN pl_users u ON u.id = e.actor_id WHERE e.company_id = %i AND e.book_id = %i AND e.journal_id = %i ORDER BY e.id FOR SHARE', $companyId, $bookId, $journalId);
     });
 }
-
