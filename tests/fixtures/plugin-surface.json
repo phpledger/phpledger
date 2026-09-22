@@ -366,7 +366,8 @@
                 "int $journalId",
                 "?string $date",
                 "string $idempotencyKey",
-                "string $reason"
+                "string $reason",
+                "bool $scheduled="
             ],
             "returns": "array"
         },
