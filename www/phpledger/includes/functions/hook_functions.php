@@ -60,6 +60,11 @@ function pl_hook_points(): array
         'journal.posted' => ['kind' => 'action', 'args' => ['array journal', 'array context'], 'returns' => 'void', 'phase' => 'after-commit'],
         // After the outermost commit of a period close.
         'period.closed' => ['kind' => 'action', 'args' => ['array period', 'array context'], 'returns' => 'void', 'phase' => 'after-commit'],
+        'period.checklist' => ['kind' => 'filter', 'args' => ['array items', 'array context'], 'returns' => 'array', 'phase' => 'pre-lock'],
+        // Employee register changes publish the company and saved employee after commit.
+        'employee.created' => ['kind' => 'action', 'args' => ['array payload'], 'returns' => 'void', 'phase' => 'after-commit'],
+        'employee.updated' => ['kind' => 'action', 'args' => ['array payload'], 'returns' => 'void', 'phase' => 'after-commit'],
+        'employee.terminated' => ['kind' => 'action', 'args' => ['array payload'], 'returns' => 'void', 'phase' => 'after-commit'],
         // The workspace navigation groups, so a plugin can add its own screens to the sidebar.
         'navigation.groups' => ['kind' => 'filter', 'args' => ['array groups', 'array context'], 'returns' => 'array', 'phase' => 'request'],
         // B77 and B78: the registration point for a channel plugin. The value is the handler array

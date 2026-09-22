@@ -9,6 +9,30 @@
         "PL_Hook_Veto": "DomainException"
     },
     "hook_points": {
+        "employee.created": {
+            "kind": "action",
+            "args": [
+                "array payload"
+            ],
+            "returns": "void",
+            "phase": "after-commit"
+        },
+        "employee.terminated": {
+            "kind": "action",
+            "args": [
+                "array payload"
+            ],
+            "returns": "void",
+            "phase": "after-commit"
+        },
+        "employee.updated": {
+            "kind": "action",
+            "args": [
+                "array payload"
+            ],
+            "returns": "void",
+            "phase": "after-commit"
+        },
         "journal.posted": {
             "kind": "action",
             "args": [
@@ -44,6 +68,15 @@
             ],
             "returns": "array",
             "phase": "cli"
+        },
+        "period.checklist": {
+            "kind": "filter",
+            "args": [
+                "array items",
+                "array context"
+            ],
+            "returns": "array",
+            "phase": "pre-lock"
         },
         "period.closed": {
             "kind": "action",

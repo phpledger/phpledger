@@ -110,3 +110,30 @@ test('every published function exists and every published extension point is rai
             'Core publishes the extension point ' . $point . ' and never raises it.');
     }
 });
+
+
+test('package manifests can declare the employee lifecycle and period checklist extension points', function (): void {
+    $hooks = ['employee.created', 'employee.updated', 'employee.terminated', 'period.checklist'];
+    $manifest = [
+        'type' => 'plugin', 'slug' => 'sample-register-extension', 'name' => 'Sample register extension',
+        'version' => '1.0.0', 'contract' => PL_PLUGIN_CONTRACT, 'api' => PL_PLUGIN_API_VERSION,
+        'description' => 'Sample declarations only; no code is installed or executed.',
+        'author' => 'PHP Ledger test suite', 'licence' => 'AGPL-3.0-or-later',
+        'adds' => ['Sample employee lifecycle and close checklist integration.'],
+        'requires' => [], 'entry' => 'plugin.php', 'hooks' => $hooks,
+        'files' => ['plugin.php' => hash('sha256', '<?php // sample extension')],
+    ];
+    $validated = pl_plugin_manifest_validate($manifest, 'sample-register-extension');
+    assert_same($hooks, $validated['hooks']);
+    foreach ($hooks as $hook) {
+        $single = $manifest;
+        $single['hooks'] = [$hook];
+        assert_same([$hook], pl_plugin_manifest_validate($single, 'sample-register-extension')['hooks']);
+    }
+    $unknown = $manifest;
+    $unknown['hooks'] = ['employee.unknown'];
+    assert_throws(fn() => pl_plugin_manifest_validate($unknown, 'sample-register-extension'), DomainException::class, 'does not publish');
+    $wrongVersion = $manifest;
+    $wrongVersion['api'] = '1.0.0';
+    assert_throws(fn() => pl_plugin_manifest_validate($wrongVersion, 'sample-register-extension'), DomainException::class, 'plugin API');
+});
