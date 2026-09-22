@@ -1797,3 +1797,9 @@ Parent browser review found pending schedules were not prefilled and already rev
 ### Schedule-screen follow-up outcome
 
 Pending dates now prefill from the event trail. An intentionally blank date remains blank after validation failure. A scoped read of the existing linked journal shows a completed state and reversal link, hiding the schedule form after either scheduled or manual reversal. No ledger API or schema changed. Expanded HTTP regression covers pending, failed-clear, scheduled-completed and manually reversed states; isolated focused suite **37 tests, zero failures**, three changed PHP files lint clean, diff check clean. Parent owns visual confirmation and combined gates.
+
+## 2026-09-23 — Codex: combined M17 implementation and validation complete
+
+All three Claude continuations are integrated on codex/m17-takeover. Full immutable-source checks at 1683b899f64272f95d7af80fb23698097a960ae2 passed 597 tests on MySQL 8.4 and 597 on MariaDB 10.11, zero failures on each; 361 PHP lint checks, PHPStan and sample validation also passed. The 16 initial integration failures were corrected without weakening reconciliation/access guards; subsequent stale sample-structure pins were regenerated and added to package/CI checks. Both generators pass, and 13 package-builder tests pass.
+
+Exact ZIP fresh-install proof: 50 migrations, current structures, employee, cash-count posting, close checklist, encrypted round-trip, balanced totals, no-op replay and unchanged payload. Populated published-v1.2.1 upgrades passed on both engines. Actual browser actions and 12 route/viewport checks passed. Original worktree changes and eight pre-existing main website files are backed up with matching SHA-256. See docs/repository/M17-TAKEOVER-2026-09-23.md for source/hash/logs and limitations. Local fast-forward handoff only; no push, release, production migration, deployment or external business action.

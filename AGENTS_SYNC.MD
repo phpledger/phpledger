@@ -1,5 +1,13 @@
 # Shared Claude and Codex state
 
+## Latest checkpoint, 23 September 2026 (Codex): all three M17 continuations verified together
+
+- Period close/reversals/cash counts (047), employee master (048) and encrypted plugin secret storage (049) are complete locally on `codex/m17-takeover`, ready for the owner's authorized local implementation handoff. Source tested and packaged: `1683b899f64272f95d7af80fb23698097a960ae2`; subsequent handoff edits are documentation only.
+- Full `composer check`: **597 tests, zero failures on both MySQL 8.4 and MariaDB 10.11**; 361 PHP files lint clean, PHPStan clean. Both resource generators and 13 package-builder tests pass. Populated v1.2.1 upgrades preserve historical rows/balances on both engines; the exact ZIP passes 50 fresh migrations and first operations, including current sample structure pins.
+- Browser proof covers employee save, exact cash-count adjustment, automatic reversal on period opening, required-review rejection and successful close, and four routes at desktop/tablet/phone widths. Original lane WIP and the main checkout's eight existing generated website file changes are separately backed up outside Git.
+- API `1.1.0` includes the new secret/employee/checklist surface and scheduled reversal argument; exact `1.0.0` plugin manifests need review/update. Payroll, recurring-job infrastructure, accountant acceptance and production rollout remain separate. No push, release, deployment, real-data migration or stakeholder/provider action was performed.
+- Canonical evidence and the full changed-file inventory: [M17 local takeover receipt](docs/repository/M17-TAKEOVER-2026-09-23.md). Earlier built/unmerged checkpoints below are historical; do not replay the three original worktree snapshots over the integrated result.
+
 ## Latest checkpoint, 21 September 2026 (Claude): the fixed-asset register (M14) is built, not merged
 
 - **Branch `m14/fixed-assets`, rebased onto `master` `3fc315d`, one commit, not pushed, not merged.** Issue **#95**. Migration **046_fixed_assets**: it started at 042, and the plugin runtime, the sample skeletons and the ownership register each took a number while it was being built, so it has been renumbered twice. It appears in five places — the file name, the installer label in `install_check_functions.php`, two lines in `tools/package-files.json`, the `migrations` list in `resources/modules/fixed-assets.json`, and prose in the docs. Its `pl_core_audit` `entity_type` MODIFY carries the union of 041's list plus `asset` and `asset_class`; 044 uses an audit table of its own and adds nothing to that ENUM.
