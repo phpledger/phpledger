@@ -18,7 +18,7 @@
     <?php }, 'transaction-editor-title'); ?>
     <?php if ($form['message']): ?><div class="alert alert-danger" role="alert" tabindex="-1" data-error-message <?= $errors===[]?'data-form-error':'' ?>><strong><?= pl_e(pl_t('Your draft has not been changed.')) ?></strong><p><?= pl_e($form['message']) ?></p><p><?= pl_e(pl_t('Your submitted values are kept below.')) ?><?php if ($document): ?> <a href="<?= pl_e(pl_workflow_url('/transactions/edit', ['id'=>$document['id']])) ?>"><?= pl_e(pl_t('Reload the latest saved version')) ?></a> <?= pl_e(pl_t('to resolve a revision conflict.')) ?><?php endif; ?></p></div><?php endif; ?>
     <?php pl_ui_error_summary($errors, $fields); ?>
-    <form id="transaction-editor" class="panel doc-body" method="post" action="<?= pl_e(pl_workflow_url('/transactions/save')) ?>" data-document-form>
+    <form id="transaction-editor" class="panel doc-body" method="post" action="<?= pl_e(pl_workflow_url('/transactions/save')) ?>" data-document-form<?php if (!$document): ?> data-heading-id="transaction-editor-title" data-receipt-heading="<?= pl_e(pl_t('New {kind}', ['kind' => pl_t('receipt')])) ?>" data-expense-heading="<?= pl_e(pl_t('New {kind}', ['kind' => pl_t('expense')])) ?>"<?php endif; ?>>
         <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?>
         <?php pl_ui_return_filters($returnFilters); ?>
         <input type="hidden" name="creation_key" value="<?= pl_e(pl_web_text($input,'creation_key')) ?>">

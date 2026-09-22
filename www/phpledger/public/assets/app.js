@@ -335,6 +335,9 @@ if (documentForm) {
     const category = documentForm.elements.category_account_id;
     const filterCategories = () => {
         const kind = documentForm.elements.kind.value;
+        const heading = document.getElementById(documentForm.dataset.headingId || '');
+        const headingText = kind === 'receipt' ? documentForm.dataset.receiptHeading : documentForm.dataset.expenseHeading;
+        if (heading && headingText) heading.textContent = headingText;
         [...category.options].forEach(option => {
             const mismatch = !!option.dataset.categoryKind && option.dataset.categoryKind !== kind;
             option.hidden = mismatch;
