@@ -136,7 +136,7 @@ function pl_get_payroll(int $actor, int $company, int $book, int $id, ?string $a
     foreach (['id','company_id','book_id','created_by'] as $field) { $row[$field] = (int) $row[$field]; }
     $row['journal_id'] = $row['journal_id'] === null ? null : (int) $row['journal_id'];
     $row['reversal_id'] = $row['reversal_id'] === null ? null : (int) $row['reversal_id'];
-    $row['elements'] = DB::query('SELECT e.*,a.name AS account_name,a.code AS account_code FROM pl_payroll_elements e JOIN pl_accounts a ON a.id=e.account_id WHERE e.payroll_id=%i ORDER BY e.id', $id);
+    $row['elements'] = DB::query('SELECT e.*,a.name AS account_name,a.code AS account_code FROM pl_payroll_elements e JOIN pl_accounts a ON a.id=e.account_id WHERE e.payroll_id=%i ORDER BY e.id FOR SHARE', $id);
     foreach ($row['elements'] as &$element) {
         foreach (['id','account_id','payroll_id'] as $field) { $element[$field] = (int) $element[$field]; }
         $element['paid'] = pl_payroll_paid($element['id'], $asOf);
@@ -214,7 +214,7 @@ function pl_payroll_validate_general_payment(int $actor,int $company,int $book,a
     if ($payroll['reversal_id'] !== null) { throw new DomainException('This payroll was reversed.'); }
     if (DB::queryFirstField('SELECT journal_id FROM pl_general_drafts WHERE id=%i FOR UPDATE',$draft['id']) !== null) { return; }
     $byId=array_column($payroll['elements'],null,'id');
-    foreach (DB::query('SELECT element_id,amount FROM pl_payroll_payment_lines WHERE payment_id=%i',$payment['id']) as $line) {
+    foreach (DB::query('SELECT element_id,amount FROM pl_payroll_payment_lines WHERE payment_id=%i FOR SHARE',$payment['id']) as $line) {
         if (bccomp($line['amount'],bcsub($byId[(int)$line['element_id']]['amount'],pl_payroll_paid((int)$line['element_id'],null,true),4),4)>0) { throw new DomainException('Another payment settled this payroll amount. Review the outstanding balance.'); }
     }
 }
@@ -226,9 +226,8 @@ function pl_payroll_validate_posting(int $actor,int $company,int $book,array $pa
         $payroll=DB::queryFirstRow('SELECT id FROM pl_payroll_journals WHERE company_id=%i AND book_id=%i AND journal_id=%i FOR UPDATE',$company,$book,$reversalOf);
         if ($payroll) {
             pl_payroll_require($actor,$company,true);
-            foreach (DB::query('SELECT id FROM pl_payroll_elements WHERE payroll_id=%i',$payroll['id']) as $element) {
-                if (bccomp(pl_payroll_paid((int)$element['id'],null,true),'0',4)>0) { throw new DomainException('Reverse payroll payments before reversing their accrual.'); }
-            }
+            $unreversed=DB::queryFirstField('SELECT p.id FROM pl_payroll_payments p JOIN pl_general_drafts d ON d.id=p.draft_id JOIN pl_journals j ON j.id=d.journal_id LEFT JOIN pl_journals r ON r.reversal_of_id=j.id WHERE p.payroll_id=%i AND (r.id IS NULL OR r.journal_date>%s) LIMIT 1 FOR SHARE',$payroll['id'],$payload['date']);
+            if ($unreversed!==null) { throw new DomainException('Reverse payroll payments with an effective date no later than the accrual reversal.'); }
         }
         return;
     }
@@ -243,7 +242,7 @@ function pl_payroll_validate_posting(int $actor,int $company,int $book,array $pa
     if (!preg_match('/^payroll:([1-9][0-9]*)$/D',$payload['source_reference'],$m)) { throw new DomainException('Use the payroll accounting service.'); }
     $row=DB::queryFirstRow('SELECT * FROM pl_payroll_journals WHERE id=%i AND company_id=%i AND book_id=%i FOR UPDATE',(int)$m[1],$company,$book);
     if (!$row || $payload['idempotency_key']!=='payroll:'.$row['id'].':post') { throw new DomainException('Use the payroll accounting service.'); }
-    $elements=DB::query('SELECT element_kind AS kind,account_id,amount FROM pl_payroll_elements WHERE payroll_id=%i ORDER BY id',$row['id']);
+    $elements=DB::query('SELECT element_kind AS kind,account_id,amount FROM pl_payroll_elements WHERE payroll_id=%i ORDER BY id FOR SHARE',$row['id']);
     foreach ($elements as &$element) { $element['account_id']=(int)$element['account_id']; } unset($element);
     $expected=pl_preview_payroll($actor,$company,$book,['period_from'=>$row['period_from'],'period_to'=>$row['period_to'],'date'=>$row['posting_date'],
         'external_reference'=>$row['external_reference'],'description'=>$row['description'],'elements'=>$elements]);

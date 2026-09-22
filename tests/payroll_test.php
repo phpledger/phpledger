@@ -148,3 +148,26 @@ test('shared public demo login remains usable while other users and harmless pro
         putenv('PL_ENV=test');assert_true(!pl_shared_demo_is_account($id));pl_update_profile($id,['display_name'=>'Normal installation','username'=>'normal'.bin2hex(random_bytes(5))]);
     }finally{putenv('PL_ENV=test');putenv($prior===false?'PL_INSTALL_DIRECTORY':'PL_INSTALL_DIRECTORY='.$prior);unlink($dir.'/installed.json');rmdir($dir);}
 });
+
+test('payroll current allocation reads reject overpayment from an older caller snapshot',function():void{
+    $f=payroll_fixture();$row=pl_post_payroll($f['actor_id'],$f['company_id'],$f['book_id'],payroll_input($f));
+    $element=array_column($row['elements'],null,'element_kind')['net_pay']['id'];
+    DB::startTransaction();
+    try{
+        DB::queryFirstField('SELECT COUNT(*) FROM pl_payroll_payment_lines');
+        $job=$f+['payroll'=>$row['id'],'element'=>$element];
+        $process=proc_open([PHP_BINARY,__DIR__.'/payroll_snapshot_worker.php',json_encode($job,JSON_THROW_ON_ERROR)],[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes);
+        if(!is_resource($process)){throw new RuntimeException('Payroll snapshot worker unavailable.');}fclose($pipes[0]);
+        $json=stream_get_contents($pipes[1]);$error=stream_get_contents($pipes[2]);fclose($pipes[1]);fclose($pipes[2]);assert_same(0,proc_close($process),$error);
+        $second=json_decode($json,true,32,JSON_THROW_ON_ERROR);
+        assert_throws(fn()=>pl_post_general_draft($f['actor_id'],$f['company_id'],$f['book_id'],$second['id'],1),DomainException::class,'Another payment');
+    }finally{DB::rollback();}
+});
+
+test('payroll accrual reversal cannot precede the effective reversal of its settled payments',function():void{
+    $f=payroll_fixture();$row=pl_post_payroll($f['actor_id'],$f['company_id'],$f['book_id'],payroll_input($f));
+    $draft=payroll_payment($f,$row,'net_pay','5000');$posted=pl_post_general_draft($f['actor_id'],$f['company_id'],$f['book_id'],$draft['id'],1);
+    pl_reverse_journal($f['actor_id'],$f['company_id'],$f['book_id'],$posted['journal_id'],gmdate('Y-m-d',time()+86400),bin2hex(random_bytes(16)),'Sample future payment reversal');
+    assert_throws(fn()=>pl_reverse_journal($f['actor_id'],$f['company_id'],$f['book_id'],$row['journal_id'],gmdate('Y-m-d'),bin2hex(random_bytes(16)),'Too early'),DomainException::class,'effective date');
+    pl_reverse_journal($f['actor_id'],$f['company_id'],$f['book_id'],$row['journal_id'],gmdate('Y-m-d',time()+86400),bin2hex(random_bytes(16)),'After effective payment reversal');
+});
