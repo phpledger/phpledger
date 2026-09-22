@@ -1810,7 +1810,6 @@ Local handoff completed: master fast-forwarded from 0ff0211 to 4962ea6. All eigh
 
 Owner requested all remaining work and publication of 1.3.0 with its matching demo and website. Integration is isolated at codex/release-1.3.0; origin's two Docker workflow commits were merged without altering main or its eight dirty generated files. Read-only hosting check shows demo1.1.0 af0f4895, healthy, so demo needs a real code/data rollout. Plan and reserved migrations are recorded in docs/strategy/RELEASE-PLAN-1.3.md. Independent lanes plan and implement financial modules; coordinator alone owns release/platform/shared integration and live actions. Existing credential-safe signing/SSH paths will be used; no campaigns or stakeholder messages.
 
-<<<<<<< HEAD
 ## 2026-09-23 - Owner release follow-up: real-install demo and documentation
 
 Owner requests the actual installer and full onboarding in the public demo, ordinary application exploration and hourly reset to simplify release maintenance. Coordinator owns disposable installation hosting, visitor isolation, normal release artifact parity and reset evidence. Owner also requests README/Wiki cleanup encouraging trial and voluntary donations. Release plan updated before implementation; donation destination requested, not invented. Financial lanes continue independently. No live change yet.
@@ -1818,11 +1817,9 @@ Owner requests the actual installer and full onboarding in the public demo, ordi
 ## 2026-09-23 - Shared demo clarification and candidate evidence
 
 Owner clarified one shared actual installation, every installer stage visible, database credentials/settings hidden and fixed server-side, public application login fixed at login, hourly reset. This supersedes the earlier visitor-isolation proposal. Parent implemented the hosting guard/reset/proxy, real installer policy and CLI upgrade entry point. Local browser checks completed installation/onboarding and second visitor login; forged inputs/config-download rejected; reset invalidated old session/CSRF after numeric identity reuse. Nine responsive checks passed; actual shutdown/session race drained before clearing old generation. Health now recognizes intentional installer-ready state. Installer24/0, package-builder13/0, both resource generators clean. Candidate only; no production change. Donation link remains requested and not invented. Owner also explicitly restored both GHCR and Docker Hub; consolidated release ZIP publisher preserves the newer Docker Hub description feature without development-image publication.
-=======
 ## 2026-09-23 — Codex 1.3 payroll and employee-consolidation scope
 
 Own codex/1.3-payroll at .cache/13-payroll, migrations 053 and 055. Implement approved aggregate payroll accounting, ordinary reviewed general-journal payments, explicit employee/trading/driver links and comparisons of collected identity fields. No inferred identities or bank data, no payslips/statutory calculation. Coordinate common payment helper with loans and checklist with year-end. Local-only lane; coordinator publishes. Preserve other lanes and existing history.
->>>>>>> c0820dd (Add shared reviewed non-trade account payment draft service)
 
 
 ## 2026-09-23 — Codex 1.3 payroll / employee links local handoff

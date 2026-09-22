@@ -221,4 +221,3 @@ Answers to the six plugin questions put after the detailed explanation, plus one
 ## 23 September 2026 - owner release-channel correction
 
 For 1.3.0 the owner explicitly selected publication to both GHCR and Docker Hub. This supersedes B86's GHCR-only restriction. Both official images must be built from the same verified published release ZIP; master/tag pushes must not publish the development Dockerfile over release tags. Existing Docker Hub description publication is retained in that single release workflow. Credential values remain private; existing secret names are DOCKERHUB_USERNAME and DOCKERHUB_TOKEN.
-
