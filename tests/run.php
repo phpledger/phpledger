@@ -102,6 +102,7 @@ $suites[] = 'payroll_test.php';
 // other suite and no child process the sweep starts ever sees a fixture package.
 $suites[] = 'plugin_test.php';
 $suites[] = 'secret_store_test.php';
+$suites[] = 'schedules_test.php';
 $suites[] = 'plugin_surface_test.php';
 // 1.3 M14: the Fixed assets module.
 $suites[] = 'asset_test.php';
@@ -173,6 +174,9 @@ if (($argv[1] ?? '') === '--suite=lists') {
 }
 if (($argv[1] ?? '') === '--suite=i18n') {
     $suites = ['ledger_test.php', 'i18n_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=schedules') {
+    $suites=['ledger_test.php','concurrency_test.php','core_test.php','document_test.php','pos_test.php','module_test.php','schedules_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=plugins') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php',

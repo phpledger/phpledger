@@ -95,6 +95,8 @@ $routes = [
     // 1.3 M17: the employee master (issue #98's blocker). 'employees' is not a directory under
     // www/phpledger/public (only 'assets' is), so this does not repeat B90.
     '/employees' => ['GET', 'POST'], '/employees/links' => ['GET', 'POST'], '/payroll' => ['GET', 'POST'],
+    '/recurring' => ['GET', 'POST'], '/schedules' => ['GET', 'POST'], '/loans' => ['GET', 'POST'],
+    '/reports/schedules' => ['GET'], '/reports/loans' => ['GET'],
     '/contra-review' => ['GET'], '/contra-review/confirm' => ['POST'],
     '/general-journals' => ['GET'], '/general-journals/new' => ['GET'], '/general-journals/edit' => ['GET'],
     '/general-journals/detail' => ['GET'], '/general-journals/save' => ['POST'], '/general-journals/post' => ['POST'], '/general-journals/reverse' => ['POST'],
@@ -412,6 +414,10 @@ try {
     if ($path === '/employees/links') {
         require_once dirname(__DIR__) . '/includes/functions/employment_link_web_functions.php';
         pl_web_employee_links($actorId,$companyId,$bookId,$user,$company,$method);
+    }
+    if (in_array($path, ['/recurring','/schedules','/loans','/reports/schedules','/reports/loans'], true)) {
+        require_once dirname(__DIR__) . '/includes/functions/scheduling_web_functions.php';
+        pl_web_scheduling($actorId, $companyId, $bookId, $user, $company, $method, $path);
     }
     if ($path === '/employees') {
         require_once dirname(__DIR__) . '/includes/functions/employee_web_functions.php';

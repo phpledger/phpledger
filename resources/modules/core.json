@@ -33,6 +33,9 @@
     "047_period_close",
     "048_employee_master",
     "049_secret_store",
+    "050_scheduler_jobs",
+    "051_recurring_schedules",
+    "052_loan_schedules",
     "053_payroll_accounting",
     "054_year_end",
     "055_employee_links"
@@ -55,7 +58,12 @@
     "/employees",
     "/cash-counts",
     "/payroll",
-    "/employees/links"
+    "/employees/links",
+    "/recurring",
+    "/schedules",
+    "/loans",
+    "/reports/schedules",
+    "/reports/loans"
   ],
   "permissions": [
     "owner",

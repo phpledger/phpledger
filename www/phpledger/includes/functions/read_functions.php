@@ -85,6 +85,8 @@ function pl_read_catalog(): array
         'fiscal_years' => ['Read fiscal-year dates and closing states.', [], [], true],
         'year_end' => ['Read reviewed year-end policy, adjustments, comparative reports and audit history.', ['year_id' => $id], ['year_id'], false],
         'ownership_snapshot' => ['Read who owns the company at a date: share classes, holdings and percentages per holder, votes, fully diluted totals, the members register and the officers register.', ['as_of' => $date], ['as_of'], false],
+        'release_schedules' => ['Read prepaid, accrual and deferred-income releases and their general-ledger reconciliation.', ['as_of' => $date], ['as_of'], true],
+        'loan_schedules' => ['Read loan principal, current/non-current split, interest, schedule versions and general-ledger reconciliation.', ['as_of' => $date], ['as_of'], true],
         'share_ledger' => ['Read the append-only share ledger: allotments, transfers, cancellations, bonus issues and re-designations, with their corrections. Transfers never carry a journal.', [], [], true],
     ];
     $catalog = [];
@@ -218,6 +220,18 @@ function pl_connection_read_operations(array $connection): array
 }
 
 /** One scoped business interface for HTTP and MCP; only existing accounting services compute money. */
+function pl_read_schedule_report(int $actor,int $company,int $book,string $asOf,bool $loan,int $page,int $size): array
+{
+    $report=$loan?pl_loan_report($actor,$company,$book,$asOf):pl_schedule_report($actor,$company,$book,$asOf);
+    $key=$loan?'loans':'schedules';$rows=[];
+    foreach($report[$key] as $row) {
+        $safe=pl_read_fields($row,$loan?['id','name','lender','principal','principal_paid','interest_paid','outstanding','current','non_current','start_date','liability_account_id']:['id','name','kind','amount','released','unreleased','balance_account_id','counterpart_account_id','funding_journal_id']);
+        $detail=$loan?'schedule':'releases';$safe[$detail]=array_map(static fn(array $r):array=>pl_read_fields($r,['id','due_date','principal','interest','closing_balance','amount','draft_id','journal_id']),$row[$detail]);
+        $rows[]=$safe;
+    }
+    return ['as_of'=>$asOf,$key=>pl_read_page($rows,$page,$size),'accounts'=>$report['accounts']];
+}
+
 function pl_read_operation(string $connectionId, string $operation, array $input): array
 {
     $args = pl_read_arguments($operation, $input);
@@ -261,6 +275,8 @@ function pl_read_operation(string $connectionId, string $operation, array $input
             'fiscal_years' => pl_read_page(pl_year_end_list($actor,$company,$book),$page,$size),
             'year_end' => pl_year_end_report($actor,$company,$book,$args['year_id']),
             'ownership_snapshot' => pl_read_ownership_snapshot($actor, $company, $args['as_of']),
+            'release_schedules' => pl_read_schedule_report($actor, $company, $book, $args['as_of'], false, $page, $size),
+            'loan_schedules' => pl_read_schedule_report($actor, $company, $book, $args['as_of'], true, $page, $size),
             'share_ledger' => pl_read_page(array_map(static fn (array $row): array => pl_read_fields($row, ['id','effective_date','event_type','type_label','class_code','class_name','quantity','from_name','to_name','to_class_code','consideration_currency','consideration_amount','nominal_total','premium_total','certificate_reference','journal_id','reversal_of_id','status']),
                 pl_list_share_events($actor, $company, 1000)), $page, $size),
             default => throw new LogicException('Read operation is not implemented.'),

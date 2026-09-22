@@ -62,6 +62,7 @@ function pl_period_core_checklist_items(): array
         // HARD. A draft dated inside the period is work that was started and not finished; if
         // the period closes it can never be posted, because a closed period refuses postings.
         // Closing over one destroys the only thing that could still be done about it.
+        'core.schedules_released' => ['label'=>'Schedules released through the period end','hint'=>'Review and post every due prepaid, accrual and deferred-income release.','severity'=>'hard','computed'=>true],
         'core.drafts' => [
             'label' => 'No unposted drafts are dated in this period',
             'hint' => 'A draft dated inside a closed period can never be posted, because a closed period refuses postings.',
@@ -291,6 +292,7 @@ function pl_period_checklist_build(int $actorId, int $companyId, int $bookId, in
             }
         }
         $facts = [
+            'core.schedules_released' => ['satisfied'=>($dueReleases=pl_schedule_unreleased($companyId,$bookId,$period['end_date']))===[], 'detail'=>$dueReleases],
             'core.drafts' => ['satisfied' => $drafts === [], 'detail' => $drafts],
             'core.reversals' => ['satisfied' => $reversals === [], 'detail' => $reversals],
             'core.cash_bank_reconciled' => ['satisfied' => $unreconciled === [], 'detail' => $unreconciled],

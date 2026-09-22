@@ -4,6 +4,13 @@ declare(strict_types=1);
 /** Internal transactional outbox: callers have already authorized their source mutation. */
 function pl_enqueue_outbound_event(int $companyId,int $bookId,string $type,string $entityType,int $entityId,int $revision,string $key): int
 {
+    return pl_enqueue_delivery_event($companyId,$bookId,$type,$entityType,$entityId,$revision,$key,'outbound');
+}
+
+/** One event writer for outbound delivery and internal draft jobs; never duplicate the queue. */
+function pl_enqueue_delivery_event(int $companyId,int $bookId,string $type,string $entityType,int $entityId,int $revision,string $key,string $dispatchKind): int
+{
+    if (!in_array($dispatchKind,['outbound','internal'],true)) { throw new DomainException('Unknown delivery purpose.'); }
     if (DB::transactionDepth()<1) { throw new LogicException('Enqueue must share the source transaction.'); }
     pl_ledger_book($companyId,$bookId);
     if (!preg_match('/^[a-z][a-z0-9_.]{0,79}$/D',$type) || !preg_match('/^[a-z][a-z0-9_]{0,39}$/D',$entityType) || $entityId<1 || $revision<1) { throw new DomainException('Invalid outbound event identity.'); }
@@ -11,9 +18,9 @@ function pl_enqueue_outbound_event(int $companyId,int $bookId,string $type,strin
     // No contact names, bank accounts, tax identities or arbitrary private payload copies.
     $payload=json_encode(['entity_type'=>$entityType,'entity_id'=>$entityId,'revision'=>$revision],JSON_THROW_ON_ERROR);
     $hash=hash('sha256',json_encode([$companyId,$bookId,$type,1,$payload],JSON_THROW_ON_ERROR));
-    $prior=DB::queryFirstRow('SELECT id,payload_hash FROM pl_outbound_events WHERE book_id=%i AND event_key=%s FOR UPDATE',$bookId,$key);
-    if($prior){if(!hash_equals($prior['payload_hash'],$hash)){throw new DomainException('Outbound event key already describes different content.');}return (int)$prior['id'];}
-    DB::insert('pl_outbound_events',['company_id'=>$companyId,'book_id'=>$bookId,'event_type'=>$type,'event_key'=>$key,'payload'=>$payload,'payload_hash'=>$hash]);
+    $prior=DB::queryFirstRow('SELECT id,payload_hash,dispatch_kind FROM pl_outbound_events WHERE book_id=%i AND event_key=%s FOR UPDATE',$bookId,$key);
+    if($prior){if($prior['dispatch_kind']!==$dispatchKind || !hash_equals($prior['payload_hash'],$hash)){throw new DomainException('Outbound event key already describes different content.');}return (int)$prior['id'];}
+    DB::insert('pl_outbound_events',['company_id'=>$companyId,'book_id'=>$bookId,'event_type'=>$type,'event_key'=>$key,'dispatch_kind'=>$dispatchKind,'payload'=>$payload,'payload_hash'=>$hash]);
     return (int)DB::insertId();
 }
 
@@ -77,7 +84,7 @@ function pl_dispatch_outbound_events(array $handlers,int $limit=100): array
         // A bounded lazy fan-out leaves events unconsumed when there is no registry entry.
         pl_ledger_transaction(function()use($consumer,$companyId,$bookId,$limit):void{
             pl_ledger_book($companyId,$bookId,true);
-            $events=DB::query('SELECT e.id FROM pl_outbound_events e WHERE e.company_id=%i AND e.book_id=%i AND NOT EXISTS(SELECT 1 FROM pl_outbound_deliveries d WHERE d.event_id=e.id AND d.consumer=%s) ORDER BY e.id LIMIT %i',$companyId,$bookId,$consumer,$limit);
+            $events=DB::query('SELECT e.id FROM pl_outbound_events e WHERE e.company_id=%i AND e.book_id=%i AND e.dispatch_kind=\'outbound\' AND NOT EXISTS(SELECT 1 FROM pl_outbound_deliveries d WHERE d.event_id=e.id AND d.consumer=%s) ORDER BY e.id LIMIT %i',$companyId,$bookId,$consumer,$limit);
             foreach($events as $event){DB::insert('pl_outbound_deliveries',['event_id'=>$event['id'],'company_id'=>$companyId,'book_id'=>$bookId,'consumer'=>$consumer]);}
         });
         while($result['claimed']<$limit){

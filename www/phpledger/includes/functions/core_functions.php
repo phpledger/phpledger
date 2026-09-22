@@ -270,12 +270,14 @@ function pl_post_general_draft(int $actorId, int $companyId, int $bookId, int $i
         $draft = pl_get_general_draft($actorId, $companyId, $bookId, $id);
         if ($revision !== $draft['revision']) { throw new DomainException('The saved draft changed. Review its latest version before posting.'); }
         if ($draft['journal_id'] !== null) { return $draft; }
+        pl_scheduled_general_validate($actorId,$companyId,$bookId,$draft);
         $journal = pl_post_journal($actorId, $companyId, $bookId, [
             'date' => $draft['document_date'], 'currency' => $book['currency'], 'source_type' => 'general_journal',
             'source_reference' => 'general:' . $id, 'description' => $draft['description'],
             'idempotency_key' => 'general:' . $id . ':post', 'lines' => $draft['lines'],
         ]);
         DB::update('pl_general_drafts', ['journal_id' => $journal['id'], 'updated_by' => $actorId, 'updated_at' => gmdate('Y-m-d H:i:s')], 'id = %i', $id);
+        pl_scheduled_general_posted($actorId,$companyId,$bookId,$id,(int)$journal['id']);
         $posted = pl_get_general_draft($actorId, $companyId, $bookId, $id);
         pl_core_audit($actorId, $companyId, $bookId, 'general_journal', $id, 'posted', $draft['description'], $draft, $posted);
         return $posted;

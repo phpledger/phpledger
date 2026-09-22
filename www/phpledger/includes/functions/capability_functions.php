@@ -88,6 +88,10 @@ function pl_capability_catalogue(): array
         // review is not always the person who may edit the register itself.
         'payroll.view' => ['label' => 'Read payroll accounting', 'description' => 'Read aggregate payroll journals and payable elements; no individual pay.', 'scope' => 'company'],
         'payroll.manage' => ['label' => 'Maintain payroll accounting', 'description' => 'Post aggregate payroll accruals and prepare reviewed payments. Requires payroll.view.', 'scope' => 'company'],
+        'schedules.view' => ['label'=>'Read recurring schedules','description'=>'Read recurring documents and deferred balances.','scope'=>'company'],
+        'schedules.manage' => ['label'=>'Manage recurring schedules','description'=>'Authorize scheduled review drafts, never automatic posting.','scope'=>'company'],
+        'loans.view' => ['label'=>'Read loans','description'=>'Read loan schedules and liability reconciliation.','scope'=>'company'],
+        'loans.manage' => ['label'=>'Manage loans','description'=>'Maintain financing schedules and authorize review drafts.','scope'=>'company'],
         'employee.view' => ['label' => 'See the employee register', 'description' => 'Read employee identity, employment status and dates, job title and static pay terms. Personal data is sensitive (owner decision B58).', 'scope' => 'company'],
         'employee.manage' => ['label' => 'Maintain the employee register', 'description' => 'Record and edit employee identity, employment status and dates, job title, pay terms and the explicit link to the ownership register.', 'scope' => 'company'],
 

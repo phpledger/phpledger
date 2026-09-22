@@ -1747,6 +1747,22 @@
       "destination": "www/phpledger/templates/views/employee-links.php"
     },
     {
+      "source": "tools/scheduler.php",
+      "destination": "tools/scheduler.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/scheduler_functions.php",
+      "destination": "www/phpledger/includes/functions/scheduler_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/recurring_functions.php",
+      "destination": "www/phpledger/includes/functions/recurring_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/loan_functions.php",
+      "destination": "www/phpledger/includes/functions/loan_functions.php"
+    },
+    {
       "source": "www/phpledger/includes/functions/account_payment_functions.php",
       "destination": "www/phpledger/includes/functions/account_payment_functions.php"
     },
@@ -1769,6 +1785,26 @@
     {
       "source": "www/phpledger/templates/views/year-end.php",
       "destination": "www/phpledger/templates/views/year-end.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/scheduling_web_functions.php",
+      "destination": "www/phpledger/includes/functions/scheduling_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/scheduling.php",
+      "destination": "www/phpledger/templates/views/scheduling.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/050_scheduler_jobs.php",
+      "destination": "www/phpledger/install/migrations/050_scheduler_jobs.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/051_recurring_schedules.php",
+      "destination": "www/phpledger/install/migrations/051_recurring_schedules.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/052_loan_schedules.php",
+      "destination": "www/phpledger/install/migrations/052_loan_schedules.php"
     }
   ]
 }

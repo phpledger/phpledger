@@ -314,6 +314,7 @@ function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array
         }
         pl_year_end_assert_posting($actorId, $companyId, $bookId, $payload, $reversalOf);
         pl_correction_assert_posting_allowed($companyId, $bookId, $payload, $reversalOf);
+        pl_schedule_validate_posting($actorId, $companyId, $bookId, $payload, $reversalOf);
         // A reversal dated before today needs the backdated-reversal permission AND the original
         // posting date, because the case this guard exists for is somebody quietly undoing an
         // entry in an earlier open period after the fact.

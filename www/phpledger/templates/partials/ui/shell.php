@@ -46,6 +46,9 @@ $navGroups = [
         // gate: the screen repeats its own employee.view check.
         ['/payroll', pl_t('Payroll accounting'), 'book', ['payroll'], pl_user_can((int)$user['id'], (int)$company['id'], 'payroll.view')],
         ['/employees', pl_t('Employees'), 'briefcase', ['employees'], pl_user_can((int)$user['id'], (int)$company['id'], 'employee.view')],
+        ['/recurring', pl_t('Recurring documents'), 'calendar', ['scheduling'], pl_user_can((int)$user['id'], (int)$company['id'], 'schedules.view')],
+        ['/schedules', pl_t('Release schedules'), 'calendar', ['scheduling'], pl_user_can((int)$user['id'], (int)$company['id'], 'schedules.view')],
+        ['/loans', pl_t('Loans'), 'briefcase', ['scheduling'], pl_user_can((int)$user['id'], (int)$company['id'], 'loans.view')],
         ['/tax', pl_t('Tax codes'), 'receipt', ['tax'], true],
         ['/opening-balances', pl_t('Opening balances'), 'book', ['opening-balances'], !pl_demo_enabled()],
         ['/opening-conversion', pl_t('Opening documents'), 'file-text', ['opening-conversion'], !pl_demo_enabled()],
