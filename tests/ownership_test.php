@@ -410,12 +410,23 @@ test('B74: a director who is also a supplier is NOT a related party until somebo
     assert_same('Bilal Sample', $marked[0]['subject_name']);
     assert_same(0, count(pl_related_party_candidates($f['actor_id'], (int) $f['company_id'])),
         'A marked party is no longer a candidate.');
-    // The employee master is 1.3 (B70): the column allows it and the resolver says so plainly.
+    // B70 now supplies the employee register. Missing and foreign-company employees must
+    // still be refused; a real employee reference never bypasses the same-company boundary.
     assert_true(isset(pl_related_party_registers()['employee']));
-    assert_throws(fn () => pl_save_related_party_marker($f['actor_id'], (int) $f['company_id'], [
-        'party_id' => (int) $party['id'], 'related_register' => 'employee', 'related_id' => 1,
+    $missingEmployeeId = (int) DB::queryFirstField('SELECT COALESCE(MAX(id), 0) + 1 FROM pl_employees');
+    $marker = ['party_id' => (int) $party['id'], 'related_register' => 'employee',
         'relationship' => 'key_management', 'effective_from' => '2026-01-01', 'effective_to' => '',
-        'note' => '', 'reason' => 'Sample employee marker.']), DomainException::class, 'employee master is not built yet');
+        'note' => '', 'reason' => 'Sample employee marker.'];
+    assert_throws(fn () => pl_save_related_party_marker($f['actor_id'], (int) $f['company_id'],
+        $marker + ['related_id' => $missingEmployeeId]), DomainException::class, 'not in the register you chose');
+    $other = pl_create_company($f['actor_id'], 'Sample other employer ' . $f['suffix'], 'USD', '2026-01-01');
+    $foreign = pl_save_employee($f['actor_id'], (int) $other['company_id'], [
+        'full_name' => 'Sample employee of another company', 'employment_type' => 'full_time',
+        'employment_status' => 'active', 'hire_date' => '2026-01-01', 'reason' => 'Sample foreign-company reference.']);
+    assert_throws(fn () => pl_save_related_party_marker($f['actor_id'], (int) $f['company_id'],
+        $marker + ['related_id' => $foreign['id']]), DomainException::class, 'not in the register you chose');
+    assert_same(1, count(pl_list_related_party_markers($f['actor_id'], (int) $f['company_id'])),
+        'Rejected employee references must not add a disclosure designation.');
 });
 
 test('B58: reading a related-party marker takes an authority an ordinary member does not have', function (): void {
