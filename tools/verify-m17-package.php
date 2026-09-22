@@ -36,6 +36,13 @@ try {
     foreach (['047_period_close', '048_employee_master', '049_secret_store'] as $version) {
         if (!in_array($version, $migrations['applied'], true)) { throw new RuntimeException('Package omitted an M17 migration.'); }
     }
+    $sampleIds = pl_sample_structure_ids();
+    if ($sampleIds === []) { throw new RuntimeException('Package has no bundled sample structures.'); }
+    foreach ($sampleIds as $sampleId) {
+        if (pl_sample_structure_read($sampleId) === null) {
+            throw new RuntimeException('Packaged sample structure is missing or stale: ' . $sampleId);
+        }
+    }
     $actor = pl_create_user('package@example.test', 'Sample package owner', bin2hex(random_bytes(24)));
     $f = pl_create_company($actor, 'Sample M17 package company', 'USD', '2026-01-01');
     $company = $f['company_id']; $book = $f['book_id'];
@@ -73,7 +80,7 @@ try {
         }
     }
     echo 'Package smoke passed: ' . count($migrations['applied']) . ' fresh migrations; '
-        . "employee saved, cash difference posted exactly, checklist rendered as data, encrypted secret round-trip, balanced report, replay no-op and payload unchanged.\n";
+        . "bundled sample structures current, employee saved, cash difference posted exactly, checklist rendered as data, encrypted secret round-trip, balanced report, replay no-op and payload unchanged.\n";
 } finally {
     DB::useDB('phpledger_test');
     DB::query('DROP DATABASE %b', $database);

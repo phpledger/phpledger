@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Harbour Trade",
   "business": "Wholesale / trader",
-  "source_digest": "12b6af5bd7a3e03bc8dccb86358c7b5ec82ef27025d7dcf29ebc36158db645fc",
+  "source_digest": "edba8f2a3ba21b09efbb04e797ca50cbb86724de68a43def196df8c0066f994d",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

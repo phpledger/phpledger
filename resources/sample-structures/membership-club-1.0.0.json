@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Riverside Community Club",
   "business": "Membership club",
-  "source_digest": "5b377a06970d4be50ecbf065399970aa74050d5d40d0be988e551a9adb987152",
+  "source_digest": "11f3df030b8bd2199efd085dc496abb59d6f54937f07928542c869378c16841b",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

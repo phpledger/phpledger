@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Cedar Table",
   "business": "Restaurant / cafe",
-  "source_digest": "6efa8db6c3b273a473eae5ffbc956f1cf06d4b1f7e8438bc9688b57746f73045",
+  "source_digest": "bb6565319d6738661e858fbd53a6808c8d419ff52d4b78f35a017d1be6999967",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

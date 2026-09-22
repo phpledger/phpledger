@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Harbor Supply Company",
   "business": "Distribution",
-  "source_digest": "3afba0d917f1672374088ca9d5eaa49033e26d9aba0cd43204e25b08c23fd71e",
+  "source_digest": "b39e3061b05720949bb273e37d3b1ed08563049987a224ef88f952b224d48f85",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {

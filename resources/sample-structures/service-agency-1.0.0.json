@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "Cedar Studio",
   "business": "Professional services / agency",
-  "source_digest": "12b0a460af07789ae9f0921f2d6cc1784dcc963e5f0f3b1ea6cd6ff963c896fa",
+  "source_digest": "ef5dc27ba100dbcdb61e034e7093d4b6ba081b8fc1b06b92fd1fae02445d1d94",
   "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
   "accounts": [
     {
