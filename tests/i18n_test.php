@@ -415,6 +415,8 @@ test('every route renders under the pseudo-locale and the document language foll
         '/packages',
         // 1.2.1 M8a: the ownership register and its reports.
         '/ownership', '/reports/ownership',
+        // 1.3 M17: the employee master (issue #98's blocker).
+        '/employees',
         // 1.2.1 M9: the counter till. /counter/receipt needs a posted sale, so the sweep asks
         // for the till itself, which is the screen with the new strings on it. A book with no
         // warehouse renders it as an empty state, which is what the sweep's fixture has.

@@ -42,6 +42,9 @@ $navGroups = [
     'Setup' => [
         ['/accounts', pl_t('Chart of accounts'), 'list', ['accounts'], true],
         ['/owner', pl_t('Owner and partners'), 'building', ['owner'], true],
+        // 1.3 M17: the employee master (issue #98's blocker). The nav is a hint, never the
+        // gate: the screen repeats its own employee.view check.
+        ['/employees', pl_t('Employees'), 'briefcase', ['employees'], pl_user_can((int)$user['id'], (int)$company['id'], 'employee.view')],
         ['/tax', pl_t('Tax codes'), 'receipt', ['tax'], true],
         ['/opening-balances', pl_t('Opening balances'), 'book', ['opening-balances'], !pl_demo_enabled()],
         ['/opening-conversion', pl_t('Opening documents'), 'file-text', ['opening-conversion'], !pl_demo_enabled()],
@@ -97,7 +100,7 @@ $quickCreate = [
         <a class="nav-item" href="<?= pl_e(pl_url('/home')) ?>" title="<?= pl_e(pl_t('Home')) ?>"<?= $view === 'home' ? ' aria-current="page"' : '' ?>><?= pl_icon('home') ?><span><?= pl_e(pl_t('Home')) ?></span></a>
         <?php foreach ($navGroups as $group => $items): ?>
             <?php $items = array_filter($items, static fn (array $item): bool => (bool)$item[4]); if ($items === []) { continue; } ?>
-            <?php if ($group === 'Setup'): ?><details class="nav-group-collapsible"<?= in_array($view, ['accounts','tax','opening-balances','opening-conversion','periods','modules','packages','connections','users','roles','cost-visibility'], true) ? ' open' : '' ?>><summary class="nav-group-summary"><span><?= pl_e(pl_t('Setup')) ?></span><?= pl_icon('chevron-down') ?></summary><div class="nav-group-body"><?php else: ?><p class="nav-group-label"><?= pl_e(pl_t($group)) ?></p><?php endif; ?>
+            <?php if ($group === 'Setup'): ?><details class="nav-group-collapsible"<?= in_array($view, ['accounts','tax','opening-balances','opening-conversion','periods','modules','packages','connections','users','roles','cost-visibility','employees'], true) ? ' open' : '' ?>><summary class="nav-group-summary"><span><?= pl_e(pl_t('Setup')) ?></span><?= pl_icon('chevron-down') ?></summary><div class="nav-group-body"><?php else: ?><p class="nav-group-label"><?= pl_e(pl_t($group)) ?></p><?php endif; ?>
             <?php foreach ($items as [$href, $label, $icon, $views]): ?>
                 <a class="nav-item" href="<?= pl_e(pl_url($href)) ?>" title="<?= pl_e($label) ?>"<?= in_array($view, $views, true) ? ' aria-current="page"' : '' ?>><?= pl_icon($icon) ?><span><?= pl_e($label) ?></span></a>
             <?php endforeach; ?>

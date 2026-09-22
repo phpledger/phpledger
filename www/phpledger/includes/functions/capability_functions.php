@@ -80,6 +80,13 @@ function pl_capability_catalogue(): array
         'relatedparty.view' => ['label' => 'See related-party information', 'description' => 'Read the related-party markers and the related-party and director loan reports. Restricted, because a marker names a customer or supplier as a director or a director\'s family (owner decision B58).', 'scope' => 'company'],
         'relatedparty.manage' => ['label' => 'Record a related-party marker', 'description' => 'Designate a customer or supplier as key management personnel, a close family member of one, or an entity either controls. Nobody is related by default; the designation is always affirmative.', 'scope' => 'company'],
 
+        // 1.3 M17: the employee master (B70), issue #98's blocker. Split the same way the
+        // related-party marker is: reading a person's identity, employment status and pay terms
+        // is sensitive personal data (owner decision B58), and the person who prepares a payroll
+        // review is not always the person who may edit the register itself.
+        'employee.view' => ['label' => 'See the employee register', 'description' => 'Read employee identity, employment status and dates, job title and static pay terms. Personal data is sensitive (owner decision B58).', 'scope' => 'company'],
+        'employee.manage' => ['label' => 'Maintain the employee register', 'description' => 'Record and edit employee identity, employment status and dates, job title, pay terms and the explicit link to the ownership register.', 'scope' => 'company'],
+
         // The Users module itself.
         'users.manage' => ['label' => 'Manage people in this company', 'description' => 'Invite, edit, suspend, reactivate and deactivate the people who can use this company.', 'scope' => 'company'],
         'roles.manage' => ['label' => 'Manage roles', 'description' => 'Create and edit custom roles and their capabilities for this company.', 'scope' => 'company'],

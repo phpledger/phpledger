@@ -1510,14 +1510,17 @@ function pl_related_party_require_view(int $actorId, int $companyId): void
 /**
  * Resolve which person a marker points at, per register.
  *
- * `related_id` has no foreign key: it points into a different table per register, and the
- * employee master is 1.3 work (B70). This is the one place that resolves it, and an unknown
- * register is refused rather than guessed — which is what lets the employee register arrive
- * without a schema change, exactly as B72 intended.
+ * `related_id` has no foreign key: it points into a different table per register. This is the
+ * one place that resolves it, and an unknown register is refused rather than guessed — which is
+ * what let the employee register arrive without a schema change, exactly as B72 intended: the
+ * `employee` branch below is 1.3 M17's entire change to this function, and to the related-party
+ * mechanism as a whole. It reads `pl_employees`; it does not read employment status to decide
+ * who is related, because nothing does that — a marker is only ever the affirmative act
+ * `pl_save_related_party_marker()` records.
  *
  * @return array{name:string, detail:string}|null null when the register has no such row
  */
-function pl_related_party_subject(int $companyId, string $register, int $relatedId): ?array
+function pl_related_party_subject(int $companyId, string $register, int $relatedId, ?int $actorId = null): ?array
 {
     if ($register === 'officer') {
         $row = DB::queryFirstRow('SELECT o.officer_role, o.appointed_on, o.resigned_on, p.name FROM pl_ownership_officers o
@@ -1536,11 +1539,16 @@ function pl_related_party_subject(int $companyId, string $register, int $related
             . ($row['effective_to'] === null ? '' : ' to ' . (string) $row['effective_to'])];
     }
     if ($register === 'employee') {
-        // B70 puts the employee master in 1.3. `related_register` already allows it, which is the
-        // whole point of the column: the marker gains employees without a schema change. Until
-        // that register exists a marker cannot point at one, and saying so is better than
-        // resolving it to nothing and letting a report show a blank name.
-        throw new DomainException('The employee master is not built yet, so a marker cannot point at an employee. Mark the person through the officers or members register instead.');
+        $row = DB::queryFirstRow('SELECT full_name, job_title, employment_status, hire_date, termination_date FROM pl_employees
+            WHERE id = %i AND company_id = %i', $relatedId, $companyId);
+        if (!$row) { return null; }
+        if ($actorId === null || !pl_user_can($actorId, $companyId, 'employee.view')) {
+            return ['name' => (string) $row['full_name'], 'detail' => ''];
+        }
+        $status = pl_employment_statuses()[(string) $row['employment_status']] ?? (string) $row['employment_status'];
+        $detail = ((string) $row['job_title'] !== '' ? (string) $row['job_title'] . ', ' : '') . $status
+            . ' since ' . (string) $row['hire_date'] . ($row['termination_date'] === null ? '' : ', ended ' . (string) $row['termination_date']);
+        return ['name' => (string) $row['full_name'], 'detail' => $detail];
     }
     throw new DomainException('Unknown related-party register: ' . $register);
 }
@@ -1571,7 +1579,7 @@ function pl_list_related_party_markers(int $actorId, int $companyId, ?string $as
         $row['is_vendor'] = (bool) $row['is_vendor'];
         $row['relationship_label'] = pl_related_party_relationships()[(string) $row['relationship']] ?? (string) $row['relationship'];
         $row['register_label'] = pl_related_party_registers()[(string) $row['related_register']] ?? (string) $row['related_register'];
-        $subject = (string) $row['related_register'] === 'employee' ? null : pl_related_party_subject($companyId, (string) $row['related_register'], $row['related_id']);
+        $subject = pl_related_party_subject($companyId, (string) $row['related_register'], $row['related_id'], $actorId);
         $row['subject_name'] = $subject['name'] ?? '';
         $row['subject_detail'] = $subject['detail'] ?? '';
         $markers[] = $row;
@@ -1731,7 +1739,7 @@ function pl_related_party_transactions(int $actorId, int $companyId, int $bookId
     foreach ($markers as $marker) {
         $partyId = (int) $marker['party_id'];
         $register = (string) $marker['related_register'];
-        $subject = $register === 'employee' ? null : pl_related_party_subject($companyId, $register, (int) $marker['related_id']);
+        $subject = pl_related_party_subject($companyId, $register, (int) $marker['related_id'], $actorId);
         $parties[$partyId]['relationships'][] = [
             'relationship' => (string) $marker['relationship'],
             'relationship_label' => pl_related_party_relationships()[(string) $marker['relationship']] ?? (string) $marker['relationship'],

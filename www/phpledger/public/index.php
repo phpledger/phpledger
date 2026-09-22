@@ -84,6 +84,9 @@ $routes = [
     // 1.2 M8a: the ownership register (issue #92). Every screen here is also in the pl_render()
     // allowlist in web_functions.php and in the route sweep in tests/i18n_test.php.
     '/ownership' => ['GET', 'POST'], '/ownership/export' => ['GET'], '/reports/ownership' => ['GET'],
+    // 1.3 M17: the employee master (issue #98's blocker). 'employees' is not a directory under
+    // www/phpledger/public (only 'assets' is), so this does not repeat B90.
+    '/employees' => ['GET', 'POST'],
     '/contra-review' => ['GET'], '/contra-review/confirm' => ['POST'],
     '/general-journals' => ['GET'], '/general-journals/new' => ['GET'], '/general-journals/edit' => ['GET'],
     '/general-journals/detail' => ['GET'], '/general-journals/save' => ['POST'], '/general-journals/post' => ['POST'], '/general-journals/reverse' => ['POST'],
@@ -372,6 +375,11 @@ try {
     if ($path === '/bank-reconciliation') {
         require_once dirname(__DIR__) . '/includes/functions/reconciliation_web_functions.php';
         pl_web_reconciliation($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    // 1.3 M17: the employee master (issue #98's blocker).
+    if ($path === '/employees') {
+        require_once dirname(__DIR__) . '/includes/functions/employee_web_functions.php';
+        pl_web_employees($actorId, $companyId, $bookId, $user, $company, $method);
     }
     // 1.2 M8a: the ownership register. The Open Cap Format export is a plain read of the
     // register, so it needs no more authority than opening the screen does.

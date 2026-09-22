@@ -113,6 +113,11 @@ require_once __DIR__ . '/functions/opening_conversion_functions.php';
 // business can start from it. Loaded after the services it composes.
 require_once __DIR__ . '/functions/sample_structure_functions.php';
 require_once __DIR__ . '/functions/branding_functions.php';
+// 1.3 M17: the employee master (B70). Loaded before the ownership register because
+// ownership_functions.php's pl_related_party_subject() resolves a marker naming the employee
+// register and calls into this file to do it; load order does not matter to PHP itself since
+// both are pure function declarations, but this keeps the dependency reading top to bottom.
+require_once __DIR__ . '/functions/employee_functions.php';
 // 1.2.1 M8a: the ownership register. It loads before the plugin runtime because a package may
 // register a listener on its hook points while it boots, so pl_ownership_on() has to exist by
 // then; and because a country company-secretarial package is exactly the caller B63 designed

@@ -11,7 +11,8 @@
     "core.exports",
     "core.tax",
     "core.users",
-    "core.ownership"
+    "core.ownership",
+    "core.employees"
   ],
   "migrations": [
     "001_foundation",
@@ -29,6 +30,7 @@
     "043_sample_skeletons",
     "044_ownership_register",
     "045_chart_headings",
+    "048_employee_master",
     "049_secret_store"
   ],
   "routes": [
@@ -44,7 +46,8 @@
     "/cost-visibility",
     "/profile",
     "/ownership",
-    "/reports/ownership"
+    "/reports/ownership",
+    "/employees"
   ],
   "permissions": [
     "owner",
@@ -68,5 +71,5 @@
     "ownership_snapshot",
     "share_ledger"
   ],
-  "history": "Core journal and source history is always available to authorized readers. 1.2 adds users, roles and capabilities: authorisation is pl_user_can() over a capability catalogue, the three protected system roles are installation-wide definitions assigned per company, and the 1.1 role ENUM on pl_company_members stays mirrored through 1.2 and is dropped in 1.3. 1.2.1 lets a new business start from a sample company's structure: the structure section is read separately from the sample's history, the import posts nothing and leaves every balance at zero, and pl_sample_imports records which structure produced which business. 1.2.1 adds the plugin runtime: packages are recorded in pl_packages with an immutable pl_package_actions audit, their own migration receipts and one shared options table, and only an installation administrator installs or activates one. 1.2.1 also adds the ownership register: the company legal form and registration profile, the members and officers registers, share classes and an append-only share ledger whose allotments post through the core posting service and whose transfers post nothing, and the related-party marker, which defaults every person to not related and takes an affirmative designation (owner decisions B63, B72 as narrowed by B74)."
+  "history": "Core journal and source history is always available to authorized readers. 1.2 adds users, roles and capabilities: authorisation is pl_user_can() over a capability catalogue, the three protected system roles are installation-wide definitions assigned per company, and the 1.1 role ENUM on pl_company_members stays mirrored through 1.2 and is dropped in 1.3. 1.2.1 lets a new business start from a sample company's structure: the structure section is read separately from the sample's history, the import posts nothing and leaves every balance at zero, and pl_sample_imports records which structure produced which business. 1.2.1 adds the plugin runtime: packages are recorded in pl_packages with an immutable pl_package_actions audit, their own migration receipts and one shared options table, and only an installation administrator installs or activates one. 1.2.1 also adds the ownership register: the company legal form and registration profile, the members and officers registers, share classes and an append-only share ledger whose allotments post through the core posting service and whose transfers post nothing, and the related-party marker, which defaults every person to not related and takes an affirmative designation (owner decisions B63, B72 as narrowed by B74). 1.3 adds the employee master: identity, employment status and dates, job title and static pay terms as reference data, company-scoped like the ownership register and, like it, kept out of pl_core_audit's entity_type ENUM for the same book_id-NOT-NULL reason. No pay run, payslip or statutory deduction is built; that is issue #98. related_register on the related-party marker now resolves 'employee', which the schema has allowed since migration 044 (owner decisions B70, B71 as amended by B76, B72 as narrowed by B74)."
 }

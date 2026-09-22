@@ -803,7 +803,9 @@ function pl_render(string $view, array $data = []): never
         'ownership', 'ownership-reports',
         // 1.3 M14: the Fixed assets module. Its report is 'asset-register', on the route
         // the manifest declares; every one of these is also in tests/i18n_test.php's sweep.
-        'assets', 'asset-detail', 'asset-depreciation', 'asset-register'];
+        'assets', 'asset-detail', 'asset-depreciation', 'asset-register',
+        // 1.3 M17: the employee master (issue #98's blocker). Also in tests/i18n_test.php's sweep.
+        'employees'];
     if (!in_array($view, $allowed, true)) {
         throw new LogicException('Unknown template.');
     }

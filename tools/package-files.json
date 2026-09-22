@@ -1673,6 +1673,22 @@
     {
       "source": "www/phpledger/templates/views/asset-register.php",
       "destination": "www/phpledger/templates/views/asset-register.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/048_employee_master.php",
+      "destination": "www/phpledger/install/migrations/048_employee_master.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/employee_functions.php",
+      "destination": "www/phpledger/includes/functions/employee_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/employee_web_functions.php",
+      "destination": "www/phpledger/includes/functions/employee_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/employees.php",
+      "destination": "www/phpledger/templates/views/employees.php"
     }
   ]
 }

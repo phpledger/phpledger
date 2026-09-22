@@ -89,6 +89,7 @@ $suites[] = 'onboarding_skeleton_test.php';
 // 1.2.1 M8a: the ownership register. After the Users suite, because every write in it is behind
 // a capability and the fixture grants them through the same role machinery.
 $suites[] = 'ownership_test.php';
+$suites[] = 'employee_test.php';
 // 1.2 M8: the plugin runtime. It runs last because it writes packages into a temporary package
 // directory of its own and points PL_PLUGIN_DIRECTORY at it; the last test clears both, so no
 // other suite and no child process the sweep starts ever sees a fixture package.
@@ -163,6 +164,9 @@ if (($argv[1] ?? '') === '--suite=i18n') {
 if (($argv[1] ?? '') === '--suite=plugins') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php',
         'module_test.php', 'outbound_test.php', 'capability_equivalence_test.php', 'plugin_test.php', 'secret_store_test.php', 'plugin_surface_test.php'];
+}
+if (($argv[1] ?? '') === '--suite=employees') {
+    $suites = ['employee_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=assets') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php', 'module_test.php', 'asset_test.php'];
