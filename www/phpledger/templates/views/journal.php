@@ -21,6 +21,7 @@ if ($journal['source_type'] === 'general_journal' && preg_match('/^general:([1-9
 <section class="flex flex-col gap-4 my-5 rounded-panel border border-border bg-surface" aria-labelledby="journal-title">
 <?php pl_ui_document_header($journal['reference'],'posted',static function (): void { ?><a class="btn btn-secondary" href="<?= pl_e(pl_url('/reports/trial-balance')) ?>"><?= pl_e(pl_t('Trial balance')) ?></a><?php },'journal-title'); ?>
 <p class="text-sm text-ink-muted px-5"><?= pl_e($company['name'].' · '.$journal['currency'].' · '.pl_date_label($journal['journal_date'])) ?></p>
+<?php if(pl_user_can((int)$user['id'],(int)$company['id'],'schedules.manage') && $journal['reversal_of_id']===null && $linkedReversal===null): ?><p class="px-5 flex gap-3 flex-wrap"><a class="btn btn-secondary" href="<?= pl_e(pl_url('/recurring').'?source_kind=journal&source_id='.(int)$journal['id']) ?>"><?= pl_e(pl_t('Make recurring')) ?></a><a class="btn btn-secondary" href="<?= pl_e(pl_url('/schedules').'?funding_journal_id='.(int)$journal['id']) ?>"><?= pl_e(pl_t('Create release schedule')) ?></a></p><?php endif ?>
     <div class="doc-body">
         <h2 class="section-title"><?= pl_e(pl_t('Entry details')) ?></h2>
         <p><?= pl_e((string) $journal['description']) ?></p>

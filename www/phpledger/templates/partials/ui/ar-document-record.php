@@ -14,6 +14,7 @@ $names=pl_starter_options($accounts);
 <?php if ($document['reversal_journal_id']): ?><a class="btn btn-secondary" href="<?= pl_e(pl_workflow_url('/journals/detail',['id'=>$document['reversal_journal_id']])) ?>"><?= pl_e(pl_t('View reversing entry')) ?></a><?php endif; ?>
 <?php }); ?>
 <div class="doc-body">
+<?php if($document['status']==='posted' && !$document['reversal_journal_id'] && in_array($document['kind'],['invoice','bill'],true) && pl_user_can((int)$user['id'],(int)$company['id'],'schedules.manage')): ?><p><a class="btn btn-secondary" href="<?= pl_e(pl_url('/recurring').'?source_kind=ar&source_id='.(int)$document['id']) ?>"><?= pl_e(pl_t('Make recurring')) ?></a></p><?php endif ?>
 <?php if ($form['message']!==''): ?><div class="alert alert-danger" role="alert" tabindex="-1" data-form-error><?= pl_e($form['message']) ?></div><?php endif; ?>
 <?php if ($document['reversal_journal_id']): pl_ui_strip(pl_t('This document has been reversed. Its original posting and linked reversal remain in the history.'),'warning'); endif; ?>
 <section><p class="text-sm text-ink-muted mb-3"><?= pl_e($company['name'].' · '.ucwords(str_replace('_',' ',$document['kind']))) ?></p>

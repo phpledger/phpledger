@@ -123,7 +123,7 @@ function pl_recurring_generate(array $job,array $payload): array
     if($payload['kind']==='ar') { $input['due_date']=(new DateTimeImmutable($input['date']))->modify('+'.max(0,(int)($input['due_days']??0)).' days')->format('Y-m-d');$draft=pl_save_ar_document($actor,$company,$book,$input); }
     elseif($payload['kind']==='document') { $draft=pl_save_document($actor,$company,$book,$input); }
     else { $draft=pl_save_general_draft($actor,$company,$book,$input); }
-    return ['kind'=>$payload['kind'],'id'=>(int)$draft['id']];
+    return ['kind'=>$payload['kind'],'id'=>(int)$draft['id']]+($payload['kind']==='ar'?['side'=>$input['kind']==='bill'?'ap':'ar']:[]);
 }
 
 /** Existing posting is the funding evidence, never an inferred balancing journal. */
@@ -214,6 +214,7 @@ function pl_scheduled_general_validate(int $actor,int $company,int $book,array $
     $job=pl_scheduled_draft_job($company,$book,(int)$draft['id']);if(!$job || $job['job_kind']==='recurring') { return; }
     pl_scheduler_require($actor,$company,true,str_starts_with($job['job_kind'],'loan_'));
     $payload=json_decode($job['payload'],true,64,JSON_THROW_ON_ERROR);
+    if($job['job_kind']==='loan_payment') { pl_loan_payment_accrual_guard($company,$book,(int)$payload['instalment_id']); }
     if($draft['document_date']!==$job['occurrence_date']) { throw new DomainException('A scheduled release or instalment must retain its planned date. Create a reviewed new plan to change it.'); }
     if($job['job_kind']==='release') {
         $row=DB::queryFirstRow('SELECT r.amount,s.kind,s.balance_account_id,s.counterpart_account_id,s.funding_journal_id FROM pl_schedule_releases r JOIN pl_release_schedules s ON s.id=r.schedule_id WHERE r.id=%i FOR SHARE',$payload['release_id']);
@@ -238,6 +239,7 @@ function pl_schedule_validate_posting(int $actor,int $company,int $book,array $p
     if($reversalOf!==null) {
         if($job['job_kind']==='loan_payment') {
             $data=json_decode($job['payload'],true,64,JSON_THROW_ON_ERROR);
+            pl_loan_payment_accrual_guard($company,$book,(int)$data['instalment_id']);
             $row=DB::queryFirstRow('SELECT v.version,l.current_version FROM pl_loan_instalments i JOIN pl_loan_versions v ON v.id=i.version_id JOIN pl_loans l ON l.id=i.loan_id WHERE i.id=%i FOR SHARE',$data['instalment_id']);
             if($row && (int)$row['version']!==(int)$row['current_version']) { throw new DomainException('This payment was incorporated into a later loan version. Review that version before correcting earlier payments.'); }
         }

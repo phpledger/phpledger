@@ -34,6 +34,7 @@ $scopeQuery = $filters;
 </section>
 <section class="transaction-detail split-view-detail" aria-label="<?= pl_e(pl_t('Transaction details')) ?>">
 <?php if ($document): ?>
+<?php if($document['status']==='posted' && pl_user_can((int)$user['id'],(int)$company['id'],'schedules.manage')): ?><p><a class="btn btn-secondary" href="<?= pl_e(pl_url('/recurring').'?source_kind=document&source_id='.(int)$document['id']) ?>"><?= pl_e(pl_t('Make recurring')) ?></a></p><?php endif ?>
     <a class="split-view-back" href="<?= pl_e(pl_workflow_url('/transactions', $scopeQuery)) ?>"><?= pl_icon('arrow-left') ?> <?= pl_e(pl_t('Back to list')) ?></a>
     <?php if ($form['message']): ?><div class="alert alert-danger" role="alert" tabindex="-1" data-form-error><strong><?= pl_e(pl_t('We couldn\'t complete that action.')) ?></strong><p><?= pl_e($form['message']) ?></p></div><?php endif; ?>
     <div class="detail-heading"><div><div class="inline-heading"><h2><?= pl_e($document['number']) ?></h2><span class="badge <?= pl_e($document['status']) ?>"><?= pl_e(ucfirst($document['status'])) ?></span></div><h3><?= pl_e($document['counterparty'] ?: ucfirst($document['kind'])) ?></h3></div><p class="detail-amount"><?= pl_e($company['currency']) ?> <strong><?= pl_e(pl_money($document['amount'])) ?></strong></p></div>

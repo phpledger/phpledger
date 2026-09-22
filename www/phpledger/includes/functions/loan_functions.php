@@ -69,6 +69,8 @@ function pl_revise_loan(int $actor,int $company,int $book,int $id,int $revision,
         pl_scheduler_require($actor,$company,true,true);pl_ledger_book($company,$book,true);$loan=DB::queryFirstRow('SELECT * FROM pl_loans WHERE id=%i AND company_id=%i AND book_id=%i FOR UPDATE',$id,$company,$book);
         if(!$loan || (int)$loan['revision']!==$revision) { throw new DomainException('The loan changed. Review the current schedule version.'); }
         $effective=pl_ledger_date((string)($input['start_date']??''));$paid=pl_loan_paid_rows($company,$book,$id,'9999-12-31');$remaining=$loan['principal'];
+        $activity=DB::query("SELECT j.journal_date,v.journal_date AS reversed_on FROM pl_loan_instalments i JOIN pl_scheduler_jobs q ON q.book_id=i.book_id AND q.request_key=CONCAT('loan-payment:',i.id) JOIN pl_scheduler_results x ON x.job_id=q.id JOIN pl_effective_general_drafts d ON d.id=CAST(JSON_UNQUOTE(JSON_EXTRACT(x.result,'$.id')) AS UNSIGNED) JOIN pl_journals j ON j.id=d.journal_id LEFT JOIN pl_journals v ON v.reversal_of_id=j.id WHERE i.loan_id=%i AND i.company_id=%i AND i.book_id=%i FOR SHARE",$id,$company,$book);
+        foreach($activity as $event) { if(max($event['journal_date'],$event['reversed_on']??'')>$effective) { throw new DomainException('A new loan version cannot precede an existing payment or its dated reversal.'); } }
         foreach($paid as $r) { if($r['journal_date']>$effective) { throw new DomainException('A new version cannot precede a posted instalment.'); }$remaining=bcsub($remaining,$r['principal'],4); }
         $currentDate=DB::queryFirstField('SELECT effective_date FROM pl_loan_versions WHERE loan_id=%i AND version=%i FOR SHARE',$id,$loan['current_version']);
         if($effective<$currentDate || bccomp($remaining,'0',4)<=0) { throw new DomainException('A revised schedule cannot precede its current version and needs remaining principal.'); }
@@ -81,18 +83,35 @@ function pl_loan_due(int $company,int $book,string $asOf,int $limit,bool $dry=fa
 {
     if($limit<1) { return []; }$asOf=pl_ledger_date($asOf);
     $rows=DB::query("SELECT i.*,l.actor_id FROM pl_loan_instalments i JOIN pl_loan_versions v ON v.id=i.version_id JOIN pl_loans l ON l.id=i.loan_id AND l.current_version=v.version WHERE i.company_id=%i AND i.book_id=%i AND i.due_date<=%s AND NOT EXISTS(SELECT 1 FROM pl_scheduler_jobs q WHERE q.book_id=i.book_id AND q.request_key=CONCAT('loan-payment:',i.id)) ORDER BY i.due_date,i.id LIMIT %i",$company,$book,$asOf,$limit);
-    if(!$dry) { foreach($rows as $r) { pl_ledger_transaction(fn()=>pl_scheduler_enqueue((int)$r['actor_id'],$company,$book,'loan_payment',(int)$r['id'],$r['due_date'],['instalment_id'=>(int)$r['id']],'loan-payment:'.$r['id'])); } }
+    if(!$dry) {
+        $candidates=$rows;$rows=[];
+        foreach($candidates as $candidate) {
+            $current=pl_ledger_transaction(function()use($candidate,$company,$book):?array {
+                pl_ledger_book($company,$book,true);
+                $r=DB::queryFirstRow('SELECT i.*,l.actor_id FROM pl_loan_instalments i JOIN pl_loan_versions v ON v.id=i.version_id JOIN pl_loans l ON l.id=i.loan_id AND l.current_version=v.version WHERE i.id=%i AND i.company_id=%i AND i.book_id=%i FOR SHARE',$candidate['id'],$company,$book);
+                if(!$r) { return null; }
+                pl_scheduler_enqueue((int)$r['actor_id'],$company,$book,'loan_payment',(int)$r['id'],$r['due_date'],['instalment_id'=>(int)$r['id']],'loan-payment:'.$r['id']);return $r;
+            });
+            if($current!==null) { $rows[]=$current; }
+        }
+    }
     if(count($rows)>=$limit) { return $rows; }
     // End-of-period interest remains a draft; an actual instalment on that day already includes it.
     foreach(DB::query('SELECT l.*,v.id AS version_id,v.annual_rate,v.method,v.effective_date,p.id AS period_id,p.end_date FROM pl_loans l JOIN pl_loan_versions v ON v.loan_id=l.id AND v.version=l.current_version JOIN pl_periods p ON p.company_id=l.company_id AND p.book_id=l.book_id WHERE l.company_id=%i AND l.book_id=%i AND p.end_date<=%s AND p.end_date>=v.effective_date ORDER BY p.end_date,l.id',$company,$book,$asOf) as $r) {
         if(count($rows)>=$limit) { break; }
         $made=pl_ledger_transaction(function()use($r,$company,$book,$dry):?array{
             pl_ledger_book($company,$book,true);
-            if(DB::queryFirstField('SELECT id FROM pl_loan_accruals WHERE loan_id=%i AND period_id=%i FOR UPDATE',$r['id'],$r['period_id'])!==null) { return null; }
-            if(DB::queryFirstField('SELECT id FROM pl_loan_instalments WHERE version_id=%i AND due_date=%s FOR SHARE',$r['version_id'],$r['end_date'])!==null) { return null; }
+            // Eligibility and rates must come from the current version after serialization.
+            $r=DB::queryFirstRow('SELECT l.*,v.id AS version_id,v.annual_rate,v.method,v.effective_date,v.principal AS version_principal,p.id AS period_id,p.end_date FROM pl_loans l JOIN pl_loan_versions v ON v.loan_id=l.id AND v.version=l.current_version JOIN pl_periods p ON p.company_id=l.company_id AND p.book_id=l.book_id WHERE l.id=%i AND l.company_id=%i AND l.book_id=%i AND p.id=%i AND p.end_date>=v.effective_date FOR SHARE',$r['id'],$company,$book,$r['period_id']);
+            if(!$r) { return null; }
+            if(DB::queryFirstField('SELECT id FROM pl_loan_accruals WHERE loan_id=%i AND period_id=%i AND version_id=%i FOR UPDATE',$r['id'],$r['period_id'],$r['version_id'])!==null) { return null; }
             if($r['method']==='custom') { return null; } // No implied APR/day count for a lender-entered schedule.
-            $last=$r['effective_date'];$outstanding=$r['principal'];foreach(pl_loan_paid_rows($company,$book,(int)$r['id'],$r['end_date']) as $paid) { $outstanding=bcsub($outstanding,$paid['principal'],4);if($paid['journal_date']>$last) { $last=$paid['journal_date']; } }
-            $days=(int)(new DateTimeImmutable($last))->diff(new DateTimeImmutable($r['end_date']))->format('%r%a');$base=$r['method']==='flat'?$r['principal']:$outstanding;
+            $last=$r['effective_date'];$outstanding=$r['principal'];foreach(pl_loan_paid_rows($company,$book,(int)$r['id'],$r['end_date']) as $paid) {
+                // A planned or reversed payment is not interest recognition.
+                if($paid['journal_date']===$r['end_date'] && bccomp($paid['interest'],'0',4)>0) { return null; }
+                $outstanding=bcsub($outstanding,$paid['principal'],4);if($paid['journal_date']>$last) { $last=$paid['journal_date']; }
+            }
+            $days=(int)(new DateTimeImmutable($last))->diff(new DateTimeImmutable($r['end_date']))->format('%r%a');$base=$r['method']==='flat'?$r['version_principal']:$outstanding;
             $amount=pl_loan_round(bcdiv(bcmul(bcmul($base,$r['annual_rate'],16),(string)$days,16),'36500',16));
             if($days<1 || bccomp($outstanding,'0',4)<=0 || bccomp($amount,'0',4)<=0) { return null; }
             if($dry) { return ['loan_id'=>(int)$r['id'],'period_id'=>(int)$r['period_id'],'due_date'=>$r['end_date'],'amount'=>$amount]; }
@@ -107,15 +126,37 @@ function pl_loan_due(int $company,int $book,string $asOf,int $limit,bool $dry=fa
 function pl_loan_job_lines(array $job,array $payload): array
 {
     $table=$job['job_kind']==='loan_payment'?'pl_loan_instalments':'pl_loan_accruals';$id=(int)($payload[$job['job_kind']==='loan_payment'?'instalment_id':'accrual_id']??0);
-    $r=DB::queryFirstRow('SELECT i.*,l.liability_account_id,l.interest_account_id,l.bank_account_id,l.accrued_account_id,l.funding_journal_id,l.current_version,v.version FROM %b i JOIN pl_loans l ON l.id=i.loan_id JOIN pl_loan_versions v ON v.id=i.version_id WHERE i.id=%i AND i.company_id=%i AND i.book_id=%i FOR SHARE',$table,$id,$job['company_id'],$job['book_id']);
+    $r=DB::queryFirstRow('SELECT i.*,l.liability_account_id,l.interest_account_id,l.bank_account_id,l.accrued_account_id,l.funding_journal_id,l.current_version,l.principal AS loan_principal,v.version,v.method,v.annual_rate,v.effective_date,v.principal AS version_principal FROM %b i JOIN pl_loans l ON l.id=i.loan_id JOIN pl_loan_versions v ON v.id=i.version_id WHERE i.id=%i AND i.company_id=%i AND i.book_id=%i FOR SHARE',$table,$id,$job['company_id'],$job['book_id']);
     if(!$r || (int)$r['version']!==(int)$r['current_version']) { throw new DomainException('This draft belongs to a superseded loan schedule. Use the current version.'); }
     if(DB::queryFirstField('SELECT id FROM pl_journals WHERE reversal_of_id=%i FOR SHARE',$r['funding_journal_id'])!==null) { throw new DomainException('The loan funding entry has been reversed.'); }
     $lines=[];
     if($job['job_kind']==='loan_payment') {
         foreach([[$r['liability_account_id'],$r['principal']],[$r['interest_account_id'],$r['interest']]] as [$account,$amount]) { if(bccomp($amount,'0',4)>0) { $lines[]=['account_id'=>(int)$account,'debit'=>$amount,'credit'=>'0','description'=>'Loan instalment']; } }
         $lines[]=['account_id'=>(int)$r['bank_account_id'],'debit'=>'0','credit'=>bcadd($r['principal'],$r['interest'],4),'description'=>'Loan payment'];
-    } else { $lines=[['account_id'=>(int)$r['interest_account_id'],'debit'=>$r['amount'],'credit'=>'0','description'=>'Loan interest accrual'],['account_id'=>(int)$r['accrued_account_id'],'debit'=>'0','credit'=>$r['amount'],'description'=>'Accrued loan interest']]; }
+    } else {
+        pl_loan_accrual_replacement_guard((int)$job['company_id'],(int)$job['book_id'],(int)$r['loan_id'],(int)$r['period_id'],$id);
+        if($r['method']!=='custom') {
+            $last=$r['effective_date'];$outstanding=$r['loan_principal'];
+            foreach(pl_loan_paid_rows((int)$job['company_id'],(int)$job['book_id'],(int)$r['loan_id'],$r['due_date']) as $paid) { $outstanding=bcsub($outstanding,$paid['principal'],4);$last=max($last,$paid['journal_date']); }
+            $days=(int)(new DateTimeImmutable($last))->diff(new DateTimeImmutable($r['due_date']))->format('%r%a');$base=$r['method']==='flat'?$r['version_principal']:$outstanding;
+            $current=pl_loan_round(bcdiv(bcmul(bcmul($base,$r['annual_rate'],16),(string)$days,16),'36500',16));
+            if($last!==$r['from_date'] || bccomp($current,$r['amount'],4)!==0) { throw new DomainException('Payments changed this accrual basis. Reschedule the remaining loan to create a new reviewed accrual version.'); }
+        }
+        $lines=[['account_id'=>(int)$r['interest_account_id'],'debit'=>$r['amount'],'credit'=>'0','description'=>'Loan interest accrual'],['account_id'=>(int)$r['accrued_account_id'],'debit'=>'0','credit'=>$r['amount'],'description'=>'Accrued loan interest']];
+    }
     return $lines;
+}
+
+function pl_loan_accrual_replacement_guard(int $company,int $book,int $loan,int $period,int $except=0): void
+{
+    $posted=DB::queryFirstField("SELECT a.id FROM pl_loan_accruals a JOIN pl_scheduler_jobs q ON q.book_id=a.book_id AND q.request_key=CONCAT('loan-accrual:',a.id) JOIN pl_scheduler_results x ON x.job_id=q.id JOIN pl_effective_general_drafts d ON d.id=CAST(JSON_UNQUOTE(JSON_EXTRACT(x.result,'$.id')) AS UNSIGNED) JOIN pl_journals j ON j.id=d.journal_id LEFT JOIN pl_journals v ON v.reversal_of_id=j.id AND v.journal_date<=a.due_date WHERE a.company_id=%i AND a.book_id=%i AND a.loan_id=%i AND a.period_id=%i AND a.id<>%i AND v.id IS NULL LIMIT 1 FOR SHARE",$company,$book,$loan,$period,$except);
+    if($posted!==null) { throw new DomainException('Reverse the earlier accrued interest within its affected period before posting a replacement.'); }
+}
+
+function pl_loan_payment_accrual_guard(int $company,int $book,int $instalment): void
+{
+    $blocked=DB::queryFirstField("SELECT a.id FROM pl_loan_instalments i JOIN pl_loan_accruals a ON a.loan_id=i.loan_id AND a.due_date>=i.due_date JOIN pl_scheduler_jobs q ON q.book_id=a.book_id AND q.request_key=CONCAT('loan-accrual:',a.id) JOIN pl_scheduler_results x ON x.job_id=q.id JOIN pl_effective_general_drafts d ON d.id=CAST(JSON_UNQUOTE(JSON_EXTRACT(x.result,'$.id')) AS UNSIGNED) JOIN pl_journals j ON j.id=d.journal_id LEFT JOIN pl_journals v ON v.reversal_of_id=j.id AND v.journal_date<=a.due_date WHERE i.id=%i AND i.company_id=%i AND i.book_id=%i AND v.id IS NULL LIMIT 1 FOR SHARE",$instalment,$company,$book);
+    if($blocked!==null) { throw new DomainException('This backdated payment changes posted accrued interest. Reverse that accrual within its period first, or reschedule the payment into the later period.'); }
 }
 
 /** Custom lender accrual is an explicit reviewed amount; no rate is inferred. */
@@ -128,9 +169,9 @@ function pl_loan_custom_accrual(int $actor,int $company,int $book,int $loanId,in
         $loan=DB::queryFirstRow('SELECT l.id,v.id AS version_id,v.method,v.effective_date FROM pl_loans l JOIN pl_loan_versions v ON v.loan_id=l.id AND v.version=l.current_version WHERE l.id=%i AND l.company_id=%i AND l.book_id=%i FOR SHARE',$loanId,$company,$book);
         $period=DB::queryFirstRow('SELECT start_date,end_date FROM pl_periods WHERE id=%i AND company_id=%i AND book_id=%i FOR SHARE',$periodId,$company,$book);
         if(!$loan || !$period || $loan['method']!=='custom' || $period['end_date']<$loan['effective_date']) { throw new DomainException('Select a current custom loan and a period after its effective date.'); }
-        $old=DB::queryFirstRow('SELECT id,amount FROM pl_loan_accruals WHERE loan_id=%i AND period_id=%i FOR UPDATE',$loanId,$periodId);
+        $old=DB::queryFirstRow('SELECT id,amount FROM pl_loan_accruals WHERE loan_id=%i AND period_id=%i AND version_id=%i FOR UPDATE',$loanId,$periodId,$loan['version_id']);
         if($old) { if(bccomp($old['amount'],$amount,4)!==0) { throw new DomainException('This period already has a different immutable accrual.'); }return (int)$old['id']; }
-        $from=max($loan['effective_date'],$period['start_date']);$reverse=(new DateTimeImmutable($period['end_date']))->modify('+1 day')->format('Y-m-d');$days=(int)(new DateTimeImmutable($from))->diff(new DateTimeImmutable($period['end_date']))->format('%r%a');
+        $from=max($loan['effective_date'],$period['start_date']);$reverse=(new DateTimeImmutable($period['end_date']))->modify('+1 day')->format('Y-m-d');$days=(int)(new DateTimeImmutable($from))->diff(new DateTimeImmutable($period['end_date']))->format('%r%a')+1;
         DB::insert('pl_loan_accruals',['loan_id'=>$loanId,'version_id'=>$loan['version_id'],'company_id'=>$company,'book_id'=>$book,'period_id'=>$periodId,'due_date'=>$period['end_date'],'from_date'=>$from,'reverse_on'=>$reverse,'amount'=>$amount,'days_elapsed'=>$days]);$id=(int)DB::insertId();
         pl_scheduler_enqueue($actor,$company,$book,'loan_accrual',$id,$period['end_date'],['accrual_id'=>$id,'reverse_on'=>$reverse],'loan-accrual:'.$id);
         pl_schedule_audit($actor,$company,$book,'loan',$loanId,'custom_accrual',$reason,null,['accrual_id'=>$id,'period_id'=>$periodId,'amount'=>$amount]);return $id;
@@ -145,17 +186,20 @@ function pl_loan_generate(array $job,array $payload): array
     return ['kind'=>'journal','id'=>(int)$draft['id']];
 }
 
-function pl_loan_report(int $actor,int $company,int $book,string $asOf): array
+function pl_loan_report(int $actor,int $company,int $book,string $asOf,?string $from=null): array
 {
     pl_scheduler_require($actor,$company,false,true);pl_ledger_book($company,$book);$asOf=pl_ledger_date($asOf);$cutoff=(new DateTimeImmutable($asOf))->modify('+12 months')->format('Y-m-d');$rows=[];$accounts=[];
+    $from=pl_ledger_date($from??substr($asOf,0,4).'-01-01');if($from>$asOf) { throw new DomainException('Interest period start must not follow its end.'); }
     foreach(DB::query('SELECT l.*,p.legal_name AS lender FROM pl_loans l JOIN pl_parties p ON p.id=l.lender_party_id WHERE l.company_id=%i AND l.book_id=%i AND l.start_date<=%s ORDER BY l.id',$company,$book,$asOf) as $loan) {
         $paid='0.0000';$interest='0.0000';$paidIds=[];foreach(pl_loan_paid_rows($company,$book,(int)$loan['id'],$asOf) as $r) { $paid=bcadd($paid,$r['principal'],4);$interest=bcadd($interest,$r['interest'],4);$paidIds[(int)$r['id']]=true; }
         $remaining=bcsub($loan['principal'],$paid,4);$version=DB::queryFirstRow('SELECT * FROM pl_loan_versions WHERE loan_id=%i AND effective_date<=%s ORDER BY version DESC LIMIT 1',$loan['id'],$asOf);$current='0.0000';$schedule=[];
         if($version) { $schedule=DB::query("SELECT i.*,d.id AS draft_id,d.journal_id FROM pl_loan_instalments i LEFT JOIN pl_scheduler_jobs q ON q.book_id=i.book_id AND q.request_key=CONCAT('loan-payment:',i.id) LEFT JOIN pl_scheduler_results x ON x.job_id=q.id LEFT JOIN pl_effective_general_drafts d ON d.id=CAST(JSON_UNQUOTE(JSON_EXTRACT(x.result,'$.id')) AS UNSIGNED) WHERE i.version_id=%i ORDER BY i.due_date",$version['id']);foreach($schedule as $r) { if($r['due_date']<=$cutoff && !isset($paidIds[(int)$r['id']])) { $current=bcadd($current,$r['principal'],4); } } }
         if(bccomp($current,$remaining,4)>0) { $current=$remaining; }
         $loan['principal_paid']=$paid;$loan['interest_paid']=$interest;$loan['outstanding']=$remaining;$loan['current']=$current;$loan['non_current']=bcsub($remaining,$current,4);$loan['schedule']=$schedule;$loan['version']=$version;
+        $journals=DB::queryFirstColumn("SELECT DISTINCT d.journal_id FROM pl_scheduler_jobs q JOIN pl_scheduler_results x ON x.job_id=q.id JOIN pl_effective_general_drafts d ON d.id=CAST(JSON_UNQUOTE(JSON_EXTRACT(x.result,'$.id')) AS UNSIGNED) WHERE q.company_id=%i AND q.book_id=%i AND d.journal_id IS NOT NULL AND ((q.job_kind='loan_payment' AND q.source_id IN (SELECT id FROM pl_loan_instalments WHERE loan_id=%i)) OR (q.job_kind='loan_accrual' AND q.source_id IN (SELECT id FROM pl_loan_accruals WHERE loan_id=%i)))",$company,$book,$loan['id'],$loan['id']);
+        $loan['interest_period']=$journals===[]?'0.0000':bcadd((string)DB::queryFirstField('SELECT COALESCE(SUM(l.debit-l.credit),0) FROM pl_journal_lines l JOIN pl_journals j ON j.id=l.journal_id WHERE j.company_id=%i AND j.book_id=%i AND l.account_id=%i AND j.journal_date BETWEEN %s AND %s AND (j.id IN %li OR j.reversal_of_id IN %li)',$company,$book,$loan['interest_account_id'],$from,$asOf,$journals,$journals),'0',4);
         $loan['accruals']=DB::query("SELECT a.*,d.id AS draft_id,d.journal_id FROM pl_loan_accruals a LEFT JOIN pl_scheduler_jobs q ON q.book_id=a.book_id AND q.request_key=CONCAT('loan-accrual:',a.id) LEFT JOIN pl_scheduler_results x ON x.job_id=q.id LEFT JOIN pl_effective_general_drafts d ON d.id=CAST(JSON_UNQUOTE(JSON_EXTRACT(x.result,'$.id')) AS UNSIGNED) WHERE a.loan_id=%i ORDER BY a.due_date",$loan['id']);$rows[]=$loan;$id=(int)$loan['liability_account_id'];$accounts[$id]=bcadd($accounts[$id]??'0',$remaining,4);
     }
     $tie=[];foreach($accounts as $id=>$expected) { $a=pl_get_account($actor,$company,$book,$id);$balance=bcsub('0',pl_cash_account_balance($company,$book,$id,$asOf),4);$tie[]=['account_id'=>$id,'code'=>$a['code'],'name'=>$a['name'],'scheduled_balance'=>$expected,'ledger_balance'=>$balance,'difference'=>bcsub($balance,$expected,4)]; }
-    return ['as_of'=>$asOf,'loans'=>$rows,'accounts'=>$tie];
+    return ['from'=>$from,'as_of'=>$asOf,'loans'=>$rows,'accounts'=>$tie];
 }

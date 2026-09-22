@@ -55,14 +55,15 @@ function pl_web_scheduling(int $actor,int $companyId,int $bookId,array $user,arr
     if($form['input']!==[] && (pl_web_id($form['input'],'company_id')!==$companyId || pl_web_id($form['input'],'book_id')!==$bookId)) { $form['input']=[]; }
     $asOf=pl_ledger_date(pl_web_text($_GET,'as_of',gmdate('Y-m-d')));
     $rows=$area==='recurring'?DB::query('SELECT id,name,status,revision,frequency,start_date,next_index FROM pl_recurring_templates WHERE company_id=%i AND book_id=%i ORDER BY id DESC',$companyId,$bookId):[];
-    $data=$area==='loans'?pl_loan_report($actor,$companyId,$bookId,$asOf):($area==='schedules'?pl_schedule_report($actor,$companyId,$bookId,$asOf):null);
+    $reportData=$area==='loans'?pl_loan_report($actor,$companyId,$bookId,$asOf):($area==='schedules'?pl_schedule_report($actor,$companyId,$bookId,$asOf):null);
     $jobs=DB::query("SELECT j.id,j.job_kind,j.occurrence_date,d.status,d.attempts,x.result FROM pl_scheduler_jobs j JOIN pl_outbound_events e ON e.book_id=j.book_id AND e.event_key=CONCAT('scheduler:',j.id) JOIN pl_outbound_deliveries d ON d.event_id=e.id AND d.consumer='core.scheduler' LEFT JOIN pl_scheduler_results x ON x.job_id=j.id WHERE j.company_id=%i AND j.book_id=%i AND j.job_kind IN %ls ORDER BY j.id DESC LIMIT 100",$companyId,$bookId,$area==='loans'?['loan_payment','loan_accrual']:[$area==='recurring'?'recurring':'release']);
     $mayManage=pl_user_can($actor,$companyId,($area==='loans'?'loans.':'schedules.').'manage');
-    $accounts=$mayManage?DB::query('SELECT id,code,name,type,role FROM pl_accounts WHERE company_id=%i AND book_id=%i AND is_active=1 AND is_postable=1 ORDER BY code',$companyId,$bookId):[];
+    $accounts=$mayManage?DB::query('SELECT id,code,name,type,role FROM pl_accounts WHERE company_id=%i AND book_id=%i AND is_active=1 ORDER BY code',$companyId,$bookId):[];
+    $accounts=array_values(array_filter($accounts,static fn(array $a):bool=>pl_account_is_postable($companyId,$bookId,$a['code'])));
     $parties=$mayManage && $area==='loans'?DB::query('SELECT id,legal_name FROM pl_parties WHERE company_id=%i ORDER BY legal_name',$companyId):[];
     $input=$form['input']?:['creation_key'=>bin2hex(random_bytes(16)),'start_date'=>gmdate('Y-m-d'),'frequency'=>'monthly','periods'=>12,'term_months'=>12,'annual_rate'=>'0','method'=>'reducing','source_kind'=>pl_web_text($_GET,'source_kind','journal'),'source_id'=>pl_web_id($_GET,'source_id'),'funding_journal_id'=>pl_web_id($_GET,'funding_journal_id')];
     if($area==='loans' && $mayManage && $form['input']===[] && pl_web_id($_GET,'revise')>0) {
-        foreach($data['loans'] as $loan) { if((int)$loan['id']===pl_web_id($_GET,'revise')) { $input=array_replace($input,$loan,['principal'=>$loan['outstanding'],'start_date'=>$asOf,'method'=>$loan['version']['method'],'annual_rate'=>$loan['version']['annual_rate'],'term_months'=>$loan['version']['term_months']]);break; } }
+        foreach($reportData['loans'] as $loan) { if((int)$loan['id']===pl_web_id($_GET,'revise')) { $input=array_replace($input,$loan,['principal'=>$loan['outstanding'],'start_date'=>$asOf,'method'=>$loan['version']['method'],'annual_rate'=>$loan['version']['annual_rate'],'term_months'=>$loan['version']['term_months']]);break; } }
     }
-    pl_render('scheduling',compact('area','report','user','company','form','input','preview','asOf','rows','data','jobs','mayManage','accounts','parties')+['title'=>ucfirst($area)]);
+    pl_render('scheduling',compact('area','report','user','company','form','input','preview','asOf','rows','reportData','jobs','mayManage','accounts','parties')+['title'=>ucfirst($area)]);
 }

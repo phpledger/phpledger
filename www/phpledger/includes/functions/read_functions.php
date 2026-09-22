@@ -225,11 +225,11 @@ function pl_read_schedule_report(int $actor,int $company,int $book,string $asOf,
     $report=$loan?pl_loan_report($actor,$company,$book,$asOf):pl_schedule_report($actor,$company,$book,$asOf);
     $key=$loan?'loans':'schedules';$rows=[];
     foreach($report[$key] as $row) {
-        $safe=pl_read_fields($row,$loan?['id','name','lender','principal','principal_paid','interest_paid','outstanding','current','non_current','start_date','liability_account_id']:['id','name','kind','amount','released','unreleased','balance_account_id','counterpart_account_id','funding_journal_id']);
+        $safe=pl_read_fields($row,$loan?['id','name','lender','principal','principal_paid','interest_paid','interest_period','outstanding','current','non_current','start_date','liability_account_id']:['id','name','kind','amount','released','unreleased','balance_account_id','counterpart_account_id','funding_journal_id']);
         $detail=$loan?'schedule':'releases';$safe[$detail]=array_map(static fn(array $r):array=>pl_read_fields($r,['id','due_date','principal','interest','closing_balance','amount','draft_id','journal_id']),$row[$detail]);
         $rows[]=$safe;
     }
-    return ['as_of'=>$asOf,$key=>pl_read_page($rows,$page,$size),'accounts'=>$report['accounts']];
+    return ['as_of'=>$asOf,'interest_from'=>$report['from']??null,$key=>pl_read_page($rows,$page,$size),'accounts'=>$report['accounts']];
 }
 
 function pl_read_operation(string $connectionId, string $operation, array $input): array
