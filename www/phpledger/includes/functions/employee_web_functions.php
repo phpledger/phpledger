@@ -61,7 +61,6 @@ function pl_web_employees_post(int $actorId, int $companyId, array $company): vo
         pl_web_assert_scope($company, $_POST);
     } catch (DomainException $error) {
         pl_form_failure($return, [], $error->getMessage());
-        return;
     }
     try {
         $ownershipPartyRaw = pl_web_text($_POST, 'ownership_party_id');
