@@ -57,10 +57,13 @@ function pl_employee_get_or_null(int $actorId, int $companyId, int $id): ?array
 function pl_web_employees_post(int $actorId, int $companyId, array $company): void
 {
     $return = pl_url('/employees');
-    $scopeMatched = false;
     try {
         pl_web_assert_scope($company, $_POST);
-        $scopeMatched = true;
+    } catch (DomainException $error) {
+        pl_form_failure($return, [], $error->getMessage());
+        return;
+    }
+    try {
         $ownershipPartyRaw = pl_web_text($_POST, 'ownership_party_id');
         $employee = pl_save_employee($actorId, $companyId, [
             'full_name' => pl_web_text($_POST, 'full_name'),
@@ -88,6 +91,6 @@ function pl_web_employees_post(int $actorId, int $companyId, array $company): vo
         pl_notice(pl_t('Saved to the employee register.'));
         pl_redirect($return . '?id=' . $employee['id']);
     } catch (DomainException $error) {
-        pl_form_failure($return, $scopeMatched ? $_POST : [], $error->getMessage());
+        pl_form_failure($return, $_POST, $error->getMessage());
     }
 }

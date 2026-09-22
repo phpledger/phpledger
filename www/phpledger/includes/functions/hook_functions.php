@@ -61,7 +61,6 @@ function pl_hook_points(): array
         // After the outermost commit of a period close.
         'period.checklist' => ['kind' => 'filter', 'args' => ['array items', 'array context'], 'returns' => 'array', 'phase' => 'pre-lock'],
         'period.closed' => ['kind' => 'action', 'args' => ['array period', 'array context'], 'returns' => 'void', 'phase' => 'after-commit'],
-        'period.checklist' => ['kind' => 'filter', 'args' => ['array items', 'array context'], 'returns' => 'array', 'phase' => 'pre-lock'],
         // Employee register changes publish the company and saved employee after commit.
         'employee.created' => ['kind' => 'action', 'args' => ['array payload'], 'returns' => 'void', 'phase' => 'after-commit'],
         'employee.updated' => ['kind' => 'action', 'args' => ['array payload'], 'returns' => 'void', 'phase' => 'after-commit'],

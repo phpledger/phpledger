@@ -188,7 +188,7 @@ function pl_change_period_status(int $actorId, int $companyId, int $bookId, int 
             // 1.2 M8: queued, not fired. The book row above is locked for the rest of this
             // transaction; pl_ledger_transaction() runs this after the commit, outside the lock.
             pl_hook_after_commit('period.closed', [$period, ['company_id' => $companyId, 'book_id' => $bookId,
-                'actor_id' => $actorId, 'checklist' => $checklist === null ? [] : $checklist['items']]]);
+                'actor_id' => $actorId, 'checklist' => $checklist['items']]]);
         }
         return pl_period_record_action($actorId, $companyId, $bookId, $period, $action, $priorStatus, $reason, $key, $hash,
             pl_period_reversal_receipt($reversals) + ['checklist_warnings' => $checklist === null ? [] : array_column($checklist['warnings'], 'label')]);
