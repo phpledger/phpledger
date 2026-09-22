@@ -37,7 +37,7 @@ class PL_Hook_Veto extends DomainException
  * number and fails when the surface moves without it. A plugin manifest names the version it was
  * written against and must match exactly (B47).
  */
-const PL_PLUGIN_API_VERSION = '1.0.0';
+const PL_PLUGIN_API_VERSION = '1.1.0';
 
 /** The contract number a plugin package manifest must declare. Bundled modules are contract 1. */
 const PL_PLUGIN_CONTRACT = 2;
@@ -406,6 +406,10 @@ function pl_plugin_api_functions(): array
         // Package identity and settings (B46).
         'pl_plugin_table_prefix', 'pl_plugin_option_get', 'pl_plugin_option_all',
         'pl_plugin_option_set', 'pl_plugin_option_delete',
+        // The secret store (B83, B78): authenticated, at-rest storage for a credential a package
+        // must replay in plaintext server-side, such as a connector's SMTP password. There is no
+        // published "get all" for secrets, unlike options — see plugin_functions.php's comment.
+        'pl_plugin_secret_get', 'pl_plugin_secret_set', 'pl_plugin_secret_delete', 'pl_plugin_secret_names',
         // The outbound machine and its registration point (B77, B78). These four stopped being
         // internal helpers the moment a third party could sell a connector over them.
         'pl_enqueue_outbound_event', 'pl_outbound_claim', 'pl_outbound_acknowledge',

@@ -743,6 +743,7 @@ function pl_plugin_uninstall(int $actorId, string $slug, bool $deleteData, strin
         }
         if ($deleteData) {
             DB::delete('pl_plugin_options', 'slug = %s', $slug);
+            DB::delete('pl_plugin_secrets', 'slug = %s', $slug);
             DB::delete('pl_plugin_migrations', 'slug = %s', $slug);
         }
         $result = ['slug' => $slug, 'status' => 'removed', 'data_deleted' => $deleteData];
@@ -1003,6 +1004,97 @@ function pl_plugin_option_delete(int $actorId, string $slug, string $name, int $
         pl_require_capability($actorId, $scope, 'modules.manage', 'Your role cannot change package settings for this business.');
     }
     DB::delete('pl_plugin_options', 'slug = %s AND company_id = %i AND option_name = %s', pl_plugin_slug($slug), $scope, pl_plugin_option_name($name));
+}
+
+// -------------------------------------------------------------------------------- secrets
+
+/**
+ * A package's credentials (B83, B78): the exact same scope as an option (installation, or one
+ * business — pl_plugin_option_scope() is reused rather than a second scoping rule), but the
+ * stored value is authenticated ciphertext from secret_functions.php, never plaintext and never
+ * JSON like an option's value can be. A secret is a single string a connector will replay to an
+ * outside service — an SMTP password, an API token — not a structured setting.
+ *
+ * There is deliberately no `pl_plugin_secret_all()` returning every value the way
+ * `pl_plugin_option_all()` does: decrypting a whole scope at once for a caller that only ever
+ * needs one credential is exactly the kind of casual plaintext handling B83's rules exist to
+ * prevent. pl_plugin_secret_names() answers "what is set" without decrypting anything, which is
+ * what a settings screen needs to show which fields already hold a value.
+ */
+function pl_plugin_secret_name(string $name): string
+{
+    if (!preg_match('/^[a-z][a-z0-9_.]{0,119}$/D', $name)) {
+        throw new DomainException('A package secret name is lower-case letters, digits, dots and underscores.');
+    }
+    return $name;
+}
+
+/**
+ * The decrypted value, for a package's own server-side code to use — for example, inside the
+ * outbound-consumer handler it registered, to authenticate with a mail provider. Never call this
+ * from a code path that renders, JSON-encodes or logs the result: nothing downstream of it may
+ * reach a browser.
+ */
+function pl_plugin_secret_get(string $slug, string $name, int $companyId = 0): ?string
+{
+    return pl_secret_locked(function () use ($slug, $name, $companyId): ?string {
+        $slug = pl_plugin_slug($slug);
+        $scope = pl_plugin_option_scope($companyId);
+        $name = pl_plugin_secret_name($name);
+        $raw = DB::queryFirstField('SELECT ciphertext FROM pl_plugin_secrets WHERE slug = %s AND company_id = %i AND secret_name = %s', $slug, $scope, $name);
+        return $raw === null ? null : pl_secret_decrypt((string) $raw, pl_secret_context($slug, $scope, $name));
+    });
+}
+
+/** @return list<string> which secrets are set for this scope, never their values — what a
+ *  settings screen shows to say "a value is already saved" without ever decrypting one. */
+function pl_plugin_secret_names(string $slug, int $companyId = 0): array
+{
+    $names = [];
+    foreach (DB::query('SELECT secret_name FROM pl_plugin_secrets WHERE slug = %s AND company_id = %i ORDER BY secret_name',
+        pl_plugin_slug($slug), pl_plugin_option_scope($companyId)) as $row) {
+        $names[] = (string) $row['secret_name'];
+    }
+    return $names;
+}
+
+function pl_plugin_secret_set(int $actorId, string $slug, string $name, string $value, int $companyId = 0): void
+{
+    $slug = pl_plugin_slug($slug);
+    $name = pl_plugin_secret_name($name);
+    $scope = pl_plugin_option_scope($companyId);
+    if ($value === '' || strlen($value) > 65536) {
+        throw new DomainException('A package secret is a non-empty value of up to 64 KB.');
+    }
+    if ($scope === 0) {
+        pl_plugin_require_admin($actorId);
+    } else {
+        pl_require_capability($actorId, $scope, 'modules.manage', 'Your role cannot change package settings for this business.');
+    }
+    if (pl_plugin_record($slug) === null) {
+        throw new DomainException('This package is not installed.');
+    }
+    if (DB::transactionDepth() !== 0) { throw new LogicException('Secret writes cannot run inside a transaction.'); }
+    pl_secret_locked(function () use ($slug, $scope, $name, $value, $actorId): void {
+        $ciphertext = pl_secret_encrypt($value, pl_secret_context($slug, $scope, $name));
+        pl_ledger_transaction(function () use ($slug, $scope, $name, $ciphertext, $actorId): void {
+            DB::insertUpdate('pl_plugin_secrets', [
+                'slug' => $slug, 'company_id' => $scope, 'secret_name' => $name, 'ciphertext' => $ciphertext,
+                'updated_by' => $actorId, 'updated_at' => gmdate('Y-m-d H:i:s'),
+            ], ['ciphertext' => $ciphertext, 'updated_by' => $actorId, 'updated_at' => gmdate('Y-m-d H:i:s')]);
+        });
+    });
+}
+
+function pl_plugin_secret_delete(int $actorId, string $slug, string $name, int $companyId = 0): void
+{
+    $scope = pl_plugin_option_scope($companyId);
+    if ($scope === 0) {
+        pl_plugin_require_admin($actorId);
+    } else {
+        pl_require_capability($actorId, $scope, 'modules.manage', 'Your role cannot change package settings for this business.');
+    }
+    DB::delete('pl_plugin_secrets', 'slug = %s AND company_id = %i AND secret_name = %s', pl_plugin_slug($slug), $scope, pl_plugin_secret_name($name));
 }
 
 // --------------------------------------------------------- the outbound registration point

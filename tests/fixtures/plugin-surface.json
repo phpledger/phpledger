@@ -1,5 +1,5 @@
 {
-    "api_version": "1.0.0",
+    "api_version": "1.1.0",
     "contract": 2,
     "constants": [
         "PL_PLUGIN_API_VERSION",
@@ -242,6 +242,40 @@
                 "int $bookId"
             ],
             "returns": "array"
+        },
+        "pl_plugin_secret_delete": {
+            "parameters": [
+                "int $actorId",
+                "string $slug",
+                "string $name",
+                "int $companyId="
+            ],
+            "returns": "void"
+        },
+        "pl_plugin_secret_get": {
+            "parameters": [
+                "string $slug",
+                "string $name",
+                "int $companyId="
+            ],
+            "returns": "?string"
+        },
+        "pl_plugin_secret_names": {
+            "parameters": [
+                "string $slug",
+                "int $companyId="
+            ],
+            "returns": "array"
+        },
+        "pl_plugin_secret_set": {
+            "parameters": [
+                "int $actorId",
+                "string $slug",
+                "string $name",
+                "string $value",
+                "int $companyId="
+            ],
+            "returns": "void"
         },
         "pl_plugin_table_prefix": {
             "parameters": [

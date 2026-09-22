@@ -28,7 +28,8 @@
     "042_plugin_runtime",
     "043_sample_skeletons",
     "044_ownership_register",
-    "045_chart_headings"
+    "045_chart_headings",
+    "049_secret_store"
   ],
   "routes": [
     "/accounts",

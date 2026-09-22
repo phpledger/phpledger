@@ -128,6 +128,7 @@ function plugin_fixture_clean_state(): void
     foreach (pl_plugin_records() as $slug => $record) {
         DB::delete('pl_packages', 'slug = %s', $slug);
         DB::delete('pl_plugin_options', 'slug = %s', $slug);
+        DB::delete('pl_plugin_secrets', 'slug = %s', $slug);
         DB::delete('pl_plugin_migrations', 'slug = %s', $slug);
     }
     DB::query('DROP TABLE IF EXISTS pl_sample_plugin_notes');

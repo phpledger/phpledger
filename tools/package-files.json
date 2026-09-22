@@ -1599,6 +1599,14 @@
       "destination": "www/phpledger/includes/functions/plugin_functions.php"
     },
     {
+      "source": "www/phpledger/includes/functions/secret_functions.php",
+      "destination": "www/phpledger/includes/functions/secret_functions.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/049_secret_store.php",
+      "destination": "www/phpledger/install/migrations/049_secret_store.php"
+    },
+    {
       "source": "www/phpledger/includes/functions/package_web_functions.php",
       "destination": "www/phpledger/includes/functions/package_web_functions.php"
     },

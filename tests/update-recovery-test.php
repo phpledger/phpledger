@@ -24,6 +24,7 @@ $private = $fixture . '/installation'; mkdir($private, 0700);
 putenv('PL_INSTALL_DIRECTORY=' . $private); putenv('PL_ENV=test');
 pl_update_write($private . '/operator.key', str_repeat('test-only-', 5));
 pl_update_write($private . '/publisher.pem', $public);
+pl_update_write($private . '/secret.key', 'sample-secret-store-key');
 try {
     foreach (['../escape.php', '/absolute.php', 'a//b', 'storage/key.php', 'www/config.local.php', 'a/CON.php', 'a/file.', 'a/private.pem', 'a\b.php'] as $path) {
         update_reject(fn() => pl_update_path($path), 'unsafe package path rejected');
@@ -126,10 +127,12 @@ try {
     update_check(pl_update_step($root, $callbacks)['phase'] === 'apply', 'Backup did not precede mutation.');
     update_check(pl_update_step($root, $callbacks)['phase'] === 'migrate', 'Apply did not checkpoint.');
     update_check(file_get_contents($root . '/www/phpledger/includes/bootstrap.php') !== 'original code', 'Fixture code not updated.');
+    pl_update_write($private . '/secret.key', 'sample-altered-key');
     update_check(pl_update_step($root, $callbacks)['phase'] === 'restored', 'Failed migration did not recover.');
     update_check(file_get_contents($root . '/www/phpledger/includes/bootstrap.php') === 'original code', 'Original code not restored.');
     update_check(file_get_contents($root . '/old-file.txt') === 'old file' && !is_file($root . '/new-file.txt'), 'Old/new file restoration mismatch.');
     update_check(file_get_contents($root . '/www/phpledger/storage/oauth/private.key') === 'sample-private-key', 'Private key lost.');
+    update_check(file_get_contents($private . '/secret.key') === 'sample-secret-store-key', 'Secret store key not restored with the matched database.');
     clearstatcache();
     update_check((fileperms($root . '/old-file.txt') & 0777) === 0750 && (fileperms($root . '/www/phpledger/includes/bootstrap.php') & 0777) === 0640
         && (fileperms($root . '/www/phpledger/storage/oauth/private.key') & 0777) === 0600, 'Original code and private-key permissions were not restored.');

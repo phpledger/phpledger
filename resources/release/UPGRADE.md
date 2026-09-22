@@ -204,3 +204,8 @@ MySQL DDL is not automatically rolled back as one application transaction. An `a
 Keep maintenance active. Have the operator restore the last verified database backup into an isolated replacement database, restore its matching code/configuration, and rerun the restoration checks before switching back. Restore code and database as a compatible pair; reverting application files alone does not undo a schema change. Any writes made after the backup require a separate reconciliation plan.
 
 A published 0.6.0-preview installation has no automatic rollback or backup scheduler; use the manual procedure above. This release's `/maintenance.php` updater described above adds automatic pre-update matched backup and recovery, subject to its disclosed assurance limits; it does not add a recurring backup scheduler or historical application migration. Repository development/restore test tools are not shipped as customer commands.
+
+
+### Encrypted package credentials
+
+When migration 049 is present, package credentials require the matching `secret.key` in the configured private installation directory. Include that file (including a pending rotation checkpoint, if present) in the same maintenance-window backup as the database. Automatic updater recovery includes it. Never copy it into `public/`, send it with a database-only export, or regenerate it to recover existing ciphertext: a lost key requires the matching private-directory backup or manually replacing all credentials. Successful key rotation does not erase keys from retained historical backups. Secret-store rotation is an installation-administrator operation; installed connectors must use the declared plugin API version. This feature supplies storage, not an email/SMS/WhatsApp transport.

@@ -118,6 +118,10 @@ require_once __DIR__ . '/functions/branding_functions.php';
 // then; and because a country company-secretarial package is exactly the caller B63 designed
 // those hook points for.
 require_once __DIR__ . '/functions/ownership_functions.php';
+// 1.3 M17: the secret store (B83). Loaded before plugin_functions.php, whose
+// pl_plugin_secret_* wrappers call into it; update_functions.php (required at the very top,
+// before the database connects) already gives it pl_update_directory() and pl_update_write().
+require_once __DIR__ . '/functions/secret_functions.php';
 // 1.2 M8: the plugin runtime loads last, so every core service a package may call already
 // exists, and so a package can never shadow one. pl_plugin_boot() costs one is_dir() and one
 // scandir() on an installation with no packages, which is every installation until one is

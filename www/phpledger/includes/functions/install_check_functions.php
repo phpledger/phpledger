@@ -299,6 +299,7 @@ function pl_install_step_label(string $version): string
         '042_plugin_runtime' => 'Adding the package and plugin runtime',
         '044_ownership_register' => 'Adding the ownership register and share ledger',
         '045_chart_headings' => 'Naming the chart of accounts classes and groups',
+        '049_secret_store' => 'Adding the encrypted secret store for package credentials',
         '046_fixed_assets' => 'Adding the fixed-asset register',
     ];
     if (isset($labels[$version])) {

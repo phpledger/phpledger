@@ -302,7 +302,7 @@ function pl_update_file_backup(string $root, string $operation, array $metadata,
             if ($file->isFile()) { $privatePaths[] = $file->getPathname(); }
         }
     }
-    foreach (['operator.key', 'publisher.pem', 'installed.json'] as $name) {
+    foreach (['operator.key', 'publisher.pem', 'installed.json', 'secret.key'] as $name) {
         $path = pl_update_directory($root) . '/' . $name;
         if (is_file($path)) { $privatePaths[] = $path; }
     }
