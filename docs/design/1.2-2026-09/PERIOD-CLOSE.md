@@ -35,3 +35,5 @@ Targeted suite: `php tests/run.php --suite=period-close`. It covers hard blocker
 The coordinator owns the combined MySQL/MariaDB full suite, extracted-package install and upgrade checks, and desktop/tablet/mobile browser evidence. Local technical tests do not constitute accounting review or observed usability acceptance. No production, external-provider or stakeholder action is part of this implementation.
 
 Lane evidence on 23 September 2026: PHP 8.3 / MySQL 8.4 isolated temporary database, **36 targeted tests, zero failures**, changed PHP lint and diff check clean. This includes real HTTP route workflows and old-snapshot/concurrent retry regressions. Full dual-engine and package acceptance remain the coordinator's combined gate.
+
+Schedule-screen review: pending dates prefill from event history; a failed submission retains an intentionally blank date. Once any linked reversal exists, the detail screen shows its date and link and no longer offers scheduling. These states are covered by the HTTP regression.

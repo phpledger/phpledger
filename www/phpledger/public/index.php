@@ -825,7 +825,8 @@ try {
     $journal = pl_get_journal($actorId, $companyId, $bookId, pl_web_id($_GET, 'id'));
     $commercialSource = DB::queryFirstRow('SELECT d.id,d.kind,d.document_number FROM pl_ar_document_revisions r JOIN pl_ar_documents d ON d.id=r.document_id AND d.company_id=r.company_id AND d.book_id=r.book_id WHERE r.company_id=%i AND r.book_id=%i AND r.journal_id=%i', $companyId, $bookId, $journal['reversal_of_id'] ?? $journal['id']);
     if ($commercialSource) { $commercialSource['number'] = pl_document_number_display($commercialSource['document_number'], (int)$commercialSource['id'], $commercialSource['kind']); }
-    pl_render('journal', ['title' => 'Journal entry', 'user' => $user, 'company' => $company, 'journal' => $journal, 'commercialSource'=>$commercialSource, 'reversalHistory' => pl_journal_reversal_history($actorId, $companyId, $bookId, (int) $journal['id']), 'scheduleForm' => pl_form_state(pl_url('/journals/detail', ['id' => (int) $journal['id']]))]);
+    $linkedReversal = DB::queryFirstRow('SELECT id, journal_date FROM pl_journals WHERE company_id = %i AND book_id = %i AND reversal_of_id = %i FOR SHARE', $companyId, $bookId, $journal['id']);
+    pl_render('journal', ['title' => 'Journal entry', 'user' => $user, 'company' => $company, 'journal' => $journal, 'commercialSource'=>$commercialSource, 'linkedReversal' => $linkedReversal, 'reversalHistory' => pl_journal_reversal_history($actorId, $companyId, $bookId, (int) $journal['id']), 'scheduleForm' => pl_form_state(pl_url('/journals/detail', ['id' => (int) $journal['id']]))]);
 } catch (PlDemoUnavailable $error) {
     http_response_code(503);
     header('Retry-After: 10');

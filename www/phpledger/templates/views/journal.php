@@ -3,6 +3,12 @@ declare(strict_types=1);
 $canWrite = pl_can_write($company);
 $reversalHistory = $reversalHistory ?? [];
 $scheduleForm = $scheduleForm ?? ['message' => '', 'input' => []];
+$linkedReversal = $linkedReversal ?? null;
+$scheduledDate = '';
+foreach ($reversalHistory as $scheduleEvent) {
+    if (in_array($scheduleEvent['event'], ['scheduled', 'cleared'], true)) { $scheduledDate = (string) ($scheduleEvent['reverse_on'] ?? ''); }
+}
+if (array_key_exists('reverse_on', $scheduleForm['input'])) { $scheduledDate = pl_web_text($scheduleForm['input'], 'reverse_on'); }
 $documentSource = null;
 $generalSource = null;
 if (preg_match('/^document:([1-9][0-9]*)$/D', (string) $journal['source_reference'], $sourceMatch)) {
@@ -46,13 +52,18 @@ if ($journal['source_type'] === 'general_journal' && preg_match('/^general:([1-9
         </table>
     </div>
 </section>
-<?php if ($canWrite && $journal['reversal_of_id'] === null && in_array($journal['source_type'], ['general','general_journal','receipt','payment','adjustment'], true)): ?>
+<?php if ($linkedReversal !== null): ?>
+<section class="rounded-panel border border-border bg-surface p-4 my-4"><h2 class="section-title"><?= pl_e(pl_t('Reversal completed')) ?></h2>
+<p><?= pl_e(pl_t('This journal was reversed on {date}.', ['date' => pl_date_label($linkedReversal['journal_date'])])) ?></p>
+<a class="btn btn-secondary" href="<?= pl_e(pl_url('/journals/detail', ['id' => (int) $linkedReversal['id']])) ?>"><?= pl_e(pl_t('View linked reversal')) ?></a></section>
+<?php endif; ?>
+<?php if ($canWrite && $linkedReversal === null && $journal['reversal_of_id'] === null && in_array($journal['source_type'], ['general','general_journal','receipt','payment','adjustment'], true)): ?>
 <section class="rounded-panel border border-border bg-surface p-4 my-4"><h2 class="section-title"><?= pl_e(pl_t('Scheduled reversal')) ?></h2>
 <p><?= pl_e(pl_t('The linked reversal posts when its period opens. If that period is already open, saving the schedule posts it immediately. Leave the date blank to clear a pending schedule.')) ?></p>
 <?php if ($scheduleForm['message'] !== ''): ?><p class="alert alert-danger" role="alert"><?= pl_e($scheduleForm['message']) ?></p><?php endif; ?>
 <form method="post" action="<?= pl_e(pl_url('/periods/schedule-reversal')) ?>" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
 <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?><input type="hidden" name="journal_id" value="<?= (int) $journal['id'] ?>">
-<label><?= pl_e(pl_t('Reverse on')) ?><input class="input" type="date" name="reverse_on" value="<?= pl_e(pl_web_text($scheduleForm['input'],'reverse_on')) ?>"></label>
+<label><?= pl_e(pl_t('Reverse on')) ?><input class="input" type="date" name="reverse_on" value="<?= pl_e($scheduledDate) ?>"></label>
 <label><?= pl_e(pl_t('Reason')) ?><input class="input" name="reason" maxlength="400" required></label><button class="btn btn-secondary"><?= pl_e(pl_t('Save reversal schedule')) ?></button>
 </form></section>
 <?php endif; ?>

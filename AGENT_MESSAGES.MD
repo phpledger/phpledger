@@ -1789,3 +1789,11 @@ Evidence: dedicated Docker project `codexm17period`, MySQL 8.4 temporary databas
 ### 23 September 2026 — Final period-close review follow-up
 
 Parent review identified that a zero-difference count could bypass central FX posting validation. Cash-count selection and service now exclude a designated currency different from the book currency, including agreed counts. Added a regression proving foreign zero-count refusal and functional-currency agreement. Latest isolated targeted result: **37 tests, zero failures**; latest PHP lint and staged diff check clean. Trimmed a new-file trailing blank line that was not included by the earlier unstaged diff check. All combined gates still belong to the coordinator.
+
+## 2026-09-23 — Codex schedule-screen follow-up scope
+
+Parent browser review found pending schedules were not prefilled and already reversed originals still offered a scheduling form. Narrow follow-up owns only the journal view model/template and focused HTTP regression: derive pending date from existing event history, retain submitted blank values after validation failure, read the existing linked reversal for completed state/link, and hide the form after reversal. No ledger API, schema, migration or new workflow.
+
+### Schedule-screen follow-up outcome
+
+Pending dates now prefill from the event trail. An intentionally blank date remains blank after validation failure. A scoped read of the existing linked journal shows a completed state and reversal link, hiding the schedule form after either scheduled or manual reversal. No ledger API or schema changed. Expanded HTTP regression covers pending, failed-clear, scheduled-completed and manually reversed states; isolated focused suite **37 tests, zero failures**, three changed PHP files lint clean, diff check clean. Parent owns visual confirmation and combined gates.

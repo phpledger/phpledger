@@ -76,6 +76,22 @@ test('period and cash count routes render and enforce CSRF, scope and posted evi
         [$status,$body]=$request('/cash-counts?id='.$countId);assert_same(200,$status);assert_true(str_contains($body,'View posted difference'));
         [$status]=$request('/periods/schedule-reversal',['company_id'=>$f['company_id'],'book_id'=>$f['book_id'],'csrf'=>$token,'journal_id'=>$journal['id'],'reverse_on'=>'2027-01-01','reason'=>'Sample HTTP accrual']);assert_true(in_array($status,[302,303],true));
         assert_same('2027-01-01',DB::queryFirstField('SELECT reverse_on FROM pl_journal_reversal_schedules WHERE journal_id=%i',$journal['id']));
+        [$status,$body]=$request('/journals/detail?id='.$journal['id']);assert_same(200,$status);
+        assert_true(str_contains($body,'name="reverse_on" value="2027-01-01"'),'Pending schedule date is prefilled');
+        $request('/periods/schedule-reversal',['company_id'=>$f['company_id'],'book_id'=>$f['book_id'],'csrf'=>$token,'journal_id'=>$journal['id'],'reverse_on'=>'','reason'=>'']);
+        [$status,$body]=$request('/journals/detail?id='.$journal['id']);assert_same(422,$status);
+        assert_true(str_contains($body,'name="reverse_on" value=""'),'Intentionally blank input survives validation failure');
+        $opened=pl_create_period($actor,$f['company_id'],$f['book_id'],['start_date'=>'2027-01-01','end_date'=>'2027-12-31','reason'=>'HTTP next period','request_key'=>'http-next']);
+        assert_same(1,$opened['reversals_posted']);
+        $reversalId=(int)DB::queryFirstField('SELECT id FROM pl_journals WHERE reversal_of_id=%i',$journal['id']);
+        [$status,$body]=$request('/journals/detail?id='.$journal['id']);assert_same(200,$status);
+        assert_true(str_contains($body,'Reversal completed') && str_contains($body,'/journals/detail?id='.$reversalId),'Completed schedule links the posted reversal');
+        assert_true(!str_contains($body,'Save reversal schedule') && !str_contains($body,'name="reverse_on"'),'Completed journal has no misleading schedule form');
+        $manual=pl_post_journal($actor,$f['company_id'],$f['book_id'],ledger_payload($f,'1.0000'));
+        pl_schedule_journal_reversal($actor,$f['company_id'],$f['book_id'],$manual['id'],'2028-01-01','Pending before manual reversal');
+        pl_reverse_journal($actor,$f['company_id'],$f['book_id'],$manual['id'],gmdate('Y-m-d'),'http-manual-reversal','Manual correction');
+        [$status,$body]=$request('/journals/detail?id='.$manual['id']);assert_same(200,$status);
+        assert_true(str_contains($body,'Reversal completed') && !str_contains($body,'Save reversal schedule'),'Manual linked reversal also disables pending schedule form');
     } finally {proc_terminate($server);proc_close($server);@unlink($log);}
 });
 
