@@ -164,6 +164,7 @@ function pl_change_period_status(int $actorId, int $companyId, int $bookId, int 
         if ((int) $period['revision'] !== $expectedRevision || $period['status'] === $status) {
             throw new DomainException('This period has changed. Review its current status before submitting a new action.');
         }
+        if ($status === 'open') { pl_year_end_assert_period($companyId, $bookId, $period); }
         $priorStatus = (string) $period['status'];
         if ($status === 'closed') {
             // The authoritative pass, under the lock. Only the core items are recomputed here;

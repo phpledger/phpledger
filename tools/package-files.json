@@ -1753,6 +1753,22 @@
     {
       "source": "www/phpledger/install/migrations/055_employee_links.php",
       "destination": "www/phpledger/install/migrations/055_employee_links.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/054_year_end.php",
+      "destination": "www/phpledger/install/migrations/054_year_end.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/year_end_functions.php",
+      "destination": "www/phpledger/includes/functions/year_end_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/year_end_web_functions.php",
+      "destination": "www/phpledger/includes/functions/year_end_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/year-end.php",
+      "destination": "www/phpledger/templates/views/year-end.php"
     }
   ]
 }

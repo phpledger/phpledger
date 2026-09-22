@@ -312,6 +312,7 @@ function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array
             if (function_exists('pl_inventory_assert_reversal_allowed')) { pl_inventory_assert_reversal_allowed($companyId, $bookId, $reversalOf); }
             if (function_exists('pl_purchasing_assert_reversal_allowed')) { pl_purchasing_assert_reversal_allowed($companyId, $bookId, $reversalOf); }
         }
+        pl_year_end_assert_posting($actorId, $companyId, $bookId, $payload, $reversalOf);
         pl_correction_assert_posting_allowed($companyId, $bookId, $payload, $reversalOf);
         // A reversal dated before today needs the backdated-reversal permission AND the original
         // posting date, because the case this guard exists for is somebody quietly undoing an

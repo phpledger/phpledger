@@ -246,3 +246,4 @@ Period close checklists, B89 synchronous reversing journals and cash counts are 
 
 
 1.3 implementation detail: aggregate payroll accrual/payment accounting and explicit employee-to-sales/driver/trade links are documented in [PAYROLL-ACCOUNTING.md](design/1.2-2026-09/PAYROLL-ACCOUNTING.md). These do not constitute individual payroll calculation, payslips, statutory compliance or a bank connector. Real-book/accountant acceptance remains the 2.0 gate under B81; internal worked examples are the 1.3 evidence.
+Year-end close implementation and review contract: [Fiscal-year closing](accounting/YEAR-END.md). Publication and combined release gates remain tracked in the 1.3 release plan.

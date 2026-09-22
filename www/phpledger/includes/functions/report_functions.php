@@ -39,6 +39,13 @@ function pl_home_overview(int $actorId, int $companyId, int $bookId, string $asO
     ];
 }
 
+/** Shared performance-report predicate; full balance-sheet/TB queries deliberately omit it. */
+function pl_performance_journal_sql(string $alias = 'j'): string
+{
+    if (!preg_match('/^[a-z][a-z0-9_]*$/D', $alias)) { throw new LogicException('Use a fixed SQL journal alias.'); }
+    return "$alias.source_type <> 'year_end_close' AND NOT EXISTS (SELECT 1 FROM pl_journals ye_original WHERE ye_original.id=$alias.reversal_of_id AND ye_original.source_type='year_end_close')";
+}
+
 /** Posted income and expense movements for an inclusive business-date range. */
 function pl_profit_loss(int $actorId, int $companyId, int $bookId, string $from, string $to): array
 {
@@ -54,7 +61,7 @@ function pl_profit_loss(int $actorId, int $companyId, int $bookId, string $from,
         COALESCE(SUM(CASE WHEN j.id IS NOT NULL THEN l.credit ELSE 0 END), 0) AS credit
         FROM pl_accounts a
         LEFT JOIN pl_journal_lines l ON l.account_id = a.id AND l.company_id = a.company_id AND l.book_id = a.book_id
-        LEFT JOIN pl_journals j ON j.id = l.journal_id AND j.company_id = a.company_id AND j.book_id = a.book_id AND j.journal_date >= %s AND j.journal_date <= %s
+        LEFT JOIN pl_journals j ON j.id = l.journal_id AND j.company_id = a.company_id AND j.book_id = a.book_id AND j.journal_date >= %s AND j.journal_date <= %s AND " . pl_performance_journal_sql() . "
         WHERE a.company_id = %i AND a.book_id = %i AND a.type IN ('income','expense')
         GROUP BY a.id, a.code, a.name, a.type, a.is_contra, a.report_classification ORDER BY a.code", $from, $to, $companyId, $bookId);
     $income = [];

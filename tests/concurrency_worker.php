@@ -14,7 +14,12 @@ while (!is_file($input['barrier'])) {
 }
 $fixture = $input['fixture'];
 try {
-    if (in_array($input['mode'], ['purchase_receive','purchase_bill','opening_convert'], true)) {
+    if ($input['mode'] === 'year_close') {
+        try {
+            $result=pl_year_end_change($fixture['actor_id'],$fixture['company_id'],$fixture['book_id'],$input['year_id'],'close',$input['revision'],'Concurrent reviewed close',$input['key'],$input['close_input']);
+            $journal=['id'=>$result['journal_id']??0];
+        } catch (DomainException $e) { if(!($input['allow_domain_failure']??false)){throw $e;} $journal=['id'=>0]; }
+    } elseif (in_array($input['mode'], ['purchase_receive','purchase_bill','opening_convert'], true)) {
         try {
             $result=match ($input['mode']) {
                 'purchase_receive'=>pl_receive_purchase_order($fixture['actor_id'],$fixture['company_id'],$fixture['book_id'],$input['order_id'],$input['receipt_input']),

@@ -34,6 +34,7 @@
     "048_employee_master",
     "049_secret_store",
     "053_payroll_accounting",
+    "054_year_end",
     "055_employee_links"
   ],
   "routes": [
@@ -41,6 +42,7 @@
     "/general-journals",
     "/opening-balances",
     "/periods",
+    "/year-end",
     "/bank-reconciliation",
     "/reports",
     "/tax",

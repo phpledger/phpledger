@@ -49,6 +49,7 @@ $navGroups = [
         ['/tax', pl_t('Tax codes'), 'receipt', ['tax'], true],
         ['/opening-balances', pl_t('Opening balances'), 'book', ['opening-balances'], !pl_demo_enabled()],
         ['/opening-conversion', pl_t('Opening documents'), 'file-text', ['opening-conversion'], !pl_demo_enabled()],
+        ['/year-end', pl_t('Year-end close'), 'book', ['year-end'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'cost.view')],
         ['/periods', pl_t('Periods'), 'book', ['periods'], !pl_demo_enabled()],
         ['/numbering', pl_t('Document numbering'), 'list', ['numbering'], !pl_demo_enabled()],
         ['/accounting-policies', pl_t('Accounting policies'), 'adjustments-horizontal', ['accounting-policies'], !pl_demo_enabled()],

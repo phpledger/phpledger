@@ -105,6 +105,7 @@ $suites[] = 'secret_store_test.php';
 $suites[] = 'plugin_surface_test.php';
 // 1.3 M14: the Fixed assets module.
 $suites[] = 'asset_test.php';
+$suites[] = 'year_end_test.php';
 $suites[] = 'period_close_test.php';
 $suites[] = 'cash_count_test.php';
 if (($argv[1] ?? '') === '--suite=period-close') {
@@ -201,6 +202,7 @@ if (($argv[1] ?? '') === '--suite=owner') {
 if (($argv[1] ?? '') === '--suite=stock-documents') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'stock_document_test.php'];
 }
+if (($argv[1] ?? '') === '--suite=year-end') { $suites = ['ledger_test.php','concurrency_test.php','year_end_test.php']; }
 foreach ($suites as $suite) {
     if (is_file(__DIR__ . '/' . $suite)) {
         require __DIR__ . '/' . $suite;

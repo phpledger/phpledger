@@ -786,7 +786,7 @@ function pl_render(string $view, array $data = []): never
 {
     $allowed = ['home','ar','ap','parties','inventory','purchasing','tax','opening-conversion','login', 'companies', 'sample-chooser', 'onboarding', 'setup-review', 'transactions', 'editor',
         'trial-balance', 'account', 'journal', 'help', 'error', 'demo', 'reports', 'balance-sheet', 'profit-loss', 'cash-forecast', 'pos', 'ageing', 'settlement', 'stock-count', 'goods-receipt',
-        'accounts', 'general-journals', 'general-editor', 'general-detail', 'modules', 'opening-balances', 'periods', 'cash-counts',
+        'accounts', 'general-journals', 'general-editor', 'general-detail', 'modules', 'opening-balances', 'periods', 'cash-counts', 'year-end',
         'bank-reconciliation', 'connections', 'oauth-consent', 'sample-guide', 'numbering', 'owner',
         // 1.2 M4: the stock document family and its report.
         'stock-documents', 'stock-document', 'van-settlement', 'stock-by-location',

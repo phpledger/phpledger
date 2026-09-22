@@ -59,6 +59,7 @@ function pl_capability_catalogue(): array
         'modules.manage' => ['label' => 'Enable and disable modules', 'description' => 'Review a module package and turn it on or off for this company.', 'scope' => 'company'],
         'navigation.manage' => ['label' => 'Change navigation', 'description' => 'Show or hide receivables and payables in the sidebar.', 'scope' => 'company'],
         'numbering.manage' => ['label' => 'Change document numbering', 'description' => 'Edit the running number series for a document type.', 'scope' => 'company'],
+        'year_end.manage' => ['label' => 'Manage fiscal-year closing', 'description' => 'Review year policies, adjustments, closing and reopening.', 'scope' => 'company'],
         'periods.reopen' => ['label' => 'Reopen a closed period', 'description' => 'Reopen an accounting period that was closed.', 'scope' => 'company'],
         'opening.manage' => ['label' => 'Manage opening balances and conversion', 'description' => 'Prepare, review and confirm opening balances, opening debt and opening stock.', 'scope' => 'company'],
         'openitem.activate' => ['label' => 'Activate open-item accounting', 'description' => 'Switch this company to open-item receivables and payables.', 'scope' => 'company'],

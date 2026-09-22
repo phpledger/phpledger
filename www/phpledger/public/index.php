@@ -65,7 +65,7 @@ $routes = [
     '/locale' => ['POST'],
     '/companies' => ['GET'], '/company/select' => ['POST'], '/sample-chooser' => ['GET', 'POST'], '/onboarding' => ['GET', 'POST'],
     '/setup/review' => ['GET', 'POST'], '/transactions' => ['GET'], '/transactions/detail' => ['GET'],
-    '/opening-balances' => ['GET', 'POST'], '/periods' => ['GET', 'POST'], '/periods/schedule-reversal' => ['POST'], '/cash-counts' => ['GET', 'POST'], '/bank-reconciliation' => ['GET', 'POST'],
+    '/opening-balances' => ['GET', 'POST'], '/periods' => ['GET', 'POST'], '/periods/schedule-reversal' => ['POST'], '/cash-counts' => ['GET', 'POST'], '/year-end' => ['GET', 'POST'], '/bank-reconciliation' => ['GET', 'POST'],
     '/numbering' => ['GET', 'POST'], '/accounting-policies' => ['GET', 'POST'], '/company-profile' => ['GET', 'POST'],
     '/transactions/new' => ['GET'], '/transactions/edit' => ['GET'], '/transactions/save' => ['POST'],
     '/transactions/post' => ['POST'], '/transactions/reverse' => ['POST'],
@@ -364,6 +364,10 @@ try {
     if ($path === '/opening-balances') {
         require_once dirname(__DIR__) . '/includes/functions/opening_web_functions.php';
         pl_web_opening($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    if ($path === '/year-end') {
+        require_once dirname(__DIR__) . '/includes/functions/year_end_web_functions.php';
+        pl_web_year_end($actorId, $companyId, $bookId, $user, $company, $method);
     }
     if ($path === '/cash-counts') {
         require_once dirname(__DIR__) . '/includes/functions/cash_count_web_functions.php';

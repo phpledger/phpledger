@@ -82,6 +82,8 @@ function pl_read_catalog(): array
         // role: exposing a marker here would put "this customer is a director's wife" behind an
         // API key. A plugin that needs it asks a signed-in person through the hook points.
         'payroll_journals' => ['Read aggregate payroll journals and elements by pay period, never individual pay.', ['from' => $date, 'to' => $date, 'element' => ['type' => 'string', 'enum' => array_keys(pl_payroll_kinds())]], ['from','to'], true],
+        'fiscal_years' => ['Read fiscal-year dates and closing states.', [], [], true],
+        'year_end' => ['Read reviewed year-end policy, adjustments, comparative reports and audit history.', ['year_id' => $id], ['year_id'], false],
         'ownership_snapshot' => ['Read who owns the company at a date: share classes, holdings and percentages per holder, votes, fully diluted totals, the members register and the officers register.', ['as_of' => $date], ['as_of'], false],
         'share_ledger' => ['Read the append-only share ledger: allotments, transfers, cancellations, bonus issues and re-designations, with their corrections. Transfers never carry a journal.', [], [], true],
     ];
@@ -256,6 +258,8 @@ function pl_read_operation(string $connectionId, string $operation, array $input
                 pl_list_stock_transfers($actor, $company, $book, array_diff_key($args, array_flip(['company_id','book_id','page','page_size'])))), $page, $size),
             'unapplied_credit' => pl_unapplied_credit($actor, $company, $book, $args['side'], $args['as_of'] ?? null, $args['party_id'] ?? null),
             'payroll_journals' => pl_read_page(pl_list_payroll($actor,$company,$book,$args['from'],$args['to'],$args['element'] ?? null),$page,$size),
+            'fiscal_years' => pl_read_page(pl_year_end_list($actor,$company,$book),$page,$size),
+            'year_end' => pl_year_end_report($actor,$company,$book,$args['year_id']),
             'ownership_snapshot' => pl_read_ownership_snapshot($actor, $company, $args['as_of']),
             'share_ledger' => pl_read_page(array_map(static fn (array $row): array => pl_read_fields($row, ['id','effective_date','event_type','type_label','class_code','class_name','quantity','from_name','to_name','to_class_code','consideration_currency','consideration_amount','nominal_total','premium_total','certificate_reference','journal_id','reversal_of_id','status']),
                 pl_list_share_events($actor, $company, 1000)), $page, $size),
