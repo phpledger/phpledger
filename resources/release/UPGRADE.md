@@ -2,6 +2,10 @@
 
 ## Command-line upgrade entry point
 
+For **1.3.0**, upgrade a backup copy of the complete 1.2.1 installation first, including its private installation receipt, publisher key and configuration. Pending migrations through 056 add the package/accounting workflow structures and retire the legacy membership role column. They are not reversible individually; rollback means restoring the matched previous application and database backup. Keep the existing table namespace during upgrade. Configurable prefixes are an installation choice, not an in-place table renaming tool.
+
+The eleven optional practice histories are now separate data-only sample packages. Existing companies and their records remain intact. New installations retain a neutral starter; install a sample package through Packages before selecting its structure or history during onboarding. Existing installations send no installation notice until their installation administrator explicitly enables it in Updates.
+
 After backing up matching application files, private configuration and the database, stop application traffic and scheduled writers, then replace the application files using the manual procedure below. Run:
 
 ```sh

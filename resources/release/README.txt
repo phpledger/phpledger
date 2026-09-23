@@ -7,7 +7,7 @@ WHAT YOU NEED
 - Web hosting with PHP 8.2 or newer (8.3 recommended) and these PHP extensions:
   bcmath, pdo_mysql, mbstring, curl, openssl and fileinfo.
   Most hosting panels list them under "Select PHP Version" or "PHP extensions".
-- A MySQL 8.4 or MariaDB 10.4 (or newer) database.
+- MySQL 8.0.19 or newer (8.4 recommended), or MariaDB 10.4 or newer.
 - An Apache or LiteSpeed web server, which most shared hosting uses.
   XAMPP on your own computer works too.
 
