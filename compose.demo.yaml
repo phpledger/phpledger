@@ -9,7 +9,7 @@ services:
       - ./docker/shared-demo-proxy.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       default:
-        ipv4_address: ${PL_DEMO_INTERNAL_PROXY_IP:-10.204.82.10}
+        ipv4_address: ${PL_DEMO_INTERNAL_PROXY_IP:-10.204.83.10}
       edge: {}
     depends_on:
       - demo-web
@@ -24,7 +24,7 @@ services:
       PL_DB_NAME: phpledger_demo
       PL_DB_USER: ledger_demo_web
       PL_DB_PASSWORD: ${PL_DEMO_WEB_PASSWORD:?Set a dedicated demo runtime password}
-      PL_TRUSTED_PROXY_IPS: ${PL_DEMO_INTERNAL_PROXY_IP:-10.204.82.10}
+      PL_TRUSTED_PROXY_IPS: ${PL_DEMO_INTERNAL_PROXY_IP:-10.204.83.10}
       PL_DEMO_LOCAL_HTTP: ${PL_DEMO_LOCAL_HTTP:-0}
       PL_PUBLIC_URL: ${PL_DEMO_PUBLIC_URL:-https://phpledger.com/demo}
       PL_ALLOWED_ORIGINS: ${PL_ALLOWED_ORIGINS:-}
@@ -94,7 +94,8 @@ volumes:
 networks:
   edge: {}
   default:
+    name: ${COMPOSE_PROJECT_NAME:-phpledger-demo}_shared
     internal: true
     ipam:
       config:
-        - subnet: ${PL_DEMO_DOCKER_SUBNET:-10.204.82.0/24}
+        - subnet: ${PL_DEMO_DOCKER_SUBNET:-10.204.83.0/24}
