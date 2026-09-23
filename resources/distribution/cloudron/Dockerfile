@@ -7,7 +7,7 @@
 # Build and publish this image yourself before referencing it from CloudronVersions.json
 # (its "dockerImage" field is a placeholder here - see NOTES.md); this file only prepares
 # the wrapper, it does not build or push anything.
-FROM ghcr.io/phpledger/phpledger:1.2.1
+FROM ghcr.io/phpledger/phpledger:1.3.0
 
 # COPY --chmod sets the executable bit at copy time: the base image already switches to
 # the non-root `www-data` USER (docs/CONTAINER.md, "Non-root and read-only"), which

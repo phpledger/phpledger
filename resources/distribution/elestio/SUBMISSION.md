@@ -33,7 +33,7 @@ AGPL-3.0-or-later
 
 ## Image location
 
-`ghcr.io/phpledger/phpledger`, pinned to `1.2.1`. Never `:latest` — see
+`ghcr.io/phpledger/phpledger`, pinned to `1.3.0`. Never `:latest` — see
 `compose.yaml`. Built from a real tagged release ZIP, not from a development
 branch (`docker/release/Dockerfile` in this repository).
 
@@ -102,3 +102,8 @@ as software from a young, actively developing project rather than an
 established, externally-audited accounting product, and should verify its
 output against their own accounting practice before relying on it for
 statutory reporting.
+
+
+## 1.3.0 candidate update
+
+The image reference above follows the 1.3.0 release candidate. Older observations in this dossier describe their dated source and are not new provider acceptance. Verify the actual published tag/digest and repeat the provider checks before submission.

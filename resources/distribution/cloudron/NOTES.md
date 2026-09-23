@@ -90,3 +90,8 @@ cloud database tiers decision P4 anticipates.
 
 
 Reference: [MySQL 8.0 stored-program binary logging](https://dev.mysql.com/doc/refman/8.0/en/stored-programs-logging.html) distinguishes function characteristics from the trigger privilege requirement. No Cloudron host acceptance is claimed here.
+
+
+## 1.3.0 candidate metadata
+
+Active unpinned template versions now target 1.3.0. Earlier 1.2.1 measurements and checks above remain historical. Recheck the exact final artifact and provider contract before submission; this metadata update does not establish provider acceptance or publication. Cloudron version history is unchanged until the separate wrapper image exists and its host configuration is accepted.

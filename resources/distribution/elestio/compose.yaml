@@ -5,7 +5,7 @@
 # This compose file is the "here is a working deployment" attachment for that
 # outreach: a maintainer takes it as-is or adapts it into whatever internal
 # format Elestio uses. It reproduces compose.production.yaml (repository root)
-# exactly: image pinned to 1.2.1 (never :latest), app on 8080 internally, MySQL
+# exactly: image pinned to 1.3.0 (never :latest), app on 8080 internally, MySQL
 # 8.4 with --log-bin-trust-function-creators=1, the private volume at
 # /var/lib/phpledger, and the full PL_* environment contract.
 #
@@ -17,7 +17,7 @@
 name: phpledger
 services:
   web:
-    image: ghcr.io/phpledger/phpledger:1.2.1
+    image: ghcr.io/phpledger/phpledger:1.3.0
     restart: unless-stopped
     ports:
       - "${PL_WEB_PORT:-8080}:8080"

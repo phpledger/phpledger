@@ -1887,3 +1887,9 @@ Approved local continuation: versioned media-kit copy matching existing six-file
 
 
 Media source outcome: six1.3copy files, capture plan and operator assembly guide under docs/design/website/media-kit/1.3.0; tools/build-media-kit.py preserves historical kit layout with exact application ZIP VERSION/hash binding, original PNG hashes/dimensions/captions/alt, source provenance and deterministic archive/checksums. Missing captures/invalid evidence/different existing output refuse; no final screenshot or mediaarchive invented. Four synthetic fixturetests pass and Pythoncompile/sourcechecks clean. Module-Roadmap currentclaims refreshed with future/independentreview boundaries. Parent supplies exact artifact capture evidence thenassembles/publishes. No social/email sent, schema change or live action.
+
+## 2026-09-23 — Codex distribution metadata scope
+Local codex/1.3-distribution-metadata from19b26c1: bump unpinned active deployment references to1.3.0, preserve hash-bound oldartifact pairs andhistoricalCloudronVersions until finalhashes exist, leave clientpackageversion unchanged; prepare Wiki1.3 fromcurrentrelease notes. No provider/publication actions.
+
+
+Distribution metadata handoff: active unpinned templates target1.3.0; productionCompose default pinned1.3.0; newInstallatron versionfolder andWikiRelease1.3+sidebar prepared. Client0.1.0 anddynamicfeedtemplate unchanged. Yunohost archivehash/version/URL, Umbrel imageindexdigest+version, historicalCloudronVersions andSoftaculous finalsize remainexplicitpending in resources/distribution/README. Seven scaffoldertests+seven imagetagtests passed;17JSON/XML/TOML/YAMLtemplates parsed; productionCompose configquietpassed; diffclean. No artifacts/hashes invented, deployments/providercalls orschema changes.

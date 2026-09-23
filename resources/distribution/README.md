@@ -265,3 +265,20 @@ compose file is a strong check, and it is not the same thing.
   repository root, and **a matching documentation pull request is required before a
   template can merge** (`content/docs/services/<slug>.mdx` in their docs repository).
   So Coolify is two pull requests, not one.
+
+
+## 1.3.0 candidate metadata and remaining artifact pins
+
+Unpinned active image/default versions target 1.3.0. The production Compose default is pinned to 1.3.0; operators may explicitly choose another published tag. This is source preparation, not provider publication or acceptance.
+
+| File | Required final evidence before changing the remaining pin |
+|---|---|
+| `yunohost/manifest.toml` | Update `version`, source release URL and SHA-256 together from the exact final application ZIP. The coherent 1.2.1 pair remains until then. |
+| `umbrel/phpledger/docker-compose.yml` | Replace the application tag and multi-architecture index digest together after the official image is published. Preserve the separately pinned MySQL image unless deliberately updating it. |
+| `umbrel/phpledger/umbrel-app.yml` | Bump application version alongside that verified image pin. |
+| `cloudron/CloudronVersions.json` | Preserve the historical 1.2.1 entry. Add 1.3.0 only after its separate Cloudron wrapper image exists and its platform checks pass; the active manifest/Dockerfile are candidate sources. |
+| `softaculous/info.xml` | Remeasure uncompressed size/file count from the final ZIP and replace the old measured `<space>` allowance before submission. No new size has been guessed. |
+
+The new `installatron/phpledger/1.3.0/init.xml` is a candidate version directory. Its archive URL is a planned release destination, not download proof. Older 1.2.1 version directories and dated dossier evidence remain historical. None of these templates proves that a provider accepted the application.
+
+The `create-phpledger` client stays at its existing independently published package version. Its compose template uses the release-feed substitution token, so the current application version comes from that feed; no application tag is hard-coded into its template. Do not bump the client package version merely to track an application release.

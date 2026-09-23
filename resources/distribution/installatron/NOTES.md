@@ -133,3 +133,8 @@ entries with upgrade/install attributes" line in the docs, with no
 worked example); whether registering through the hosted Installer Editor
 is mandatory rather than optional for a file-based submission; and the
 full requirement-id vocabulary beyond the one worked example.
+
+
+## 1.3.0 candidate metadata
+
+Active unpinned template versions now target 1.3.0. Earlier 1.2.1 measurements and checks above remain historical. Recheck the exact final artifact and provider contract before submission; this metadata update does not establish provider acceptance or publication. The new phpledger/1.3.0/init.xml is a candidate; older version directories remain unchanged.

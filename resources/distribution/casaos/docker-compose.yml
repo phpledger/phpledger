@@ -16,7 +16,7 @@ services:
         target: /private
 
   web:
-    image: ghcr.io/phpledger/phpledger:1.2.1
+    image: ghcr.io/phpledger/phpledger:1.3.0
     container_name: phpledger
     restart: unless-stopped
     depends_on:

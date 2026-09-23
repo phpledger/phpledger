@@ -132,3 +132,8 @@ with "Package layout is missing www/phpledger/install" if that step was skipped,
 so getting this wrong fails loudly at install time rather than producing a broken
 installation. Verified against the published 1.2.1 asset: 1585 entries, all under
 `phpledger/`, `sha256 e983add7d909daf2b78151f6bc1d2195c2603fd57a711bf88e1ffb42c9c214b7`.
+
+
+## 1.3.0 candidate metadata
+
+Active unpinned template versions now target 1.3.0. Earlier 1.2.1 measurements and checks above remain historical. Recheck the exact final artifact and provider contract before submission; this metadata update does not establish provider acceptance or publication. The disk-space allowance must be remeasured from the final ZIP before submission.
