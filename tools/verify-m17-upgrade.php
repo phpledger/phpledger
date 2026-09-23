@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// A two-process upgrade proof: seed with the archived v1.2.1 implementation, then
+// A two-process upgrade proof: seed with the archived v1.3.0 implementation, then
 // check with the candidate implementation. Only a random disposable test schema.
 if (PHP_SAPI !== 'cli' || getenv('PL_ENV') !== 'test' || getenv('PL_DB_HOST') !== 'db_test'
     || getenv('PL_DB_NAME') !== 'phpledger_test' || getenv('PL_DB_USER') !== 'root') {
@@ -10,14 +10,14 @@ if (PHP_SAPI !== 'cli' || getenv('PL_ENV') !== 'test' || getenv('PL_DB_HOST') !=
 }
 $mode = $argv[1] ?? '';
 if (!in_array($mode, ['seed', 'check', 'verify', 'verify-candidate'], true)) {
-    throw new DomainException('Choose seed or check; seed also takes the archived v1.2.1 source directory.');
+    throw new DomainException('Choose seed or check; seed also takes the archived v1.3.0 source directory.');
 }
 $source = isset($argv[2]) ? realpath($argv[2]) : dirname(__DIR__);
 if (!$source || !is_file($source . '/www/phpledger/includes/bootstrap.php')) {
     throw new DomainException('The source directory must contain the application.');
 }
-if ($mode === 'seed' && trim((string) file_get_contents($source . '/www/phpledger/VERSION')) !== '1.2.1') {
-    throw new DomainException('Seed from the published v1.2.1 archive.');
+if ($mode === 'seed' && trim((string) file_get_contents($source . '/www/phpledger/VERSION')) !== '1.3.0') {
+    throw new DomainException('Seed from the published v1.3.0 archive.');
 }
 require $source . '/www/phpledger/includes/bootstrap.php';
 require $source . '/www/phpledger/install/migrate.php';
@@ -49,8 +49,8 @@ if ($mode === 'seed') {
     DB::useDB($database);
     try {
         $migrations = pl_migrate();
-        m17_upgrade_require(in_array('043_sample_skeletons', $migrations['applied'], true)
-            && !in_array('044_ownership_register', $migrations['applied'], true), 'Unexpected baseline migration chain.');
+        m17_upgrade_require(in_array('056_membership_role_id', $migrations['applied'], true)
+            && !in_array('057_document_parties', $migrations['applied'], true), 'Unexpected baseline migration chain.');
         // Use the actual release fixture builders and services, never current helpers
         // against an old schema. Merely loading test files does not run their tests.
         function test(string $name, callable $action): void {}
@@ -73,7 +73,7 @@ if ($mode === 'seed') {
         $trial = pl_trial_balance(...$args);
         m17_upgrade_require($trial['balanced'], 'Baseline must balance before the upgrade.');
         $receipt = ['database' => $database, 'fixture' => $fixture, 'rows' => $snapshot,
-            'memberships' => DB::query('SELECT company_id,user_id,role,role_id FROM pl_company_members ORDER BY company_id,user_id'),
+            'memberships' => DB::query('SELECT company_id,user_id,role_id FROM pl_company_members ORDER BY company_id,user_id'),
             'receipts' => DB::query('SELECT * FROM pl_schema_migrations ORDER BY version'),
             'total_debit' => $trial['total_debit'], 'total_credit' => $trial['total_credit']];
         $oldMask = umask(0077);
@@ -81,7 +81,7 @@ if ($mode === 'seed') {
             m17_upgrade_require(file_put_contents($receiptPath, json_encode($receipt, JSON_THROW_ON_ERROR)) !== false,
                 'Could not persist the sample upgrade receipt.');
         } finally { umask($oldMask); }
-        echo "Seed passed: published v1.2.1, posted cash journal, partially paid invoice, exact historical rows recorded.\n";
+        echo "Seed passed: published v1.3.0, posted cash journal, partially paid invoice, exact historical rows recorded.\n";
     } catch (Throwable $error) {
         DB::useDB('phpledger_test');
         DB::query('DROP DATABASE %b', $database);
@@ -96,7 +96,8 @@ m17_upgrade_require((bool) preg_match('/^phpledger_m17_verify_[a-f0-9]{24}$/D', 
 DB::useDB($database);
 try {
     $migration = in_array($mode, ['verify', 'verify-candidate'], true) ? ['applied'=>[]] : pl_migrate();
-    foreach ($mode === 'verify' ? [] : ['047_period_close', '048_employee_master', '049_secret_store', '050_scheduler_jobs', '051_recurring_schedules', '052_loan_schedules', '053_payroll_accounting', '054_year_end', '055_employee_links', '056_membership_role_id'] as $version) {
+    $expectedMigrations = ['057_document_parties', '058_money_account_kind', '059_bank_overdraft_limits', '060_cash_balance_policy'];
+    foreach ($mode === 'verify' ? [] : $expectedMigrations as $version) {
         m17_upgrade_require($mode === 'verify-candidate' ? DB::queryFirstField('SELECT status FROM pl_schema_migrations WHERE version=%s',$version)==='applied' : in_array($version, $migration['applied'], true), 'Expected new migration not applied: ' . $version);
     }
     if ($mode !== 'verify') {
@@ -110,16 +111,23 @@ try {
         $after = DB::query('SELECT ' . $select . ' FROM %b WHERE id IN %li ORDER BY id', $table, array_column($rows, 'id'));
         m17_upgrade_require($after === $rows, 'Historical rows changed during upgrade: ' . $table);
     }
-    m17_upgrade_require(DB::query('SELECT company_id,user_id,role,role_id FROM pl_company_members ORDER BY company_id,user_id') === $receipt['memberships'], 'Original membership IDs and compatibility labels changed.');
+    m17_upgrade_require(DB::query('SELECT company_id,user_id,role_id FROM pl_company_members ORDER BY company_id,user_id') === $receipt['memberships'], 'Original membership identities or role assignments changed.');
     $oldReceipts = DB::query('SELECT * FROM pl_schema_migrations WHERE version IN %ls ORDER BY version', array_column($receipt['receipts'], 'version'));
     m17_upgrade_require($oldReceipts === $receipt['receipts'], 'Published migration receipts changed.');
     $f = $receipt['fixture'];
+    if ($mode !== 'verify') {
+        $newVersions = DB::queryFirstColumn('SELECT version FROM pl_schema_migrations WHERE version NOT IN %ls ORDER BY version', array_column($receipt['receipts'], 'version'));
+        m17_upgrade_require($newVersions === $expectedMigrations, 'Upgrade introduced an unexpected migration set.');
+        m17_upgrade_require(pl_trading_policies($f['actor_id'], $f['company_id'], $f['book_id'])['cash_shortfall_policy'] === 'warning', 'Upgrade did not preserve warning-only cash policy default.');
+    }
     $trial = pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id']);
     m17_upgrade_require($trial['balanced'] && $trial['total_debit'] === $receipt['total_debit']
         && $trial['total_credit'] === $receipt['total_credit'], 'Historical trial balance changed.');
     if ($mode === 'verify') { m17_upgrade_require(DB::query('SELECT * FROM pl_schema_migrations ORDER BY version') === $receipt['receipts'], 'Restoration did not recover the exact original migration receipts.'); }
     else { m17_upgrade_require(pl_migrate()['applied'] === [], 'Migration replay was not a no-op.'); }
-    echo 'Upgrade passed: ' . count($migration['applied']) . " migrations from v1.2.1, historical accounts/periods/posted journals/partially paid invoice unchanged, old receipts preserved, balanced totals and no-op replay.\n";
+    echo $mode === 'verify'
+        ? "Restoration passed: exact v1.3.0 rows, memberships, migration receipts and balanced totals recovered.\n"
+        : "Upgrade passed: exactly four v1.4.0 migration receipts verified, warning-only cash default retained, historical accounts/periods/posted journals/partially paid invoice unchanged, old receipts preserved, balanced totals and no-op replay.\n";
 } finally {
     if (getenv('PL_UPGRADE_KEEP') !== '1') {
         DB::useDB('phpledger_test');

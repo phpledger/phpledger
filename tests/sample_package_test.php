@@ -12,8 +12,8 @@ function sample_package_test_archive(string $root,array $changes=[],array $extra
 {
     $entry=array_values(array_filter(json_decode((string)file_get_contents(PL_ROOT.'/resources/demo-packs/catalog.json'),true,32,JSON_THROW_ON_ERROR),static fn(array $e):bool=>$e['id']==='retail-shop'))[0];
     $pack=str_replace("\r\n","\n",(string)file_get_contents(PL_ROOT.'/resources/demo-packs/'.$entry['file']));
-    $structure=str_replace("\r\n","\n",(string)file_get_contents(PL_ROOT.'/resources/sample-structures/retail-shop-1.0.0.json'));
-    $m=array_replace(['type'=>'sample','slug'=>'sample-retail-shop','version'=>'1.0.0','contract'=>1,'name'=>$entry['name'],'description'=>$entry['capability_note'],'author'=>'Sample test publisher','licence'=>'CC0-1.0','homepage'=>'https://phpledger.com/directory/sample-retail-shop/','requires'=>['core'=>'1.0.0'],'sample'=>$entry,'files'=>['pack.json'=>hash('sha256',$pack),'structure.json'=>hash('sha256',$structure)]],$changes);
+    $structure=str_replace("\r\n","\n",(string)file_get_contents(PL_ROOT.'/resources/sample-structures/retail-shop-'.$entry['version'].'.json'));
+    $m=array_replace(['type'=>'sample','slug'=>'sample-retail-shop','version'=>$entry['version'],'contract'=>1,'name'=>$entry['name'],'description'=>$entry['capability_note'],'author'=>'Sample test publisher','licence'=>'CC0-1.0','homepage'=>'https://phpledger.com/directory/sample-retail-shop/','requires'=>['core'=>'1.0.0'],'sample'=>$entry,'files'=>['pack.json'=>hash('sha256',$pack),'structure.json'=>hash('sha256',$structure)]],$changes);
     $bytes=['package.json'=>json_encode($m,JSON_THROW_ON_ERROR),'pack.json'=>$pack,'structure.json'=>$structure]+$extra;
     $path=$root.'/archive-'.bin2hex(random_bytes(5)).'.zip';$z=new ZipArchive();$z->open($path,ZipArchive::CREATE|ZipArchive::OVERWRITE);foreach($bytes as $name=>$raw){$z->addFromString($m['slug'].'/'.$name,$raw);}$z->close();
     return ['archive'=>$path,'manifest'=>$m,'bytes'=>$bytes];
@@ -60,7 +60,7 @@ test('publisher-signed host preloads remain offline read-only and reject changed
     $root=sample_package_test_root();$f=sample_package_fixture();try{
         $a=sample_package_test_archive($root);$stage=pl_plugin_stage_archive($f['actor_id'],$a['archive']);
         $key=openssl_pkey_new(['private_key_type'=>OPENSSL_KEYTYPE_RSA,'private_key_bits'=>3072]);$details=openssl_pkey_get_details($key);file_put_contents($root.'/publisher.pem',$details['key']);putenv('PL_UPDATE_PUBLIC_KEY='.$root.'/publisher.pem');
-        $m=['schema'=>1,'type'=>'sample','slug'=>$stage['slug'],'version'=>'1.0.0','archive_bytes'=>filesize($a['archive']),'archive_sha256'=>hash_file('sha256',$a['archive']),'manifest_sha256'=>hash('sha256',$a['bytes']['package.json']),'files'=>$a['manifest']['files']];
+        $m=['schema'=>1,'type'=>'sample','slug'=>$stage['slug'],'version'=>$a['manifest']['version'],'archive_bytes'=>filesize($a['archive']),'archive_sha256'=>hash_file('sha256',$a['archive']),'manifest_sha256'=>hash('sha256',$a['bytes']['package.json']),'files'=>$a['manifest']['files']];
         $payload=json_encode($m,JSON_THROW_ON_ERROR);openssl_sign($payload,$signature,$key,OPENSSL_ALGO_SHA256);$envelope=json_encode(['payload'=>base64_encode($payload),'signature'=>base64_encode($signature)],JSON_THROW_ON_ERROR);
         file_put_contents($root.'/samples/'.$stage['slug'].'/sample-envelope.json',$envelope);putenv('PL_SAMPLE_PACKAGES_READONLY=1');putenv('PL_ENV=demo-install');
         assert_same('verified',pl_sample_package_read($stage['slug'])['trust']);assert_same(['retail-shop'],array_keys(pl_demo_pack_catalog()));
