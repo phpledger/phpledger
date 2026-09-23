@@ -4,15 +4,15 @@ Each release's exact source revision is recorded in its `PACKAGE-MANIFEST.json` 
 
 PHP Ledger 1.0.0 was the first supported stable release of the restarted application. It preserves the lightweight BixiSoft PHP/MeekroDB structure while separating accounting functions, server permissions, templates and the public front controller. Read "Supported scope and limits" and "Assurance status" below before deployment; the dated preview sections further down record the historical, superseded scope of each earlier development release.
 
-## 1.4.0: cash choices, linked parties and guided practice (prepared)
+## 1.4.0: cash choices, linked parties and guided practice
 
-This release candidate adds an administrator-selectable cash and bank shortfall policy per book. Existing and new books start in warning-only mode: posting can proceed after a shortfall warning. An administrator with accounting-policy permission may choose strict mode, which rejects postings that create or worsen a physical-cash shortfall or exceed an explicitly configured bank overdraft limit. A bank facility is not treated as cash, and the policy choice is audited. The posting service reads the current choice when a transaction is posted; a preview is guidance, not a reservation of funds.
+This release adds an administrator-selectable cash and bank shortfall policy per book. Existing and new books start in warning-only mode: posting can proceed after a shortfall warning. An administrator with accounting-policy permission may choose strict mode, which rejects postings that create or worsen a physical-cash shortfall or exceed an explicitly configured bank overdraft limit. A bank facility is not treated as cash, and the policy choice is audited. The posting service reads the current choice when a transaction is posted; a preview is guidance, not a reservation of funds.
 
 Receipts and expenses can link to a named customer, supplier or other party without turning a cash transaction into an open invoice or bill. The workspace, help and sample guides make these relationships and the difference between cash, bank and party balances clearer. The fictional sample structures and stories support guided practice; they do not change real customer records or imply that every business scenario has been independently reviewed.
 
 Migrations 057–060 follow the published 1.3.0 chain through 056. They add optional document-party links, cash/bank classification, bank overdraft limits and the book's configurable shortfall policy. Existing books default to warning-only; strict enforcement is an explicit administrative choice. Back up the matching application, private configuration and database, and rehearse an upgrade on a copy before applying these forward-only migrations. See UPGRADE.md.
 
-The owner waived the versioned media kit for this delivery. Release ZIP, checksum, signed update metadata, website/feed, official images, sample package publication and hosted demo require their own publication verification. This candidate has not yet been published or deployed. Independent accounting and security review and real-business pilots remain separate assurance work.
+The owner waived the versioned media kit for this delivery. The release provides a ZIP, checksum and signed update metadata. Publication receipts record the verified website, image, sample-package and hosted-demo channels. Independent accounting and security review and real-business pilots remain separate assurance work.
 
 ## 1.3.0: reviewable accounting workflows and the complete installation experience
 

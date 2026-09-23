@@ -40,7 +40,7 @@ PHP Ledger helps small businesses keep their books, follow money owed by custome
 
 **Start here:** [Try the demo](https://phpledger.com/demo/) · [Download the latest release](https://github.com/phpledger/phpledger/releases/latest) · [Installation guide](resources/release/INSTALL.md) · [Wiki](https://github.com/phpledger/phpledger/wiki)
 
-This branch is preparing **1.4.0**. Version 1.3.0 remains the latest published release until the 1.4.0 archive, signed update metadata and distribution channels are verified and published. The [published releases](https://github.com/phpledger/phpledger/releases) are the source of truth for available downloads.
+**PHP Ledger 1.4.0** adds administrator-controlled cash and bank shortfall policies, linked payer/payee selection, contextual help and fictional-company learning stories. See the [release downloads and notes](https://github.com/phpledger/phpledger/releases/tag/v1.4.0).
 
 ## What you can do
 
@@ -67,7 +67,7 @@ Posted journals are immutable. Corrections create linked reversals, closed perio
 
 Use fictional information and follow a transaction from its source to the ledger and reports. Demo work is temporary and resets hourly. The demo page describes the experience currently deployed.
 
-The currently deployed 1.3 demo follows the real installer and business onboarding in one shared disposable installation. If another visitor has already installed it, sign in with **demo / DemoLedger123!**. The installer shows labelled dummy database values; the host connection is fixed. Everyone sees the same fictional records until the hourly reset clears the database and sessions. Check the demo landing page for the deployed version; the prepared 1.4.0 changes are not live yet.
+The hosted demo follows the real installer and business onboarding in one shared disposable installation. If another visitor has already installed it, sign in with **demo / DemoLedger123!**. The installer shows labelled dummy database values; the host connection is fixed. Everyone sees the same fictional records until the hourly reset clears the database and sessions. Check the demo landing page for the deployed version.
 
 For a first exercise, create a small business or import a fictional sample, record a receipt and an expense, and inspect the trial balance. Then try a correction and follow the linked reversal. [Reporting walkthroughs](https://github.com/phpledger/phpledger/wiki/Reporting-Guides) provide more guided examples.
 
