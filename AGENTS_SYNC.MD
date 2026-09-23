@@ -1,5 +1,11 @@
 # Shared Claude and Codex state
 
+## Current public release, 23 September 2026: 1.4.0
+
+Owner-authorized 1.4.0 is live: immutable app/tag `8fface957e1bac2a7292b8125dc57170c24b6ebf`, website `2c3624f23c9faec5e293205fb7afe8fe87071c98`, official image index `sha256:a170945385c9cd2dc604d1a2c6889ad7af02b64cbd8b0c3d6bb49c9afcf2edf9`. The new isolated project is `phpledger-demo14`, port 18204, hosting root `/var/www/phpledger/data/releases/release-1-4-0-20260923-r3-hosting`; the old 1.3 project remains running for rollback. Do not use old default hosting-status project names to infer the public version. Both earlier 1.4 staging attempts were never launched and remain retained; do not replay any one-shot operator. Private rollback data stays on the host.
+
+Public artifacts, all 413 website paths, 11 signed samples, both image registries/architectures, Wiki/About and Packagist are verified. The actual 18:00 UTC scheduled reset and prior-session expiry were observed. See the [publication receipt](docs/repository/PUBLICATION-2026-09-23-1.4.0.md) and its JSON for exact pins, evidence, final demo state and remaining presentation/assurance gaps. No media kit per explicit owner waiver. Main checkout Academy/AGENTS changes and eight original generated website contents remain preserved; do not broadly reset or fast-forward the original checkout.
+
 ## Completed release, 23 September 2026: 1.3.0 public and verified
 
 Release v1.3.0 is published at immutable application source `9a4d2872545e232d5c94933e701e5c5ae8cd1de1`. Signed ZIP, media kit, both GHCR/Docker Hub architectures and latest tags, eleven signed sample repositories, Wiki/About, website, shared installer demo and private installation-notice receiver are public and verified. See [publication receipt](docs/repository/PUBLICATION-2026-09-23-1.3.0.md) and its JSON companion for exact hashes, CI/upgrade/browser evidence and assurance boundaries.
