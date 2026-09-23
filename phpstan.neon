@@ -5,6 +5,7 @@ parameters:
         - www/phpledger/install
         - www/phpledger/public
         - www/phpledger/templates
+        - www/installation-service
         - tools
     tmpDir: .cache/phpstan
     scanFiles:
