@@ -30,10 +30,8 @@ For project, pilot or support enquiries:
 
 **Supporting partners:** BixiTech, BixiSoft, BrownBag and Agency75. These are project-support identities, not customer testimonials or accounting certifications.
 
-## Supporting development
+## Support the project
 
-If PHP Ledger is useful to you and you can afford to help, a voluntary donation can support development, documentation, testing and project infrastructure. Donations are optional. Trying a workflow, reporting a reproducible issue, improving a translation or sharing the project also helps.
-
-The project owner is confirming the donation destination for the 1.3.0 release. No payment link is published here yet. A donation is support for the project; paid installation or support work requires its own agreed scope.
+Try a workflow, report a reproducible problem, improve a guide or translation, or contribute a reviewed fix. [Join the project discussions](https://github.com/phpledger/phpledger/discussions) to offer time or expertise. Paid installation or support work requires its own agreed scope.
 
 [[First package|First-Package]] · [[Roadmap]] · [[Architecture]]

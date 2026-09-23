@@ -1,6 +1,6 @@
 # Container image
 
-Status: built in 1.2 M12 (B42, `docs/strategy/RELEASE-PLAN-1.2.md`). The image ships from `1.2.1` on `ghcr.io/phpledger/phpledger`, which is the only container channel (decision B86; Docker Hub was dropped). See [release protocol](RELEASE-PROTOCOL.md) for how this channel fits alongside the ZIP and Composer channels, and [decision register](strategy/DECISION-REGISTER.md) B42.
+The 1.3 release publishes official images to **ghcr.io/phpledger/phpledger** and **phpledger/phpledger** on Docker Hub. The owner restored both channels for this release; earlier GHCR-only policy remains historical. Both images must be built from the same verified release ZIP. Use the publication receipt for the exact available tags and digests; this guide does not itself prove a registry push. See the [release protocol](RELEASE-PROTOCOL.md).
 
 The image is built from the published release ZIP, never from the working tree (`docker/release/Dockerfile`): it is the same file set the ZIP and Composer channels install, repackaged, not a separately built application (release protocol principle 2). It runs a single `php:8.3-apache` base as a non-root process on port 8080.
 
@@ -68,10 +68,10 @@ Published by `.github/workflows/container-image.yml` when a GitHub Release is pu
 
 | Release | Tags |
 |---|---|
-| Stable (`1.2.1`) | `1.2.1`, `1.2`, `1`, `latest`, on both registries |
-| Prerelease (`1.2.1-rc.1`) | `1.2.1-rc.1` only. `latest` never moves for a prerelease. |
+| Stable (`1.3.0`) | `1.3.0`, `1.3`, `1`, `latest`, on both registries after verified publication |
+| Prerelease (`1.3.0-rc.1`) | `1.3.0-rc.1` only. `latest` never moves for a prerelease. |
 
-GHCR authenticates with the workflow's own `GITHUB_TOKEN`. Docker Hub needs the owner's account: repository secrets `DOCKERHUB_NAMESPACE` and `DOCKERHUB_TOKEN`. Without both, the workflow publishes to GHCR only and records that in its job summary rather than guessing a namespace or skipping silently.
+GHCR authenticates with the workflow's own `GITHUB_TOKEN`. Docker Hub needs the owner's account: repository secrets `DOCKERHUB_NAMESPACE` and `DOCKERHUB_TOKEN`. Both official channels are release requirements. Missing Docker Hub credentials are a publication blocker to report, not proof that the second channel shipped. Record each pushed digest and verify the installed version from both registries.
 
 ## Three installer behaviours this image needed fixed
 

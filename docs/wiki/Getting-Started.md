@@ -8,9 +8,7 @@ Automated test suites, fault-injection update/recovery tests, exact-artifact ins
 
 Start at [the PHP Ledger website](https://phpledger.com/) or [open the demonstration](https://phpledger.com/demo/).
 
-**[Download the 1.1.3 package](https://github.com/phpledger/phpledger/releases/tag/v1.1.3).** Choose `phpledger-1.1.3.zip` and its SHA-256 file from the release assets; automatic source archives do not include installed dependencies. The ZIP carries a short `README.txt`; the full [INSTALL.md](https://github.com/phpledger/phpledger/blob/master/resources/release/INSTALL.md) and [UPGRADE.md](https://github.com/phpledger/phpledger/blob/master/resources/release/UPGRADE.md) are on GitHub.
-
-This release adds universal account statements, chart management, saved general-journal draft/review/post/reverse workflows, the accounting starter (AR/AP, optional Purchasing/Inventory, core tax), browser installation and signed automatic updates. It retains receipts, expenses, owner reports and the sample cash POS. It is the first stable release, with the remaining independent-review and pilot gates described in [[First package|First-Package]].
+**[Download the current published package](https://github.com/phpledger/phpledger/releases/latest).** Choose the application ZIP and its SHA-256 file; GitHub source archives do not include production dependencies. Follow the INSTALL and UPGRADE instructions for that exact version. This documentation prepares the 1.3 workflow; the published release receipt identifies completed gates.
 
 Modern source is in `www/phpledger`; historical code remains only in Git history. Developers can use the [development guide](https://github.com/phpledger/phpledger/blob/master/docs/DEVELOPMENT.md). New project-owned code and documentation are [AGPL-3.0-or-later licensed](https://github.com/phpledger/phpledger/blob/master/LICENSE); [licence scope](https://github.com/phpledger/phpledger/blob/master/LICENSE-SCOPE.md) preserves separate historical, dependency and asset terms.
 
@@ -24,13 +22,19 @@ On your own computer there is nothing to prepare before you start. With the data
 
 A site without an HTTPS certificate can be installed and used. Setup warns on every step and the installed copy repeats the warning, because sign-in details travel unencrypted and Connections (the API, MCP and app integrations) need an HTTPS address. Turn on SSL in your hosting panel before keeping real books.
 
+## Choose a starting point
+
+The core includes the neutral starter. Optional multi-year histories are separate CC0 data-only packages. Open Packages, explicitly refresh the directory and review a sample before installing it. Nothing downloads on page load. Exact dependencies must be installed separately. Onboarding can use the sample structure with zero balances for a real business, or its complete fictional history in a separate practice company. Removing the source package keeps existing companies and journals. Shared demo packages are verified host preloads and read-only.
+
+Setup supports an installation-specific table prefix and explicit database TLS verification. Use preflight and the host configuration; a provider name is not proof of compatibility.
+
 ## Keep it updated
 
 Signed automatic updates are available from the independent `/maintenance.php` operator interface: verify the publisher signature, take a matched code/configuration/key/database backup, apply the release and run migrations, with automatic restoration of the matched backup if anything fails. This requires the PHP zip extension. See `UPGRADE.md` and [[Release 1.0.0|Release-1.0.0]] for the manual backup/restore procedure and current qualification boundaries.
 
 ## Try the demonstration
 
-Each visitor receives a separate fictional business. Synthetic records reset hourly, ending the old sample session. Capacity limits apply to temporary writes. Do not enter real customer records, credentials or business documents.
+The 1.3 demonstration is one shared installation. Follow the actual installer if it has reset, or use **demo / DemoLedger123!** if another visitor has already completed setup. Database fields display labelled dummy values and cannot change host configuration. The hourly reset clears fictional records and all PHP sessions. Never enter personal or business data.
 
 1. Open **Reports → Open account ledger**, choose an account and inspect opening, debit, credit, running and closing balances. Transactions and Journals also link directly to the ledger; mobile entries keep the running balance visible.
 2. Create a general-journal draft with synthetic amounts and save it.

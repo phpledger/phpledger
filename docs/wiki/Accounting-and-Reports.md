@@ -42,3 +42,12 @@ Core reports do not yet implement a complete country framework, statutory disclo
 Independent accounting review has not happened. Advanced stock (multiple locations, batches, serials, expiry, landed cost), automated rate providers, period-end FX revaluation and group consolidation are not part of 1.1.0. Multiple stock locations and transfers are the first 1.2 module; batches, serials, expiry and landed cost come later. Country tax rules, withholding and statutory filing remain future work; see [[Module roadmap|Module-Roadmap]] for the sequence and acceptance gates.
 
 [[Countries and currencies|Countries-and-Currencies]] · [[Architecture]] · [[First package|First-Package]]
+
+
+## Reviewed payroll, schedules and year end in 1.3
+
+Payroll records aggregate reviewed totals, staff advances and partial settlement through normal journal drafts and central posting. The confidential employee register is separate from public ledger descriptions and read API totals. This is not a per-person payroll calculation, payslip or statutory filing service. Dated reversals retain source links and reject unsupported settlement intervals.
+
+Recurring entries, accrual release and loan schedules create drafts for review; scheduler retries preserve occurrence identity. Review a loan convention against its actual contract before posting principal and interest. Existing opening or funding entries are linked explicitly.
+
+Period close includes a checklist and physical cash counts. Fiscal-year preview requires a chosen legal treatment and destination accounts; partnership allocations require a reviewed ratio snapshot. Close and reopen are traceable, and the performance-report comparatives are preserved. Outstanding payroll or loan liabilities remain balance-sheet balances; they are not silently discarded by a checklist.

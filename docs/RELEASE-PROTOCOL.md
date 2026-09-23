@@ -4,9 +4,19 @@ Owner request, 19 September 2026: every release follows one distribution protoco
 
 Related: [release signing](RELEASE-SIGNING.md), [installer](INSTALLER.md), [distribution plan](strategy/DISTRIBUTION-PLAN.md), [platform roadmap](strategy/PLATFORM-ROADMAP.md).
 
-## Status on 20 September 2026
+## 1.3 release requirements
 
-Updated at the 1.1.2 patch. The rows record what is live now; the 19 September wording is kept where nothing changed.
+The official container channels are `ghcr.io/phpledger/phpledger` and `phpledger/phpledger` on Docker Hub, restored by the owner for 1.3. Both consume the same publisher-verified release ZIP. The release is incomplete until each published image is pulled and its version, package provenance and digest are recorded. Do not describe an unpushed tag as available.
+
+Optional sample packages have independent GitHub repositories, versioned ZIPs and signed inventories. Build their exact sources after the final sample reconciliation, regenerate the static directory, sign inventories, publish assets, and verify a download/install plus offline host preload. The core archive excludes optional multi-year histories while retaining the neutral starter.
+
+The shared installer demo uses ordinary release code with fixed host database settings, labelled dummy browser fields, the public `demo / DemoLedger123!` account and an hourly database/session reset. Verify installation, shared sign-in, tampered settings, preloaded samples and reset before describing the new demo as live.
+
+README, Wiki, website metadata and the media kit must describe the same shipped capabilities and limits. Historical release records below stay historical; the 1.3 publication receipt supplies final engine, package, browser, registry and provider evidence.
+
+## Historical status on 20 September 2026
+
+Updated at the 1.1.2 patch. The rows record what was live then; the 19 September wording is kept where nothing changed.
 
 | Part | State |
 |---|---|

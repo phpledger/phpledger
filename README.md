@@ -7,7 +7,7 @@
 <h1 align="center">Open-source, self-hosted accounting and cash POS for small businesses</h1>
 
 <p align="center">
-  Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+. New code is AGPL-3.0-or-later licensed; a commercial licence is available.
+  Built on PHP 8.2+ with MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+. New code is AGPL-3.0-or-later licensed; a commercial licence is available.
 </p>
 
 <p align="center">
@@ -19,7 +19,7 @@
 
 <p align="center">
   <a href="docs/INSTALLER.md"><img alt="PHP 8.2 or newer" src="https://img.shields.io/badge/PHP-8.2%2B-777bb4?style=for-the-badge&labelColor=0c2052&logo=php&logoColor=white"></a>
-  <a href="docs/INSTALLER.md"><img alt="MySQL 8.4" src="https://img.shields.io/badge/MySQL-8.4-00758f?style=for-the-badge&labelColor=0c2052&logo=mysql&logoColor=white"></a>
+  <a href="docs/INSTALLER.md"><img alt="MySQL 8.0.19 or newer" src="https://img.shields.io/badge/MySQL-8.0.19%2B-00758f?style=for-the-badge&labelColor=0c2052&logo=mysql&logoColor=white"></a>
   <a href="docs/INSTALLER.md"><img alt="MariaDB 10.4 or newer" src="https://img.shields.io/badge/MariaDB-10.4%2B-c0765a?style=for-the-badge&labelColor=0c2052&logo=mariadb&logoColor=white"></a>
   <a href="LICENSE"><img alt="Licence: AGPL-3.0-or-later" src="https://img.shields.io/badge/licence-AGPL--3.0--or--later-a42e2b?style=for-the-badge&labelColor=0c2052"></a>
 </p>
@@ -51,6 +51,9 @@ This branch is preparing **1.3.0**. The [published releases](https://github.com/
 | Understand the numbers | Explore account statements, trial balance, profit and loss and balance sheet, with links back to journals and source records. |
 | Manage day-to-day operations | Use optional Purchasing, Inventory, Stock locations and a simple cash point of sale. Each module has its own documented scope. |
 | Record owner transactions | Keep capital, drawings, owner loans and repayments distinct from operating income and expenses. |
+| Prepare period and year end | Review cash counts and the close checklist, create dated reversals, and use an explicit fiscal-year policy for retained earnings or reviewed partnership allocations. |
+| Account for payroll and loans | Post aggregate payroll accruals, advances and partial settlements; review recurring, accrual and loan drafts before posting. No statutory payroll or per-person payslips. |
+| Keep employee identities consistent | Use a confidential employee register and explicit staff/driver and trade links; historical labels and related-party choices remain separate. |
 | Work with others | Assign users and roles with permissions enforced by the server. |
 | Connect reporting tools | Use scoped read-only API and MCP connections for supported reports. |
 
@@ -62,7 +65,7 @@ Posted journals are immutable. Corrections create linked reversals, closed perio
 
 Use fictional information and follow a transaction from its source to the ledger and reports. Demo work is temporary and resets hourly. The demo page describes the experience currently deployed.
 
-For 1.3.0, the demo is being changed to offer the actual installer and business onboarding in a shared installation with protected database settings and a fixed public login. That new experience is a release requirement; it is not yet claimed live by this branch.
+The 1.3 demo follows the real installer and business onboarding in one shared disposable installation. If another visitor has already installed it, sign in with **demo / DemoLedger123!**. The installer shows labelled dummy database values; the host connection is fixed. Everyone sees the same fictional records until the hourly reset clears the database and sessions. Check the demo landing page for the deployed version; this branch remains a release candidate until publication.
 
 For a first exercise, create a small business or import a fictional sample, record a receipt and an expense, and inspect the trial balance. Then try a correction and follow the linked reversal. [Reporting walkthroughs](https://github.com/phpledger/phpledger/wiki/Reporting-Guides) provide more guided examples.
 
@@ -73,9 +76,15 @@ For a first exercise, create a small business or import a fictional sample, reco
 3. Upload and extract the package, then open its address to start the browser installer. No Composer, Node or terminal is needed for a packaged browser installation.
 4. Create the administrator account, set up a business and review its accounts, currency and opening position before entering real records.
 
-**Requirements:** PHP 8.2 or newer (8.3 recommended), MySQL 8.4 or MariaDB 10.4+, and the extensions listed in the [installer documentation](docs/INSTALLER.md). Automatic browser updates also require PHP's zip extension. Use HTTPS for an internet-facing installation.
+**Requirements:** PHP 8.2 or newer (8.3 recommended), MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+, and the extensions listed in the [installer documentation](docs/INSTALLER.md). Automatic browser updates also require PHP's zip extension. Use HTTPS for an internet-facing installation.
 
 The upload-anywhere package layout requires Apache or LiteSpeed with the supplied access rules. A dedicated document root at `www/phpledger/public` is the preferred layout; never serve the repository root. Follow the documented Nginx configuration when using Nginx.
+
+Prefer a container? Official images use **ghcr.io/phpledger/phpledger** and **phpledger/phpledger** on Docker Hub, built from the same verified release ZIP. Pin a released version and follow the [container guide](docs/CONTAINER.md). A registry tag is usable only after its release publication checks pass.
+
+Optional multi-year sample histories are separate data-only packages. The neutral starter remains in the core; use **Packages** to review and install a sample, then choose its structure or an isolated practice company during onboarding.
+
+The browser installer supports a validated database table prefix and explicit TLS settings. Arabic is available as a draft translation with right-to-left layout; native language and accounting review remain pending.
 
 Already running PHP Ledger? Read the [upgrade and recovery guide](resources/release/UPGRADE.md) before replacing files. Back up matching code, configuration and database. The updater verifies signed metadata against the [publisher key](docs/RELEASE-SIGNING.md) you pin; older releases can require a manual first upgrade.
 
@@ -108,7 +117,7 @@ Try PHP Ledger and tell us where a task became confusing. A small, reproducible 
 - **Report a security issue privately:** follow [SECURITY.md](SECURITY.md).
 - **Discuss installation assistance or support:** [contact the project](mailto:rmak78@gmail.com).
 
-Voluntary donations can help fund development, documentation, testing and project infrastructure. Financial support is optional; trying the software, reporting an issue and contributing an improvement are welcome too. The donation destination will be added after the project owner confirms it.
+Help the project by trying a complete workflow, reporting a reproducible issue, improving a translation or contributing a reviewed change. [Join the discussion](https://github.com/phpledger/phpledger/discussions) to offer testing, documentation or development help.
 
 ## Licence and project
 

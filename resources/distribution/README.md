@@ -10,7 +10,7 @@ this directory existing does not imply.
 
 ## The two groups
 
-**Container catalogues** wrap the published image, `ghcr.io/phpledger/phpledger`, the
+**Container catalogues** wrap the official release image, `ghcr.io/phpledger/phpledger` or `phpledger/phpledger` on Docker Hub, the
 way [`compose.production.yaml`](../../compose.production.yaml) already runs it. None of
 them builds application code a different way, so [release protocol principle
 2](../../docs/RELEASE-PROTOCOL.md) holds: they deploy the same artifact everyone else
@@ -39,7 +39,7 @@ application: milestone M12 shipped that path in 1.2.1.
 Every container manifest reproduces the same shape, and none of them diverges from
 `compose.production.yaml` without that file changing first:
 
-- Image `ghcr.io/phpledger/phpledger` pinned to a concrete version, never `latest`.
+- Image `ghcr.io/phpledger/phpledger` or `phpledger/phpledger` pinned to a concrete version, never `latest`.
 - Application on port 8080 internally, health probe at `/health`.
 - MySQL 8.4 started with `--log-bin-trust-function-creators=1`.
 - Private application state on a volume at `/var/lib/phpledger`.
@@ -83,11 +83,9 @@ and not the `captain-definition-oneclick.yml` filename a reasonable guess produc
 mismatch in the set and it is unresolved. The addon is one shared MySQL server for every
 app on the box, not a per-app container, so `--log-bin-trust-function-creators=1` cannot
 be passed. Our migrations create triggers and functions under binary logging, which MySQL
-refuses without either that flag or every routine being marked `DETERMINISTIC`. This is tracked as
+can refuse without the required privilege or an operator-approved trust setting. Adding `DETERMINISTIC` does not remove the trigger privilege requirement: CREATE TRIGGER has no such characteristic. This is tracked as
 [#103](https://github.com/phpledger/phpledger/issues/103). The two
-real options are named in `cloudron/NOTES.md`: mark the routines correctly in the
-migrations, which is the proper fix and helps every engine, or ask a Cloudron operator to
-set the flag server-wide, which a package cannot request. **Do not submit the Cloudron
+operator requirements are named in `cloudron/NOTES.md`: verify the effective migration privileges or have the host operator review the server-wide trust setting. A package must not rewrite immutable migration bytes or claim that a determinism label makes triggers privilege-free. **Do not submit the Cloudron
 package until one of those happens.** The package has also never been through
 `cloudron build`, since the CLI was not available here.
 

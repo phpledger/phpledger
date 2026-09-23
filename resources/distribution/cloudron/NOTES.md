@@ -10,7 +10,7 @@ first draft, not a verified package.
 `compose.production.yaml` starts its own `db` service with
 `command: ["--log-bin-trust-function-creators=1"]`. That flag matters because our
 migrations create triggers and functions under binary logging, which MySQL refuses
-without it (or without every routine being marked `DETERMINISTIC`).
+without an appropriate privilege or an operator-approved trust setting. Adding a `DETERMINISTIC` label does not solve trigger-creation privileges: `CREATE TRIGGER` has no such characteristic.
 
 Cloudron's `mysql` addon is **one shared MySQL 8.4 server for every app on the box**,
 not a per-app container we can pass a startup flag to. Cloudron's own addon
@@ -22,13 +22,9 @@ grant documented for the per-app database user either.
 
 **This means: as packaged, PHP Ledger's migrations may fail against the mysql addon's
 server if that server was not itself started with `log_bin_trust_function_creators`
-enabled by the Cloudron host administrator.** This is not worked around here. Two real
-fixes exist, both outside this packaging task's scope:
+enabled by the Cloudron host administrator.** This is not worked around here. The host operator must review the applicable privilege and binary-log policy:
 
-- An application-level fix: mark every trigger/function PHP Ledger's migrations create
-  as `DETERMINISTIC` (or `NO SQL`/`READS SQL DATA` as accurate), which is what MySQL
-  actually requires under binary logging without the trust flag - `phpledger.com`'s own
-  compose file works around needing the flag rather than fixing the routines.
+- Verify that the migration account can create the required triggers under the actual server policy. Function characteristics describe routine behavior; they are not a substitute for trigger privileges, and historical migration bytes must not be rewritten to add misleading labels.
 - Ask a Cloudron server operator to enable `log_bin_trust_function_creators` globally
   via `my.cnf` on the box's shared MySQL server, which is outside a package's control
   and cannot be asserted or requested from `CloudronManifest.json`.
@@ -89,8 +85,8 @@ Inferred, not confirmed:
 ## Tracked
 
 The addon/binary-logging mismatch above is [issue
-#103](https://github.com/phpledger/phpledger/issues/103): declare the routines the
-migrations create with their real data access so MySQL stops needing
-`--log-bin-trust-function-creators=1` at all. **Do not submit this package until that
-lands.** The same constraint will apply to any managed or shared MySQL, including the
+#103](https://github.com/phpledger/phpledger/issues/103). **Do not submit this package until the actual host privilege/trust configuration is verified and installation succeeds.** The same constraint will apply to any managed or shared MySQL, including the
 cloud database tiers decision P4 anticipates.
+
+
+Reference: [MySQL 8.0 stored-program binary logging](https://dev.mysql.com/doc/refman/8.0/en/stored-programs-logging.html) distinguishes function characteristics from the trigger privilege requirement. No Cloudron host acceptance is claimed here.
