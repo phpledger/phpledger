@@ -282,6 +282,10 @@ test('a transfer posts nothing at all, and the schema refuses one that tries', f
 test('the share ledger is append-only in the database and a correction is a linked reversal', function (): void {
     $f = ownership_fixture();
     $chart = ownership_company_chart($f);
+    $bank = pl_get_account($f['actor_id'], $f['company_id'], $f['book_id'], $chart['cash']);
+    pl_save_account($f['actor_id'], $f['company_id'], $f['book_id'], array_replace($bank, [
+        'money_kind' => 'bank', 'reason' => 'The share allotment and its correction use the sample company bank account.',
+    ]), (int) $bank['id'], (int) $bank['revision']);
     $classId = ownership_class($f);
     $holder = ownership_person($f, 'Ayesha Sample');
     $event = ownership_event($f, ['event_type' => 'allotment', 'share_class_id' => $classId,
@@ -671,6 +675,10 @@ test('worked example, a private company over two periods: allotment, premium, tr
 
 test('worked example, a partnership over two periods: fixed and fluctuating partner capital', function (): void {
     $f = ownership_fixture();
+    $bank = pl_get_account($f['actor_id'], $f['company_id'], $f['book_id'], $f['accounts']['1000']);
+    pl_save_account($f['actor_id'], $f['company_id'], $f['book_id'], array_replace($bank, [
+        'money_kind' => 'bank', 'reason' => 'The partnership example uses its actual bank account for contributions and drawings.',
+    ]), (int) $bank['id'], (int) $bank['revision']);
     $accounts = [
         'aslam_capital' => ownership_account($f, '3-310-10001-00', 'Capital account - Aslam', 'equity'),
         'kamran_capital' => ownership_account($f, '3-310-10002-00', 'Capital account - Kamran', 'equity'),

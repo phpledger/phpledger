@@ -84,7 +84,8 @@ test('account currency changes see postings committed after the caller snapshot'
     $f = ledger_fixture(); $accountId = $f['accounts']['1000'];
     $account = pl_get_account($f['actor_id'], $f['company_id'], $f['book_id'], $accountId);
     $input = ['name'=>$account['name'], 'code'=>$account['code'], 'type'=>$account['type'], 'role'=>$account['role'], 'is_active'=>true,
-        'currency'=>'EUR', 'reason'=>'Sample stale snapshot currency change'];
+        'currency'=>'EUR', 'overdraft_enabled'=>true, 'overdraft_limit'=>$account['overdraft_limit'],
+        'reason'=>'Sample stale snapshot currency change with explicitly confirmed facility terms'];
     DB::startTransaction();
     try {
         assert_same(0, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journal_lines WHERE account_id=%i', $accountId));

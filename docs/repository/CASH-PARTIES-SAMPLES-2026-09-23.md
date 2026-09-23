@@ -41,9 +41,13 @@ The other ten companies intentionally have profiles and scenario summaries while
 
 Current1.1.0 packs and structures retain all1.0.0 resources unchanged. All11 sample replays passed36 monthly checkpoints each (focused31tests, zero failures). Original historical source amounts and monthly totals are preserved. Six unfunded physical-cash transfers,16 unfunded bank outflows across9 samples, and3 dependent reversals are explicit staged/unposted practice evidence; source IDs and amounts are retained. No funding or bank credit was invented. Twelve zero-balance structures include the Accounting starter. Cedar has24 historical monthly chapters plus a separate2026 practice chapter and eight quarterly teaching pairs; ten other journeys are clearly incomplete.
 
+## Combined-run corrections
+
+The initial full MariaDB run reported625tests/7failures; MySQL reported625/6, with the cash-count fixture fix already loaded by its later stage. Six cases were older fixtures relying on unclassified/unfunded money or an implicit facility-currency change; one case was a bare country-code placeholder. Fixtures now explicitly classify and genuinely fund their intended scenarios, including owner equity before expenses, and confirm facility terms before testing currency immutability. The placeholder uses `pl_t()`; the untranslated ceiling remains12. A temporary exact-name driver reran all7 original failed closures from normal test definitions on each engine:7passed, zero failures each. Normal complete suite reruns follow; focused reruns are not represented as a full pass.
+
 ## Exact changed-file inventory
 
-The following repository-relative paths are the implementation delta from the recorded base, including generated website outputs in the isolated branch. Main-checkout dirty outputs are preserved separately.
+Repository-relative implementation delta from `1647c965`:
 
 - `AGENTS_SYNC.MD`
 - `AGENT_MESSAGES.MD`
@@ -55,6 +59,7 @@ The following repository-relative paths are the implementation delta from the re
 - `docs/VALIDATION.md`
 - `docs/accounting/CORE_RULE_REGISTER.md`
 - `docs/design/website/qa/static-checks.json`
+- `docs/repository/CASH-PARTIES-SAMPLES-2026-09-23.json`
 - `docs/repository/CASH-PARTIES-SAMPLES-2026-09-23.md`
 - `resources/demo-packs/catalog.json`
 - `resources/demo-packs/distributor-1.1.0.json`
@@ -112,14 +117,18 @@ The following repository-relative paths are the implementation delta from the re
 - `resources/ui/ext/reports.css`
 - `resources/ui/ext/setup.css`
 - `tests/cash_control_test.php`
+- `tests/cash_count_test.php`
 - `tests/concurrency_worker.php`
+- `tests/currency_test.php`
 - `tests/demo_pack_test.php`
 - `tests/document_party_http_test.php`
 - `tests/document_party_test.php`
 - `tests/document_test.php`
 - `tests/guidance_test.php`
+- `tests/i18n_test.php`
 - `tests/ledger_test.php`
 - `tests/onboarding_skeleton_test.php`
+- `tests/ownership_test.php`
 - `tests/report_tree_test.php`
 - `tests/run.php`
 - `tests/sample-learning-test.py`

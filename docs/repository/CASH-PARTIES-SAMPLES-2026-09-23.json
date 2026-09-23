@@ -1,0 +1,119 @@
+{
+  "status": "combined validation running",
+  "scope": "local implementation only",
+  "base": "1647c965",
+  "runtime_commit": "a10cb2d0ebb3e9163e2bdd376ee0581a130b33b8",
+  "branch": "codex/cash-parties-sample-stories",
+  "migrations": [
+    "050_document_parties",
+    "051_money_account_kind",
+    "052_bank_overdraft_limits"
+  ],
+  "schema_changed": true,
+  "historical_migrations_changed": false,
+  "existing_website_outputs_preserved": 8,
+  "package": {
+    "path": ".cache/cash-party-package-accepted/phpledger-1.2.1.zip",
+    "purpose": "local validation archive, not a published release",
+    "sha256": "94b2824b316bcf7c274e63fb35fcc8cc294d998dabcd829c3b243800c82c15bf",
+    "mysql_fresh_migrations": 53,
+    "mariadb_fresh_migrations": 53
+  },
+  "checks": {
+    "cash_bank_mariadb": {
+      "tests": 49,
+      "failures": 0
+    },
+    "parties_http_mariadb": {
+      "tests": 39,
+      "failures": 0
+    },
+    "samples_mysql": {
+      "tests": 31,
+      "failures": 0,
+      "companies": 11,
+      "monthly_checkpoints_each": 36
+    },
+    "sample_content": {
+      "tests": 9,
+      "failures": 0
+    },
+    "website_content": {
+      "tests": 3,
+      "failures": 0
+    },
+    "website_check": {
+      "pages": 87,
+      "errors": 0,
+      "warnings": 0
+    },
+    "package_builder": {
+      "tests": 13,
+      "failures": 0
+    },
+    "populated_upgrade_mysql": "passed",
+    "populated_upgrade_mariadb": "passed",
+    "exact_package_mysql": "passed",
+    "exact_package_mariadb": "passed",
+    "full_mysql": "running",
+    "full_mariadb": "running",
+    "initial_full_mariadb": {
+      "tests": 625,
+      "failures": 7
+    },
+    "initial_full_mysql": {
+      "tests": 625,
+      "failures": 6
+    },
+    "targeted_failure_rerun_mysql": {
+      "tests": 7,
+      "failures": 0
+    },
+    "targeted_failure_rerun_mariadb": {
+      "tests": 7,
+      "failures": 0
+    }
+  },
+  "sample_practice_defects": {
+    "unfunded_physical_cash_transfers": 6,
+    "unfunded_bank_outflows": 16,
+    "dependent_unposted_reversals": 3,
+    "invented_funding": false,
+    "invented_facilities": false
+  },
+  "browser": {
+    "widths": [
+      1440,
+      768,
+      390
+    ],
+    "flows": [
+      "unfunded cash draft and refusal",
+      "inline party validation recovery and creation",
+      "supplier selectable for receipt",
+      "funded exact-balance expense",
+      "bank zero-floor refusal",
+      "audited facility configuration",
+      "exact bank limit posting",
+      "excess bank limit refusal",
+      "party keyboard selection",
+      "inline creation cancellation preserves fields",
+      "independent report help and Escape",
+      "print-hidden help",
+      "no-JavaScript native help and party selector",
+      "Cedar sample provisioning and scoped chapter journal link",
+      "sample expense posting and linked reversal retain expense workspace"
+    ],
+    "console_note": "Expected HTTP422 validation responses; existing unused Inter preload warning observed."
+  },
+  "external_calls": {
+    "public_reference_reads": true,
+    "provider_or_business_writes": false,
+    "google_drive_documents": []
+  },
+  "raw_secrets_exposed": false,
+  "production_changed": false,
+  "published": false,
+  "pushed": false,
+  "deployed": false
+}
