@@ -119,7 +119,7 @@ test('opening zero cutover has a durable receipt and requires an open period wit
 test('opening access is scoped and readonly viewers cannot prepare or confirm', function (): void {
     $f = opening_fixture(); $other = opening_fixture(); $p = opening_preview($f);
     assert_throws(fn() => pl_get_opening_preview($other['actor_id'], $other['company_id'], $other['book_id'], (int) $p['id']), DomainException::class, 'not available');
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     assert_same($p['id'], pl_get_opening_preview($other['actor_id'], $f['company_id'], $f['book_id'], (int) $p['id'])['id']);
     assert_throws(fn() => pl_confirm_opening($other['actor_id'], $f['company_id'], $f['book_id'], (int) $p['id'], $p['payload_hash'], true), DomainException::class);
     assert_throws(fn() => pl_preview_opening($other['actor_id'], $f['company_id'], $f['book_id'], opening_input(), 'viewer'), DomainException::class);

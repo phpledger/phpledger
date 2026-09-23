@@ -91,7 +91,7 @@ test('original-date correction is owner permissioned and closed periods still de
     if (substr($yesterday, 0, 4) !== gmdate('Y')) { return; } // Annual fixture starts on January 1.
     $f = correction_fixture($yesterday); $s = $f['source'];
     $other = ledger_fixture();
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'accountant']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'accountant']);
     assert_throws(fn () => pl_correct_source($other['actor_id'], $f['company_id'], $f['book_id'], 'general_journal', $s['id'], $s['revision'], $f['input'], $yesterday, 'denied-backdate', 'Backdate exception'), DomainException::class, 'backdated-reversal permission');
     pl_change_period_status($f['actor_id'], $f['company_id'], $f['book_id'], $f['period_id'], 'closed', 1, 'Close for correction test', 'correction-close');
     assert_throws(fn () => pl_correct_source($f['actor_id'], $f['company_id'], $f['book_id'], 'general_journal', $s['id'], $s['revision'], $f['input'], $yesterday, 'closed-backdate', 'Backdate exception'), DomainException::class, 'period');

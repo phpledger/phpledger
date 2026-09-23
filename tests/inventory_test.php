@@ -136,7 +136,7 @@ test('inventory enabled writes and historical reads enforce company permissions'
     $input = inventory_move_input($f); pl_inventory_receive($f['actor_id'], $f['company_id'], $f['book_id'], $input);
     assert_throws(fn() => pl_inventory_receive($other['actor_id'], $f['company_id'], $f['book_id'], $input), DomainException::class);
     assert_throws(fn() => pl_inventory_valuation($other['actor_id'], $f['company_id'], $f['book_id']), DomainException::class);
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     assert_throws(fn() => pl_inventory_receive($other['actor_id'], $f['company_id'], $f['book_id'], $input), DomainException::class);
     assert_same(1, count(pl_inventory_history($other['actor_id'], $f['company_id'], $f['book_id'])));
     pl_set_company_module($f['actor_id'], $f['company_id'], 'inventory', false, 1, pl_module_registry()['inventory']['digest'], 'Sample disable', bin2hex(random_bytes(16)));

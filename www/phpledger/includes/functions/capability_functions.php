@@ -15,10 +15,8 @@ require_once __DIR__ . '/shared_demo_functions.php';
  * got; pl_user_can() answers a yes/no question for someone who is already through the gate, and
  * answers "no" rather than throwing for anyone who is not.
  *
- * The three-value ENUM on pl_company_members is still written (pl_assign_company_role() writes
- * both it and role_id) and is still what pl_require_company_access() reads for the read/write
- * boundary. That mirror is deliberate and lasts through 1.2; 1.3 drops the ENUM. Nothing in 1.2
- * reads the ENUM to make a *permission* decision beyond read-versus-write.
+ * Migration 056 removes the 1.2 ENUM mirror. role_id and its scoped grants are authoritative;
+ * existing module/screen role labels are computed by pl_role_access_label(), never persisted.
  *
  * INSTALLATION SCOPE
  * ------------------
@@ -333,7 +331,7 @@ function pl_seed_installation_admin(): ?int
     }
     $owner = DB::queryFirstField(
         "SELECT m.user_id FROM pl_company_members m JOIN pl_companies c ON c.id = m.company_id "
-        . "WHERE m.role = 'owner' ORDER BY c.id, m.user_id LIMIT 1"
+        . "JOIN pl_roles r ON r.id = m.role_id WHERE r.is_system = 1 AND r.company_id IS NULL AND r.slug = 'owner' ORDER BY c.id, m.user_id LIMIT 1"
     );
     if ($owner === null) {
         return null;
@@ -345,43 +343,24 @@ function pl_seed_installation_admin(): ?int
     return $ownerId;
 }
 
-/**
- * The membership row plus the resolved role. The ENUM is still read for the read/write boundary;
- * role_id is what carries the capabilities. A membership written before migration 040 and never
- * touched since is backfilled by that migration, so role_id is never null in practice; if one
- * ever were, it falls back to the installation-wide role whose slug matches the ENUM.
- */
+/** Authoritative membership and scoped role, read currently inside a transaction. */
 function pl_company_member_role(int $actorId, int $companyId): ?array
 {
-    // Inside a caller-owned transaction the membership is read exactly the way
-    // pl_require_company_access() reads it — the same two-table join, FOR SHARE — so a stale
-    // REPEATABLE READ snapshot cannot retain a permission that was revoked, and so both engines
-    // see the same statement the existing gate already runs on them. Outside a transaction no
-    // lock is taken: the read is a plain one, as every other navigation hint is.
     $lock = DB::transactionDepth() > 0 ? ' FOR SHARE' : '';
-    $member = DB::queryFirstRow(
-        'SELECT m.role, m.role_id FROM pl_company_members m '
-        . 'INNER JOIN pl_users u ON u.id = m.user_id '
-        . 'WHERE m.company_id = %i AND m.user_id = %i AND u.is_active = 1' . $lock,
-        $companyId,
-        $actorId
+    $row = DB::queryFirstRow(
+        'SELECT m.company_id, m.user_id, m.role_id, r.id AS resolved_role_id, r.slug, r.name, r.is_system '
+        . 'FROM pl_company_members m JOIN pl_users u ON u.id = m.user_id JOIN pl_roles r ON r.id = m.role_id '
+        . 'WHERE m.company_id = %i AND m.user_id = %i AND u.is_active = 1 '
+        . 'AND (r.company_id IS NULL OR r.company_id = m.company_id)' . $lock, $companyId, $actorId
     );
-    if (!$member) {
-        return null;
-    }
-    $role = $member['role_id'] === null
-        ? null
-        : DB::queryFirstRow('SELECT id AS resolved_role_id, slug, name, is_system FROM pl_roles WHERE id = %i', (int) $member['role_id']);
-    // A membership written before migration 040 and never touched since is backfilled by that
-    // migration, so role_id is never null in practice; if one ever were, the installation-wide
-    // role whose slug matches the mirrored ENUM is the answer.
-    $role ??= DB::queryFirstRow('SELECT id AS resolved_role_id, slug, name, is_system FROM pl_roles WHERE company_id IS NULL AND slug = %s', (string) $member['role']);
-    if (!$role) {
-        return null;
-    }
-    $row = array_replace($member, $role);
+    if (!$row) { return null; }
     $row['resolved_role_id'] = (int) $row['resolved_role_id'];
     $row['is_system'] = (bool) $row['is_system'];
+    $row['capabilities'] = DB::queryFirstColumn(
+        'SELECT c.capability FROM pl_role_capabilities rc JOIN pl_capabilities c ON c.id = rc.capability_id WHERE rc.role_id = %i' . $lock,
+        $row['resolved_role_id']
+    );
+    $row['role'] = pl_role_access_label($row);
     return $row;
 }
 
@@ -418,7 +397,7 @@ function pl_user_capabilities(int $actorId, int $companyId): array
             $rows = DB::query(
                 'SELECT c.capability, c.owner_type, c.owner_id FROM pl_role_capabilities rc '
                 . 'INNER JOIN pl_capabilities c ON c.id = rc.capability_id '
-                . 'WHERE rc.role_id = %i',
+                . 'WHERE rc.role_id = %i' . ($inTransaction ? ' FOR SHARE' : ''),
                 $member['resolved_role_id']
             );
             foreach ($rows as $row) {
@@ -594,26 +573,25 @@ function pl_role_slug(string $name): string
 }
 
 /**
- * Assign a role in one company, writing BOTH the new role_id and the 1.1 ENUM. A custom role
- * mirrors the ENUM of the closest system role: a role that can write is an 'accountant', a
- * read-only role is a 'viewer'. `owner` is never derived, so the ENUM never gains an owner the
- * new model did not intend.
+ * Assign the authoritative role_id. The returned role label is derived for existing callers.
  */
 function pl_assign_company_role(int $actorId, int $companyId, int $userId, int $roleId, string $reason): array
 {
     return pl_ledger_transaction(function () use ($actorId, $companyId, $userId, $roleId, $reason): array {
+        DB::queryFirstField('SELECT id FROM pl_companies WHERE id = %i FOR UPDATE', $companyId);
         pl_require_company_access($actorId, $companyId, true);
         pl_require_capability($actorId, $companyId, 'users.manage', 'Your role cannot change who works in this company.');
         $role = pl_get_role($actorId, $companyId, $roleId);
-        $before = DB::queryFirstRow('SELECT company_id, user_id, role, role_id FROM pl_company_members WHERE company_id = %i AND user_id = %i FOR UPDATE', $companyId, $userId);
-        $enum = pl_role_enum_mirror($role);
+        $before = DB::queryFirstRow('SELECT m.company_id, m.user_id, r.slug AS role, m.role_id FROM pl_company_members m JOIN pl_roles r ON r.id = m.role_id WHERE m.company_id = %i AND m.user_id = %i FOR UPDATE', $companyId, $userId);
+        $enum = pl_role_access_label($role);
         if ($enum !== 'owner') { pl_shared_demo_require_mutable_account($userId); }
         if ($before && $before['role'] === 'owner' && $enum !== 'owner'
-            && (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_company_members WHERE company_id = %i AND role = 'owner'", $companyId) < 2) {
+            && pl_company_owner_count($companyId, $userId) < 1) {
             throw new DomainException('This company would be left without an owner. Give someone else the Owner role first.');
         }
-        $row = ['company_id' => $companyId, 'user_id' => $userId, 'role' => $enum, 'role_id' => $roleId];
-        DB::insertUpdate('pl_company_members', $row, ['role' => $enum, 'role_id' => $roleId]);
+        $row = ['company_id' => $companyId, 'user_id' => $userId, 'role_id' => $roleId];
+        DB::insertUpdate('pl_company_members', $row, ['role_id' => $roleId]);
+        $row['role'] = $enum;
         pl_capability_cache_reset();
         pl_user_audit($actorId, $companyId, $userId, 'membership', $userId, $before ? 'updated' : 'created',
             pl_ledger_text($reason, 'Reason', 500, false), $before ?: null, $row);
@@ -622,11 +600,10 @@ function pl_assign_company_role(int $actorId, int $companyId, int $userId, int $
 }
 
 /**
- * The ENUM value a role mirrors, for the 1.2 dual write. Dropped with the ENUM in 1.3.
- * A protected system role maps to its own slug; a custom role maps to accountant or viewer
- * depending on whether it can record entries.
+ * Compatibility label for existing module/screen contracts, never stored in membership.
+ * Only a protected system Owner is owner; custom writing roles remain accountant.
  */
-function pl_role_enum_mirror(array $role): string
+function pl_role_access_label(array $role): string
 {
     if ($role['is_system'] && in_array($role['slug'], pl_system_role_slugs(), true)) {
         return (string) $role['slug'];
@@ -734,4 +711,10 @@ function pl_save_report_cost_setting(int $actorId, int $companyId, int $bookId, 
         pl_core_audit($actorId, $companyId, $bookId, 'report_cost_setting', $id, $before['revision'] === 0 ? 'created' : 'updated', $reason, $before, $after);
         return $after;
     });
+}
+
+/** Current active protected owners. Callers serialize membership changes on the company row. */
+function pl_company_owner_count(int $companyId, int $excludedUserId = 0): int
+{
+    return count(DB::queryFirstColumn("SELECT m.user_id FROM pl_company_members m JOIN pl_roles r ON r.id = m.role_id JOIN pl_users u ON u.id = m.user_id WHERE m.company_id = %i AND r.company_id IS NULL AND r.is_system = 1 AND r.slug = 'owner' AND u.is_active = 1 AND m.user_id <> %i FOR SHARE", $companyId, $excludedUserId));
 }

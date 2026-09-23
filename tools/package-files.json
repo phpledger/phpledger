@@ -1687,6 +1687,10 @@
       "destination": "www/phpledger/install/migrations/055_employee_links.php"
     },
     {
+      "source": "www/phpledger/install/migrations/056_membership_role_id.php",
+      "destination": "www/phpledger/install/migrations/056_membership_role_id.php"
+    },
+    {
       "source": "www/phpledger/install/migrations/054_year_end.php",
       "destination": "www/phpledger/install/migrations/054_year_end.php"
     },

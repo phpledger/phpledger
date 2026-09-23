@@ -47,7 +47,7 @@ test('module changes enforce owner identity scope freshness compatible installat
     $f = ledger_fixture(); $other = ledger_fixture(); $m = pl_module_registry()['pos-showcase'];
     assert_throws(fn() => pl_set_company_module($other['actor_id'], $f['company_id'], 'pos-showcase', true, 0, $m['digest'], 'Denied', 'denied'), DomainException::class);
     foreach (['accountant', 'viewer'] as $role) {
-        DB::insertUpdate('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => $role]);
+        sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => $role], true);
         assert_throws(fn() => pl_set_company_module($other['actor_id'], $f['company_id'], 'pos-showcase', true, 0, $m['digest'], 'Denied', 'denied'), DomainException::class);
     }
     assert_throws(fn() => pl_set_company_module($f['actor_id'], $f['company_id'], 'core', false, 0, $m['digest'], 'Denied', 'denied'), DomainException::class, 'required');

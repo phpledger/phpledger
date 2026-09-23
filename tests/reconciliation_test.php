@@ -65,7 +65,7 @@ test('bank access rejects viewer writes, cross-company objects, wrong accounts, 
     $fixture = ledger_fixture();
     $other = ledger_fixture();
     $input = bank_fixture_input($fixture);
-    DB::insert('pl_company_members', ['company_id' => $fixture['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $fixture['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     assert_throws(fn() => pl_bank_preview_statement($other['actor_id'], $fixture['company_id'], $fixture['book_id'], $input), DomainException::class);
     assert_throws(fn() => pl_bank_preview_statement($fixture['actor_id'], $other['company_id'], $other['book_id'], $input), DomainException::class);
     $invalid = $input;

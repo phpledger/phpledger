@@ -17,6 +17,17 @@ function sample_assignment_employee(int $actor,int $company,string $name='Sample
     return pl_save_employee($actor,$company,['full_name'=>$name,'employment_type'=>'full_time','employment_status'=>'active','hire_date'=>'2026-01-01','reason'=>'Explicit fictional employment fixture'])['id'];
 }
 
+/** Current-schema sample membership; role slugs are fixture input, never persisted. */
+function sample_membership_insert(array $row, bool $upsert = false): void
+{
+    if (!isset($row['role_id'])) {
+        $row['role_id'] = DB::queryFirstField('SELECT id FROM pl_roles WHERE company_id IS NULL AND is_system = 1 AND slug = %s', $row['role']);
+    }
+    unset($row['role']);
+    if ($upsert) { DB::insertUpdate('pl_company_members', $row); }
+    else { DB::insert('pl_company_members', $row); }
+}
+
 function test(string $name, callable $action): void
 {
     global $results;
@@ -193,6 +204,7 @@ if (($argv[1] ?? '') === '--suite=employees') {
 if (($argv[1] ?? '') === '--suite=assets') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php', 'module_test.php', 'asset_test.php'];
 }
+if (($argv[1] ?? '') === '--suite=roles') { $suites = ['ledger_test.php', 'capability_equivalence_test.php', 'users_test.php']; }
 if (($argv[1] ?? '') === '--suite=users') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php', 'module_test.php', 'capability_equivalence_test.php', 'users_test.php'];
 }

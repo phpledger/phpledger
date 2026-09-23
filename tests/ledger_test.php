@@ -139,7 +139,7 @@ test('cross-company accounts, books, journals and reporting are denied', functio
 test('viewers can report but cannot post or reverse; inactive actors cannot read', function (): void {
     $fixture = ledger_fixture();
     $viewer = ledger_fixture();
-    DB::insert('pl_company_members', ['company_id' => $fixture['company_id'], 'user_id' => $viewer['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $fixture['company_id'], 'user_id' => $viewer['actor_id'], 'role' => 'viewer']);
     assert_true(pl_trial_balance($viewer['actor_id'], $fixture['company_id'], $fixture['book_id'])['balanced']);
     $journal = pl_post_journal($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], ledger_payload($fixture));
     assert_throws(fn() => pl_post_journal($viewer['actor_id'], $fixture['company_id'], $fixture['book_id'], ledger_payload($fixture)), DomainException::class);
@@ -253,10 +253,10 @@ test('a caller-owned old snapshot cannot retain revoked write permission', funct
     $otherConnection = new MeekroDB();
     DB::startTransaction();
     try {
-        assert_same('owner', DB::queryFirstField('SELECT role FROM pl_company_members WHERE company_id = %i AND user_id = %i', $fixture['company_id'], $fixture['actor_id']));
-        $otherConnection->update('pl_company_members', ['role' => 'viewer'], 'company_id = %i AND user_id = %i', $fixture['company_id'], $fixture['actor_id']);
+        assert_same('owner', DB::queryFirstField('SELECT r.slug FROM pl_company_members m JOIN pl_roles r ON r.id = m.role_id WHERE m.company_id = %i AND m.user_id = %i', $fixture['company_id'], $fixture['actor_id']));
+        $otherConnection->update('pl_company_members', ['role_id' => DB::queryFirstField("SELECT id FROM pl_roles WHERE company_id IS NULL AND slug = 'viewer'")], 'company_id = %i AND user_id = %i', $fixture['company_id'], $fixture['actor_id']);
         // The old consistent snapshot still says owner, while the service must use current authorization.
-        assert_same('owner', DB::queryFirstField('SELECT role FROM pl_company_members WHERE company_id = %i AND user_id = %i', $fixture['company_id'], $fixture['actor_id']));
+        assert_same('owner', DB::queryFirstField('SELECT r.slug FROM pl_company_members m JOIN pl_roles r ON r.id = m.role_id WHERE m.company_id = %i AND m.user_id = %i', $fixture['company_id'], $fixture['actor_id']));
         assert_throws(fn() => pl_post_journal($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], ledger_payload($fixture)), DomainException::class, 'access');
         assert_same(0, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE book_id = %i', $fixture['book_id']));
     } finally {

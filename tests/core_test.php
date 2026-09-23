@@ -52,7 +52,7 @@ test('account edits audit names and status and reject stale revisions or reclass
 
 test('core account and general journal services enforce viewers scope and readiness', function (): void {
     $f = ledger_fixture(); $other = ledger_fixture();
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     assert_same($f['accounts']['1000'], pl_get_account($other['actor_id'], $f['company_id'], $f['book_id'], $f['accounts']['1000'])['id']);
     assert_throws(fn () => pl_save_account($other['actor_id'], $f['company_id'], $f['book_id'], core_account_input()), DomainException::class);
     assert_throws(fn () => pl_get_account($f['actor_id'], $f['company_id'], $f['book_id'], $other['accounts']['1000']), DomainException::class);

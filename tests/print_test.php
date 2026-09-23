@@ -13,7 +13,7 @@ function print_fixture(): array
     $members = [];
     foreach (['accountant', 'viewer'] as $role) {
         $members[$role] = pl_create_user('print-' . $role . '-' . $suffix . '@example.test', 'Sample print ' . $role, 'Sample-test-password-' . $suffix);
-        DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $members[$role], 'role' => $role]);
+        sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $members[$role], 'role' => $role]);
     }
     $stranger = pl_create_user('print-stranger-' . $suffix . '@example.test', 'Sample print stranger', 'Sample-test-password-' . $suffix);
     return $f + ['journal_id' => (int) $posted['journal_id'], 'members' => $members, 'stranger_id' => $stranger, 'other' => settlement_fixture()];

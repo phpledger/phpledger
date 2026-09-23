@@ -184,7 +184,7 @@ test('account statements enforce actor company book and account scope while perm
     assert_throws(fn () => pl_account_activity($f['actor_id'], $f['company_id'], $f['book_id'], $other['accounts']['1000']), DomainException::class);
     assert_throws(fn () => pl_account_activity($f['actor_id'], $f['company_id'], $f['book_id'], $f['accounts']['1000'], '2026-02-30'), DomainException::class);
     assert_throws(fn () => pl_account_activity($f['actor_id'], $f['company_id'], $f['book_id'], $f['accounts']['1000'], '2026-09-14', 1, 'not-a-date'), DomainException::class);
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     $statement = pl_account_activity($other['actor_id'], $f['company_id'], $f['book_id'], $f['accounts']['1000'], '2026-09-30', 1, '2026-09-15');
     assert_same('100.0000', $statement['opening_balance']);
     assert_same('100.0000', $statement['closing_balance']);
@@ -222,7 +222,7 @@ test('owner reports provide zero states valid date boundaries and scoped read pe
     assert_throws(fn () => pl_balance_sheet($other['actor_id'], $f['company_id'], $f['book_id'], '2026-09-14'), DomainException::class);
     assert_throws(fn () => pl_profit_loss($f['actor_id'], $f['company_id'], $other['book_id'], '2026-01-01', '2026-09-14'), DomainException::class);
     assert_throws(fn () => pl_cash_balance($other['actor_id'], $f['company_id'], $f['book_id'], '2026-09-14'), DomainException::class);
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     assert_true(pl_balance_sheet($other['actor_id'], $f['company_id'], $f['book_id'], '2026-09-14')['balanced']);
 });
 

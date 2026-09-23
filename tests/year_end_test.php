@@ -59,7 +59,7 @@ test('year-end read API and service enforce current role, grant scope and compan
     $report=pl_read_operation($connection,'year_end',$scope+['year_id'=>$id])['data'];assert_same('closing',$report['year']['status']);assert_true(!str_contains(json_encode($report,JSON_THROW_ON_ERROR),'request_key'));
     $other=year_fixture();assert_throws(fn()=>pl_read_operation($connection,'year_end',['company_id'=>$other['company_id'],'book_id'=>$other['book_id'],'year_id'=>$id]),DomainException::class);
     $limited=pl_create_personal_token($f['actor_id'],'Reports only',[$scope],'reports');assert_throws(fn()=>pl_read_operation($limited['connection']['id'],'year_end',$scope+['year_id'=>$id]),DomainException::class,'summary reports');unset($limited);
-    $viewer=pl_create_user('year-viewer-'.bin2hex(random_bytes(8)).'@example.test','Sample viewer','Sample-password-only');DB::insert('pl_company_members',['company_id'=>$f['company_id'],'user_id'=>$viewer,'role'=>'viewer']);
+    $viewer=pl_create_user('year-viewer-'.bin2hex(random_bytes(8)).'@example.test','Sample viewer','Sample-password-only');sample_membership_insert(['company_id'=>$f['company_id'],'user_id'=>$viewer,'role'=>'viewer']);
     assert_throws(fn()=>pl_year_end_get($viewer,$f['company_id'],$f['book_id'],$id),DomainException::class,'cannot access');assert_throws(fn()=>pl_year_end_change($viewer,$f['company_id'],$f['book_id'],$id,'close',2,'Denied','viewer'),DomainException::class);
     } finally {putenv($oldUrl===false?'PL_PUBLIC_URL':'PL_PUBLIC_URL='.$oldUrl);}
 });

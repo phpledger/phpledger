@@ -136,7 +136,7 @@ test('stock locations: warehouse masters enforce scope revisions retries and imm
     $input = location_warehouse_input('DEFAULT'); $input['is_active'] = false;
     assert_throws(fn() => pl_save_inventory_warehouse($f['actor_id'], $f['company_id'], $f['book_id'], $input, $f['default_warehouse_id'], 1), DomainException::class, 'remain active');
     assert_throws(fn() => DB::update('pl_inventory_warehouses', ['is_default' => 0], 'id=%i', $f['default_warehouse_id']), Throwable::class, 'immutable');
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     assert_same(3, count(pl_list_inventory_warehouses($other['actor_id'], $f['company_id'], $f['book_id'])));
     assert_throws(fn() => pl_save_inventory_warehouse($other['actor_id'], $f['company_id'], $f['book_id'], location_warehouse_input('NO-WRITE')), DomainException::class);
 });
@@ -222,7 +222,7 @@ test('stock locations: transfers enforce access scope active warehouses periods 
     pl_inventory_receive($f['actor_id'], $f['company_id'], $f['book_id'], inventory_move_input($f));
     $input = location_transfer_input($f);
     assert_throws(fn() => pl_inventory_transfer($other['actor_id'], $f['company_id'], $f['book_id'], $input), DomainException::class);
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     assert_throws(fn() => pl_inventory_transfer($other['actor_id'], $f['company_id'], $f['book_id'], $input), DomainException::class);
     foreach (['from_warehouse_id','to_warehouse_id'] as $field) {
         $bad = array_replace($input, [$field => $other['van_warehouse_id']]);

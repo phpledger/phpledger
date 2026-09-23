@@ -144,7 +144,7 @@ test('owner transactions refuse invalid input, missing accounts and callers with
     }
     assert_throws(fn () => pl_post_owner_transaction($f['actor_id'], $f['company_id'], $f['book_id'], array_replace(owner_input('drawings', '10.0000'), ['cash_account_id' => $f['semantic']['core.equity.owner']])), DomainException::class, 'cash or bank');
     $viewer = ledger_fixture();
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $viewer['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $viewer['actor_id'], 'role' => 'viewer']);
     assert_throws(fn () => pl_post_owner_transaction($viewer['actor_id'], $f['company_id'], $f['book_id'], owner_input('drawings', '10.0000')), DomainException::class);
     assert_same(0, count(pl_list_owner_transactions($f['actor_id'], $f['company_id'], $f['book_id'])));
     // A book with no drawings account says so instead of inventing one.

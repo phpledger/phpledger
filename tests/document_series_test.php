@@ -174,7 +174,7 @@ test('a yearly series restarts at one in the next year and refuses an earlier ye
 test('only the owner may change numbering and the next number can never be lowered', function (): void {
     $f = series_fixture();
     $accountant = ledger_fixture();
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $accountant['actor_id'], 'role' => 'accountant']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $accountant['actor_id'], 'role' => 'accountant']);
     $current = series_row($f, 'invoice');
     $valid = ['prefix' => 'SI', 'padding' => 4, 'year_segment' => true, 'reset_rule' => 'yearly', 'next_number' => 1, 'revision' => $current['revision'], 'reason' => 'Shorter customer numbering'];
     assert_throws(fn() => pl_save_document_series($accountant['actor_id'], $f['company_id'], $f['book_id'], 'invoice', $valid), DomainException::class, 'business owner');

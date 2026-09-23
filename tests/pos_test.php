@@ -170,7 +170,7 @@ test('POS enforces reader writer company book and opening-readiness boundaries',
     $sale = pl_checkout_pos($f['actor_id'], $f['company_id'], $f['book_id'], $input);
     assert_throws(fn () => pl_get_pos_receipt($other['actor_id'], $f['company_id'], $f['book_id'], $sale['document_id']), DomainException::class);
     assert_throws(fn () => pl_checkout_pos($f['actor_id'], $f['company_id'], $other['book_id'], pos_input()), DomainException::class);
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     DB::update('pl_users', ['display_name'=>'Another receipt viewer'], 'id = %i', $other['actor_id']);
     assert_same('Sample ledger tester', pl_get_pos_receipt($other['actor_id'], $f['company_id'], $f['book_id'], $sale['document_id'])['cashier_name']);
     assert_same($sale['document_id'], pl_get_pos_receipt($other['actor_id'], $f['company_id'], $f['book_id'], $sale['document_id'])['document_id']);

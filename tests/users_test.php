@@ -188,7 +188,7 @@ test('an invitation names a role, is redeemed once, and can be revoked or expire
     assert_throws(fn () => pl_invite_user($f['actor_id'], $f['company_id'], $email, users_role_id('viewer'), ''), DomainException::class, 'already open');
 
     $userId = pl_accept_invitation($invitation['token'], ['display_name' => 'Invited accountant', 'username' => '', 'password' => 'Sample-invited-password-471!']);
-    assert_same('accountant', DB::queryFirstField('SELECT role FROM pl_company_members WHERE company_id = %i AND user_id = %i', $f['company_id'], $userId));
+    assert_same('accountant', DB::queryFirstField('SELECT r.slug FROM pl_company_members m JOIN pl_roles r ON r.id = m.role_id WHERE m.company_id = %i AND m.user_id = %i', $f['company_id'], $userId));
     assert_same(users_role_id('accountant'), (int) DB::queryFirstField('SELECT role_id FROM pl_company_members WHERE company_id = %i AND user_id = %i', $f['company_id'], $userId));
     pl_capability_cache_reset();
     assert_true(pl_user_can($userId, $f['company_id'], 'company.write'));
@@ -497,3 +497,90 @@ test('the MeekroORM records read the same rows, and cost one metadata query each
 class PL_Unnamed_Model extends PL_Model
 {
 }
+
+test('migration 056 preserves explicit custom roles and backfills only missing legacy role references', function (): void {
+    $f = users_fixture();
+    $custom = pl_save_role($f['actor_id'], $f['company_id'], ['name'=>'Sample scoped writer', 'reason'=>'Upgrade fixture', 'capabilities'=>['company.read','company.write']]);
+    DB::query("CREATE TEMPORARY TABLE pl_membership_upgrade_sample (company_id BIGINT UNSIGNED NOT NULL, user_id BIGINT UNSIGNED NOT NULL, role ENUM('owner','accountant','viewer') NOT NULL, role_id BIGINT UNSIGNED NULL)");
+    try {
+        DB::insert('pl_membership_upgrade_sample', ['company_id'=>$f['company_id'],'user_id'=>1,'role'=>'owner','role_id'=>null]);
+        DB::insert('pl_membership_upgrade_sample', ['company_id'=>$f['company_id'],'user_id'=>2,'role'=>'viewer','role_id'=>$custom['id']]);
+        foreach (require dirname(__DIR__).'/www/phpledger/install/migrations/056_membership_role_id.php' as $sql) {
+            DB::query(str_replace('pl_company_members','pl_membership_upgrade_sample',$sql));
+        }
+        assert_same(users_role_id('owner'), (int) DB::queryFirstField('SELECT role_id FROM pl_membership_upgrade_sample WHERE user_id=1'));
+        assert_same($custom['id'], (int) DB::queryFirstField('SELECT role_id FROM pl_membership_upgrade_sample WHERE user_id=2'));
+        assert_throws(fn()=>DB::insert('pl_membership_upgrade_sample',['company_id'=>$f['company_id'],'user_id'=>3,'role_id'=>null]));
+        assert_same([],DB::query("SHOW COLUMNS FROM pl_membership_upgrade_sample LIKE 'role'"));
+        assert_same([],DB::query("SHOW COLUMNS FROM pl_company_members LIKE 'role'"));
+    } finally { DB::query('DROP TEMPORARY TABLE pl_membership_upgrade_sample'); }
+});
+
+test('role-only membership rejects foreign company roles and derives write access from current custom grants', function (): void {
+    $f=users_fixture();$other=users_fixture();
+    $writer=pl_save_role($f['actor_id'],$f['company_id'],['name'=>'Sample current writer','reason'=>'Scope fixture','capabilities'=>['company.read','company.write']]);
+    sample_membership_insert(['company_id'=>$other['company_id'],'user_id'=>$f['actor_id'],'role_id'=>$writer['id']]);
+    assert_throws(fn()=>pl_require_company_access($f['actor_id'],$other['company_id']),DomainException::class);
+    sample_membership_insert(['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role_id'=>$writer['id']]);
+    assert_same('accountant',pl_require_company_access($other['actor_id'],$f['company_id'],true)['role']);
+    pl_save_role($f['actor_id'],$f['company_id'],['name'=>$writer['name'],'reason'=>'Revoke writing','capabilities'=>['company.read']],$writer['id'],$writer['revision']);
+    assert_same('viewer',pl_require_company_access($other['actor_id'],$f['company_id'])['role']);
+    assert_throws(fn()=>pl_require_company_access($other['actor_id'],$f['company_id'],true),DomainException::class);
+});
+
+test('an inactive second owner cannot justify removing the only active owner role', function (): void {
+    $f=users_fixture();$other=users_fixture();
+    sample_membership_insert(['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role'=>'owner']);
+    DB::update('pl_users',['is_active'=>0],'id=%i',$other['actor_id']);
+    assert_throws(fn()=>pl_assign_company_role($f['actor_id'],$f['company_id'],$f['actor_id'],users_role_id('viewer'),'Invalid demotion'),DomainException::class,'without an owner');
+    assert_same('owner',pl_require_company_access($f['actor_id'],$f['company_id'])['role']);
+    pl_remove_company_member($f['actor_id'],$f['company_id'],$other['actor_id'],'Remove inactive extra owner');
+    assert_same(1,pl_company_owner_count($f['company_id']));
+});
+
+test('an old read snapshot cannot retain revoked custom write grants', function (): void {
+    $f=users_fixture();$other=users_fixture();
+    $role=pl_save_role($f['actor_id'],$f['company_id'],['name'=>'Sample revoked writer','reason'=>'Current grant fixture','capabilities'=>['company.read','company.write']]);
+    sample_membership_insert(['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role_id'=>$role['id']]);
+    $second=new MeekroDB();DB::startTransaction();
+    try {
+        assert_true((int)DB::queryFirstField('SELECT COUNT(*) FROM pl_role_capabilities WHERE role_id=%i',$role['id'])>1);
+        $second->query("DELETE rc FROM pl_role_capabilities rc JOIN pl_capabilities c ON c.id=rc.capability_id WHERE rc.role_id=%i AND c.capability='company.write'",$role['id']);
+        assert_throws(fn()=>pl_require_company_access($other['actor_id'],$f['company_id'],true),DomainException::class);
+        assert_true(!pl_user_can($other['actor_id'],$f['company_id'],'company.write'));
+    } finally { DB::rollback();$second->disconnect(); }
+});
+
+test('accepting an older invitation cannot demote the sole active Owner', function (): void {
+    $f=users_fixture();$other=users_fixture();
+    $email=DB::queryFirstField('SELECT email FROM pl_users WHERE id=%i',$other['actor_id']);
+    $invitation=pl_invite_user($f['actor_id'],$f['company_id'],$email,users_role_id('viewer'),'Initial invitation');
+    pl_assign_company_role($f['actor_id'],$f['company_id'],$other['actor_id'],users_role_id('owner'),'Owner since invitation');
+    pl_assign_company_role($f['actor_id'],$f['company_id'],$f['actor_id'],users_role_id('accountant'),'Transfer ownership');
+    assert_throws(fn()=>pl_accept_invitation($invitation['token'],[]),DomainException::class,'without an active owner');
+    assert_same('owner',pl_require_company_access($other['actor_id'],$f['company_id'])['role']);
+});
+
+test('an installation-wide suspension or anonymisation cannot strand another company', function (): void {
+    $a=users_fixture();$b=users_fixture();
+    sample_membership_insert(['company_id'=>$a['company_id'],'user_id'=>$b['actor_id'],'role'=>'accountant']);
+    assert_throws(fn()=>pl_set_user_active($a['actor_id'],$a['company_id'],$b['actor_id'],false,'Suspend through another company'),DomainException::class,'last active owner');
+    assert_throws(fn()=>pl_anonymise_user($a['actor_id'],$a['company_id'],$b['actor_id'],'Erase through another company'),DomainException::class,'last active owner');
+    assert_same('owner',pl_require_company_access($b['actor_id'],$b['company_id'])['role']);
+    pl_assign_company_role($b['actor_id'],$b['company_id'],$a['actor_id'],users_role_id('owner'),'Add replacement owner');
+    pl_set_user_active($a['actor_id'],$a['company_id'],$b['actor_id'],false,'Replacement owner is active');
+    assert_same(0,(int)DB::queryFirstField('SELECT is_active FROM pl_users WHERE id=%i',$b['actor_id']));
+    assert_same('owner',pl_require_company_access($a['actor_id'],$b['company_id'])['role']);
+});
+
+test('global account change refuses a company membership added after its caller snapshot', function (): void {
+    $a=users_fixture();$b=users_fixture();$c=users_fixture();
+    sample_membership_insert(['company_id'=>$a['company_id'],'user_id'=>$b['actor_id'],'role'=>'accountant']);
+    $second=new MeekroDB();DB::startTransaction();
+    try {
+        assert_same(2,(int)DB::queryFirstField('SELECT COUNT(*) FROM pl_company_members WHERE user_id=%i',$b['actor_id']));
+        $second->insert('pl_company_members',['company_id'=>$c['company_id'],'user_id'=>$b['actor_id'],'role_id'=>users_role_id('owner')]);
+        assert_throws(fn()=>pl_set_user_active($a['actor_id'],$a['company_id'],$b['actor_id'],false,'Old account snapshot'),DomainException::class,'changed company memberships');
+        assert_same(1,(int)DB::queryFirstField('SELECT is_active FROM pl_users WHERE id=%i',$b['actor_id']));
+    } finally { DB::rollback();$second->disconnect(); }
+});

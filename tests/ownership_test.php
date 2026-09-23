@@ -434,7 +434,7 @@ test('B58: reading a related-party marker takes an authority an ordinary member 
     $viewer = pl_create_user('ownership-viewer-' . $f['suffix'] . '@example.invalid', 'Sample viewer', 'Sample-viewer-password-471!');
     $accountant = pl_create_user('ownership-acc-' . $f['suffix'] . '@example.invalid', 'Sample accountant', 'Sample-accountant-password-471!');
     foreach ([[$viewer, 'viewer'], [$accountant, 'accountant']] as [$userId, $slug]) {
-        DB::insert('pl_company_members', ['company_id' => (int) $f['company_id'], 'user_id' => $userId, 'role' => $slug,
+        sample_membership_insert(['company_id' => (int) $f['company_id'], 'user_id' => $userId, 'role' => $slug,
             'role_id' => (int) DB::queryFirstField('SELECT id FROM pl_roles WHERE company_id IS NULL AND slug = %s', $slug)]);
     }
     pl_capability_cache_reset();

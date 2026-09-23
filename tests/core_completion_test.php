@@ -70,7 +70,7 @@ test('core CSV exports include all statement pages exact balances safe text and 
     }
     $other = ledger_fixture();
     assert_throws(fn() => pl_export_report($other['actor_id'], $f['company_id'], $f['book_id'], 'trial-balance', '2026-12-31'), DomainException::class);
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     assert_true(str_contains(pl_export_report($other['actor_id'], $f['company_id'], $f['book_id'], 'trial-balance', '2026-12-31')['csv'], '5.1051'));
     assert_throws(fn() => pl_export_report($f['actor_id'], $f['company_id'], $f['book_id'], 'account', '2026-12-31', null, $other['accounts']['1000']), DomainException::class);
     assert_throws(fn() => pl_export_report($f['actor_id'], $f['company_id'], $f['book_id'], 'profit-loss', '2026-01-01', '2026-12-31'), DomainException::class);

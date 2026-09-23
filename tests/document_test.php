@@ -22,7 +22,7 @@ test('setup pins one chart and rejects stale previews and changed requests', fun
     assert_same(false, $company['is_sample']);
     assert_same('core-starter', $company['template']['id']);
     assert_same(pl_starter_template()['digest'], $company['template']['digest']);
-    // Thirteen starter purposes, one postable over/short provision and nineteen headings.
+    // Thirteen starter purposes, one over/short, seven payroll accounts and nineteen headings.
     assert_same(21 + 19, count($company['accounts']));
     assert_same(21, count(array_filter($company['accounts'], static fn (array $row): bool => $row['is_postable'])));
     assert_same($company['id'], pl_setup_company($f['actor_id'], $input, $key)['id']);
@@ -132,7 +132,7 @@ test('document permissions and scoped account roles fail closed', function (): v
     $bad = $input;
     $bad['category_account_id'] = $f['accounts']['4000'];
     assert_throws(fn () => pl_save_document($f['actor_id'], $f['company_id'], $f['book_id'], $bad), DomainException::class);
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $other['actor_id'], 'role' => 'viewer']);
     assert_same($document['id'], pl_get_document($other['actor_id'], $f['company_id'], $f['book_id'], $document['id'])['id']);
     assert_throws(fn () => pl_save_document($other['actor_id'], $f['company_id'], $f['book_id'], $input), DomainException::class);
     assert_throws(fn () => pl_post_document($other['actor_id'], $f['company_id'], $f['book_id'], $document['id'], 1), DomainException::class);

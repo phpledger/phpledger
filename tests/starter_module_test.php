@@ -20,7 +20,7 @@ test('hiding AR AP is audited owner presentation only and preserves required ser
     assert_same(false,pl_company_visibility($f['actor_id'],$f['company_id'])['show_ar']);
     pl_require_module($f['actor_id'],$f['company_id'],$f['book_id'],'ar'); pl_require_module($f['actor_id'],$f['company_id'],$f['book_id'],'ap');
     assert_throws(fn()=>pl_set_company_visibility($f['actor_id'],$f['company_id'],true,true,0,'Stale form','stale'),DomainException::class,'changed');
-    $other=ledger_fixture(); DB::insert('pl_company_members',['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role'=>'accountant']);
+    $other=ledger_fixture(); sample_membership_insert(['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role'=>'accountant']);
     assert_throws(fn()=>pl_set_company_visibility($other['actor_id'],$f['company_id'],true,true,1,'Not owner','notowner'),DomainException::class,'cannot change navigation');
     assert_throws(fn()=>DB::delete('pl_visibility_actions','company_id=%i',$f['company_id']));
 });

@@ -343,7 +343,7 @@ test('another account is an explicit reviewed override: owner, a recorded reason
         advance_credit_note_input($f, $expense, ['allow_other_offset_account' => 'yes'])), DomainException::class, 'must be chosen explicitly');
     // And it is the owner's call, like every other deliberate accounting exception here.
     $accountant = ledger_fixture('PKR');
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $accountant['actor_id'], 'role' => 'accountant']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $accountant['actor_id'], 'role' => 'accountant']);
     assert_throws(fn () => pl_recognize_unapplied_credit($accountant['actor_id'], $f['company_id'], $f['book_id'],
         advance_credit_note_input($f, $expense, ['allow_other_offset_account' => true, 'offset_override_reason' => $reason])),
         DomainException::class, 'Only the business owner');

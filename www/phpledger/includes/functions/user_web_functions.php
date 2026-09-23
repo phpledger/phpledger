@@ -275,7 +275,7 @@ function pl_web_profile(int $actorId, array $user, ?array $company, string $meth
 function pl_profile_memberships(int $actorId): array
 {
     $rows = DB::query(
-        'SELECT c.id, c.name, m.role, r.name AS role_name FROM pl_company_members m '
+        'SELECT c.id, c.name, r.slug AS role, r.name AS role_name FROM pl_company_members m '
         . 'JOIN pl_companies c ON c.id = m.company_id LEFT JOIN pl_roles r ON r.id = m.role_id '
         . 'WHERE m.user_id = %i ORDER BY c.name, c.id',
         $actorId

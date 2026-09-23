@@ -232,7 +232,7 @@ test('approving the driver\'s day needs the settlement permission, and cost need
 
     $suffix = bin2hex(random_bytes(8));
     $accountant = pl_create_user('sim-accountant-' . $suffix . '@example.test', 'Sample settlement accountant', 'Sample-test-password-' . $suffix);
-    DB::insert('pl_company_members', ['company_id' => $c['company_id'], 'user_id' => $accountant, 'role' => 'accountant']);
+    sample_membership_insert(['company_id' => $c['company_id'], 'user_id' => $accountant, 'role' => 'accountant']);
     assert_true(!pl_van_settlement_can_approve($accountant, $c['company_id']), 'An accountant does not hold settlement.approve.');
     assert_true(pl_van_settlement_can_approve($c['actor_id'], $c['company_id']), 'The owner holds it by default.');
     assert_throws(fn () => pl_approve_van_settlement($accountant, $c['company_id'], $c['book_id'], (int) $review['id'], 'Approve', bin2hex(random_bytes(16))),

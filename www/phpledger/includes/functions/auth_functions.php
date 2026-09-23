@@ -150,16 +150,8 @@ function pl_require_company_access(int $actorId, int $companyId, bool $write = f
     if ($actorId < 1 || $companyId < 1) {
         throw new DomainException('You do not have access to this company.');
     }
-    $member = DB::queryFirstRow(
-        'SELECT m.company_id, m.user_id, m.role FROM pl_company_members m '
-        . 'INNER JOIN pl_users u ON u.id = m.user_id '
-        // A current read also prevents stale permissions inside a caller-owned transaction.
-        . 'WHERE m.company_id = %i AND m.user_id = %i AND u.is_active = 1 FOR SHARE',
-        $companyId,
-        $actorId
-    );
-    if (!$member || !in_array($member['role'], ['owner', 'accountant', 'viewer'], true)
-        || ($write && !in_array($member['role'], ['owner', 'accountant'], true))) {
+    $member = pl_company_member_role($actorId, $companyId);
+    if (!$member || !in_array($write ? 'company.write' : 'company.read', $member['capabilities'], true)) {
         throw new DomainException('You do not have access to this company.');
     }
     pl_demo_require_company($actorId, $companyId);

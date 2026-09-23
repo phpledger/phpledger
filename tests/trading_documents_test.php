@@ -445,7 +445,7 @@ test('printing an invoice follows the record screen: owner, accountant and viewe
     $readers = [];
     foreach (['accountant', 'viewer'] as $role) {
         $readers[$role] = pl_create_user('trading-' . $role . '-' . $suffix . '@example.test', 'Sample trading ' . $role, 'Sample-test-password-' . $suffix);
-        DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $readers[$role], 'role' => $role]);
+        sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $readers[$role], 'role' => $role]);
     }
     $stranger = pl_create_user('trading-stranger-' . $suffix . '@example.test', 'Sample trading stranger', 'Sample-test-password-' . $suffix);
     foreach (['owner' => $f['actor_id']] + $readers as $role => $readerId) {

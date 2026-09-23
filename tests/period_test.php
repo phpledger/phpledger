@@ -158,8 +158,8 @@ test('period administration separates owner, accountant and viewer permissions a
     $f = ledger_fixture();
     $accountant = ledger_fixture();
     $viewer = ledger_fixture();
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $accountant['actor_id'], 'role' => 'accountant']);
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $viewer['actor_id'], 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $accountant['actor_id'], 'role' => 'accountant']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $viewer['actor_id'], 'role' => 'viewer']);
     assert_same(1, count(pl_list_periods($viewer['actor_id'], $f['company_id'], $f['book_id'])));
     assert_throws(fn() => pl_create_period($viewer['actor_id'], $f['company_id'], $f['book_id'], period_input()), DomainException::class, 'access');
     assert_throws(fn() => pl_change_period_status($viewer['actor_id'], $f['company_id'], $f['book_id'], $f['period_id'], 'closed', 1, 'Viewer action', 'viewer'), DomainException::class, 'access');

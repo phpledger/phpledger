@@ -107,10 +107,10 @@ function pl_list_company_users(int $actorId, int $companyId): array
     pl_require_company_access($actorId, $companyId);
     pl_require_capability($actorId, $companyId, 'users.manage', 'Your role cannot read the people in this company.');
     $rows = DB::query(
-        'SELECT u.' . str_replace(', ', ', u.', PL_USER_COLUMNS) . ', m.role, m.role_id, r.name AS role_name, r.slug AS role_slug, r.is_system AS role_is_system '
+        'SELECT u.' . str_replace(', ', ', u.', PL_USER_COLUMNS) . ', r.slug AS role, m.role_id, r.name AS role_name, r.slug AS role_slug, r.is_system AS role_is_system '
         . 'FROM pl_company_members m JOIN pl_users u ON u.id = m.user_id '
         . 'LEFT JOIN pl_roles r ON r.id = m.role_id '
-        . 'WHERE m.company_id = %i ORDER BY u.is_active DESC, u.display_name, u.id',
+        . 'WHERE m.company_id = %i ORDER BY u.is_active DESC, u.display_name, u.id' . (DB::transactionDepth() > 0 ? ' FOR SHARE' : ''),
         $companyId
     );
     foreach ($rows as &$row) {
@@ -359,16 +359,14 @@ function pl_set_user_active(int $actorId, int $companyId, int $userId, bool $act
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($reason, 'Reason', 500);
     return pl_ledger_transaction(function () use ($actorId, $companyId, $userId, $active, $reason): array {
+        pl_lock_user_membership_companies($userId, $companyId);
         pl_require_company_access($actorId, $companyId, true);
         pl_require_capability($actorId, $companyId, 'users.manage', 'Your role cannot suspend or reactivate people.');
         $before = pl_get_company_user($actorId, $companyId, $userId);
         if ($actorId === $userId && !$active) {
             throw new DomainException('You cannot suspend your own account. Ask another administrator.');
         }
-        if (!$active && $before['role'] === 'owner'
-            && (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_company_members m JOIN pl_users u ON u.id = m.user_id WHERE m.company_id = %i AND m.role = 'owner' AND u.is_active = 1", $companyId) < 2) {
-            throw new DomainException('This company would be left without an active owner. Give someone else the Owner role first.');
-        }
+        if (!$active) { pl_require_other_active_owners($userId); }
         DB::update('pl_users', ['is_active' => $active ? 1 : 0, 'deactivated_at' => $active ? null : gmdate('Y-m-d H:i:s')], 'id = %i', $userId);
         if (!$active) {
             pl_revoke_user_sessions($actorId, $userId, null, $reason);
@@ -390,6 +388,7 @@ function pl_remove_company_member(int $actorId, int $companyId, int $userId, str
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($reason, 'Reason', 500);
     pl_ledger_transaction(function () use ($actorId, $companyId, $userId, $reason): void {
+        DB::queryFirstField('SELECT id FROM pl_companies WHERE id = %i FOR UPDATE', $companyId);
         pl_require_company_access($actorId, $companyId, true);
         pl_require_capability($actorId, $companyId, 'users.manage', 'Your role cannot remove people from this company.');
         $before = pl_get_company_user($actorId, $companyId, $userId);
@@ -397,7 +396,7 @@ function pl_remove_company_member(int $actorId, int $companyId, int $userId, str
             throw new DomainException('You cannot remove your own access. Ask another administrator.');
         }
         if ($before['role'] === 'owner'
-            && (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_company_members WHERE company_id = %i AND role = 'owner'", $companyId) < 2) {
+            && pl_company_owner_count($companyId, $userId) < 1) {
             throw new DomainException('This company would be left without an owner. Give someone else the Owner role first.');
         }
         DB::query('DELETE FROM pl_company_members WHERE company_id = %i AND user_id = %i', $companyId, $userId);
@@ -417,6 +416,7 @@ function pl_anonymise_user(int $actorId, int $companyId, int $userId, string $re
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($reason, 'Reason', 500);
     return pl_ledger_transaction(function () use ($actorId, $companyId, $userId, $reason): array {
+        pl_lock_user_membership_companies($userId, $companyId);
         pl_require_company_access($actorId, $companyId, true);
         pl_require_capability($actorId, $companyId, 'users.manage', 'Your role cannot anonymise an account.');
         $before = pl_get_company_user($actorId, $companyId, $userId);
@@ -429,6 +429,7 @@ function pl_anonymise_user(int $actorId, int $companyId, int $userId, string $re
         if ($before['role'] === 'owner') {
             throw new DomainException('Give the Owner role to someone else before anonymising this account.');
         }
+        pl_require_other_active_owners($userId);
         $marker = 'anonymised-' . $userId;
         DB::update('pl_users', [
             'email' => $marker . '@anonymised.invalid', 'username' => null,
@@ -609,6 +610,7 @@ function pl_accept_invitation(string $token, array $input): int
             throw new DomainException('That invitation link is not valid any more. Ask for a new one.');
         }
         $companyId = (int) $invitation['company_id'];
+        DB::queryFirstField('SELECT id FROM pl_companies WHERE id = %i FOR UPDATE', $companyId);
         $roleId = (int) $invitation['role_id'];
         $email = (string) $invitation['email'];
         $userId = (int) (DB::queryFirstField('SELECT id FROM pl_users WHERE email = %s', $email) ?? 0);
@@ -618,14 +620,18 @@ function pl_accept_invitation(string $token, array $input): int
                 ($input['username'] ?? '') === '' ? null : (string) $input['username']);
         }
         $role = DB::queryFirstRow('SELECT id, company_id, slug, name, is_system FROM pl_roles WHERE id = %i', $roleId);
-        if (!$role) {
+        if (!$role || ($role['company_id'] !== null && (int) $role['company_id'] !== $companyId)) {
             throw new DomainException('That invitation names a role that no longer exists.');
         }
         $capabilities = DB::queryFirstColumn('SELECT c.capability FROM pl_role_capabilities rc JOIN pl_capabilities c ON c.id = rc.capability_id WHERE rc.role_id = %i', $roleId);
-        $enum = pl_role_enum_mirror(['slug' => (string) $role['slug'], 'is_system' => (bool) $role['is_system'], 'capabilities' => $capabilities]);
+        $enum = pl_role_access_label(['slug' => (string) $role['slug'], 'is_system' => (bool) $role['is_system'], 'capabilities' => $capabilities]);
         if ($enum !== 'owner') { pl_shared_demo_require_mutable_account($userId); }
-        DB::insertUpdate('pl_company_members', ['company_id' => $companyId, 'user_id' => $userId, 'role' => $enum, 'role_id' => $roleId],
-            ['role' => $enum, 'role_id' => $roleId]);
+        $existingMember = pl_company_member_role($userId, $companyId);
+        if ($existingMember && $existingMember['role'] === 'owner' && $enum !== 'owner' && pl_company_owner_count($companyId, $userId) < 1) {
+            throw new DomainException('This company would be left without an active owner. Give someone else the Owner role first.');
+        }
+        DB::insertUpdate('pl_company_members', ['company_id' => $companyId, 'user_id' => $userId, 'role_id' => $roleId],
+            ['role_id' => $roleId]);
         DB::update('pl_user_invitations', ['accepted_at' => gmdate('Y-m-d H:i:s'), 'accepted_user_id' => $userId], 'id = %i', (int) $invitation['id']);
         pl_capability_cache_reset();
         pl_user_audit($userId, $companyId, $userId, 'invitation', (int) $invitation['id'], 'accepted', 'Invitation accepted.',
@@ -754,4 +760,32 @@ function pl_revoke_session_handle(int $userId, string $handle, string $reason): 
     DB::update('pl_user_sessions', ['revoked_at' => gmdate('Y-m-d H:i:s'), 'revoked_by' => $userId], 'token_hash = %s', $tokenHash);
     pl_user_audit($userId, null, $userId, 'session', $userId, 'revoked', pl_ledger_text($reason, 'Reason', 500, false),
         null, ['user_id' => $userId, 'ended' => 1]);
+}
+
+/** Lock company rows in one order before touching the installation-wide account state. */
+function pl_lock_user_membership_companies(int $userId, int $selectedCompanyId): void
+{
+    $ids = array_map('intval', DB::queryFirstColumn('SELECT company_id FROM pl_company_members WHERE user_id = %i', $userId));
+    $ids[] = $selectedCompanyId;
+    $ids = array_values(array_unique($ids));
+    sort($ids, SORT_NUMERIC);
+    DB::query('SELECT id FROM pl_companies WHERE id IN %li ORDER BY id FOR UPDATE', $ids);
+    DB::queryFirstField('SELECT id FROM pl_users WHERE id = %i FOR UPDATE', $userId);
+    // A new assignment may have committed while acquiring locks. Do not acquire extra company
+    // locks after the user lock: refuse and let the operator retry in the correct lock order.
+    $current = array_map('intval', DB::queryFirstColumn('SELECT company_id FROM pl_company_members WHERE user_id = %i FOR SHARE', $userId));
+    if (array_diff($current, $ids) !== []) {
+        throw new DomainException('This account changed company memberships. Retry the account change.');
+    }
+}
+
+/** Suspending/anonymising an account must not strand any of its companies. */
+function pl_require_other_active_owners(int $userId): void
+{
+    $companies = DB::queryFirstColumn("SELECT m.company_id FROM pl_company_members m JOIN pl_roles r ON r.id = m.role_id JOIN pl_users u ON u.id = m.user_id WHERE m.user_id = %i AND u.is_active = 1 AND r.is_system = 1 AND r.company_id IS NULL AND r.slug = 'owner' FOR SHARE", $userId);
+    foreach ($companies as $companyId) {
+        if (pl_company_owner_count((int) $companyId, $userId) < 1) {
+            throw new DomainException('This account is the last active owner of a company. Give someone else the Owner role there first.');
+        }
+    }
 }

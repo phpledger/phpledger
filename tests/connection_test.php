@@ -173,7 +173,7 @@ test('machine reads match browser money and continue exact running balances acro
 
 test('membership expiry client revocation and generation binding deny previously valid credentials', function (): void {
     $f = connection_fixture();
-    DB::update('pl_company_members', ['role' => 'viewer'], 'company_id = %i AND user_id = %i', $f['company_id'], $f['actor_id']);
+    DB::update('pl_company_members', ['role_id' => DB::queryFirstField("SELECT id FROM pl_roles WHERE company_id IS NULL AND slug = 'viewer'")], 'company_id = %i AND user_id = %i', $f['company_id'], $f['actor_id']);
     assert_same($f['actor_id'], pl_connection_authenticate(connection_request('/mcp', 'POST', $f['token']))['actor_id']);
     DB::update('pl_users', ['is_active' => 0], 'id = %i', $f['actor_id']);
     assert_throws(fn () => pl_connection_authenticate(connection_request('/mcp', 'POST', $f['token'])), UnexpectedValueException::class);

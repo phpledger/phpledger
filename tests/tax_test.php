@@ -39,6 +39,6 @@ test('core tax dated revisions are scoped immutable and selected without future 
     $other=ledger_fixture();
     assert_throws(fn()=>pl_tax_calculate($other['actor_id'],$f['company_id'],$f['book_id'],$f['tax_code_id'],'2026-01-05','100','sale'),DomainException::class);
     assert_throws(fn()=>pl_tax_calculate($other['actor_id'],$other['company_id'],$other['book_id'],$f['tax_code_id'],'2026-01-05','100','sale'),DomainException::class);
-    DB::insert('pl_company_members',['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role'=>'viewer']);
+    sample_membership_insert(['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role'=>'viewer']);
     assert_throws(fn()=>pl_enter_tax_rate($other['actor_id'],$f['company_id'],$f['book_id'],array_replace($input,['idempotency_key'=>'viewer'])),DomainException::class);
 });

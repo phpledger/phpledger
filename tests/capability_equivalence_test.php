@@ -86,7 +86,7 @@ test('pl_user_can() gives every actor exactly the authorisation the literal role
         assert_true($roles[$slug] > 0, 'The protected system role ' . $slug . ' exists.');
     }
     foreach ([[$accountant, 'accountant'], [$viewer, 'viewer'], [$inactive, 'accountant']] as [$userId, $slug]) {
-        DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $userId, 'role' => $slug, 'role_id' => $roles[$slug]]);
+        sample_membership_insert(['company_id' => $companyId, 'user_id' => $userId, 'role' => $slug, 'role_id' => $roles[$slug]]);
     }
     DB::update('pl_users', ['is_active' => 0], 'id = %i', $inactive);
     pl_capability_cache_reset();
@@ -133,8 +133,8 @@ test('the converted services themselves refuse and allow exactly as they did', f
     foreach (['accountant', 'viewer'] as $slug) {
         $roles[$slug] = (int) DB::queryFirstField('SELECT id FROM pl_roles WHERE company_id IS NULL AND slug = %s', $slug);
     }
-    DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $accountant, 'role' => 'accountant', 'role_id' => $roles['accountant']]);
-    DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $viewer, 'role' => 'viewer', 'role_id' => $roles['viewer']]);
+    sample_membership_insert(['company_id' => $companyId, 'user_id' => $accountant, 'role' => 'accountant', 'role_id' => $roles['accountant']]);
+    sample_membership_insert(['company_id' => $companyId, 'user_id' => $viewer, 'role' => 'viewer', 'role_id' => $roles['viewer']]);
     pl_capability_cache_reset();
 
     // Each entry: the service, and who could run it in 1.1.
@@ -171,16 +171,16 @@ test('a custom role can be given exactly one owner-only permission without becom
         'reason' => 'Milestone M7 equivalence test.',
         'capabilities' => ['company.read', 'company.write', 'settlement.approve'],
     ]);
-    DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $approver, 'role' => 'accountant', 'role_id' => $role['id']]);
+    sample_membership_insert(['company_id' => $companyId, 'user_id' => $approver, 'role' => 'accountant', 'role_id' => $role['id']]);
     pl_capability_cache_reset();
 
     assert_true(pl_user_can($approver, $companyId, 'settlement.approve'), 'The custom role carries the one permission it was given.');
     assert_true(!pl_user_can($approver, $companyId, 'cost.view'), 'It does not carry cost visibility.');
     assert_true(!pl_user_can($approver, $companyId, 'modules.manage'), 'It does not carry module administration.');
     assert_true(!pl_user_can($approver, $companyId, 'periods.reopen'), 'It does not carry period reopening.');
-    // And the service agrees with the capability, not with the ENUM the membership still mirrors.
+    // And the service agrees with the capability, not with the derived compatibility label.
     pl_van_settlement_require_approver($approver, $companyId);
     assert_same(false, pl_stock_cost_visible($approver, $companyId, $bookId), 'Cost stays hidden from the custom role.');
-    assert_same('accountant', DB::queryFirstField('SELECT role FROM pl_company_members WHERE company_id = %i AND user_id = %i', $companyId, $approver),
-        'The 1.1 ENUM is still mirrored for a custom role, as a writing non-owner.');
+    assert_same('accountant', pl_require_company_access($approver, $companyId)['role'],
+        'The derived compatibility label preserves a custom writing non-owner.');
 });

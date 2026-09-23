@@ -22,7 +22,7 @@ function employee_input(array $overrides = []): array
 function employee_member(array $f, array $capabilities, string $slug = 'viewer'): int
 {
     $user = pl_create_user('employee-reader-' . bin2hex(random_bytes(6)) . '@example.invalid', 'Sample employee reader', 'Sample-reader-password-123');
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $user, 'role' => $slug,
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $user, 'role' => $slug,
         'role_id' => (int) DB::queryFirstField('SELECT id FROM pl_roles WHERE company_id IS NULL AND slug = %s', $slug)]);
     if ($capabilities !== []) {
         $role = pl_save_role($f['actor_id'], $f['company_id'], ['name' => 'Sample employee role ' . $user,

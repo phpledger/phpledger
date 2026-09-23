@@ -230,7 +230,7 @@ test('stock documents: approving a settlement needs the approval permission and 
     assert_throws(fn() => pl_approve_van_settlement(...array_merge($args, [$review['id'], 'Approve anyway', bin2hex(random_bytes(16))])), DomainException::class, 'does not reconcile');
     // An accountant may record stock documents but may not approve the settlement.
     $accountant = pl_create_user('stock-accountant-' . bin2hex(random_bytes(8)) . '@example.test', 'Sample stock accountant', 'Sample-test-password-' . bin2hex(random_bytes(8)));
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $accountant, 'role' => 'accountant']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $accountant, 'role' => 'accountant']);
     $byAccountant = pl_post_stock_document($accountant, $f['company_id'], $f['book_id'], stock_document_input($f, 'stock_issue', ['date' => $day, 'lines' => [['product_id' => $f['second_product_id'], 'quantity' => '2']]]));
     assert_true($byAccountant['document_number'] !== null);
     assert_throws(fn() => pl_approve_van_settlement($accountant, $f['company_id'], $f['book_id'], $review['id'], 'Accountant approval', bin2hex(random_bytes(16))), DomainException::class, 'approval permission');
@@ -277,7 +277,7 @@ test('stock documents: the location reports reconcile to the movements and to th
     }
     // Cost is a separate permission: an accountant reads the report without cost columns.
     $accountant = pl_create_user('stock-costs-' . bin2hex(random_bytes(8)) . '@example.test', 'Sample cost reader', 'Sample-test-password-' . bin2hex(random_bytes(8)));
-    DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $accountant, 'role' => 'accountant']);
+    sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $accountant, 'role' => 'accountant']);
     $hidden = pl_stock_by_location($accountant, $f['company_id'], $f['book_id'], '2026-01-06');
     assert_same(false, $hidden['cost_visible']);
     assert_same(null, $hidden['totals']['value_base']);
@@ -359,7 +359,7 @@ test('stock documents: print templates follow the record screen and its role rul
     $suffix = bin2hex(random_bytes(8));
     foreach (['accountant', 'viewer'] as $role) {
         $reader = pl_create_user('stock-print-' . $role . '-' . $suffix . '@example.test', 'Sample stock ' . $role, 'Sample-test-password-' . $suffix);
-        DB::insert('pl_company_members', ['company_id' => $f['company_id'], 'user_id' => $reader, 'role' => $role]);
+        sample_membership_insert(['company_id' => $f['company_id'], 'user_id' => $reader, 'role' => $role]);
         assert_same($issue['document_number'], pl_stock_document_print($reader, $f['company_id'], $f['book_id'], $issue['id'])['document_number'], 'A ' . $role . ' could not print the record screen.');
     }
     $stranger = pl_create_user('stock-print-stranger-' . $suffix . '@example.test', 'Sample stock stranger', 'Sample-test-password-' . $suffix);

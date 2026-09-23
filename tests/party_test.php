@@ -70,7 +70,7 @@ test('party mutations enforce revision, scope, membership and reserved schema bo
         $invalid=party_input();$invalid[$field]=$value;
         assert_throws(fn()=>pl_save_party($f['actor_id'],$f['company_id'],$f['book_id'],$invalid),DomainException::class);
     }
-    DB::insert('pl_company_members',['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role'=>'viewer']);
+    sample_membership_insert(['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role'=>'viewer']);
     assert_throws(fn()=>pl_save_party($other['actor_id'],$f['company_id'],$f['book_id'],party_input()),DomainException::class);
     assert_throws(fn()=>DB::query("UPDATE pl_party_status_history SET reason='changed' WHERE party_id=%i",$r['id']));
     assert_throws(fn()=>DB::delete('pl_party_actions','party_id=%i',$r['id']));

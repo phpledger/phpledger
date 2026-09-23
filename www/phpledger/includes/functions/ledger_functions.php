@@ -126,9 +126,8 @@ function pl_create_company(int $actorId, string $name, string $currency, string 
         }
         DB::insert('pl_companies', ['name' => $name, 'currency' => $currency, 'functional_currency' => $currency, 'presentation_currency' => $currency, 'start_date' => $startDate, 'fiscal_year_end' => $fiscalYearEnd, 'created_by' => $actorId, 'setup_status' => 'ready']);
         $companyId = (int) DB::insertId();
-        // 1.2 M7 dual write: the 1.1 ENUM and the new role_id both name the Owner role. The ENUM
-        // is dropped in 1.3; until then every membership write sets both (migration 040).
-        DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $actorId, 'role' => 'owner',
+        // Membership uses the protected Owner role definition.
+        DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $actorId,
             'role_id' => DB::queryFirstField("SELECT id FROM pl_roles WHERE company_id IS NULL AND slug = 'owner'")]);
         DB::insert('pl_books', ['company_id' => $companyId, 'name' => 'Primary book', 'functional_currency' => $currency, 'presentation_currency' => $currency]);
         $bookId = (int) DB::insertId();

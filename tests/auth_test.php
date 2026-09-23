@@ -146,8 +146,8 @@ test('company access enforces membership, read-only roles, and active accounts',
     $outsider = pl_create_user('outsider-' . $suffix . '@example.invalid', 'Outsider fixture', $password);
     $company = pl_create_company($owner, 'Permission fixture', 'USD', '2026-01-01');
     $companyId = $company['company_id'];
-    DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $accountant, 'role' => 'accountant']);
-    DB::insert('pl_company_members', ['company_id' => $companyId, 'user_id' => $viewer, 'role' => 'viewer']);
+    sample_membership_insert(['company_id' => $companyId, 'user_id' => $accountant, 'role' => 'accountant']);
+    sample_membership_insert(['company_id' => $companyId, 'user_id' => $viewer, 'role' => 'viewer']);
     assert_same('owner', pl_require_company_access($owner, $companyId, true)['role']);
     assert_same('accountant', pl_require_company_access($accountant, $companyId, true)['role']);
     assert_same('viewer', pl_require_company_access($viewer, $companyId)['role']);
