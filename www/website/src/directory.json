@@ -53,11 +53,11 @@
             ]
           },
           "file": "service-agency-1.0.0.json",
-          "sha256": "ef5dc27ba100dbcdb61e034e7093d4b6ba081b8fc1b06b92fd1fae02445d1d94"
+          "sha256": "9ddeb21d5b2e4c7d1b63e6e2c44d87a86173baabed6951bc4f4c6baab2e30269"
         },
         "files": {
-          "pack.json": "ef5dc27ba100dbcdb61e034e7093d4b6ba081b8fc1b06b92fd1fae02445d1d94",
-          "structure.json": "aa25cc817576a3763705a5f1017e30f3ff023ccb1f06f816d1596543d96e421e"
+          "pack.json": "9ddeb21d5b2e4c7d1b63e6e2c44d87a86173baabed6951bc4f4c6baab2e30269",
+          "structure.json": "cbe80799638056001c59e1101ac8a5bc1c20928525bbb206afb1a2e1a54d05a0"
         }
       },
       "inventory": {
@@ -65,12 +65,12 @@
         "type": "sample",
         "slug": "sample-service-agency",
         "version": "1.0.0",
-        "archive_bytes": 16391,
-        "archive_sha256": "54c6d2bbb10593d99428fa63ca2ee1c80c6dcf42113dafd9ef53a3d950912a7b",
-        "manifest_sha256": "4ea8081c4741c0cba2c06b6a6743ec594abd629b18e145e8fd9089c6514802a7",
+        "archive_bytes": 16461,
+        "archive_sha256": "cdcd6b272dc779cfe18588562ed498782b77122cc0780345cc1801b4f7f46986",
+        "manifest_sha256": "2fa7193a6bae61db32fde0ff6ebebd3b14ed69cb1d69da52aa96a7a1d0d86fd8",
         "files": {
-          "pack.json": "ef5dc27ba100dbcdb61e034e7093d4b6ba081b8fc1b06b92fd1fae02445d1d94",
-          "structure.json": "aa25cc817576a3763705a5f1017e30f3ff023ccb1f06f816d1596543d96e421e"
+          "pack.json": "9ddeb21d5b2e4c7d1b63e6e2c44d87a86173baabed6951bc4f4c6baab2e30269",
+          "structure.json": "cbe80799638056001c59e1101ac8a5bc1c20928525bbb206afb1a2e1a54d05a0"
         }
       }
     },
@@ -132,11 +132,11 @@
             ]
           },
           "file": "retail-shop-1.0.0.json",
-          "sha256": "5df40c8ea3e89f0e03ad0cac2d0fc936e41c56d91c2d29306374ea05a98e4103"
+          "sha256": "c02858466fcdf3f0f29eeff625781da6896ce88387bc7ff9fe01151adf2037b3"
         },
         "files": {
-          "pack.json": "5df40c8ea3e89f0e03ad0cac2d0fc936e41c56d91c2d29306374ea05a98e4103",
-          "structure.json": "fb3507e45f4b544d8e62cf723c6c87799f5733cbfa4ed64cbd56c1c7d36d3bef"
+          "pack.json": "c02858466fcdf3f0f29eeff625781da6896ce88387bc7ff9fe01151adf2037b3",
+          "structure.json": "92b3340973a403405acf7e9475c9fa4e50158f4eaf32896a26e10e4b9b47957e"
         }
       },
       "inventory": {
@@ -144,12 +144,12 @@
         "type": "sample",
         "slug": "sample-retail-shop",
         "version": "1.0.0",
-        "archive_bytes": 17951,
-        "archive_sha256": "8648fae40c6c47fd922ae84631660089ead00232b97ba1b8a05e1158a60acea8",
-        "manifest_sha256": "39be52589b0fe837bd4a4c50b00821431695cecfc0bf6816fae99ba02564ed71",
+        "archive_bytes": 18037,
+        "archive_sha256": "99bd765ec104d2eaebf355222edb7d648830d12e6763816afed11bb3c7a0e596",
+        "manifest_sha256": "164d8a6a974cd5aeee9791f8e45642f1dfab0fb0703c51fbf48ace6d53efd5c0",
         "files": {
-          "pack.json": "5df40c8ea3e89f0e03ad0cac2d0fc936e41c56d91c2d29306374ea05a98e4103",
-          "structure.json": "fb3507e45f4b544d8e62cf723c6c87799f5733cbfa4ed64cbd56c1c7d36d3bef"
+          "pack.json": "c02858466fcdf3f0f29eeff625781da6896ce88387bc7ff9fe01151adf2037b3",
+          "structure.json": "92b3340973a403405acf7e9475c9fa4e50158f4eaf32896a26e10e4b9b47957e"
         }
       }
     },
@@ -205,11 +205,11 @@
             ]
           },
           "file": "seasonal-business-1.0.0.json",
-          "sha256": "b4c9d8c1aad89c37fb443a67c5b2e5e9545b8eaab73122a336f46135eec71d7a"
+          "sha256": "0651cb9099abd22345b1b2c4efb9cc1d6ad5a482f6e31f92051e930129319817"
         },
         "files": {
-          "pack.json": "b4c9d8c1aad89c37fb443a67c5b2e5e9545b8eaab73122a336f46135eec71d7a",
-          "structure.json": "72bc7bad10f402ae14ff436d89026ca09e6be65aba5bec11d35aea851e5ee66b"
+          "pack.json": "0651cb9099abd22345b1b2c4efb9cc1d6ad5a482f6e31f92051e930129319817",
+          "structure.json": "4f78d8bf7c2b6ad2505b9c766ba3f172356fd50266c064cc59f917ffe75077a1"
         }
       },
       "inventory": {
@@ -217,12 +217,12 @@
         "type": "sample",
         "slug": "sample-seasonal-business",
         "version": "1.0.0",
-        "archive_bytes": 16192,
-        "archive_sha256": "8a0c52b97f8865fd8f25107fe396f993562cf7ab8d09f1d47afafbeaed5639e0",
-        "manifest_sha256": "c72003e03b6b6718e1f85a969c9ea01d83c8c622eefbdb0fe12df1c5d6775afd",
+        "archive_bytes": 16289,
+        "archive_sha256": "23e4be308fcc129a5405366ec3c4bb93669ae82e5047884291412e6fb321ee8b",
+        "manifest_sha256": "6b28ae55fa69bb293cfe68a26ff734f9a4f123878762b372c7eee82fc35a61ac",
         "files": {
-          "pack.json": "b4c9d8c1aad89c37fb443a67c5b2e5e9545b8eaab73122a336f46135eec71d7a",
-          "structure.json": "72bc7bad10f402ae14ff436d89026ca09e6be65aba5bec11d35aea851e5ee66b"
+          "pack.json": "0651cb9099abd22345b1b2c4efb9cc1d6ad5a482f6e31f92051e930129319817",
+          "structure.json": "4f78d8bf7c2b6ad2505b9c766ba3f172356fd50266c064cc59f917ffe75077a1"
         }
       }
     },
@@ -286,11 +286,11 @@
             ]
           },
           "file": "distributor-1.0.0.json",
-          "sha256": "b39e3061b05720949bb273e37d3b1ed08563049987a224ef88f952b224d48f85"
+          "sha256": "fe250c50fc9e42d2948d21fefd9d1897b6373107d6a2bdbbafa92ee8767f02c7"
         },
         "files": {
-          "pack.json": "b39e3061b05720949bb273e37d3b1ed08563049987a224ef88f952b224d48f85",
-          "structure.json": "f22efaa38953e32d33e73d46acba4faa0f137ff54f1fe4a85b21ec2df8857ee3"
+          "pack.json": "fe250c50fc9e42d2948d21fefd9d1897b6373107d6a2bdbbafa92ee8767f02c7",
+          "structure.json": "53c438f0b246fa3908223e1ff0acb348bdbb2899c631269cc63229bc33b3a13c"
         }
       },
       "inventory": {
@@ -298,12 +298,12 @@
         "type": "sample",
         "slug": "sample-distributor",
         "version": "1.0.0",
-        "archive_bytes": 18997,
-        "archive_sha256": "dfaaba44cb59f8db451978c16f727e31b071f3d7870156d0b3a20e94415e326a",
-        "manifest_sha256": "0d6615bd77978497527c84d2dfac0ee2cb8e1271004e39d7dbbd7c28d6f4bc9e",
+        "archive_bytes": 19088,
+        "archive_sha256": "4fe769cfdfa14dea65d75f5e4605bd8d055e3915d6c9056d8288aeceef2dac1f",
+        "manifest_sha256": "2efa0735d450ae347c0f07fcd5aaa7fc17410b6d5d329b259720aacaf38b8f0e",
         "files": {
-          "pack.json": "b39e3061b05720949bb273e37d3b1ed08563049987a224ef88f952b224d48f85",
-          "structure.json": "f22efaa38953e32d33e73d46acba4faa0f137ff54f1fe4a85b21ec2df8857ee3"
+          "pack.json": "fe250c50fc9e42d2948d21fefd9d1897b6373107d6a2bdbbafa92ee8767f02c7",
+          "structure.json": "53c438f0b246fa3908223e1ff0acb348bdbb2899c631269cc63229bc33b3a13c"
         }
       }
     },
@@ -365,11 +365,11 @@
             ]
           },
           "file": "trader-1.0.0.json",
-          "sha256": "edba8f2a3ba21b09efbb04e797ca50cbb86724de68a43def196df8c0066f994d"
+          "sha256": "44c1c517a83ae2f67c9cf34e6b4d021934a226051a1b4288f1e689244edd4b72"
         },
         "files": {
-          "pack.json": "edba8f2a3ba21b09efbb04e797ca50cbb86724de68a43def196df8c0066f994d",
-          "structure.json": "2cf79aac14d3f504fdf96e5901ab0af652ea1093b7c6a7d8d062318a3d89a3a0"
+          "pack.json": "44c1c517a83ae2f67c9cf34e6b4d021934a226051a1b4288f1e689244edd4b72",
+          "structure.json": "5526e20a641bffbef2e13081f02ce3649e83973c96a9744d94c419b47e7cbdda"
         }
       },
       "inventory": {
@@ -377,12 +377,12 @@
         "type": "sample",
         "slug": "sample-trader",
         "version": "1.0.0",
-        "archive_bytes": 18097,
-        "archive_sha256": "b6f91b9f53c9dce6a5d8dc4c1e77c9224ba19860ba81a230bfa4d487a1b063df",
-        "manifest_sha256": "849c929c98f5514eb1de07e5c91a4d27636de601919f99e9c6670f6547831aa7",
+        "archive_bytes": 18191,
+        "archive_sha256": "925ebb77497673745c638d024b57fe95fc7a08ed30df776598bf45c2e27f41f9",
+        "manifest_sha256": "c8f3f8efe1e6db7503073d23dc1e2d0c0a468da9975ec1d68229344e2551984a",
         "files": {
-          "pack.json": "edba8f2a3ba21b09efbb04e797ca50cbb86724de68a43def196df8c0066f994d",
-          "structure.json": "2cf79aac14d3f504fdf96e5901ab0af652ea1093b7c6a7d8d062318a3d89a3a0"
+          "pack.json": "44c1c517a83ae2f67c9cf34e6b4d021934a226051a1b4288f1e689244edd4b72",
+          "structure.json": "5526e20a641bffbef2e13081f02ce3649e83973c96a9744d94c419b47e7cbdda"
         }
       }
     },
@@ -442,11 +442,11 @@
             ]
           },
           "file": "restaurant-1.0.0.json",
-          "sha256": "bb6565319d6738661e858fbd53a6808c8d419ff52d4b78f35a017d1be6999967"
+          "sha256": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664"
         },
         "files": {
-          "pack.json": "bb6565319d6738661e858fbd53a6808c8d419ff52d4b78f35a017d1be6999967",
-          "structure.json": "d58717f54cd8ebd396b60e3e092bf946fe28409592bab82cfe2576ab0e29845d"
+          "pack.json": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664",
+          "structure.json": "155018b38193729d87d373a7513aa59a241b2315c1a31fd45893a57964d78c6f"
         }
       },
       "inventory": {
@@ -454,12 +454,12 @@
         "type": "sample",
         "slug": "sample-restaurant",
         "version": "1.0.0",
-        "archive_bytes": 17970,
-        "archive_sha256": "957c07a9b7010f53b66fa53357029a927fd9e69c60357d948152f4cb2151afeb",
-        "manifest_sha256": "f33ed9c6d729274e7eeafb830fb462e38ceeef009e6f4526fa2805216a3853fb",
+        "archive_bytes": 18050,
+        "archive_sha256": "2fcaf62dfc1e90d8825fcf08ed4bab3ee3f28dc30562e34042f3ef6687e443b1",
+        "manifest_sha256": "28f58acfb85e1088606edbdcd18a6023798ea4331c7b01322dec381b193a9855",
         "files": {
-          "pack.json": "bb6565319d6738661e858fbd53a6808c8d419ff52d4b78f35a017d1be6999967",
-          "structure.json": "d58717f54cd8ebd396b60e3e092bf946fe28409592bab82cfe2576ab0e29845d"
+          "pack.json": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664",
+          "structure.json": "155018b38193729d87d373a7513aa59a241b2315c1a31fd45893a57964d78c6f"
         }
       }
     },
@@ -515,11 +515,11 @@
             ]
           },
           "file": "membership-club-1.0.0.json",
-          "sha256": "11f3df030b8bd2199efd085dc496abb59d6f54937f07928542c869378c16841b"
+          "sha256": "59608630a1042db50a9d61d487a0db260388a719831de94b79566bc84aee4c47"
         },
         "files": {
-          "pack.json": "11f3df030b8bd2199efd085dc496abb59d6f54937f07928542c869378c16841b",
-          "structure.json": "284906c5315d10bf08c51cbbf124dc46667f641eeb9064ca69960212c279eacf"
+          "pack.json": "59608630a1042db50a9d61d487a0db260388a719831de94b79566bc84aee4c47",
+          "structure.json": "2b9d27af7e4a7cd3efac234fc159e61783d95015ad2c792168c0e3aafaca2a48"
         }
       },
       "inventory": {
@@ -527,12 +527,12 @@
         "type": "sample",
         "slug": "sample-membership-club",
         "version": "1.0.0",
-        "archive_bytes": 17009,
-        "archive_sha256": "f0096b5eefdf2bf15f6f39cdedb1ffbf732be3d9d572444b389f825fe60e92de",
-        "manifest_sha256": "9d9d4eb6f96ae6f377a3115a5842e457f44b326fbdc2c17aa04309d39bef90a4",
+        "archive_bytes": 17100,
+        "archive_sha256": "798477e066a89ed2b22d50ec5c0301ba0f31640b500e3abfbe2989524df44f02",
+        "manifest_sha256": "3a7c0cbbf2a2d971406b1df258df294222a0be524f946c5aacdcb12ef0f1d860",
         "files": {
-          "pack.json": "11f3df030b8bd2199efd085dc496abb59d6f54937f07928542c869378c16841b",
-          "structure.json": "284906c5315d10bf08c51cbbf124dc46667f641eeb9064ca69960212c279eacf"
+          "pack.json": "59608630a1042db50a9d61d487a0db260388a719831de94b79566bc84aee4c47",
+          "structure.json": "2b9d27af7e4a7cd3efac234fc159e61783d95015ad2c792168c0e3aafaca2a48"
         }
       }
     },
@@ -594,11 +594,11 @@
             ]
           },
           "file": "pharmacy-1.0.0.json",
-          "sha256": "6bcdc83cf502201ce308233a819b8994fc6937e4e0353f7bafc531b5e91ec7b2"
+          "sha256": "235b95787c529afd428c99e85a72c31eb387bef9763346aa5e49278e3163f95e"
         },
         "files": {
-          "pack.json": "6bcdc83cf502201ce308233a819b8994fc6937e4e0353f7bafc531b5e91ec7b2",
-          "structure.json": "93aa85e945ee2f90a06340c881aeadb473090c4d4250a008497026b458f4899d"
+          "pack.json": "235b95787c529afd428c99e85a72c31eb387bef9763346aa5e49278e3163f95e",
+          "structure.json": "9511910af8facbe58312eb58101c88b6ee59ff4e87c5a3a827d06163a5d9d557"
         }
       },
       "inventory": {
@@ -606,12 +606,12 @@
         "type": "sample",
         "slug": "sample-pharmacy",
         "version": "1.0.0",
-        "archive_bytes": 18182,
-        "archive_sha256": "569216fd185158c5fb06d35620fee4e72c1e4563b6106e21d56ddd7d267747db",
-        "manifest_sha256": "4bef59255e42316371bc0e4575b78872daac502dd79699ce75a29fd5b59fed4d",
+        "archive_bytes": 18263,
+        "archive_sha256": "625f0d178a3b8a0006d8d1649433905d77673b80b8e2314909ee147198a7ba83",
+        "manifest_sha256": "fd90671dab07252f31f0598354ddc58368052c4eca266c53ef3f722acfed468a",
         "files": {
-          "pack.json": "6bcdc83cf502201ce308233a819b8994fc6937e4e0353f7bafc531b5e91ec7b2",
-          "structure.json": "93aa85e945ee2f90a06340c881aeadb473090c4d4250a008497026b458f4899d"
+          "pack.json": "235b95787c529afd428c99e85a72c31eb387bef9763346aa5e49278e3163f95e",
+          "structure.json": "9511910af8facbe58312eb58101c88b6ee59ff4e87c5a3a827d06163a5d9d557"
         }
       }
     },
@@ -671,11 +671,11 @@
             ]
           },
           "file": "jewelry-studio-1.0.0.json",
-          "sha256": "f9f4db604b8ab4f04ebfbc5b82fc9bd30d641acad18177ccfaae642784eb403b"
+          "sha256": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538"
         },
         "files": {
-          "pack.json": "f9f4db604b8ab4f04ebfbc5b82fc9bd30d641acad18177ccfaae642784eb403b",
-          "structure.json": "ef069bf95a6359fd50ad5d42ae50071a79e9996fd9ad37218c25ac33e4d0efcf"
+          "pack.json": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538",
+          "structure.json": "43e68ecf255653bb3c0910d68595396af26a84aa61708c70820f40b4e897a049"
         }
       },
       "inventory": {
@@ -683,12 +683,12 @@
         "type": "sample",
         "slug": "sample-jewelry-studio",
         "version": "1.0.0",
-        "archive_bytes": 17042,
-        "archive_sha256": "1dc43f5d1c837e4f223859155125b48c7517cd684b41ffda8546b2d3d947217f",
-        "manifest_sha256": "b7d5c4f54af5c4d345e1b8fa87334a9110f659a9e980f98c5638cb0810074629",
+        "archive_bytes": 17124,
+        "archive_sha256": "523339c638d14416f9a026cb481a5a232c43db9d08eef86601a536ba92569828",
+        "manifest_sha256": "4c0abebd3b9318a0b0d43aa38c5c8ea74e11609c3b8eb8bf27df4f8af42ad1d9",
         "files": {
-          "pack.json": "f9f4db604b8ab4f04ebfbc5b82fc9bd30d641acad18177ccfaae642784eb403b",
-          "structure.json": "ef069bf95a6359fd50ad5d42ae50071a79e9996fd9ad37218c25ac33e4d0efcf"
+          "pack.json": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538",
+          "structure.json": "43e68ecf255653bb3c0910d68595396af26a84aa61708c70820f40b4e897a049"
         }
       }
     },
@@ -748,11 +748,11 @@
             ]
           },
           "file": "light-manufacturing-1.0.0.json",
-          "sha256": "db334ecd674b99317e15482f0ac04e1e80736a9863195787bb64599f881fe480"
+          "sha256": "9c63c622878ecf3e69a89f392ba3b673635ba951bd9e3757a2ce31aa80111b26"
         },
         "files": {
-          "pack.json": "db334ecd674b99317e15482f0ac04e1e80736a9863195787bb64599f881fe480",
-          "structure.json": "f9ddbeebd2efda50bf8aaa9f2290542fa67a16cc4aafffc2326687b42777b15b"
+          "pack.json": "9c63c622878ecf3e69a89f392ba3b673635ba951bd9e3757a2ce31aa80111b26",
+          "structure.json": "9324c0c3f277e4f432d0b780036f331a0ffc0f9dc65c91388626e9083d0059a5"
         }
       },
       "inventory": {
@@ -760,12 +760,12 @@
         "type": "sample",
         "slug": "sample-light-manufacturing",
         "version": "1.0.0",
-        "archive_bytes": 17113,
-        "archive_sha256": "37aee8d6732a01e414c049e41c07fa51caa0c7985adb1eff8c57c5dc5397859d",
-        "manifest_sha256": "01c18d99e3805ce5d932a865d1d73014c3e1c046e082f077a3a9ba923fa375d0",
+        "archive_bytes": 17194,
+        "archive_sha256": "75ba9ee5202483f32823689b917135badcfe8afd87e1cecb6c4e99c59d968934",
+        "manifest_sha256": "bdb918a780f307a19b89710c563762f2d6ba6c655f9b5429b7b0866bdf03f4f4",
         "files": {
-          "pack.json": "db334ecd674b99317e15482f0ac04e1e80736a9863195787bb64599f881fe480",
-          "structure.json": "f9ddbeebd2efda50bf8aaa9f2290542fa67a16cc4aafffc2326687b42777b15b"
+          "pack.json": "9c63c622878ecf3e69a89f392ba3b673635ba951bd9e3757a2ce31aa80111b26",
+          "structure.json": "9324c0c3f277e4f432d0b780036f331a0ffc0f9dc65c91388626e9083d0059a5"
         }
       }
     },
@@ -825,11 +825,11 @@
             ]
           },
           "file": "service-workshop-1.0.0.json",
-          "sha256": "7510c8ea6052243ad7aa0b70049adef0fa6d7a44a5af3431be9338536a068ea9"
+          "sha256": "8d8aa2dd5c4ea227ac29d8597cccc51711ffc9ac165a6846d75e82abfeeb6d2f"
         },
         "files": {
-          "pack.json": "7510c8ea6052243ad7aa0b70049adef0fa6d7a44a5af3431be9338536a068ea9",
-          "structure.json": "54491faa91445e606231b7d21287047b03ab66151837fbe40da89c01cd1b87d2"
+          "pack.json": "8d8aa2dd5c4ea227ac29d8597cccc51711ffc9ac165a6846d75e82abfeeb6d2f",
+          "structure.json": "548b3e8c6a30b929a2980f3d57e8e8795dc23ca780578d6777a7086e867ad0ed"
         }
       },
       "inventory": {
@@ -837,12 +837,12 @@
         "type": "sample",
         "slug": "sample-service-workshop",
         "version": "1.0.0",
-        "archive_bytes": 18849,
-        "archive_sha256": "39f32f77351257dc3c1661b5856da28799bc3d497995553d5247970296654e0e",
-        "manifest_sha256": "3c68526280ed3408a272ccfe2f82c454a62b6368213b6f86f8c47c977834f679",
+        "archive_bytes": 18930,
+        "archive_sha256": "17a89cfbe6c4a394fd4c3d7148dc2188c468801d6963b56c016abe5d47bc1716",
+        "manifest_sha256": "6af21193283765a95fb947ef48a081b14b8ce69d4f44be80e7a67ae3bd6b16b7",
         "files": {
-          "pack.json": "7510c8ea6052243ad7aa0b70049adef0fa6d7a44a5af3431be9338536a068ea9",
-          "structure.json": "54491faa91445e606231b7d21287047b03ab66151837fbe40da89c01cd1b87d2"
+          "pack.json": "8d8aa2dd5c4ea227ac29d8597cccc51711ffc9ac165a6846d75e82abfeeb6d2f",
+          "structure.json": "548b3e8c6a30b929a2980f3d57e8e8795dc23ca780578d6777a7086e867ad0ed"
         }
       }
     }
