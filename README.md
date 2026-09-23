@@ -115,6 +115,7 @@ Try PHP Ledger and tell us where a task became confusing. A small, reproducible 
 - **Report a bug:** [Issues](https://github.com/phpledger/phpledger/issues), using fictional records and sanitized diagnostics.
 - **Contribute:** help with documentation, translations, testing, design, code or reviewed accounting examples. Start with the [contributor guide](https://github.com/phpledger/phpledger/wiki/Contributing-and-Support) and [CLA](CLA.md).
 - **Report a security issue privately:** follow [SECURITY.md](SECURITY.md).
+- **Help fund the project:** if PHP Ledger is useful to you and you can contribute, [contact the maintainer about a donation or sponsorship](mailto:rmak78@gmail.com?subject=Supporting%20PHP%20Ledger).
 - **Discuss installation assistance or support:** [contact the project](mailto:rmak78@gmail.com).
 
 Help the project by trying a complete workflow, reporting a reproducible issue, improving a translation or contributing a reviewed change. [Join the discussion](https://github.com/phpledger/phpledger/discussions) to offer testing, documentation or development help.
