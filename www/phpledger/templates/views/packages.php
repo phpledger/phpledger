@@ -188,6 +188,7 @@ $badge = static function (string $trust, string $status): void {
         <form class="flex flex-wrap items-end gap-3" method="post" action="<?= pl_e(pl_url('/packages')) ?>" enctype="multipart/form-data">
             <?= pl_csrf_field() ?><?= pl_scope_fields($packageScope) ?>
             <input type="hidden" name="action" value="upload">
+            <input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(20))) ?>">
             <label class="field"><?= pl_e(pl_t('Package ZIP')) ?><input class="input" type="file" name="package" accept=".zip,application/zip" required></label>
             <button class="btn btn-secondary"><?= pl_e(pl_t('Unpack and review')) ?></button>
         </form>
