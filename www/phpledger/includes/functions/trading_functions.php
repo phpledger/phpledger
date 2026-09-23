@@ -32,6 +32,7 @@ function pl_trading_policy_defaults(): array
         'free_goods_account_id' => null,
         'free_goods_output_tax' => 'none',
         'cash_on_invoice_cap' => '0.0000',
+        'cash_shortfall_policy' => 'warning',
     ];
 }
 
@@ -39,7 +40,7 @@ function pl_trading_policy_defaults(): array
  * Read the effective policies of one book.
  *
  * @return array{discount_posting:string, discount_account_id:?int, free_goods_account_id:?int,
- *               free_goods_output_tax:string, cash_on_invoice_cap:string, revision:int}
+ *               free_goods_output_tax:string, cash_on_invoice_cap:string, cash_shortfall_policy:string, revision:int}
  */
 function pl_trading_policies(int $actorId, int $companyId, int $bookId): array
 {
@@ -54,6 +55,7 @@ function pl_trading_policies(int $actorId, int $companyId, int $bookId): array
             'free_goods_account_id' => $row['free_goods_account_id'] === null ? null : (int) $row['free_goods_account_id'],
             'free_goods_output_tax' => (string) $row['free_goods_output_tax'],
             'cash_on_invoice_cap' => bcadd((string) $row['cash_on_invoice_cap'], '0', 4),
+            'cash_shortfall_policy' => (string) $row['cash_shortfall_policy'],
             'revision' => (int) $row['revision'],
         ];
     }
@@ -61,7 +63,7 @@ function pl_trading_policies(int $actorId, int $companyId, int $bookId): array
 }
 
 /**
- * Save the B37 policies. Owner only, one revision at a time, with an immutable audit row
+ * Save the policies with policy.manage, one revision at a time, with an immutable audit row
  * recording who changed what and why. Posted documents are never restated: a policy change
  * applies to documents posted afterwards, which is why the audit trail keeps both states.
  */
@@ -88,6 +90,13 @@ function pl_save_trading_policies(int $actorId, int $companyId, int $bookId, arr
     $data = ['discount_posting' => $discountPosting, 'discount_account_id' => $discountAccountId,
         'free_goods_account_id' => $freeGoodsAccountId, 'free_goods_output_tax' => $freeGoodsTax,
         'cash_on_invoice_cap' => $cap];
+    // Older callers changing trading policies must preserve the administrator's cash choice.
+    if (array_key_exists('cash_shortfall_policy', $input)) {
+        if (!in_array($input['cash_shortfall_policy'], ['warning', 'strict'], true)) {
+            throw new DomainException('Choose warning only or strict cash and bank balance controls.');
+        }
+        $data['cash_shortfall_policy'] = $input['cash_shortfall_policy'];
+    }
     $hash = hash('sha256', json_encode([$actorId, $bookId, $data, $revision, $reason], JSON_THROW_ON_ERROR));
     return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $data, $revision, $reason, $key, $hash): array {
         pl_require_company_access($actorId, $companyId, true);
@@ -104,6 +113,7 @@ function pl_save_trading_policies(int $actorId, int $companyId, int $bookId, arr
         if ($before['revision'] !== $revision) {
             throw new DomainException('Someone changed these policies. Your values are retained; reload the current policies before applying your changes.');
         }
+        $data['cash_shortfall_policy'] ??= $before['cash_shortfall_policy'];
         if ($data['discount_posting'] === 'gross') {
             $account = $data['discount_account_id'] === null ? null : pl_get_account($actorId, $companyId, $bookId, $data['discount_account_id']);
             if ($account === null || !$account['is_active'] || $account['type'] !== 'income' || !$account['is_contra']) {

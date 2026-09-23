@@ -275,3 +275,14 @@ function pl_guidance_word_count(string $text): int
     $words = preg_split('/\s+/u', trim($text), -1, PREG_SPLIT_NO_EMPTY);
     return $words === false ? 0 : count($words);
 }
+
+/** View-to-help catalogue; unknown views use recovery guidance without guessing a file path. */
+function pl_guidance_pages(): array
+{
+    return pl_guidance_read('pages.php') ?? [];
+}
+
+function pl_guidance_page(string $view): string
+{
+    return (string) (pl_guidance_pages()[$view] ?? 'page-access');
+}

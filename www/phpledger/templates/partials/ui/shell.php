@@ -2,9 +2,12 @@
 declare(strict_types=1);
 $visibility = pl_company_visibility((int)$user['id'], (int)$company['id']);
 $moduleVisible = static fn (string $id): bool => pl_module_available((int)$user['id'], (int)$company['id'], (int)$company['book_id'], $id);
+$transactionWorkspace = $view === 'editor' ? ($input['kind'] ?? '') : ($filters['kind'] ?? $returnFilters['kind'] ?? $_GET['kind'] ?? '');
 $navGroups = [
     'Daily work' => [
-        ['/transactions', pl_t('Receipts & expenses'), 'receipt', ['transactions','editor','transaction-chooser'], true],
+        ['/transactions', pl_t('Receipts & expenses'), 'receipt', ($transactionWorkspace === '' || $view === 'transaction-chooser') ? ['transactions','transaction-chooser'] : [], true],
+        ['/transactions?kind=receipt', pl_t('Receipts'), 'receipt', $transactionWorkspace === 'receipt' ? ['transactions','editor'] : [], true],
+        ['/transactions?kind=expense', pl_t('Expenses'), 'receipt', $transactionWorkspace === 'expense' ? ['transactions','editor'] : [], true],
         ['/counter', pl_t('Counter sale'), 'cash-register', ['counter','counter-receipt'], $visibility['show_ar'] && $moduleVisible('inventory')],
         ['/pos', pl_t('Point of sale (sample)'), 'receipt', ['pos'], $moduleVisible('pos-showcase')],
         ['/general-journals', pl_t('Journals'), 'book', ['general-journals','general-editor','general-detail'], true],
@@ -122,7 +125,8 @@ $quickCreate = [
         <ol class="crumbs" aria-label="<?= pl_e(pl_t('Breadcrumb')) ?>"><li class="crumb"><a href="<?= pl_e(pl_url('/companies')) ?>"><?= pl_e(pl_t('Workspace')) ?></a></li><li class="crumb"><span aria-current="page"><?= pl_e($title) ?></span></li></ol>
         <div class="topbar-search"><button type="button" class="search-trigger" data-command-open aria-haspopup="dialog" hidden><?= pl_icon('search') ?><span><?= pl_e(pl_t('Search or jump to…')) ?></span><span class="kbd ms-auto"><?= pl_e(pl_t('Ctrl K')) ?></span></button></div>
         <div class="topbar-actions">
-            <?php if (pl_can_write($company)): ?><details class="menu"><summary class="btn btn-primary btn-sm"><?= pl_icon('plus') ?> <?= pl_e(pl_t('New')) ?></summary><div class="menu-panel menu-panel-end"><p class="menu-label"><?= pl_e(pl_t('Quick create')) ?></p><?php foreach ($quickCreate as [$href, $label, $visible]): if (!$visible) { continue; } ?><a class="menu-item" href="<?= pl_e(pl_url($href)) ?>"><?= pl_e($label) ?></a><?php endforeach; ?></div></details><?php endif; ?>
+            <?php pl_ui_page_help($view); ?>
+            <?php if (pl_can_write($company)): ?><details class="menu"><summary class="btn btn-primary btn-sm"><?= pl_icon('plus') ?> <?= pl_e(pl_t('New')) ?></summary><div class="menu-panel menu-panel-end"><p class="menu-label"><?= pl_e(pl_t('Quick create')) ?></p><?php foreach ($quickCreate as [$href, $label, $visible]): if (!$visible) { continue; } ?><a class="menu-item" href="<?= pl_e(pl_url($href)) ?>"><?= pl_icon((str_starts_with($href,'/transactions') || str_starts_with($href,'/receipts') || str_starts_with($href,'/expenses')) ? 'receipt' : (str_starts_with($href,'/parties') ? 'building' : 'file-text')) ?> <?= pl_e($label) ?></a><?php endforeach; ?></div></details><?php endif; ?>
             <?php if ($company['is_sample'] && pl_company_demo_pack((int)$user['id'], (int)$company['id'], (int)$company['book_id']) !== null): ?><a class="sample-guide-link max-lg:hidden" href="<?= pl_e(pl_url('/sample-guide')) ?>"><?= pl_e(pl_t('Sample guide')) ?> <?= pl_icon('arrow-right') ?></a><?php endif; ?>
             <details class="menu"><summary class="user-menu-trigger" aria-label="<?= pl_e(pl_t('User menu')) ?>"><span class="avatar"><?= pl_e(mb_strtoupper(mb_substr($user['display_name'], 0, 1))) ?></span><?= pl_icon('chevron-down') ?></summary><div class="menu-panel menu-panel-end"><p class="menu-label"><?= pl_e($user['display_name']) ?></p><?php if (!pl_demo_enabled()): ?><p class="menu-item-static"><?= pl_e($user['email']) ?></p><a class="menu-item" href="<?= pl_e(pl_url('/profile')) ?>"><?= pl_e(pl_t('Your profile')) ?></a><a class="menu-item" href="<?= pl_e(pl_url('/companies')) ?>"><?= pl_e(pl_t('Switch business')) ?></a><?php endif; ?><?php $localeSwitchId = 'topbar'; $localeSwitchClass = 'locale-switch-menu'; require __DIR__ . '/locale-switch.php'; ?><form action="<?= pl_e(pl_url('/logout')) ?>" method="post"><?= pl_csrf_field() ?><button type="submit" class="menu-item"><?= pl_icon('logout') ?> <?= pl_e(pl_demo_enabled() ? pl_t('Leave demo') : pl_t('Sign out')) ?></button></form></div></details>
         </div>

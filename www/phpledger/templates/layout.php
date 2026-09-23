@@ -16,6 +16,8 @@ $workspace = $user !== null && $company !== null && !in_array($view, ['oauth-con
     <link rel="preload" href="<?= pl_e(pl_url('/assets/fonts/InterVariable.woff2')) ?>" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="<?= pl_e(pl_url('/assets/app.css', ['v' => pl_app_version()])) ?>">
 
+    <script src="<?= pl_e(pl_url('/assets/help.js', ['v' => pl_app_version()])) ?>" defer></script>
+    <script src="<?= pl_e(pl_url('/assets/party-picker.js', ['v' => pl_app_version()])) ?>" defer></script>
     <script src="<?= pl_e(pl_url('/assets/app.js', ['v' => pl_app_version()])) ?>" defer></script>
 
 
@@ -34,11 +36,13 @@ $workspace = $user !== null && $company !== null && !in_array($view, ['oauth-con
 <main id="main" class="shell-main" tabindex="-1"><div class="shell-main-inner">
 <?php elseif ($posLayout): ?>
 <main id="main" tabindex="-1">
+<header class="context-help-header" aria-label="<?= pl_e(pl_t('Page help')) ?>"><?php pl_ui_page_help($view); ?></header>
 <?php else: ?>
 <div class="auth-shell"><div class="auth-card<?= in_array($view, ['login','oauth-consent','error'], true) ? '' : ' auth-card-wide' ?>">
 <?php $customLogo = function_exists('pl_logo_current') ? pl_logo_current() : null; ?>
 <a href="<?= pl_e(pl_url('/')) ?>" aria-label="<?= pl_e(pl_t('PHP Ledger home')) ?>"><?php if ($customLogo !== null): ?><img class="auth-logo" src="<?= pl_e(pl_logo_url($customLogo)) ?>" alt="<?= pl_e(pl_t('Business logo')) ?>" width="<?= $customLogo['width'] ?>" height="<?= $customLogo['height'] ?>"><?php else: ?><img class="auth-logo" src="<?= pl_e(pl_url('/assets/brand/phpledger-horizontal.png')) ?>" alt="<?= pl_e(pl_t('PHP Ledger')) ?>" width="2172" height="724"><?php endif; ?></a>
 <main id="main" tabindex="-1">
+<header class="context-help-header" aria-label="<?= pl_e(pl_t('Page help')) ?>"><?php pl_ui_page_help($view); ?></header>
 <?php endif; ?>
 <?php $insecureSite = pl_web_insecure_site_notice(); ?>
 <?php if ($insecureSite !== null): ?><div class="strip strip-warning" role="note"><?= pl_icon('alert-triangle') ?><p><?= pl_e($insecureSite) ?></p></div><?php endif; ?>

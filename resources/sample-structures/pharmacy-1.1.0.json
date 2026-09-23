@@ -1,0 +1,288 @@
+{
+  "contract": 1,
+  "id": "pharmacy",
+  "version": "1.1.0",
+  "name": "Meadow Training Pharmacy",
+  "business": "Non-medicinal training inventory",
+  "source_digest": "898c24a6b00af0f48048b3390810e408b8439852d36d23320e2db9404f49ab41",
+  "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
+  "accounts": [
+    {
+      "code": "1-130-00000-00",
+      "name": "Inventory",
+      "type": "asset"
+    },
+    {
+      "code": "4-200-00000-00",
+      "name": "Other Income",
+      "type": "income"
+    },
+    {
+      "code": "5-200-00000-00",
+      "name": "Cost of Sales",
+      "type": "expense"
+    },
+    {
+      "code": "1-100-21010-00",
+      "name": "Reserve bank",
+      "type": "asset",
+      "role": "cash_bank",
+      "money_kind": "bank"
+    },
+    {
+      "code": "1-100-21020-00",
+      "name": "Cash till",
+      "type": "asset",
+      "role": "cash_bank",
+      "money_kind": "physical"
+    },
+    {
+      "code": "1-100-21030-00",
+      "name": "Petty cash",
+      "type": "asset",
+      "role": "cash_bank",
+      "money_kind": "physical"
+    },
+    {
+      "code": "1-120-21200-00",
+      "name": "Prepaid insurance",
+      "type": "asset"
+    },
+    {
+      "code": "1-200-21300-00",
+      "name": "Equipment at cost",
+      "type": "asset"
+    },
+    {
+      "code": "1-900-21390-00",
+      "name": "Accumulated depreciation",
+      "type": "asset",
+      "is_contra": true
+    },
+    {
+      "code": "1-120-21500-00",
+      "name": "Staff advances",
+      "type": "asset"
+    },
+    {
+      "code": "2-100-22100-00",
+      "name": "Accrued staff bonus",
+      "type": "liability"
+    },
+    {
+      "code": "2-110-22200-00",
+      "name": "Term loan",
+      "type": "liability"
+    },
+    {
+      "code": "2-100-22300-00",
+      "name": "Net salaries payable",
+      "type": "liability"
+    },
+    {
+      "code": "2-100-22310-00",
+      "name": "Withholding tax payable",
+      "type": "liability"
+    },
+    {
+      "code": "2-100-22320-00",
+      "name": "Social security payable",
+      "type": "liability"
+    },
+    {
+      "code": "2-100-22330-00",
+      "name": "Provident fund payable",
+      "type": "liability"
+    },
+    {
+      "code": "2-120-22400-00",
+      "name": "Deferred support income",
+      "type": "liability"
+    },
+    {
+      "code": "5-100-25100-00",
+      "name": "Fictional staff salaries",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25150-00",
+      "name": "Employer contributions",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25200-00",
+      "name": "Rent",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25300-00",
+      "name": "Utilities",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25400-00",
+      "name": "Insurance expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25500-00",
+      "name": "Depreciation expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25600-00",
+      "name": "Loan interest",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "4-200-24800-00",
+      "name": "Gain or loss on asset disposal",
+      "type": "income"
+    },
+    {
+      "code": "1-130-21400-00",
+      "name": "Stock - manual support schedule",
+      "type": "asset"
+    },
+    {
+      "code": "5-200-25700-00",
+      "name": "Cost of sales - manual schedule",
+      "type": "expense",
+      "role": "expense",
+      "report_classification": "cost_of_sales"
+    },
+    {
+      "code": "1-130-31410-00",
+      "name": "Training goods inventory",
+      "type": "asset"
+    },
+    {
+      "code": "1-130-31420-00",
+      "name": "Other health retail inventory",
+      "type": "asset"
+    },
+    {
+      "code": "4-100-34100-00",
+      "name": "Training goods income",
+      "type": "income"
+    },
+    {
+      "code": "5-200-35110-00",
+      "name": "Training goods cost of sales",
+      "type": "expense",
+      "report_classification": "cost_of_sales"
+    },
+    {
+      "code": "5-100-35120-00",
+      "name": "Expiry and stock write-downs",
+      "type": "expense"
+    }
+  ],
+  "open_item_accounts": [
+    "1-110-10001-00",
+    "2-100-10001-00"
+  ],
+  "money_account_kinds": {
+    "1-100-10001-00": "bank",
+    "1-100-21010-00": "bank",
+    "1-100-21020-00": "physical",
+    "1-100-21030-00": "physical"
+  },
+  "modules": [
+    "inventory",
+    "pos-showcase",
+    "trading-documents"
+  ],
+  "packages": [],
+  "number_series": [
+    {
+      "type": "invoice",
+      "prefix": "INV",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "customer_credit",
+      "prefix": "CR",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    }
+  ],
+  "policies": {
+    "discount_posting": "net",
+    "free_goods_output_tax": "none",
+    "cash_on_invoice_cap": "0.0000"
+  },
+  "parties": [
+    {
+      "legal_name": "Demo Business Buyer (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1-110-10001-00",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Demo Counter Customer (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1-110-10001-00",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Demo Supply Partner (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2-100-10001-00",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Demo Premises Provider (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2-100-10001-00",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    }
+  ],
+  "products": [
+    {
+      "sku": "TRAINING-PACK",
+      "name": "DEMO empty training carton A - not medicine (Sample)",
+      "kind": "stock",
+      "base_unit": "carton",
+      "selling_price": "10.0000",
+      "sales_code": "4-100-34100-00",
+      "purchase_code": "5-100-10001-00",
+      "inventory_code": "1-130-31410-00",
+      "cogs_code": "5-200-35110-00"
+    },
+    {
+      "sku": "STORAGE-POUCH",
+      "name": "DEMO storage pouch B - not medicine (Sample)",
+      "kind": "stock",
+      "base_unit": "pouch",
+      "selling_price": "6.0000",
+      "sales_code": "4-100-34100-00",
+      "purchase_code": "5-100-10001-00",
+      "inventory_code": "1-130-31410-00",
+      "cogs_code": "5-200-35110-00"
+    }
+  ],
+  "tax_codes": []
+}

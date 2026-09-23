@@ -5,7 +5,11 @@ function ledger_fixture(string $currency = 'USD', string $date = '2026-01-01', s
 {
     $suffix = bin2hex(random_bytes(8));
     $actorId = pl_create_user('ledger-' . $suffix . '@example.test', 'Sample ledger tester', 'Sample-test-password-' . $suffix);
-    return ['actor_id' => $actorId] + pl_create_company($actorId, 'Sample company ' . $suffix, $currency, $date, $fiscalEnd);
+    $fixture = ['actor_id' => $actorId] + pl_create_company($actorId, 'Sample company ' . $suffix, $currency, $date, $fiscalEnd);
+    // General-ledger service fixtures explicitly model a fictional agreed credit facility;
+    // cash-policy tests reset it. Real companies and bundled samples receive no such default.
+    DB::update('pl_accounts', ['money_kind' => 'bank', 'overdraft_enabled' => 1, 'overdraft_limit' => '1000000.0000'], 'id=%i', $fixture['accounts']['1000']);
+    return $fixture;
 }
 
 function ledger_payload(array $fixture, string $amount = '12.3400', ?string $key = null): array

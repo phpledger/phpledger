@@ -267,6 +267,10 @@ compose file is a strong check, and it is not the same thing.
   So Coolify is two pull requests, not one.
 
 
+## 1.4.0 source preparation (not published)
+
+The production Compose default and unpinned catalogue candidate version fields now target 1.4.0. These are source manifests only; the image tag and wrapper packages cannot be used until the exact 1.4.0 ZIP and official images are published and pulled. Keep 1.3.0 archive URLs, checksums and the Umbrel image digest/version together until the matching 1.4.0 archive hash and multi-architecture digest are verified. The YunoHost archive pin, Installatron version directory, Softaculous installed-size measurement, Cloudron version history and provider submissions also need exact-artifact review. No provider acceptance or live deployment is implied by these candidate values.
+
 ## 1.3.0 candidate metadata and remaining artifact pins
 
 Unpinned active image/default versions target 1.3.0. The production Compose default is pinned to 1.3.0; operators may explicitly choose another published tag. This is source preparation, not provider publication or acceptance.

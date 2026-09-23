@@ -142,6 +142,9 @@
 /* Sample exercises share the workspace type, spacing and focus tokens. */
 @layer components {
   .sample-guide { font-size: .8125rem; }
+  .sample-guide .page-header { position: static; flex-wrap: wrap; }
+  .sample-guide .page-header > :first-child { flex: 1 1 18rem; }
+  .sample-guide .page-header-actions { flex-wrap: wrap; }
   .sample-guide p { line-height: 1.5; }
   .sample-guide ul, .sample-guide ol { padding-inline-start: 1.25rem; }
   .sample-guide li { margin-block-end: .25rem; }

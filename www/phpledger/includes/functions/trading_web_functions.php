@@ -20,6 +20,7 @@ function pl_web_accounting_policies(int $actorId, int $companyId, int $bookId, a
                 'free_goods_account_id' => pl_web_text($_POST, 'free_goods_account_id') === '' ? '' : pl_web_id($_POST, 'free_goods_account_id'),
                 'free_goods_output_tax' => pl_web_text($_POST, 'free_goods_output_tax'),
                 'cash_on_invoice_cap' => pl_web_text($_POST, 'cash_on_invoice_cap'),
+                'cash_shortfall_policy' => pl_web_text($_POST, 'cash_shortfall_policy'),
                 'revision' => pl_web_policy_revision($_POST),
                 'reason' => pl_web_text($_POST, 'reason'),
                 'idempotency_key' => pl_web_text($_POST, 'request_key'),
@@ -33,6 +34,7 @@ function pl_web_accounting_policies(int $actorId, int $companyId, int $bookId, a
     pl_render('accounting-policies', [
         'title' => 'Accounting policies', 'user' => $user, 'company' => $company,
         'policies' => pl_trading_policies($actorId, $companyId, $bookId),
+        'canEditPolicies' => pl_user_can($actorId, $companyId, 'policy.manage') && !pl_demo_enabled(),
         'accounts' => pl_trading_policy_account_options($actorId, $companyId, $bookId),
         'history' => pl_trading_policy_history($actorId, $companyId),
         'requestKey' => bin2hex(random_bytes(16)),

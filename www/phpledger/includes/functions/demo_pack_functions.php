@@ -1,6 +1,19 @@
 <?php
 declare(strict_types=1);
 
+/** Classify explicitly authored sample money accounts, never a name/code heuristic. */
+function pl_demo_classify_money_accounts(int $actorId, int $companyId, int $bookId, array $mapping, array $kinds): void
+{
+    foreach ($kinds as $code => $kind) {
+        if (!isset($mapping[$code]) || !in_array($kind, ['physical', 'bank'], true)) { throw new DomainException('The sample has an invalid money-account classification.'); }
+        $account = pl_get_account($actorId, $companyId, $bookId, (int) $mapping[$code]);
+        if (($account['money_kind'] ?? null) === $kind) { continue; }
+        pl_save_account($actorId, $companyId, $bookId, array_replace($account, [
+            'money_kind'=>$kind, 'is_active'=>true, 'reason'=>'Use the explicit bank or physical-cash classification authored in the sample contract.',
+        ]), (int) $account['id'], (int) $account['revision']);
+    }
+}
+
 /** Only these original bundled pack identities are selectable, never a request path. */
 function pl_demo_pack_catalog(): array
 {
@@ -14,7 +27,7 @@ function pl_demo_pack_catalog(): array
     $result = [];
     foreach ($catalog as $pack) {
         if (!in_array($pack['id'], $allowed, true)
-            || $pack['version'] !== '1.0.0' || $pack['file'] !== $pack['id'] . '-1.0.0.json'
+            || !in_array($pack['version'], ['1.0.0', '1.1.0'], true) || $pack['file'] !== $pack['id'] . '-' . $pack['version'] . '.json'
             || !in_array($pack['status'], ['released_demo_only', 'preview_only'], true)
             || !is_string($pack['capability_note']) || $pack['capability_note'] === ''
             || !preg_match('/^[a-f0-9]{64}$/D', $pack['sha256'])) {
@@ -73,6 +86,17 @@ function pl_demo_starter_playground(?string $startDate = null): array
         ],
         'tax' => ['code' => 'DEMO5', 'name' => 'Sample example 5 percent', 'percentage' => '5'],
     ];
+    $pack['version'] = '1.1.0';
+    $pack['account_code_format'] = 'structured';
+    $pack['money_account_kinds'] = ['1-100-10001-00' => 'bank'];
+    $pack['code_aliases'] = ['1300'=>'1-130-21300-00','1350'=>'1-110-21350-00','2100'=>'2-100-22100-00',
+        '2150'=>'2-100-22150-00','5100'=>'5-200-25100-00','5200'=>'5-100-25200-00'];
+    $pack['account_headings'] = [['code'=>'1-130-00000-00','name'=>'Inventory','type'=>'asset'],
+        ['code'=>'5-200-00000-00','name'=>'Cost of Sales','type'=>'expense']];
+    foreach ($pack['accounts'] as &$account) {
+        $oldCode = $account['code']; $account['code'] = $pack['code_aliases'][$oldCode];
+        if ($oldCode === '5100') { $account['report_classification'] = 'cost_of_sales'; }
+    } unset($account);
     $pack['digest'] = hash('sha256', json_encode($pack, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
     return $pack;
 }
@@ -108,12 +132,14 @@ function pl_seed_demo_starter_playground(int $actorId, int $companyId, int $book
         }
         $mapping = pl_account_code_mapping($company['accounts']);
         $reason = 'Sample zero-balance starter playground, prepared before visitor assignment.';
-        foreach ($pack['accounts'] as $definition) {
+        foreach (array_merge($pack['account_headings'] ?? [], $pack['accounts']) as $definition) {
             $account = pl_save_account($actorId, $companyId, $bookId, $definition + [
                 'is_active' => true, 'reason' => $reason, 'creation_key' => 'starter-account:' . $definition['code'],
             ]);
             $mapping[$definition['code']] = $account['id'];
         }
+        foreach (($pack['code_aliases'] ?? []) as $old => $code) { $mapping[$old] = $mapping[$code]; }
+        pl_demo_classify_money_accounts($actorId, $companyId, $bookId, $mapping, $pack['money_account_kinds']);
         foreach (['inventory', 'purchasing'] as $module) {
             $manifest = pl_module_registry()[$module];
             pl_set_company_module($actorId, $companyId, $module, true, 0, $manifest['digest'], $reason, 'starter-module:' . $module);
@@ -175,7 +201,7 @@ function pl_demo_pack_reconcile(int $actorId, int $companyId, int $bookId, array
             // so an authored checkpoint has nothing to say about it and an exact comparison must
             // not demand one. Every account that can carry a figure is still compared.
             if (in_array((string) ($row['level'] ?? 'account'), ['class', 'group'], true)) { continue; }
-            $actual[(string) (($row['legacy_code'] ?? '') !== '' ? $row['legacy_code'] : $row['code'])] = $row['balance'];
+            $actual[(string) (($pack['account_code_format'] ?? '') !== 'structured' && ($row['legacy_code'] ?? '') !== '' ? $row['legacy_code'] : $row['code'])] = $row['balance'];
         }
         $expected = $checkpoint['balances'];
         ksort($actual); ksort($expected);
@@ -253,7 +279,7 @@ function pl_demo_operational_role_type(string $role): array
 {
     if ($role === 'accounts_receivable') { return ['asset', 'receivables']; }
     if ($role === 'accounts_payable') { return ['liability', 'payables']; }
-    if (in_array($role, ['cash_on_hand', 'bank_current'], true)) { return ['asset', 'cash_bank']; }
+    if (in_array($role, ['cash_on_hand', 'bank_current', 'route_cash'], true)) { return ['asset', 'cash_bank']; }
     if ($role === 'owner_equity') { return ['equity', 'owner_equity']; }
     if (in_array($role, ['deferred_revenue', 'customer_advance', 'store_credit_liability'], true)
         || str_contains($role, 'payable') || str_contains($role, 'liability') || str_contains($role, 'grni')) { return ['liability', null]; }
@@ -291,7 +317,16 @@ function pl_demo_operational_master_data(int $actorId, int $companyId, int $book
     $mapping = []; $next = ['asset' => 1810, 'liability' => 2810, 'equity' => 3810, 'income' => 4810, 'expense' => 5810];
     foreach ($roles as $role) {
         [$type, $accountRole] = pl_demo_operational_role_type($role);
-        $code = (string) ($next[$type]++);
+        $legacyCode = (string) ($next[$type]++);
+        $code = $legacyCode;
+        if (($pack['account_code_format'] ?? '') === 'structured') {
+            $group = $type === 'asset' ? (in_array($role, ['cash_on_hand', 'bank_current', 'route_cash'], true) ? 100 : (str_contains($role, 'inventory') ? 130 : 110)) : ($type === 'liability' && in_array($role, ['deferred_revenue', 'store_credit_liability'], true) ? 120 : ($role === 'cost_of_goods_sold' ? 200 : 100));
+            $code = pl_account_code_format(['asset'=>1,'liability'=>2,'equity'=>3,'income'=>4,'expense'=>5][$type], $group, 40000 + (int) $legacyCode);
+            $headingCode = substr($code, 0, 5) . '-00000-00';
+            if (!DB::queryFirstField('SELECT id FROM pl_accounts WHERE company_id=%i AND book_id=%i AND code=%s', $companyId, $bookId, $headingCode)) {
+                pl_save_account($actorId, $companyId, $bookId, ['code'=>$headingCode, 'name'=>$group === 130 ? 'Inventory' : 'Cost of Sales', 'type'=>$type, 'is_active'=>true, 'reason'=>'Explicit sample accounting heading.', 'creation_key'=>$prefix.'heading:'.$headingCode]);
+            }
+        }
         $accountLabel = is_string($roleLabels[$role] ?? null) && $roleLabels[$role] !== '' ? $roleLabels[$role] : pl_demo_operational_role_label($role);
         $classification = [];
         if ($role === 'cost_of_goods_sold') {
@@ -300,7 +335,7 @@ function pl_demo_operational_master_data(int $actorId, int $companyId, int $book
             if ($prior === null || $prior['report_classification'] === 'cost_of_sales') { $classification = ['report_classification'=>'cost_of_sales']; }
         }
         $account = pl_save_account($actorId, $companyId, $bookId, ['code' => $code, 'name' => $accountLabel, 'type' => $type,
-            'role' => $accountRole, 'is_active' => true, 'reason' => 'Deterministic operational account for the isolated sample.',
+            'role' => $accountRole, 'money_kind' => ['cash_on_hand'=>'physical','route_cash'=>'physical','bank_current'=>'bank'][$role] ?? null, 'is_active' => true, 'reason' => 'Deterministic operational account for the isolated sample.',
             'creation_key' => $prefix . 'operational-account:' . $role] + $classification);
         $mapping[$role] = (int) $account['id'];
     }
@@ -511,6 +546,33 @@ function pl_demo_operational_replay(int $actorId, int $companyId, int $bookId, a
     foreach ($events as $event) {
         $kind = (string) $event['kind']; $receipt = ['event_id' => $event['id'], 'kind' => $kind, 'source_reference' => $event['source_reference'] ?? $event['id'], 'status' => 'replayed', 'journal_ids' => [], 'document_ids' => [], 'movement_ids' => []];
         $key = $prefix . 'operational-event:' . $event['id'];
+        $validationIssue = $event['validation_issue'] ?? null;
+        if (is_array($validationIssue)) {
+            if ($validationIssue['code'] === 'bank_shortfall') {
+                if ($bank === null) { throw new RuntimeException('The reviewed bank shortfall has no bank account.'); }
+                $preview = pl_cash_payment_preview($actorId, $companyId, $bookId, (int) $bank, $event['date'], $validationIssue['required']);
+                // The authored warning is checked against real posted records under the
+                // seed's book lock. A changed scenario must be reviewed, never silently
+                // assigned invented funding, a facility or an inaccurate warning.
+                if (!$preview['insufficient_cash'] || $preview['balance'] !== $validationIssue['available']
+                    || $preview['overdraft_limit'] !== $validationIssue['overdraft_limit']) {
+                    throw new RuntimeException('The bank shortfall evidence needs review for ' . $event['id'] . ': posted balance ' . $preview['balance'] . ', authored balance ' . $validationIssue['available'] . ', recorded limit ' . $preview['overdraft_limit'] . ', insufficient ' . ($preview['insufficient_cash'] ? 'yes' : 'no') . '. Earlier staged events: ' . implode(', ', array_column($staged, 'event_id')) . '.');
+                }
+                $validationIssue['posted_balance_verified'] = true;
+                if ($kind === 'supplier_payment') {
+                    $partyId = pl_demo_operational_event_party($event, $master, true);
+                    foreach (array_reverse($billIds) as $billId) {
+                        $bill = pl_get_ar_document($actorId, $companyId, $bookId, $billId);
+                        if ((int) $bill['party_id'] === $partyId && bccomp($bill['outstanding_fc'], $validationIssue['required'], 4) >= 0) { $receipt['unpaid_document_id'] = $billId; break; }
+                    }
+                    if (!isset($receipt['unpaid_document_id'])) { throw new RuntimeException('The staged supplier payment needs review: no matching unpaid bill supports its amount.'); }
+                }
+            } elseif ($validationIssue['code'] === 'source_not_posted' && isset($genericIds[$validationIssue['related_event_id']])) {
+                throw new RuntimeException('The staged reversal has a posted source and its sample evidence needs review.');
+            }
+            $staged[] = ['event_id' => $event['id'], 'kind' => $kind, 'reason' => $validationIssue['reason'], 'validation_issue' => $validationIssue];
+            $receipt['status'] = 'staged'; $receipt['validation_issue'] = $validationIssue; $receipts[] = $receipt; continue;
+        }
         if (in_array($kind, ['invoice', 'credit_sale'], true)) {
             if (!pl_demo_operational_stock_available($actorId, $companyId, $bookId, $event, $master)) {
                 $staged[] = ['event_id' => $event['id'], 'kind' => $kind, 'reason' => 'The contract sale needs opening stock that is retained as evidence rather than posted by the sample importer.']; $receipt['status'] = 'staged'; $receipts[] = $receipt; continue;
@@ -597,6 +659,12 @@ function pl_demo_operational_replay(int $actorId, int $companyId, int $bookId, a
         }
         $receipts[] = $receipt;
     }
+    foreach (($evidence['bank_projection_excludes_unposted_sources'] ?? []) as $excludedId) {
+        $excluded = array_values(array_filter($receipts, static fn (array $row): bool => $row['event_id'] === $excludedId));
+        if (count($excluded) !== 1 || $excluded[0]['status'] !== 'staged' || $excluded[0]['journal_ids'] !== []) {
+            throw new RuntimeException('The sample bank projection excludes a source that is no longer unposted: ' . $excludedId . '. Review its funding evidence.');
+        }
+    }
     $reconciledCount = pl_demo_operational_reconcile($companyId, $bookId, $events, $master, $receipts);
     // The contract above is what this business did; the showcase below is what 1.2.0 can
     // do with it. It runs after the reconcile so a showcase posting can never be mistaken
@@ -658,6 +726,9 @@ function pl_demo_showcase_numbering(int $actorId, int $companyId, int $bookId): 
 /** A showcase-only account, outside the operational role block, created once per sample. */
 function pl_demo_showcase_account(int $actorId, int $companyId, int $bookId, string $prefix, string $code, string $name, string $type): int
 {
+    if (str_contains($prefix, ':1.1.0:')) {
+        $code = pl_account_code_format(['asset'=>1,'liability'=>2,'equity'=>3,'income'=>4,'expense'=>5][$type], $type === 'asset' ? 110 : 100, 50000 + (int) $code);
+    }
     return (int) pl_save_account($actorId, $companyId, $bookId, ['code' => $code, 'name' => $name, 'type' => $type,
         'role' => null, 'is_active' => true, 'reason' => 'Sample account for the 1.2.0 showcase.',
         'creation_key' => $prefix . 'showcase-account:' . $code])['id'];
@@ -1016,13 +1087,29 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
         }
         $prefix = 'sample:' . $pack['id'] . ':' . $pack['version'] . ':';
         $mapping = pl_account_code_mapping($company['accounts']);
-        foreach ($pack['accounts'] as $definition) {
+        foreach (array_merge($pack['account_headings'] ?? [], $pack['accounts']) as $definition) {
             $account = pl_save_account($actorId, $companyId, $bookId, $definition + [
                 'is_active' => true, 'reason' => 'Original sample chart and manual support schedules.',
                 'creation_key' => $prefix . 'account:' . $definition['code'],
             ]);
             $mapping[$definition['code']] = $account['id'];
         }
+        // Keep old guide aliases local to this new pack; existing books are never renumbered.
+        foreach (($pack['code_aliases'] ?? []) as $old => $code) { $mapping[$old] = $mapping[$code]; }
+        pl_demo_classify_money_accounts($actorId, $companyId, $bookId, $mapping, $pack['money_account_kinds'] ?? ['1000'=>'bank','1010'=>'bank','1020'=>'physical','1030'=>'physical']);
+        $documentParties = [];
+        foreach (($pack['document_parties'] ?? []) as $definition) {
+            $customer = $definition['role'] === 'customer';
+            $party = pl_save_party($actorId, $companyId, $bookId, [
+                'legal_name' => $definition['name'], 'entity_type' => 'private_company', 'country_code' => 'ZZ',
+                'is_customer' => $customer, 'is_vendor' => !$customer, 'currency' => $company['currency'],
+                'ar_account_id' => $customer ? $mapping[$definition['key'] === 'design-client' && isset($mapping['1150']) ? '1150' : '1100'] : null, 'ap_account_id' => !$customer ? $mapping['2000'] : null,
+                'notes' => 'Fictional party explicitly linked to the versioned sample sources.',
+                'reason' => 'Prepare linked sample receipt and payment parties.', 'request_key' => $prefix . 'document-party:' . $definition['key'],
+            ]);
+            $documentParties[$definition['key']] = (int) $party['id'];
+        }
+        $storyInvoices = []; $storySources = [];
         // B64: a printed invoice, receipt or statement carries the seller's own block, and
         // an empty profile prints the bare company name. Every sample fills it in.
         pl_save_company_profile($actorId, $companyId, $pack['company_profile'] + [
@@ -1053,34 +1140,57 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
         pl_create_period($actorId, $companyId, $bookId, ['start_date' => '2026-01-01', 'end_date' => '2026-12-31',
             'reason' => 'Open practice year for sample visitor actions.', 'request_key' => $prefix . 'practice']);
         foreach ($pack['events'] as $event) {
+            $postedJournalId = null;
             if ($event['kind'] === 'owner_transaction') {
                 // Capital introduced, the owner's loan, its repayment and drawings go through the
                 // owner-transactions service so every sample shows them where the owner looks (B61).
-                pl_post_owner_transaction($actorId, $companyId, $bookId, [
+                $ownerPosted = pl_post_owner_transaction($actorId, $companyId, $bookId, [
                     'kind' => $event['owner_kind'], 'date' => $event['date'], 'amount' => $event['amount'],
                     'cash_account_id' => $mapping[$event['money_code']], 'owner_account_id' => $mapping[$event['owner_code']],
                     'description' => $event['description'], 'creation_key' => $prefix . $event['key'],
                 ] + (isset($event['partner_key']) ? ['partner_id' => $partnerIds[$event['partner_key']]] : []));
-            } elseif ($event['kind'] === 'receipt') {
+                $postedJournalId = (int) $ownerPosted['id'];
+            } elseif ($event['kind'] === 'story_invoice') {
+                $invoice = pl_save_ar_document($actorId, $companyId, $bookId, [
+                    'kind' => 'invoice', 'date' => $event['date'], 'due_date' => pl_demo_operational_due_date($event['date']),
+                    'currency' => $company['currency'], 'party_id' => $documentParties[$event['party_key']],
+                    'reference' => $event['reference'], 'notes' => $event['description'], 'creation_key' => $prefix . $event['key'],
+                    'price_mode' => 'exclusive', 'lines' => [['account_id' => $mapping['4000'], 'description' => 'Design review (Sample)',
+                        'quantity' => '1.0000', 'unit_price' => $event['amount']]],
+                ]);
+                $posted = pl_post_ar_document($actorId, $companyId, $bookId, (int) $invoice['id'], (int) $invoice['revision']);
+                $storyInvoices[$event['key']] = (int) $posted['id'];
+                $postedJournalId = (int) $posted['journal_id'];
+            } elseif ($event['kind'] === 'story_collection') {
+                $settled = pl_settle_ar_document($actorId, $companyId, $bookId, $storyInvoices[$event['invoice_key']], [
+                    'bank_account_id' => $mapping['1000'], 'amount_fc' => $event['amount'], 'date' => $event['date'],
+                    'description' => $event['description'], 'idempotency_key' => $prefix . $event['key'],
+                ]);
+                $postedJournalId = (int) $settled['journal_id'];
+            } elseif (in_array($event['kind'], ['receipt', 'expense'], true)) {
                 $source = pl_save_document($actorId, $companyId, $bookId, [
-                    'kind' => 'receipt', 'date' => $event['date'], 'amount' => $event['amount'],
+                    'kind' => $event['kind'], 'date' => $event['date'], 'amount' => $event['amount'],
+                    'party_id' => isset($event['party_key']) ? $documentParties[$event['party_key']] : null,
                     'money_account_id' => $mapping[$event['money_code']], 'category_account_id' => $mapping[$event['category_code']],
                     'counterparty' => $event['counterparty'], 'reference' => $event['reference'], 'memo' => $event['description'],
                     'creation_key' => $prefix . $event['key'],
                 ]);
-                pl_post_document($actorId, $companyId, $bookId, $source['id'], $source['revision']);
+                $postedDocument = pl_post_document($actorId, $companyId, $bookId, $source['id'], $source['revision']);
+                $postedJournalId = (int) $postedDocument['journal_id'];
             } else {
                 $lines = array_map(static fn (array $row): array => ['account_id' => $mapping[$row['code']],
                     'debit' => $row['debit'], 'credit' => $row['credit'], 'description' => $row['description']], $event['lines']);
                 $source = pl_save_general_draft($actorId, $companyId, $bookId, ['date' => $event['date'],
                     'reference' => $event['reference'], 'description' => $event['description'], 'lines' => $lines,
                     'creation_key' => $prefix . $event['key']]);
-                pl_post_general_draft($actorId, $companyId, $bookId, $source['id'], $source['revision']);
+                $postedGeneral = pl_post_general_draft($actorId, $companyId, $bookId, $source['id'], $source['revision']);
+                $postedJournalId = (int) $postedGeneral['journal_id'];
                 if ($event['reverse']) { pl_reverse_general_draft($actorId, $companyId, $bookId, $source['id'], $event['date'], 'Original sample correction: reverse wrong-cost; replacement is correct-cost on 2025-08-21.'); }
             }
+            $storySources[$event['key']] = $postedJournalId;
         }
         foreach ($pack['drafts'] as $event) {
-            pl_save_document($actorId, $companyId, $bookId, $event + ['money_account_id' => $mapping[$event['money_code'] ?? '1000'],
+            pl_save_document($actorId, $companyId, $bookId, $event + ['party_id' => isset($event['party_key']) ? $documentParties[$event['party_key']] : null, 'money_account_id' => $mapping[$event['money_code'] ?? '1000'],
                 'category_account_id' => $mapping[$event['kind'] === 'receipt' ? '4000' : '5000'], 'creation_key' => $prefix . $event['key']]);
         }
         pl_demo_pack_reconcile($actorId, $companyId, $bookId, $pack);
@@ -1093,7 +1203,7 @@ function pl_seed_demo_pack(int $actorId, int $companyId, int $bookId, string $id
         }
         $snapshot = json_encode(['sample_pack' => ['id' => $pack['id'], 'version' => $pack['version'], 'digest' => $pack['digest'],
             'date' => $pack['start_date'], 'currency' => $company['currency'], 'checkpoints' => 36,
-            'numbering' => $numbering, 'partner_ids' => $partnerIds,
+            'numbering' => $numbering, 'partner_ids' => $partnerIds, 'story_sources' => $storySources,
             'operational_replay' => $operationalReplay]], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
         pl_record_installation_history($actorId, $companyId, $bookId, 'sample', pl_starter_template(), $snapshot);
         $manifest = pl_module_registry()['pos-showcase'];
@@ -1119,5 +1229,6 @@ function pl_company_demo_pack(int $actorId, int $companyId, int $bookId): ?array
     if ($snapshot['version'] !== $pack['version'] || !hash_equals($pack['digest'], $snapshot['digest'])) {
         throw new DomainException('This sample guide has changed since your company was created. Start a fresh sample to use the current guide.');
     }
+    $pack['story_sources'] = $snapshot['story_sources'] ?? [];
     return $pack;
 }

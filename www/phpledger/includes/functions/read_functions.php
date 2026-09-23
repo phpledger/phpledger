@@ -150,6 +150,7 @@ function pl_read_fields(array $row, array $fields): array
     $result = array_intersect_key($row, array_flip($fields));
     foreach ($result as $key => &$value) {
         if ($value !== null && ($key === 'id' || str_ends_with($key, '_id'))) { $value = (int) $value; }
+        if ($key === 'overdraft_enabled') { $value = (bool) $value; }
         if ($value !== null && str_ends_with($key, '_at')) { $value = str_replace(' ', 'T', $value) . 'Z'; }
     }
     unset($value);
@@ -164,7 +165,7 @@ function pl_read_journal(array $row, int $page, int $size): array
 
 function pl_read_source(array $row, string $type, int $page, int $size): array
 {
-    $result = pl_read_fields($row, ['id','company_id','book_id','number','date','document_date','kind','status','reference','counterparty','memo','description','amount','money_account_id','category_account_id','journal_id','original_journal_id','reversal_journal_id','revision','created_at','updated_at']);
+    $result = pl_read_fields($row, ['id','company_id','book_id','number','date','document_date','kind','status','reference','counterparty','party_id','memo','description','amount','money_account_id','category_account_id','journal_id','original_journal_id','reversal_journal_id','revision','created_at','updated_at']);
     $history = array_map(static fn (array $revision): array => pl_read_fields($revision, ['revision','journal_id','reversal_journal_id','actor_id','recorded_at']) + ['source_snapshot' => $revision['source_snapshot']], $row['posting_history'] ?? []);
     $result['posting_history'] = pl_read_page($history, $page, $size);
     if ($type === 'general_journal') {
@@ -257,7 +258,7 @@ function pl_read_operation(string $connectionId, string $operation, array $input
         $bookInfo = pl_ledger_book($company, $book);
         $data = match ($operation) {
             'capabilities' => ['read_operations' => pl_connection_read_operations($connection), 'financial_writes' => false, 'enabled_modules' => array_values(array_filter(array_keys(pl_module_registry()), static fn (string $id): bool => pl_module_available($actor, $company, $book, $id)))],
-            'accounts' => pl_read_page(array_map(static fn (array $row): array => pl_read_fields($row, ['id','code','name','type','role','is_active']), DB::query('SELECT id, code, name, type, role, is_active FROM pl_accounts WHERE company_id = %i AND book_id = %i ORDER BY code, id', $company, $book)), $page, $size),
+            'accounts' => pl_read_page(array_map(static fn (array $row): array => pl_read_fields($row, ['id','code','name','type','role','is_active','money_kind','currency','overdraft_enabled','overdraft_limit','facility_currency']), DB::query('SELECT a.id,a.code,a.name,a.type,a.role,a.is_active,a.money_kind,a.currency,a.overdraft_enabled,a.overdraft_limit,COALESCE(a.currency,b.functional_currency) AS facility_currency FROM pl_accounts a JOIN pl_books b ON b.id=a.book_id AND b.company_id=a.company_id WHERE a.company_id = %i AND a.book_id = %i ORDER BY a.code,a.id', $company, $book)), $page, $size),
             'trial_balance' => pl_trial_balance($actor, $company, $book, $args['as_of']),
             'profit_loss' => pl_profit_loss($actor, $company, $book, $args['from'], $args['to']),
             'balance_sheet' => pl_balance_sheet($actor, $company, $book, $args['as_of']),
@@ -293,7 +294,7 @@ function pl_read_operation(string $connectionId, string $operation, array $input
         if (in_array($operation, ['transactions','general_journals','account_statement'], true)) {
             $key = match ($operation) { 'transactions' => 'documents', 'general_journals' => 'rows', default => 'movements' };
             if ($operation !== 'account_statement') {
-                $data[$key] = array_map(static fn (array $row): array => pl_read_fields($row, ['id','number','date','document_date','kind','status','reference','counterparty','memo','description','amount','totals','journal_id','reversal_journal_id']), $data[$key]);
+                $data[$key] = array_map(static fn (array $row): array => pl_read_fields($row, ['id','number','date','document_date','kind','status','reference','counterparty','party_id','memo','description','amount','totals','journal_id','reversal_journal_id']), $data[$key]);
             }
             $data['pagination'] = pl_read_pagination($data['total'], $data['page'], $size);
             unset($data['page'], $data['pages']);

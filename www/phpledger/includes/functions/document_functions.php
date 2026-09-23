@@ -19,16 +19,31 @@ function pl_normalize_document(array $input): array
             throw new DomainException('Choose both a cash/bank account and a category.');
         }
     }
+    $partyId = $input['party_id'] ?? null;
+    if ($partyId !== null && (!is_int($partyId) || $partyId < 1)) { throw new DomainException('Choose a valid party.'); }
     return [
         'kind' => $kind,
         'document_date' => pl_ledger_date(pl_ledger_text($input['date'] ?? null, 'Transaction date', 10)),
         'amount' => $amount,
         'money_account_id' => $input['money_account_id'],
         'category_account_id' => $input['category_account_id'],
-        'counterparty' => pl_ledger_text($input['counterparty'] ?? null, 'Paid to / received from', 160),
+        'party_id' => $partyId,
+        'counterparty' => $partyId === null ? pl_ledger_text($input['counterparty'] ?? '', 'Paid to / received from', 160) : '',
         'reference' => pl_ledger_text($input['reference'] ?? '', 'Reference', 120, false),
         'memo' => pl_ledger_text($input['memo'] ?? '', 'Memo', 500, false),
     ];
+}
+
+/** Link only eligible company master records; roles do not restrict the direction of money. */
+function pl_document_party(int $companyId, array $document): array
+{
+    if (($document['party_id'] ?? null) === null) { return $document; }
+    $party = DB::queryFirstRow('SELECT legal_name,status FROM pl_parties WHERE id=%i AND company_id=%i FOR SHARE', $document['party_id'], $companyId);
+    if (!$party || !in_array($party['status'], ['draft','under_review','approved'], true)) {
+        throw new DomainException('Choose an available party from this company. Parties on hold, blacklisted or archived cannot receive new transactions.');
+    }
+    $document['counterparty'] = $party['legal_name'];
+    return $document;
 }
 
 function pl_validate_document_accounts(int $companyId, int $bookId, array $document): void
@@ -52,6 +67,7 @@ function pl_document_row(array $row): array
         $row[$field] = (int) $row[$field];
     }
     $row['journal_id'] = $row['journal_id'] === null ? null : (int) $row['journal_id'];
+    $row['party_id'] = ($row['party_id'] ?? null) === null ? null : (int) $row['party_id'];
     $row['reversal_journal_id'] = ($row['reversal_journal_id'] ?? null) === null ? null : (int) $row['reversal_journal_id'];
     $row['amount'] = bcadd((string) $row['amount'], '0', 4);
     $row['date'] = $row['document_date'];
@@ -85,22 +101,28 @@ function pl_get_document(int $actorId, int $companyId, int $bookId, int $documen
 
 function pl_save_document(int $actorId, int $companyId, int $bookId, array $input, ?int $documentId = null, ?int $expectedRevision = null): array
 {
+    $partyProvided = array_key_exists('party_id', $input);
     $data = pl_normalize_document($input);
     $key = $documentId === null ? pl_request_key(pl_ledger_text($input['creation_key'] ?? null, 'Request identity', 128)) : null;
     $hash = hash('sha256', json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
-    return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $data, $key, $hash, $documentId, $expectedRevision): array {
+    return pl_ledger_transaction(function () use ($actorId, $companyId, $bookId, $data, $key, $hash, $documentId, $expectedRevision, $partyProvided): array {
         pl_require_company_access($actorId, $companyId, true);
         pl_ledger_book($companyId, $bookId, true);
         pl_require_book_ready($companyId);
-        pl_validate_document_accounts($companyId, $bookId, $data);
         if ($documentId === null) {
             $existing = DB::queryFirstRow('SELECT id, creation_hash FROM pl_documents WHERE company_id = %i AND book_id = %i AND creation_key = %s FOR UPDATE', $companyId, $bookId, $key);
             if ($existing) {
-                if (!hash_equals((string) $existing['creation_hash'], $hash)) {
+                $legacyData = $data;
+                unset($legacyData['party_id']);
+                $legacyHash = hash('sha256', json_encode($legacyData, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
+                if (!hash_equals((string) $existing['creation_hash'], $hash)
+                    && !(($data['party_id'] ?? null) === null && hash_equals((string)$existing['creation_hash'],$legacyHash))) {
                     throw new DomainException('This form already created a different draft. Open the saved draft or start a new transaction.');
                 }
                 return pl_get_document($actorId, $companyId, $bookId, (int) $existing['id']);
             }
+            $data = pl_document_party($companyId, $data);
+            pl_validate_document_accounts($companyId, $bookId, $data);
             pl_demo_require_document_capacity($companyId, $bookId);
             DB::insert('pl_documents', $data + [
                 'company_id' => $companyId, 'book_id' => $bookId, 'creation_key' => $key, 'creation_hash' => $hash,
@@ -108,7 +130,7 @@ function pl_save_document(int $actorId, int $companyId, int $bookId, array $inpu
             ]);
             $id = (int) DB::insertId();
         } else {
-            $existing = DB::queryFirstRow('SELECT id, revision, kind, journal_id FROM pl_documents WHERE id = %i AND company_id = %i AND book_id = %i FOR UPDATE', $documentId, $companyId, $bookId);
+            $existing = DB::queryFirstRow('SELECT id, revision, kind, journal_id, party_id FROM pl_documents WHERE id = %i AND company_id = %i AND book_id = %i FOR UPDATE', $documentId, $companyId, $bookId);
             if (!$existing) {
                 throw new DomainException('This transaction is not available in the selected company and book.');
             }
@@ -121,6 +143,12 @@ function pl_save_document(int $actorId, int $companyId, int $bookId, array $inpu
             if ($data['kind'] !== $existing['kind']) {
                 throw new DomainException('A saved receipt cannot be changed into an expense, or vice versa. Start a new transaction.');
             }
+            if ($existing['party_id'] !== null && $data['party_id'] === null) {
+                if ($partyProvided) { throw new DomainException('Choose another party to change the saved link; a linked transaction cannot be changed back to an unlinked name.'); }
+                $data['party_id'] = (int)$existing['party_id'];
+            }
+            $data = pl_document_party($companyId, $data);
+            pl_validate_document_accounts($companyId, $bookId, $data);
             DB::update('pl_documents', $data + ['revision' => $expectedRevision + 1, 'updated_by' => $actorId, 'updated_at' => gmdate('Y-m-d H:i:s')], 'id = %i', $documentId);
             $id = $documentId;
         }
@@ -134,6 +162,7 @@ function pl_preview_document(int $actorId, int $companyId, int $bookId, array $i
     pl_require_company_access($actorId, $companyId);
     $book = pl_ledger_book($companyId, $bookId);
     $document = pl_normalize_document($input);
+    $document = pl_document_party($companyId, $document);
     pl_validate_document_accounts($companyId, $bookId, $document);
     $payload = pl_document_posting_payload($document + ['id'=>0], $book['currency']);
     foreach ($payload['lines'] as &$line) {
@@ -177,6 +206,8 @@ function pl_post_document(int $actorId, int $companyId, int $bookId, int $docume
             throw new DomainException('This draft changed after you reviewed it. Review the latest saved values before posting.');
         }
         pl_validate_document_accounts($companyId, $bookId, $document);
+        // Validate current eligibility without changing the saved historical name snapshot.
+        pl_document_party($companyId, $document);
         $journal = pl_post_journal($actorId, $companyId, $bookId, pl_document_posting_payload($document, $book['currency']));
         DB::update('pl_documents', ['journal_id' => $journal['id'], 'updated_by' => $actorId, 'updated_at' => gmdate('Y-m-d H:i:s')], 'id = %i', $documentId);
         return pl_get_document($actorId, $companyId, $bookId, $documentId);

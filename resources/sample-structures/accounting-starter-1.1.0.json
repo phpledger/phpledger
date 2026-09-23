@@ -1,0 +1,138 @@
+{
+  "contract": 1,
+  "id": "accounting-starter",
+  "version": "1.1.0",
+  "name": "Accounting starter playground",
+  "business": "Invoices, bills, purchasing and stock",
+  "note": "Written by hand rather than generated, because this sample is built in code and has no pack file to read. It carries the same structure pl_demo_starter_playground() creates: the six accounts invoicing, purchasing and stock need, Inventory and Purchasing, a practice customer and supplier, two products and one clearly sample tax rate. It has no transactions to leave behind, so a skeleton and the full sample bring in the same thing here.",
+  "accounts": [
+    {
+      "code": "1-130-00000-00",
+      "name": "Inventory",
+      "type": "asset"
+    },
+    {
+      "code": "5-200-00000-00",
+      "name": "Cost of Sales",
+      "type": "expense"
+    },
+    {
+      "code": "1-130-21300-00",
+      "name": "Stock on hand",
+      "type": "asset"
+    },
+    {
+      "code": "1-110-21350-00",
+      "name": "Sample input tax",
+      "type": "asset"
+    },
+    {
+      "code": "2-100-22100-00",
+      "name": "Goods received awaiting bills",
+      "type": "liability"
+    },
+    {
+      "code": "2-100-22150-00",
+      "name": "Sample output tax",
+      "type": "liability"
+    },
+    {
+      "code": "5-200-25100-00",
+      "name": "Cost of goods sold",
+      "type": "expense",
+      "report_classification": "cost_of_sales"
+    },
+    {
+      "code": "5-100-25200-00",
+      "name": "Purchase variance and rounding",
+      "type": "expense"
+    }
+  ],
+  "open_item_accounts": [
+    "1-110-10001-00",
+    "2-100-10001-00"
+  ],
+  "modules": [
+    "inventory",
+    "purchasing"
+  ],
+  "packages": [],
+  "number_series": [
+    {
+      "type": "invoice",
+      "prefix": "INV",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "customer_credit",
+      "prefix": "CR",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "bill",
+      "prefix": "BILL",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "supplier_credit",
+      "prefix": "SC",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    }
+  ],
+  "policies": {},
+  "parties": [
+    {
+      "legal_name": "Sample customer and supplier",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": true,
+      "ar_code": "1-110-10001-00",
+      "ap_code": "2-100-10001-00",
+      "notes": "A practice party to try an invoice or a bill against. Country ZZ marks it as sample data; rename or deactivate it once your own customers are in."
+    }
+  ],
+  "products": [
+    {
+      "sku": "SAMPLE-GOODS",
+      "name": "Sample goods",
+      "kind": "stock",
+      "base_unit": "each",
+      "selling_price": "25.0000",
+      "inventory_code": "1-130-21300-00",
+      "cogs_code": "5-200-25100-00",
+      "sales_code": "4-100-10001-00",
+      "purchase_code": "5-100-10001-00"
+    },
+    {
+      "sku": "SAMPLE-SERVICE",
+      "name": "Sample service",
+      "kind": "nonstock",
+      "base_unit": "service",
+      "selling_price": "50.0000",
+      "sales_code": "4-100-10001-00",
+      "purchase_code": "5-100-10001-00"
+    }
+  ],
+  "tax_codes": [
+    {
+      "code": "DEMO5",
+      "name": "Sample example 5 percent",
+      "treatment": "standard",
+      "percentage": "5",
+      "sales_code": "2-100-22150-00",
+      "purchase_code": "1-110-21350-00"
+    }
+  ],
+  "money_account_kinds": {
+    "1-100-10001-00": "bank"
+  }
+}

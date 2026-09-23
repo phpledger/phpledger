@@ -1,11 +1,11 @@
 [
   {
     "id": "service-agency",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Cedar Studio",
     "business": "Professional services / agency",
-    "source_count": 87,
-    "journal_count": 85,
+    "source_count": 111,
+    "journal_count": 109,
     "draft_count": 3,
     "status": "released_demo_only",
     "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -25,12 +25,12 @@
         "The open 2026 drafts are separate practice records and do not alter closed history."
       ]
     },
-    "file": "service-agency-1.0.0.json",
-    "sha256": "9ddeb21d5b2e4c7d1b63e6e2c44d87a86173baabed6951bc4f4c6baab2e30269"
+    "file": "service-agency-1.1.0.json",
+    "sha256": "ac6bdf94ab46884fda066c2cc8a055c3d46cfe02dbb4c3730b9d0ed7231cec33"
   },
   {
     "id": "retail-shop",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Willow Corner Shop",
     "business": "Retail shop",
     "source_count": 85,
@@ -54,12 +54,12 @@
         "Barcode scanning and register sessions remain future UI features."
       ]
     },
-    "file": "retail-shop-1.0.0.json",
-    "sha256": "c02858466fcdf3f0f29eeff625781da6896ce88387bc7ff9fe01151adf2037b3"
+    "file": "retail-shop-1.1.0.json",
+    "sha256": "300748da05a356dda7792e186a8b9ee41dba2a4bff03cc3b7d471a03014cbb52"
   },
   {
     "id": "seasonal-business",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Sunrise Garden Services",
     "business": "Seasonal business",
     "source_count": 85,
@@ -83,12 +83,12 @@
         "Profit and cash are reviewed through the existing statements and account movements."
       ]
     },
-    "file": "seasonal-business-1.0.0.json",
-    "sha256": "0651cb9099abd22345b1b2c4efb9cc1d6ad5a482f6e31f92051e930129319817"
+    "file": "seasonal-business-1.1.0.json",
+    "sha256": "6292e9da6eb1b5880f73943fd8a542c33a282695e169cf842872aa2ebb0803f2"
   },
   {
     "id": "distributor",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Harbor Supply Company",
     "business": "Distribution",
     "source_count": 85,
@@ -112,12 +112,12 @@
         "Customer and supplier settlement remains separate from operational delivery status."
       ]
     },
-    "file": "distributor-1.0.0.json",
-    "sha256": "fe250c50fc9e42d2948d21fefd9d1897b6373107d6a2bdbbafa92ee8767f02c7"
+    "file": "distributor-1.1.0.json",
+    "sha256": "70163a74f0b77de93bcfb4f1e5382bfdeacf67e8873d59ad7269bcf7f6204e25"
   },
   {
     "id": "trader",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Harbour Trade",
     "business": "Wholesale / trader",
     "source_count": 85,
@@ -141,12 +141,12 @@
         "The pack uses one stock location and does not claim pricing-list or sales-order functionality."
       ]
     },
-    "file": "trader-1.0.0.json",
-    "sha256": "44c1c517a83ae2f67c9cf34e6b4d021934a226051a1b4288f1e689244edd4b72"
+    "file": "trader-1.1.0.json",
+    "sha256": "b39ac5e2b83594ee47e54c52ed64cd58ef22112734ce14bb6a60340892a714d3"
   },
   {
     "id": "restaurant",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Cedar Table",
     "business": "Restaurant / cafe",
     "source_count": 85,
@@ -170,12 +170,12 @@
         "Inventory and cash totals reconcile to the posted ledger events."
       ]
     },
-    "file": "restaurant-1.0.0.json",
-    "sha256": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664"
+    "file": "restaurant-1.1.0.json",
+    "sha256": "d07e565615ec83fb4e58dd4c48467658154849676fdeff50927545375fb13665"
   },
   {
     "id": "membership-club",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Riverside Community Club",
     "business": "Membership club",
     "source_count": 85,
@@ -199,12 +199,12 @@
         "Opening AR/AP detail remains evidence reconciled to the opening control journal."
       ]
     },
-    "file": "membership-club-1.0.0.json",
-    "sha256": "59608630a1042db50a9d61d487a0db260388a719831de94b79566bc84aee4c47"
+    "file": "membership-club-1.1.0.json",
+    "sha256": "7e5551dd96a087e40b8d56af0a56c6103f8a8200f5001f8046125101c014b041"
   },
   {
     "id": "pharmacy",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Meadow Training Pharmacy",
     "business": "Non-medicinal training inventory",
     "source_count": 85,
@@ -228,12 +228,12 @@
         "Expiry metadata is illustrative fixture data, not a regulatory control."
       ]
     },
-    "file": "pharmacy-1.0.0.json",
-    "sha256": "235b95787c529afd428c99e85a72c31eb387bef9763346aa5e49278e3163f95e"
+    "file": "pharmacy-1.1.0.json",
+    "sha256": "898c24a6b00af0f48048b3390810e408b8439852d36d23320e2db9404f49ab41"
   },
   {
     "id": "jewelry-studio",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Lantern Finch Jewelry Studio",
     "business": "Jewelry studio",
     "source_count": 85,
@@ -257,12 +257,12 @@
         "The pack is a bookkeeping preview; specialist treatment and runtime replay are outside this candidate contract."
       ]
     },
-    "file": "jewelry-studio-1.0.0.json",
-    "sha256": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538"
+    "file": "jewelry-studio-1.1.0.json",
+    "sha256": "89747c66fc7f979fab676b47b28ba0d26a323f4edea2dcf45ffff9cf8d30d092"
   },
   {
     "id": "light-manufacturing",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Maple Bench Works",
     "business": "Light manufacturing",
     "source_count": 85,
@@ -286,12 +286,12 @@
         "The pack is a bookkeeping preview; production costing and conversion controls are outside the current module."
       ]
     },
-    "file": "light-manufacturing-1.0.0.json",
-    "sha256": "9c63c622878ecf3e69a89f392ba3b673635ba951bd9e3757a2ce31aa80111b26"
+    "file": "light-manufacturing-1.1.0.json",
+    "sha256": "b68b85e3bad1c27d0bd7c9c06ecbe8fd723809327e77f1ebf20d04d580ffd4f4"
   },
   {
     "id": "service-workshop",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Wheel & Spoke Workshop",
     "business": "Service workshop",
     "source_count": 85,
@@ -315,7 +315,7 @@
         "Parts and service income remain distinguishable in the teaching scenario."
       ]
     },
-    "file": "service-workshop-1.0.0.json",
-    "sha256": "8d8aa2dd5c4ea227ac29d8597cccc51711ffc9ac165a6846d75e82abfeeb6d2f"
+    "file": "service-workshop-1.1.0.json",
+    "sha256": "be970b701570a7b6f0e72a4bad2ab84a3e1864395fa910af694e421cd10f5aa9"
   }
 ]

@@ -82,3 +82,7 @@ country; it is used because the application offers the euro as a base currency.
 
 See `docs/DEVELOPMENT.md`, "Adding a help concept or a jurisdiction note". New files must also be
 added to `tools/package-files.json`, or they will not ship in the release archive.
+
+## Page coverage
+
+`pages.php` maps every application view to its contextual concept; `routes.php` lists browser page routes, including installation and account-access screens. POST actions and file downloads have no independent page header. Unknown extension views receive recovery guidance until their own coverage is registered. The guidance suite checks the view and route catalogues against the source. `help.js` provides optional dismissal; native details remain readable without JavaScript.

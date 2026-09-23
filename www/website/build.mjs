@@ -9,6 +9,8 @@
  *         src/css/*.css                     concatenated in sorted order
  *         src/js/site.js
  *         src/static/**                     copied verbatim into public/
+ *         ../../resources/demo-packs        verified company profiles and learning chapters
+ *         ../phpledger/public/assets/sample-companies/*.svg shared fictional company marks
  * Writes  public/<path>index.html (or public/404.html), public/assets/site.css, public/assets/site.js,
  *         public/sitemap.xml, public/news/feed.xml (only when article pages exist),
  *         public/releases/index.json (release feed read by installations; see releases-feed.mjs),
@@ -28,6 +30,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { writeReleaseFeed } from './releases-feed.mjs';
 import { sampleDirectoryPages, writeSampleDirectory } from './sample-directory.mjs';
+import { sampleCompanyPages, copySampleCompanyLogos } from './sample-company-pages.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(ROOT, 'src');
@@ -71,8 +74,8 @@ const absolute = (sitePath) => (/^[a-z][a-z0-9+.-]*:/i.test(sitePath) ? sitePath
 
 /* ---------- pages ---------- */
 
-function parsePage(file, id) {
-  const raw = readText(file);
+function parsePage(file, id, suppliedRaw = null) {
+  const raw = suppliedRaw ?? readText(file);
   const match = raw.match(/^\s*<!--\s*(\{[\s\S]*?\})\s*-->[ \t]*\n?/);
   if (!match) fail(`${id}: the file must start with an HTML comment holding JSON front matter`);
   let meta;
@@ -134,6 +137,9 @@ function loadPages() {
   const names = fs.readdirSync(dir).filter((name) => name.endsWith('.html')).sort();
   if (!names.length) fail('src/pages has no .html files');
   const pages = [...names.map((name) => parsePage(path.join(dir, name), `src/pages/${name}`)), ...sampleDirectoryPages(path.join(SRC, 'directory.json'))];
+  for (const {content, ...meta} of sampleCompanyPages(ROOT)) {
+    pages.push(parsePage(null, `sample-packs:${meta.path}`, `<!-- ${JSON.stringify(meta)} -->\n${content}`));
+  }
   const byPath = new Map();
   for (const page of pages) {
     if (byPath.has(page.path)) fail(`${page.id}: path ${page.path} is also used by ${byPath.get(page.path).id}`);
@@ -580,6 +586,7 @@ function build() {
   const assets = { cssHref: `/assets/site.css?v=${cssHash}`, jsHref: `/assets/site.js?v=${jsHash}`, hasFeed: articles.length > 0 };
   const reserved = new Set([...pages.map((page) => page.outFile), 'sitemap.xml', 'assets/site.css', 'assets/site.js', 'news/feed.xml', 'llms.txt', 'ai/summary.json', 'ai/faq.json', '.well-known/ai.txt', 'releases/index.json']);
   const staticFiles = copyStatic(reserved);
+  copySampleCompanyLogos(ROOT, PUBLIC);
   writeDiscovery(pages);
 
   const written = [];

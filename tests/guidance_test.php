@@ -67,7 +67,7 @@ test('the built stylesheet and script still carry what the bubble promises', fun
         assert_true(str_contains($styles, $class), 'The built stylesheet has no ' . $class . '; rebuild it with npm run build:css.');
     }
     assert_true(str_contains($styles, '30rem'), 'The built stylesheet lost the narrow-screen sheet placement.');
-    $script = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/public/assets/app.js');
+    $script = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/public/assets/help.js');
     assert_true(str_contains($script, 'details[data-help]'), 'app.js lost the bubble enhancement.');
     // Nothing may move focus into the bubble: <details> is not a dialog and must not become one.
     assert_true(!preg_match('/details\[data-help\][^\n]*showModal/', $script), 'The bubble must not open as a modal dialog.');
@@ -251,4 +251,50 @@ test('a help bubble renders on a screen, reads with JavaScript disabled, and kee
         proc_close($server);
         @unlink($log);
     }
+});
+
+
+require_once dirname(__DIR__) . '/www/phpledger/includes/functions/web_functions.php';
+
+test('every application view has useful page guidance including signed-out setup', function (): void {
+    $pages = pl_guidance_pages();
+    foreach (glob(dirname(__DIR__) . '/www/phpledger/templates/views/*.php') ?: [] as $file) {
+        $view = basename($file, '.php');
+        assert_true(isset($pages[$view]), 'Missing page guidance for ' . $view);
+        assert_true(pl_guidance_concept(pl_guidance_page($view)) !== null);
+    }
+    require_once dirname(__DIR__) . '/www/phpledger/templates/partials/ui/components.php';
+    foreach (['install', 'login', 'editor', 'transactions', 'reports'] as $view) {
+        ob_start(); pl_ui_page_help($view); $html = (string) ob_get_clean();
+        assert_same(1, substr_count($html, 'data-page-help='));
+        assert_true(str_contains($html, 'help-bubble-sheet'));
+        assert_true(!str_contains($html, '<details class="help" data-help open'));
+    }
+});
+
+test('report help is outside the independent expand summary and adds no explanatory row', function (): void {
+    require_once dirname(__DIR__) . '/www/phpledger/templates/partials/ui/components.php';
+    require_once dirname(__DIR__) . '/www/phpledger/templates/partials/ui/report-tree.php';
+    $tree = pl_report_tree([['code'=>'1-100-10001-00','name'=>'Sample cash','type'=>'asset','amount'=>'1.0000']], ['amount']);
+    ob_start(); pl_ui_report_tree($tree, [['key'=>'amount','label'=>'Amount']], ['caption'=>'Sample']); $html=(string)ob_get_clean();
+    assert_true(!str_contains($html, 'What belongs in'));
+    assert_true(!str_contains($html, 'report-tree-note'));
+    preg_match_all('~<summary>(.*?)</summary>~s', $html, $summaries);
+    foreach ($summaries[1] as $summary) { assert_true(!str_contains($summary, '<details')); }
+    assert_true(str_contains($html, 'report-tree-heading-help'));
+});
+
+
+test('every registered GET page has an explicit route-to-help entry', function (): void {
+    $routes = pl_guidance_read('routes.php') ?? [];
+    $source = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/public/index.php');
+    $start = strpos($source, '$routes = [');
+    $end = strpos($source, '// /print/', $start);
+    preg_match_all("~'([^']+)'\\s*=>\\s*\\['GET'~", substr($source, $start, $end - $start), $matches);
+    foreach ($matches[1] as $route) {
+        if (in_array($route, ['/logo','/reports/export','/ownership/export'], true)) { continue; }
+        assert_true(isset($routes[$route]), 'Missing guidance route ' . $route);
+        assert_true(isset(pl_guidance_pages()[$routes[$route]]));
+    }
+    assert_same('install', $routes['/install']);
 });

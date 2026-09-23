@@ -91,3 +91,18 @@ Review desktop, tablet, and mobile widths, keyboard navigation, form errors, emp
 For a straightforward new company, target setup in five minutes after first login and a first transaction plus report lookup in ten minutes. Target unassisted completion by four of five participants in each initial owner/accountant group. Record server installation and complex data migration separately.
 
 Target WCAG 2.2 AA and document outstanding gaps. The selection date, candidate, visual evidence, and required refinements are recorded above. Observed participant sessions, working responsive/keyboard/error-state checks, and any accepted exceptions remain pending. No release exceptions have been accepted through this static review.
+
+## Local cash, party and contextual-help revision — 23 September 2026
+
+Receipts and Expenses now have separate kind-filtered workspaces while `/transactions` retains the combined view. The editor selects an existing company party or explicitly creates one without losing the transaction inputs. New interactive transactions require a party; historical text-only drafts retain an explicit compatibility path. The picker uses a native select, server search and creation, and optional JavaScript filtering.
+
+One page-help control covers all 68 application views, including authentication and installer screens. `resources/guidance/pages.php` and `routes.php` are the explicit coverage catalogues. Report heading help is independent of expansion, closes with Escape/outside click, uses a viewport-contained sheet on phones, and is omitted from print. Unstructured legacy accounts have their own labeled report group. New accounting help remains marked as draft wording pending accounting review.
+
+This is local implementation in progress, not a published release. The owner approved explicit physical-cash/bank classification and a separate bank overdraft limit in the account currency. Banks default to a zero floor; a configured facility supplies the permitted negative floor. The interface must distinguish this recorded-balance control from bank clearance and available funds. Combined accounting validation is recorded in the local implementation receipt.
+
+
+## 1.4.0 administrator choice for cash and bank controls
+
+Admin > Accounting policies now offers **Warning only** and **Strict** for each book through the existing `policy.manage` permission. Warning only is the default on fresh installs and upgrades, preserving the ability to record transactions even with a shortfall or an unclassified money account. The receipt/expense preview still explains recorded balances and shortfalls. Strict requires explicit physical-cash/bank classification before money-out postings and enforces the physical-cash zero floor and any explicitly agreed bank overdraft limit. No separate loan or unused credit line is treated as funding.
+
+Changes require a reason, revision and idempotency key and are audited through the existing accounting-policy service. Policy updates and central posting share the book lock; posting reads the effective choice afresh, including after an earlier caller snapshot. Reversals and atomic corrections follow the same selected mode. Neither mode edits historical journals or guarantees bank clearance. Migration 060 adds the warning-default policy field to the existing policy table; feature migrations are 057 document parties, 058 money-account classification and 059 bank facilities, after the published 1.3.0 chain through 056. This release supersedes the earlier always-strict local implementation; earlier validation receipts remain historical. No media kit is included by explicit owner instruction.

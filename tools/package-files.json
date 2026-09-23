@@ -1745,6 +1745,182 @@
     {
       "source": "www/phpledger/includes/functions/sample_package_functions.php",
       "destination": "www/phpledger/includes/functions/sample_package_functions.php"
+    },
+    {
+      "source": "resources/guidance/pages.php",
+      "destination": "resources/guidance/pages.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-access.php",
+      "destination": "resources/guidance/concepts/page-access.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-assets.php",
+      "destination": "resources/guidance/concepts/page-assets.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-chart.php",
+      "destination": "resources/guidance/concepts/page-chart.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-commercial.php",
+      "destination": "resources/guidance/concepts/page-commercial.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-extensions.php",
+      "destination": "resources/guidance/concepts/page-extensions.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-forecast.php",
+      "destination": "resources/guidance/concepts/page-forecast.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-getting-started.php",
+      "destination": "resources/guidance/concepts/page-getting-started.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-help.php",
+      "destination": "resources/guidance/concepts/page-help.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-installation.php",
+      "destination": "resources/guidance/concepts/page-installation.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-journals.php",
+      "destination": "resources/guidance/concepts/page-journals.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-money-documents.php",
+      "destination": "resources/guidance/concepts/page-money-documents.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-opening.php",
+      "destination": "resources/guidance/concepts/page-opening.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-overview.php",
+      "destination": "resources/guidance/concepts/page-overview.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-ownership.php",
+      "destination": "resources/guidance/concepts/page-ownership.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-parties.php",
+      "destination": "resources/guidance/concepts/page-parties.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-people.php",
+      "destination": "resources/guidance/concepts/page-people.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-periods.php",
+      "destination": "resources/guidance/concepts/page-periods.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-pos.php",
+      "destination": "resources/guidance/concepts/page-pos.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-reconciliation.php",
+      "destination": "resources/guidance/concepts/page-reconciliation.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-reports.php",
+      "destination": "resources/guidance/concepts/page-reports.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-settings.php",
+      "destination": "resources/guidance/concepts/page-settings.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-stock.php",
+      "destination": "resources/guidance/concepts/page-stock.php"
+    },
+    {
+      "source": "www/phpledger/public/assets/help.js",
+      "destination": "www/phpledger/public/assets/help.js"
+    },
+    {
+      "source": "www/phpledger/public/assets/party-picker.js",
+      "destination": "www/phpledger/public/assets/party-picker.js"
+    },
+    {
+      "source": "www/phpledger/install/migrations/057_document_parties.php",
+      "destination": "www/phpledger/install/migrations/057_document_parties.php"
+    },
+    {
+      "source": "resources/guidance/routes.php",
+      "destination": "resources/guidance/routes.php"
+    },
+    {
+      "source": "resources/guidance/concepts/cash-availability.php",
+      "destination": "resources/guidance/concepts/cash-availability.php"
+    },
+    {
+      "source": "resources/guidance/concepts/transaction-party.php",
+      "destination": "resources/guidance/concepts/transaction-party.php"
+    },
+    {
+      "source": "resources/sample-structures/accounting-starter-1.1.0.json",
+      "destination": "resources/sample-structures/accounting-starter-1.1.0.json"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/distributor.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/distributor.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/jewelry-studio.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/jewelry-studio.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/light-manufacturing.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/light-manufacturing.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/membership-club.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/membership-club.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/pharmacy.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/pharmacy.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/restaurant.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/restaurant.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/retail-shop.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/retail-shop.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/seasonal-business.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/seasonal-business.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/service-agency.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/service-agency.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/service-workshop.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/service-workshop.svg"
+    },
+    {
+      "source": "www/phpledger/public/assets/sample-companies/trader.svg",
+      "destination": "www/phpledger/public/assets/sample-companies/trader.svg"
+    },
+    {
+      "source": "www/phpledger/install/migrations/058_money_account_kind.php",
+      "destination": "www/phpledger/install/migrations/058_money_account_kind.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/059_bank_overdraft_limits.php",
+      "destination": "www/phpledger/install/migrations/059_bank_overdraft_limits.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/060_cash_balance_policy.php",
+      "destination": "www/phpledger/install/migrations/060_cash_balance_policy.php"
     }
   ]
 }

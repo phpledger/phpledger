@@ -4,7 +4,7 @@
   "author": "PHP Ledger",
   "description": "Complete double-entry accounting that runs on your own PHP hosting: invoices, expenses, a point-of-sale flow, and a full general ledger with balanced journal entries behind every transaction. This package wraps the published PHP Ledger image (docs/CONTAINER.md) and uses Cloudron's mysql addon as its database instead of the second `db` service compose.production.yaml runs. See NOTES.md in this directory for one contract mismatch that causes.",
   "tagline": "Self-hosted double-entry accounting that runs on your own PHP hosting.",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "healthCheckPath": "/health",
   "httpPort": 8080,
   "manifestVersion": 2,

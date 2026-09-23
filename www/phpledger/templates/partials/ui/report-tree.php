@@ -46,6 +46,7 @@ function pl_ui_report_tree_node(array $node, array $columns, array $options): vo
         return;
     }
     $open = $level !== 'class' || pl_ui_report_open_by_default((string) $node['code']);
+    echo '<div class="report-tree-wrapper">';
     echo '<details class="report-tree-branch report-tree-' . pl_e($level) . '"' . ($open ? ' open' : '') . '>';
     echo '<summary><span class="report-tree-code"><span class="report-tree-chevron" aria-hidden="true">&#9656;</span>'
         . pl_e((string) ($node['short_code'] ?? $node['code'])) . '</span>'
@@ -54,13 +55,14 @@ function pl_ui_report_tree_node(array $node, array $columns, array $options): vo
         echo '<span class="num">' . pl_e(pl_money((string) ($node[$column['key']] ?? '0.0000'))) . '</span>';
     }
     echo '</summary>';
-    pl_ui_report_tree_note($node);
     foreach ($children as $child) { pl_ui_report_tree_node($child, $columns, $options); }
     echo '</details>';
+    pl_ui_report_tree_note($node);
+    echo '</div>';
 }
 
 /**
- * The plain-words explanation of one class or group, under the heading it explains.
+ * An independent help control aligned with a class or group heading.
  *
  * A heading now carries a name — "Cash and Cash Equivalents", not "Group 1-100" — and this is the
  * line that says what that name is supposed to hold, for a reader who has never done bookkeeping.
@@ -72,10 +74,8 @@ function pl_ui_report_tree_note(array $node): void
     $code = (string) ($node['code'] ?? '');
     $concept = pl_account_heading_concept($code);
     if ($concept === null || pl_guidance_concept($concept) === null) { return; }
-    echo '<div class="report-tree-note"><span>'
-        . pl_e(pl_t('What belongs in {group}', ['group' => (string) ($node['label'] ?? $node['name'] ?? '')]))
-        . '</span>';
-    pl_ui_help($concept);
+    echo '<div class="report-tree-heading-help">';
+    pl_ui_help($concept, 'sheet');
     echo '</div>';
 }
 
@@ -83,6 +83,7 @@ function pl_ui_report_tree_row(array $node, array $columns, array $options): voi
 {
     $isHeading = (bool) ($node['is_heading'] ?? false);
     $contra = (bool) ($node['is_contra'] ?? false);
+    echo '<div class="report-tree-wrapper">';
     echo '<div class="report-tree-row' . ($isHeading ? ' report-tree-row-empty' : '') . ($contra ? ' report-tree-row-contra' : '') . '">';
     echo '<span class="report-tree-code">' . pl_e((string) ($node['short_code'] ?? $node['code'])) . '</span>';
     echo '<span class="report-tree-name">';
@@ -100,6 +101,7 @@ function pl_ui_report_tree_row(array $node, array $columns, array $options): voi
     }
     echo '</div>';
     // A heading reaches this function when the depth control has cut its children off. It is still
-    // the heading of a group, so it still gets the line that says what belongs in it.
+    // the heading of a group, so it still gets an independent help control beside it.
     if ($isHeading) { pl_ui_report_tree_note($node); }
+    echo '</div>';
 }

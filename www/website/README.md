@@ -69,6 +69,14 @@ The public output needs no Node.js, PHP, database, analytics or third-party page
 
 `tools/prepare-images.py` is the existing optional Pillow-based asset preparation tool; the prepared derivatives are already present. It is not part of normal page builds. The image manifests record source paths, dimensions, bytes and hashes.
 
+### Sample-company stories
+
+`sample-company-pages.mjs` adds `/sample-companies/` and each stable sample-ID profile to the normal page build. It reads the current catalogue and verifies each pack's SHA-256 before rendering its `learning_story` content. Stories stay in the versioned sample packs shared with the installed Sample guide; do not copy them into standalone page sources. Cedar has 24 historical chapters and a separate 2026 practice chapter. The other ten companies explicitly show that enriched monthly chapters are unfinished.
+
+Original SVG company marks live in `www/phpledger/public/assets/sample-companies/` and the website build copies those exact assets. They are repository-native vectors with no downloaded assets or external requests. Website story pages display stable source references; only the installed guide resolves actual records in the visitor's selected company. No numeric transaction IDs belong in public story URLs.
+
+Run `node --test www/website/sample-company-pages.test.mjs` from the repository root for source-reference, chapter/version, route and logo checks, then the normal website build/check. Local visual checks cover the index and Cedar profile at desktop, tablet and phone widths, with native source disclosures available without JavaScript.
+
 ## Local preview and routing
 
 The existing website Compose service serves `public` at [http://127.0.0.1:18201/](http://127.0.0.1:18201/). A plain static server also works for directory pages, although Nginx is required to validate the configured HTTP redirects and custom 404 status.

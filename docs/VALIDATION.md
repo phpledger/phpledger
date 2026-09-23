@@ -529,3 +529,17 @@ The live browser exercised all four sample packs, 1440/768/390 layouts, report d
 ## 0.6.0-preview publication - 18 September 2026
 
 Published GitHub prerelease, upgraded hosted demo and generated website; Wiki/About updated. Exact ZIP fresh/0.5 upgrade checks passed on PHP 8.2/8.3/8.4, source 282 tests passed, and local plus actual frozen hosted backup restoration verified. Public downloads and media-kit checksums match. See [publication receipt](repository/PUBLICATION-2026-09-18.md) for results, backups and disclosed remaining acceptance limitations.
+
+
+## 23 September 2026 — Local cash, bank, parties and samples revision
+
+This delivery remains local. The implementation and exact evidence are recorded in [the cash/party/sample receipt](repository/CASH-PARTIES-SAMPLES-2026-09-23.md). Three additive migrations are included: nullable scoped document parties050, explicit money-account classification051, and agreed bank overdraft limits052. Original migration receipts and posted values must remain unchanged. Default bank borrowing allowance is zero; no facility is inferred during upgrade.
+
+Acceptance covers central posting under the book lock, daily and future-date balances, currency units, exact retries, concurrent spending, reversal/correction rollback, linked-party snapshots and old callers, form state preservation, both workspaces, independent report help, versioned sample/source links, zero-balance structures, populated upgrades and exact-package fresh installs. Unfunded practice events are disclosed and staged, not forced through with invented funding. A technical pass does not replace independent accounting/security review, translated-copy review or observed business usability. Consult the receipt for completed checks and remaining gaps rather than treating this list as a pass claim.
+
+
+## 1.4.0 administrator choice for cash and bank controls
+
+Admin > Accounting policies now offers **Warning only** and **Strict** for each book through the existing `policy.manage` permission. Warning only is the default on fresh installs and upgrades, preserving the ability to record transactions even with a shortfall or an unclassified money account. The receipt/expense preview still explains recorded balances and shortfalls. Strict requires explicit physical-cash/bank classification before money-out postings and enforces the physical-cash zero floor and any explicitly agreed bank overdraft limit. No separate loan or unused credit line is treated as funding.
+
+Changes require a reason, revision and idempotency key and are audited through the existing accounting-policy service. Policy updates and central posting share the book lock; posting reads the effective choice afresh, including after an earlier caller snapshot. Reversals and atomic corrections follow the same selected mode. Neither mode edits historical journals or guarantees bank clearance. Migration 060 adds the warning-default policy field to the existing policy table; feature migrations are 057 document parties, 058 money-account classification and 059 bank facilities, after the published 1.3.0 chain through 056. This release supersedes the earlier always-strict local implementation; earlier validation receipts remain historical. No media kit is included by explicit owner instruction.

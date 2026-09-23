@@ -359,6 +359,17 @@ test('every route renders under the pseudo-locale and the document language foll
     $password = 'Sample-sweep-password-' . $suffix;
     $actor = pl_create_user($email, 'Sample sweep owner', $password);
     $fixture = pl_create_company($actor, 'Sample sweep company ' . $suffix, 'USD', '2026-01-01');
+    $bank = pl_get_account($actor, $fixture['company_id'], $fixture['book_id'], $fixture['accounts']['1000']);
+    pl_save_account($actor, $fixture['company_id'], $fixture['book_id'], array_replace($bank, [
+        'money_kind' => 'bank', 'reason' => 'The route sweep uses a bank account funded by the sample owner.',
+    ]), (int) $bank['id'], (int) $bank['revision']);
+    pl_save_and_post_general_draft($actor, $fixture['company_id'], $fixture['book_id'], [
+        'date' => '2026-01-11', 'reference' => 'Sample sweep funding', 'description' => 'Sample owner funds the bank before the expense', 'creation_key' => 'i18n-funding-' . $suffix,
+        'lines' => [
+            ['account_id' => $fixture['accounts']['1000'], 'debit' => '20.0000', 'credit' => '0.0000', 'description' => 'Sample bank funding'],
+            ['account_id' => $fixture['accounts']['3000'], 'debit' => '0.0000', 'credit' => '20.0000', 'description' => 'Sample owner contribution'],
+        ],
+    ]);
     pl_save_and_post_general_draft($actor, $fixture['company_id'], $fixture['book_id'], [
         'date' => '2026-01-12', 'reference' => 'Sample sweep journal', 'description' => 'Sample sweep general journal', 'creation_key' => 'i18n-sweep-' . $suffix,
         'lines' => [

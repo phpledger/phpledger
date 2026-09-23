@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 // Run this probe outside the extracted archive. Application code and dependencies
 // must all load from that unchanged archive, not from this checkout.
-if (PHP_SAPI !== 'cli' || getenv('PL_ENV') !== 'test' || getenv('PL_DB_HOST') !== 'db_test'
+if (PHP_SAPI !== 'cli' || getenv('PL_ENV') !== 'test' || !in_array(getenv('PL_DB_HOST'), ['db_test', 'maria_test'], true)
     || getenv('PL_DB_NAME') !== 'phpledger_test' || getenv('PL_DB_USER') !== 'root') {
-    fwrite(STDERR, "Package verification requires the disposable db_test root account.\n");
+    fwrite(STDERR, "Package verification requires the disposable db_test/maria_test root account.\n");
     exit(2);
 }
 $package = realpath($argv[1] ?? '');
@@ -25,7 +25,7 @@ if (!mkdir($private, 0700)) { throw new RuntimeException('Could not create priva
 putenv('PL_INSTALL_DIRECTORY=' . $private);
 require $package . '/www/phpledger/includes/bootstrap.php';
 require $package . '/www/phpledger/install/migrate.php';
-if (DB::$host !== 'db_test' || DB::$dbName !== 'phpledger_test' || DB::$user !== 'root') {
+if (!in_array(DB::$host, ['db_test', 'maria_test'], true) || DB::$dbName !== 'phpledger_test' || DB::$user !== 'root') {
     throw new RuntimeException('Effective configuration is not the disposable test service.');
 }
 $database = 'phpledger_m17_package_' . bin2hex(random_bytes(12));
@@ -33,8 +33,8 @@ DB::query('CREATE DATABASE %b CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci',
 DB::useDB($database);
 try {
     $migrations = pl_migrate();
-    foreach (['047_period_close', '048_employee_master', '049_secret_store'] as $version) {
-        if (!in_array($version, $migrations['applied'], true)) { throw new RuntimeException('Package omitted an M17 migration.'); }
+    foreach (['047_period_close', '048_employee_master', '049_secret_store', '057_document_parties', '058_money_account_kind', '059_bank_overdraft_limits', '060_cash_balance_policy'] as $version) {
+        if (!in_array($version, $migrations['applied'], true)) { throw new RuntimeException('Package omitted required migration ' . $version); }
     }
     $sampleIds = pl_sample_structure_ids();
     if ($sampleIds === []) { throw new RuntimeException('Package has no bundled sample structures.'); }
@@ -46,12 +46,37 @@ try {
     $actor = pl_create_user('package@example.test', 'Sample package owner', bin2hex(random_bytes(24)));
     $f = pl_create_company($actor, 'Sample M17 package company', 'USD', '2026-01-01');
     $company = $f['company_id']; $book = $f['book_id'];
-    pl_post_journal($actor, $company, $book, [
-        'date' => '2026-09-14', 'currency' => 'USD', 'source_type' => 'receipt',
-        'source_reference' => 'package-proof', 'idempotency_key' => 'package-proof', 'description' => 'Sample cash',
-        'lines' => [['account_id' => $f['accounts']['1000'], 'debit' => '125', 'credit' => '0'],
-            ['account_id' => $f['accounts']['4000'], 'debit' => '0', 'credit' => '125']],
-    ]);
+    $policy = pl_trading_policies($actor, $company, $book);
+    if ($policy['cash_shortfall_policy'] !== 'warning') { throw new RuntimeException('Fresh install did not default to warning only.'); }
+    pl_save_trading_policies($actor, $company, $book, array_replace($policy, ['cash_shortfall_policy'=>'strict','reason'=>'Opt into strict policy for package proof','idempotency_key'=>'package-strict-policy']));
+    $cash = pl_get_account($actor, $company, $book, $f['accounts']['1000']);
+    if ($cash['money_kind'] !== null) { throw new RuntimeException('New company silently classified its combined cash / bank account.'); }
+    pl_save_account($actor, $company, $book, array_replace($cash, ['money_kind' => 'physical', 'reason' => 'The package proof uses a physical cash box.']), $cash['id'], $cash['revision']);
+    $party = pl_save_party($actor, $company, $book, ['legal_name' => 'Sample package customer', 'entity_type' => 'private_company', 'country_code' => 'US',
+        'is_customer' => true, 'is_vendor' => false, 'currency' => 'USD', 'request_key' => 'package-proof-party', 'reason' => 'Fictional package receipt proof.']);
+    $receipt = pl_save_document($actor, $company, $book, ['kind' => 'receipt', 'date' => '2026-09-14', 'amount' => '125', 'money_account_id' => $cash['id'],
+        'category_account_id' => $f['accounts']['4000'], 'party_id' => $party['id'], 'counterparty' => '', 'reference' => 'PACKAGE-RECEIPT', 'memo' => 'Sample receipt proof', 'creation_key' => 'package-proof-receipt']);
+    $receipt = pl_post_document($actor, $company, $book, $receipt['id'], $receipt['revision']);
+    if ($receipt['party_id'] !== $party['id'] || $receipt['counterparty'] !== 'Sample package customer') { throw new RuntimeException('Packaged receipt omitted its linked party or name snapshot.'); }
+    $refused = false;
+    try {
+        pl_post_journal($actor, $company, $book, ['date' => '2026-09-14', 'currency' => 'USD', 'source_type' => 'general_journal', 'source_reference' => 'package-overspend',
+            'idempotency_key' => 'package-overspend', 'description' => 'Must reject fictional cash overspend', 'lines' => [
+                ['account_id' => $f['accounts']['5000'], 'debit' => '126', 'credit' => '0'], ['account_id' => $cash['id'], 'debit' => '0', 'credit' => '126']]]);
+    } catch (DomainException $error) { $refused = str_contains($error->getMessage(), 'keep the document as a draft'); }
+    if (!$refused || DB::queryFirstField('SELECT id FROM pl_journals WHERE book_id=%i AND idempotency_key=%s', $book, 'package-overspend')) { throw new RuntimeException('Packaged physical cash control did not atomically reject overspending.'); }
+    $bank = pl_save_account($actor, $company, $book, ['code' => 'BANK-PROOF', 'name' => 'Sample agreed bank facility', 'type' => 'asset', 'role' => 'cash_bank',
+        'money_kind' => 'bank', 'overdraft_enabled' => true, 'overdraft_limit' => '10', 'is_active' => true, 'reason' => 'Fictional package proof of an agreed bank facility.', 'creation_key' => 'package-bank-facility']);
+    $bankPayment = ['date' => '2026-09-14', 'currency' => 'USD', 'source_type' => 'general_journal', 'source_reference' => 'package-bank-limit',
+        'idempotency_key' => 'package-bank-limit', 'description' => 'Sample exact bank facility limit', 'lines' => [
+            ['account_id' => $f['accounts']['5000'], 'debit' => '10', 'credit' => '0'], ['account_id' => $bank['id'], 'debit' => '0', 'credit' => '10']]];
+    pl_post_journal($actor, $company, $book, $bankPayment);
+    $bankPayment['idempotency_key'] = 'package-bank-over-limit'; $bankPayment['source_reference'] = 'package-bank-over-limit';
+    $bankPayment['lines'][0]['debit'] = '0.0001'; $bankPayment['lines'][1]['credit'] = '0.0001';
+    $refused = false;
+    try { pl_post_journal($actor, $company, $book, $bankPayment); }
+    catch (DomainException $error) { $refused = str_contains($error->getMessage(), 'permitted floor of -10.0000'); }
+    if (!$refused) { throw new RuntimeException('Packaged bank facility exceeded its agreed limit.'); }
     $employee = pl_save_employee($actor, $company, ['full_name' => 'Sample Employee',
         'employment_type' => 'full_time', 'employment_status' => 'active', 'hire_date' => '2026-01-01',
         'reason' => 'Sample package smoke.']);
@@ -80,7 +105,7 @@ try {
         }
     }
     echo 'Package smoke passed: ' . count($migrations['applied']) . ' fresh migrations; '
-        . "bundled sample structures current, employee saved, cash difference posted exactly, checklist rendered as data, encrypted secret round-trip, balanced report, replay no-op and payload unchanged.\n";
+        . "bundled sample structures current, party-linked receipt snapshot retained, physical cash overspend refused, agreed bank facility exact limit accepted and excess refused, employee saved, cash difference posted exactly, checklist rendered as data, encrypted secret round-trip, balanced report, replay no-op and payload unchanged.\n";
 } finally {
     DB::useDB('phpledger_test');
     DB::query('DROP DATABASE %b', $database);

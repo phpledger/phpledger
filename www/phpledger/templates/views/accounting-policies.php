@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 $policyInput = $form['input'];
-$canEditPolicies = ($company['role'] ?? '') === 'owner' && !pl_demo_enabled();
+$canEditPolicies = ($canEditPolicies ?? false) && !pl_demo_enabled();
 $value = static fn (string $field, string $fallback): string => pl_web_text($policyInput, $field, $fallback);
 ?>
 <section class="flex flex-col gap-4 py-5" aria-labelledby="policies-title">
     <div class="page-header">
-        <div><p class="eyebrow"><?= pl_e(pl_t('Books and controls')) ?></p><h1 class="page-title" id="policies-title"><?= pl_e(pl_t('Accounting policies')) ?></h1><p class="muted"><?= pl_e(pl_t('How this book posts trading discounts, free goods and cash taken on an invoice.')) ?></p></div>
+        <div><p class="eyebrow"><?= pl_e(pl_t('Books and controls')) ?></p><h1 class="page-title" id="policies-title"><?= pl_e(pl_t('Accounting policies')) ?></h1><p class="muted"><?= pl_e(pl_t('How this book controls cash and bank shortfalls, trading discounts, free goods and cash taken on an invoice.')) ?></p></div>
         <a class="btn btn-secondary" href="<?= pl_e(pl_url('/company-profile')) ?>"><?= pl_e(pl_t('Company profile')) ?></a>
     </div>
     <?php if ($form['message'] !== ''): ?>
@@ -18,11 +18,12 @@ $value = static fn (string $field, string $fallback): string => pl_web_text($pol
         <p class="muted"><?= pl_e(pl_t('The worked examples for each value are in')) ?> <code>docs/accounting/examples/trading-document-policies.md</code>.</p>
     </div>
     <?php if (!$canEditPolicies): ?>
-        <div class="rounded-panel border border-border bg-surface p-4"><p><?= pl_e(pl_demo_enabled() ? pl_t('Policy administration is disabled in the public sample.') : pl_t('Your role can read these policies. Only the business owner can change them.')) ?></p></div>
+        <div class="rounded-panel border border-border bg-surface p-4"><p><?= pl_e(pl_demo_enabled() ? pl_t('Policy administration is disabled in the public sample.') : pl_t('Your role can read these policies. An administrator with accounting-policy permission can change them.')) ?></p></div>
     <?php endif; ?>
     <div class="rounded-panel border border-border bg-surface p-4">
         <h2 class="section-title mb-2"><?= pl_e(pl_t('Current policies')) ?></h2>
         <dl class="print-facts">
+            <dt><?= pl_e(pl_t('Cash and bank shortfalls')) ?></dt><dd><?= pl_e($policies['cash_shortfall_policy'] === 'strict' ? pl_t('Strict: block new or worsened shortfalls') : pl_t('Warning only: posting is permitted (default)')) ?></dd>
             <dt><?= pl_e(pl_t('Line discounts')) ?></dt><dd><?= pl_e($policies['discount_posting'] === 'gross' ? pl_t('Gross to income, discount shown as contra-income') : pl_t('Net to income (recommended)')) ?></dd>
             <dt><?= pl_e(pl_t('Free goods, output tax')) ?></dt><dd><?= pl_e($policies['free_goods_output_tax'] === 'open_market_value' ? pl_t('Charged at open-market value and borne by the business') : pl_t('None (recommended)')) ?></dd>
             <dt><?= pl_e(pl_t('Cash on an invoice')) ?></dt><dd><?= bccomp((string) $policies['cash_on_invoice_cap'], '0', 4) === 0 ? pl_e(pl_t('Not accepted (recommended default)')) : pl_e(pl_t('Up to {amount} per invoice', ['amount' => pl_money((string) $policies['cash_on_invoice_cap'])])) ?></dd>
@@ -35,6 +36,14 @@ $value = static fn (string $field, string $fallback): string => pl_web_text($pol
             <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?>
             <input type="hidden" name="revision" value="<?= (int) $policies['revision'] ?>">
             <input type="hidden" name="request_key" value="<?= pl_e((string) $requestKey) ?>">
+            <div class="field sm:col-span-2"><label for="policy-cash-shortfall"><?= pl_e(pl_t('Cash and bank shortfall control')) ?></label>
+                <?php $cashPolicy = $value('cash_shortfall_policy', (string) $policies['cash_shortfall_policy']); ?>
+                <select class="input" id="policy-cash-shortfall" name="cash_shortfall_policy" aria-describedby="policy-cash-shortfall-help">
+                    <option value="warning"<?= $cashPolicy === 'warning' ? ' selected' : '' ?>><?= pl_e(pl_t('Warning only: permit posting (default)')) ?></option>
+                    <option value="strict"<?= $cashPolicy === 'strict' ? ' selected' : '' ?>><?= pl_e(pl_t('Strict: block new or worsened shortfalls')) ?></option>
+                </select>
+                <p class="muted" id="policy-cash-shortfall-help"><?= pl_e(pl_t('Warning only keeps balance warnings visible and permits posting, including payments from unclassified money accounts. Strict requires physical cash or bank classification and blocks new or worsened cash deficits and bank borrowing beyond zero or the agreed overdraft limit. It also checks later dates affected by backdated entries and the combined result of corrections. Existing entries remain unchanged; funding that improves an existing shortfall is permitted. These book checks do not confirm bank clearance or actual available funds.')) ?></p>
+            </div>
             <div class="field"><label for="policy-discount"><?= pl_e(pl_t('Line discount posting')) ?></label>
                 <?php $discountPosting = $value('discount_posting', (string) $policies['discount_posting']); ?>
                 <select class="input" id="policy-discount" name="discount_posting">

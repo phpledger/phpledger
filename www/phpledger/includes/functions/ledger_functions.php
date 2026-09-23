@@ -101,6 +101,179 @@ function pl_ledger_transaction(callable $work): mixed
     }
 }
 
+/** Fresh locking reads are essential after waiting for the book lock under REPEATABLE READ.
+ * @return array<int,array{name:string,money_kind:?string,overdraft_enabled:bool,overdraft_limit:string,facility_currency:string,daily:array<string,string>,currency_daily:array<string,array<string,string>>}>
+ */
+function pl_cash_timeline(int $companyId, int $bookId, ?array $accountIds = null): array
+{
+    if ($accountIds === []) { return []; }
+    $timeline = [];
+    $filter = $accountIds === null ? '' : ' AND a.id IN %li';
+    $args = $accountIds === null ? [$companyId, $bookId] : [$companyId, $bookId, $accountIds];
+    $accounts = DB::query("SELECT a.id,a.name,a.money_kind,a.overdraft_enabled,a.overdraft_limit,COALESCE(a.currency,b.functional_currency) AS facility_currency FROM pl_accounts a JOIN pl_books b ON b.id=a.book_id AND b.company_id=a.company_id WHERE a.company_id=%i AND a.book_id=%i AND a.role='cash_bank'" . $filter . ' FOR SHARE', ...$args);
+    foreach ($accounts as $account) {
+        $timeline[(int) $account['id']] = ['name' => (string) $account['name'], 'money_kind' => $account['money_kind'], 'overdraft_enabled' => (bool) $account['overdraft_enabled'], 'overdraft_limit' => (string) $account['overdraft_limit'], 'facility_currency' => (string) $account['facility_currency'], 'daily' => [], 'currency_daily' => []];
+    }
+    // Do not use an aggregate consistent read: an earlier caller snapshot can be stale.
+    if (!$timeline) { return []; }
+    $rows = DB::query("SELECT l.account_id,j.journal_date,l.debit,l.credit,l.currency,l.amount_fc FROM pl_journal_lines l
+        JOIN pl_journals j ON j.id=l.journal_id AND j.company_id=l.company_id AND j.book_id=l.book_id
+        JOIN pl_accounts a ON a.id=l.account_id AND a.company_id=l.company_id AND a.book_id=l.book_id
+        WHERE l.company_id=%i AND l.book_id=%i AND a.id IN %li ORDER BY j.journal_date,l.id FOR SHARE", $companyId, $bookId, array_keys($timeline));
+    foreach ($rows as $row) {
+        $id = (int) $row['account_id'];
+        $date = (string) $row['journal_date'];
+        $timeline[$id]['daily'][$date] = bcadd($timeline[$id]['daily'][$date] ?? '0.0000', bcsub((string) $row['debit'], (string) $row['credit'], 4), 4);
+        $currency = (string) $row['currency'];
+        $delta = bccomp((string) $row['debit'], '0', 4) > 0 ? (string) $row['amount_fc'] : bcsub('0', (string) $row['amount_fc'], 4);
+        $timeline[$id]['currency_daily'][$currency][$date] = bcadd($timeline[$id]['currency_daily'][$currency][$date] ?? '0.0000', $delta, 4);
+    }
+    return $timeline;
+}
+
+/** Compare daily closing balances, permitting improvements to pre-existing deficits.
+ * @param array<int,array{name:string,money_kind:?string,daily:array<string,string>,currency_daily?:array<string,array<string,string>>,overdraft_enabled?:bool,overdraft_limit?:string,facility_currency?:string}> $before
+ * @param array<int,array{name:string,money_kind:?string,daily:array<string,string>,currency_daily?:array<string,array<string,string>>,overdraft_enabled?:bool,overdraft_limit?:string,facility_currency?:string}> $after
+ */
+function pl_cash_assert_timeline(array $before, array $after): void
+{
+    foreach ($after as $id => $account) {
+        if (!in_array($account['money_kind'], ['physical', 'bank'], true)) { continue; }
+        // A positive translated carrying amount cannot supply missing physical notes in EUR,
+        // USD or another currency. Keep each actual-currency balance separate as well as base.
+        // A foreign bank facility is agreed in account-currency units, not its changing
+        // translated carrying amount. Physical cash retains both base and unit checks.
+        $ledgers = $account['money_kind'] === 'physical' ? [[$account['name'], $before[$id]['daily'] ?? [], $account['daily'], '0.0000']] : [];
+        $oldCurrencies = $before[$id]['currency_daily'] ?? [];
+        $newCurrencies = $account['currency_daily'] ?? [];
+        foreach (array_unique(array_merge(array_keys($oldCurrencies), array_keys($newCurrencies))) as $currency) {
+            $floor = $account['money_kind'] === 'bank' && ($account['overdraft_enabled'] ?? false) && ($account['facility_currency'] ?? '') === $currency
+                ? bcsub('0', $account['overdraft_limit'] ?? '0.0000', 4) : '0.0000';
+            $ledgers[] = [$account['name'] . ' (' . $currency . ')', $oldCurrencies[$currency] ?? [], $newCurrencies[$currency] ?? [], $floor];
+        }
+        foreach ($ledgers as [$name, $oldDays, $newDays, $floor]) {
+            $dates = array_unique(array_merge(array_keys($oldDays), array_keys($newDays)));
+            sort($dates, SORT_STRING);
+            $oldBalance = '0.0000';
+            $newBalance = '0.0000';
+            foreach ($dates as $date) {
+                $oldBalance = bcadd($oldBalance, $oldDays[$date] ?? '0.0000', 4);
+                $newBalance = bcadd($newBalance, $newDays[$date] ?? '0.0000', 4);
+                if (bccomp($newBalance, $floor, 4) < 0 && bccomp($newBalance, $oldBalance, 4) < 0) {
+                    throw new DomainException($name . ' has ' . $oldBalance . ' recorded on ' . $date . '. This posting would leave ' . $newBalance . ', below the permitted floor of ' . $floor . '. Record the actual funding, correct the date or payment account, or keep the document as a draft.');
+                }
+            }
+        }
+    }
+}
+
+/** Internal effective policy read; callers establish company/book access and locking. */
+function pl_cash_balance_policy(int $companyId, int $bookId): string
+{
+    // Posting and policy changes share the book lock. This must remain a current read,
+    // including when the caller's REPEATABLE READ snapshot predates a policy change.
+    $policy = DB::queryFirstField('SELECT cash_shortfall_policy FROM pl_trading_policies WHERE company_id=%i AND book_id=%i FOR SHARE', $companyId, $bookId);
+    return $policy === null ? 'warning' : (string) $policy;
+}
+
+/** Internal transaction scope for evaluating a correction at its committed result. */
+function pl_cash_atomic_scope(?array $set = null): array
+{
+    static $scope = [];
+    if ($set !== null) { $scope = $set; }
+    return $scope;
+}
+
+/** Reversal and replacement must pass together; any failure rolls back both journals. */
+function pl_cash_atomic_change(int $companyId, int $bookId, callable $work): mixed
+{
+    return pl_ledger_transaction(function () use ($companyId, $bookId, $work): mixed {
+        pl_ledger_book($companyId, $bookId, true);
+        if (pl_cash_balance_policy($companyId, $bookId) === 'warning') { return $work(); }
+        $prior = pl_cash_atomic_scope();
+        if ($prior === ['company_id' => $companyId, 'book_id' => $bookId]) { return $work(); }
+        $before = pl_cash_timeline($companyId, $bookId);
+        pl_cash_atomic_scope(['company_id' => $companyId, 'book_id' => $bookId]);
+        try {
+            $result = $work();
+            pl_cash_assert_timeline($before, pl_cash_timeline($companyId, $bookId));
+            return $result;
+        } finally { pl_cash_atomic_scope($prior); }
+    });
+}
+
+/** Called only after the posting path has acquired its book lock and checked retries. */
+function pl_cash_assert_posting(int $companyId, int $bookId, array $payload): void
+{
+    if (pl_cash_balance_policy($companyId, $bookId) === 'warning') { return; }
+    $accounts = DB::query("SELECT id,name,money_kind FROM pl_accounts WHERE company_id=%i AND book_id=%i AND role='cash_bank' AND id IN %li FOR SHARE", $companyId, $bookId, array_column($payload['lines'], 'account_id'));
+    $money = [];
+    $controlled = [];
+    foreach ($accounts as $account) {
+        $money[(int) $account['id']] = $account;
+        if (in_array($account['money_kind'], ['physical', 'bank'], true)) { $controlled[] = (int) $account['id']; }
+    }
+    foreach ($payload['lines'] as $line) {
+        $id = (int) $line['account_id'];
+        if (isset($money[$id]) && $money[$id]['money_kind'] === null && bccomp($line['credit'], '0', 4) > 0) {
+            throw new DomainException('Choose physical cash or bank for ' . $money[$id]['name'] . ' in the chart of accounts before posting money out.');
+        }
+    }
+    if (!$controlled || pl_cash_atomic_scope() === ['company_id' => $companyId, 'book_id' => $bookId]) { return; }
+    $before = pl_cash_timeline($companyId, $bookId, $controlled);
+    $after = $before;
+    foreach ($payload['lines'] as $line) {
+        $id = (int) $line['account_id'];
+        if (!isset($after[$id])) { continue; }
+        $date = $payload['date'];
+        $after[$id]['daily'][$date] = bcadd($after[$id]['daily'][$date] ?? '0.0000', bcsub($line['debit'], $line['credit'], 4), 4);
+        $currency = $line['currency'];
+        $delta = bccomp($line['debit'], '0', 4) > 0 ? $line['amount_fc'] : bcsub('0', $line['amount_fc'], 4);
+        $after[$id]['currency_daily'][$currency][$date] = bcadd($after[$id]['currency_daily'][$currency][$date] ?? '0.0000', $delta, 4);
+    }
+    pl_cash_assert_timeline($before, $after);
+}
+
+/** Advisory form preview; posting always rechecks under the book lock. */
+function pl_cash_payment_preview(int $actorId, int $companyId, int $bookId, int $accountId, string $date, string $amount): array
+{
+    pl_require_company_access($actorId, $companyId);
+    $book = pl_ledger_book($companyId, $bookId);
+    $cashPolicy = pl_cash_balance_policy($companyId, $bookId);
+    $date = pl_ledger_date($date);
+    $amount = pl_amount($amount);
+    $account = DB::queryFirstRow("SELECT id,name,role,money_kind FROM pl_accounts WHERE id=%i AND company_id=%i AND book_id=%i AND role='cash_bank' AND is_active=1 FOR SHARE", $accountId, $companyId, $bookId);
+    if (!$account) { throw new DomainException('Choose an active cash or bank account in this book.'); }
+    $timeline = pl_cash_timeline($companyId, $bookId, [$accountId]);
+    $balance = '0.0000';
+    foreach ($timeline[$accountId]['daily'] as $day => $delta) {
+        if ($day <= $date) { $balance = bcadd($balance, $delta, 4); }
+    }
+    $projected = bcsub($balance, $amount, 4);
+    $policy = $timeline[$accountId];
+    $currencyBalance = '0.0000';
+    foreach ($policy['currency_daily'][$book['currency']] ?? [] as $day => $delta) {
+        if ($day <= $date) { $currencyBalance = bcadd($currencyBalance, $delta, 4); }
+    }
+    $insufficient = false;
+    $warning = null;
+    if (in_array($account['money_kind'], ['physical', 'bank'], true)) {
+        $proposed = $timeline;
+        $proposed[$accountId]['daily'][$date] = bcsub($proposed[$accountId]['daily'][$date] ?? '0.0000', $amount, 4);
+        $proposed[$accountId]['currency_daily'][$book['currency']][$date] = bcsub($proposed[$accountId]['currency_daily'][$book['currency']][$date] ?? '0.0000', $amount, 4);
+        try { pl_cash_assert_timeline($timeline, $proposed); }
+        catch (DomainException $error) { $insufficient = true; $warning = $error->getMessage(); }
+    }
+    if ($account['money_kind'] === null) { $warning = 'Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.'; }
+    if ($warning !== null && $cashPolicy === 'warning') { $warning = 'Warning only: this book permits posting despite cash or bank balance warnings. ' . $warning; }
+    return ['account_id' => $accountId, 'name' => $account['name'], 'role' => $account['role'], 'money_kind' => $account['money_kind'], 'currency' => $book['currency'], 'date' => $date,
+        'balance' => $balance, 'payment' => $amount, 'projected_balance' => $projected, 'insufficient_cash' => $insufficient, 'cash_shortfall_policy' => $cashPolicy,
+        'classification_required' => $account['money_kind'] === null, 'blocked_payment' => $cashPolicy !== 'warning' && ($insufficient || ($account['money_kind'] === null && bccomp($amount, '0', 4) > 0)), 'warning' => $warning,
+        'overdraft_enabled' => $policy['overdraft_enabled'], 'overdraft_limit' => $policy['overdraft_limit'], 'facility_currency' => $policy['facility_currency'],
+        'permitted_floor' => $policy['overdraft_enabled'] ? bcsub('0', $policy['overdraft_limit'], 4) : '0.0000',
+        'payment_currency' => $book['currency'], 'payment_currency_balance' => $currencyBalance, 'projected_currency_balance' => bcsub($currencyBalance, $amount, 4)];
+}
+
 /** @return array{company_id:int, book_id:int, period_id:int, accounts:array<int|string,int>} */
 function pl_create_company(int $actorId, string $name, string $currency, string $startDate, string $fiscalYearEnd = '12-31'): array
 {
@@ -361,6 +534,7 @@ function pl_post_journal_locked(int $actorId, int $companyId, int $bookId, array
             }
             pl_currency_validate_posting_line($actorId, $companyId, $bookId, $payload, $line, $account, $reversalOf !== null || $carryingAccount === $line['account_id'] || array_key_exists($lineIndex,$settlementAllocations ?? []));
         }
+        pl_cash_assert_posting($companyId, $bookId, $payload);
         DB::insert('pl_journals', [
             'company_id' => $companyId, 'book_id' => $bookId, 'period_id' => (int) $periods[0]['id'],
             'journal_date' => $payload['date'], 'currency' => $payload['currency'], 'description' => $payload['description'],

@@ -266,3 +266,12 @@ function pl_ui_list_controls(array $filters): void
 }
 
 require_once __DIR__ . '/report-tree.php';
+
+/** One compact page control, also available before a company is selected. */
+function pl_ui_page_help(string $view): void
+{
+    if (!function_exists('pl_guidance_page')) { require_once dirname(__DIR__, 3) . '/includes/functions/guidance_functions.php'; }
+    echo '<div class="page-help" data-page-help="' . pl_e($view) . '">';
+    pl_ui_help(pl_guidance_page($view), 'sheet');
+    echo '</div>';
+}

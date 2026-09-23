@@ -520,7 +520,8 @@ try {
                 'is_active' => pl_web_text($_POST, 'is_active') === '1', 'is_contra' => pl_web_text($_POST, 'is_contra') === '1',
                 'reason' => pl_web_text($_POST, 'reason'),
                 'creation_key' => pl_web_text($_POST, 'creation_key'),
-            ], $id ?: null, $id ? pl_web_id($_POST, 'revision') : null);
+            ] + (array_key_exists('money_kind', $_POST) ? ['money_kind' => pl_web_text($_POST, 'money_kind') ?: null] : [])
+                + (array_key_exists('overdraft_configured', $_POST) ? ['overdraft_enabled' => isset($_POST['overdraft_enabled']), 'overdraft_limit' => pl_web_text($_POST, 'overdraft_limit') ?: '0'] : []), $id ?: null, $id ? pl_web_id($_POST, 'revision') : null);
             pl_notice('Account saved. Posted journal history is preserved.');
             pl_redirect(pl_url('/accounts', ['id' => $account['id'],'return_filters'=>$chartFilters]));
         } catch (DomainException $error) { pl_form_failure($return, $_POST, $error->getMessage()); }
@@ -797,6 +798,29 @@ try {
                 throw new DomainException('The transaction type does not match this screen.');
             }
             $input = pl_web_document_input($retained);
+            $action = pl_web_text($retained, 'editor_action');
+            if (in_array($action, ['search_party','open_party','cancel_party','create_party'], true)) {
+                if (!pl_can_write($company)) { throw new DomainException('Your role can read transactions but cannot edit them.'); }
+                if ($action === 'create_party') {
+                    $created = pl_save_party($actorId,$companyId,$bookId,[
+                        'legal_name'=>pl_web_text($retained,'new_party_name'), 'entity_type'=>pl_web_text($retained,'new_party_type','business'),
+                        'country_code'=>strtoupper(pl_web_text($retained,'new_party_country')), 'currency'=>$company['currency'],
+                        'is_customer'=>isset($retained['new_party_customer']), 'is_vendor'=>isset($retained['new_party_vendor']),
+                        'request_key'=>pl_web_text($retained,'party_creation_key'), 'reason'=>'Created from a receipt or expense draft.',
+                    ]);
+                    $retained['party_id'] = (string)$created['id'];
+                    $retained['counterparty'] = pl_web_text($retained,'new_party_name');
+                    $retained['party_search'] = '';
+                    $retained['party_creation_key'] = bin2hex(random_bytes(24));
+                    $retained['editor_action'] = 'party_created';
+                }
+                if ($action === 'open_party') { $retained['new_party_name'] = pl_web_text($retained,'party_search'); }
+                pl_form_failure($return,$retained,'',200);
+            }
+            if (($input['party_id'] ?? null) === null) {
+                $legacy = $existing;
+                if (!$legacy || $legacy['party_id'] !== null) { throw new DomainException('Choose who the money was paid to or received from, or explicitly create a party.'); }
+            }
             if (pl_web_text($_POST, 'editor_action') === 'preview') {
                 if (!pl_can_write($company)) { throw new DomainException('Your role can read transactions but cannot edit them.'); }
                 pl_preview_document($actorId, $companyId, $bookId, $input);
@@ -860,7 +884,26 @@ try {
             try { $preview = pl_preview_document($actorId, $companyId, $bookId, pl_web_document_input($input)); }
             catch (DomainException $error) { $form['message'] = $error->getMessage(); }
         }
-        pl_render('editor', ['title'=>$document ? 'Edit draft' : ($kind === 'receipt' ? 'New receipt' : 'New expense'), 'user'=>$user, 'company'=>$company, 'document'=>$document, 'input'=>$input, 'form'=>$form, 'preview'=>$preview, 'returnFilters'=>$returnFilters, 'screen'=>$screen]);
+        if (!$form['input'] && !$document && !isset($_GET['return_filters'])) { $returnFilters['kind'] = $kind; }
+        $partySearch = mb_substr(pl_web_text($input,'party_search'),0,160);
+        pl_require_company_access($actorId,$companyId); // Same read boundary as pl_get_party/pl_page_parties.
+        $parties = DB::query("SELECT id,legal_name,trading_name,country_code,is_customer,is_vendor,status FROM pl_parties WHERE company_id=%i AND status IN ('draft','under_review','approved') AND (%s='' OR LOCATE(%s,legal_name)>0 OR LOCATE(%s,trading_name)>0) ORDER BY legal_name,id LIMIT 100",$companyId,$partySearch,$partySearch,$partySearch);
+        $selectedPartyId = pl_web_id($input,'party_id');
+        if ($selectedPartyId && !in_array($selectedPartyId,array_map(static fn(array $party):int=>(int)$party['id'],$parties),true)) {
+            $selectedParty = DB::queryFirstRow('SELECT id,legal_name,trading_name,country_code,is_customer,is_vendor,status FROM pl_parties WHERE company_id=%i AND id=%i',$companyId,$selectedPartyId);
+            if ($selectedParty) { array_unshift($parties,$selectedParty); }
+        }
+        $cashPreview = null;
+        if (!array_key_exists('money_account_id',$input)) {
+            foreach ($company['accounts'] as $account) {
+                if ($account['role']==='cash_bank' && $account['type']==='asset' && $account['is_active']) { $input['money_account_id']=(int)$account['id']; break; }
+            }
+        }
+        if (function_exists('pl_cash_payment_preview') && pl_web_id($input,'money_account_id')) {
+            try { $cashPreview = pl_cash_payment_preview($actorId,$companyId,$bookId,pl_web_id($input,'money_account_id'),pl_web_text($input,'date'),pl_web_text($input,'kind') === 'expense' ? (pl_web_text($input,'amount') ?: '0') : '0'); }
+            catch (DomainException $error) { /* Incomplete drafts remain editable. */ }
+        }
+        pl_render('editor', ['title'=>$document ? 'Edit draft' : ($kind === 'receipt' ? 'New receipt' : 'New expense'), 'user'=>$user, 'company'=>$company, 'document'=>$document, 'input'=>$input, 'form'=>$form, 'preview'=>$preview, 'returnFilters'=>$returnFilters, 'screen'=>$screen, 'parties'=>$parties, 'cashPreview'=>$cashPreview]);
     }
     if ($path === '/transactions' || $path === '/transactions/detail') {
         $filters = pl_list_filters($_GET, 'transactions');
@@ -871,7 +914,7 @@ try {
         }
         $document = $id ? pl_get_document($actorId, $companyId, $bookId, $id) : null;
         $form = $id ? pl_form_state(pl_workflow_url('/transactions/detail', ['id' => $id] + $filters)) : ['message' => '', 'input' => []];
-        pl_render('transactions', ['title' => 'Transactions', 'user' => $user, 'company' => $company, 'list' => $list, 'filters' => $filters, 'document' => $document, 'form' => $form, 'detailOnly' => $path === '/transactions/detail']);
+        pl_render('transactions', ['title' => ($filters['kind'] === 'receipt' ? 'Receipts' : ($filters['kind'] === 'expense' ? 'Expenses' : 'Transactions')), 'user' => $user, 'company' => $company, 'list' => $list, 'filters' => $filters, 'document' => $document, 'form' => $form, 'detailOnly' => $path === '/transactions/detail']);
     }
     if ($path === '/reports/trial-balance') {
         $asOf = pl_web_text($_GET, 'as_of', gmdate('Y-m-d'));

@@ -47,6 +47,11 @@ test('period and cash count routes render and enforce CSRF, scope and posted evi
     $suffix=bin2hex(random_bytes(6));$email='period-http-'.$suffix.'@example.test';$password='Sample-http-password-'.$suffix;
     $actor=pl_create_user($email,'Sample period owner',$password);
     $f=['actor_id'=>$actor]+pl_create_company($actor,'Sample period HTTP '.$suffix,'USD','2026-01-01');
+    $cash=pl_get_account($actor,$f['company_id'],$f['book_id'],$f['accounts']['1000']);
+    pl_save_account($actor,$f['company_id'],$f['book_id'],[
+        'name'=>$cash['name'],'code'=>$cash['code'],'type'=>$cash['type'],'role'=>$cash['role'],
+        'is_active'=>true,'money_kind'=>'physical','reason'=>'Explicit physical cash for funded cash-count HTTP scenario',
+    ],$cash['id'],$cash['revision']);
     $journal=pl_post_journal($actor,$f['company_id'],$f['book_id'],ledger_payload($f,'100.0000'));
     $port=random_int(20000,50000);$base='http://127.0.0.1:'.$port;
     $log=sys_get_temp_dir().'/period-http-'.$suffix.'.log';

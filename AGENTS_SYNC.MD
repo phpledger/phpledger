@@ -294,3 +294,27 @@ Local takeover in agent-a2c82cf1a04045756: migration 049, authenticated private-
 ## 23 September 2026 — M17 period-close takeover handoff
 
 Codex completed the paused period-close/reversing-journal/cash-count lane locally on actual branch `worktree-agent-a473613d91ab7aa9d` (the older claim named `m17/period-close`). Migration 047 remains reserved. Targeted PHP 8.3/MySQL 8.4 suite: **36 tests, zero failures**, including HTTP write controls and concurrency/rollback evidence; changed PHP lint and diff check clean. Coordinator integrates the local commit and owns combined engine/package/browser gates and plugin API snapshot. No merge, push, release or live change from this lane. See the latest agent message and `docs/design/1.2-2026-09/PERIOD-CLOSE.md`.
+
+
+## 2026-09-23 — Cash, parties, samples and guidance implementation scope
+
+Codex owns isolated branch `codex/cash-parties-sample-stories`, worktree `.cache/cash-parties-sample-stories`, from `1647c965`. Eight pre-existing main website outputs are backed up separately with verified SHA-256; they are outside this implementation lane. Cash/account policy, linked parties/workspaces, sample/stories, and help/integration have separate agent ownership. Owner approved nullable party migration050, explicit cash/bank classification051, then separately approved agreed bank overdraft limits052. Bank limits use account-currency units; a separate borrowing facility remains a liability, not fabricated bank funds. No publication, deployment, provider action, live reset or customer conversion is authorised. Verification is local on disposable MySQL8.4/MariaDB10.11 and browser fixtures. Final outcomes and exact changed-file receipt follow here.
+
+
+### Owner release-content instruction — 23 September 2026
+
+Include bundled demo, documentation and website changes in this delivery. The owner explicitly waived a media kit for this delivery. Preserve the local-only boundary: no hosted demo reset, website publication, release upload, push or deployment is authorized by this instruction. Final full MySQL/MariaDB reruns remain in progress; targeted corrections and exact-package fresh installs have passed.
+
+
+## 2026-09-23 — Cash, bank, parties, sample stories and help: local handoff
+
+Implementation and verification complete in isolated branch `codex/cash-parties-sample-stories` from `1647c965`; tested runtime `005384204faed83499b6145c6c4a364042a2d8bb`. Full normal `composer check` passed 625 tests with zero failures on each of MySQL 8.4 and MariaDB 10.11, PHP lint 368/0 and PHPStan clean. Both populated upgrades and exact unchanged-package fresh installs passed; 53 migrations on fresh install, only new 050/051/052 added. Current sample generators, all eleven replays, twelve zero-balance structures, website build/content, package tests and browser desktop/tablet/phone journeys passed. Original eight dirty main website files and their backups retain recorded hashes.
+
+Owner explicitly included bundled demo, docs and website and waived this delivery's media kit. The 240-path inventory, package hash, commands, browser journeys, references, known staged practice shortfalls and remaining review boundaries are in `docs/repository/CASH-PARTIES-SAMPLES-2026-09-23.md` and its JSON receipt. Main source was not fast-forwarded because its original dirty generated outputs are preserved. No push, publication, hosting action, live reset, customer migration or stakeholder message. Public reference reads only; no raw secrets exposed.
+
+Task-owned test database/helper/browser containers and network, acceptance browser, and local static preview server were closed after evidence capture. Logs, screenshots, validation archive and isolated source branch are retained; other projects were untouched.
+
+
+## 2026-09-23 — 1.4.0 configurable cash policy and live release scope
+
+Owner authorized making strict cash/bank enforcement an administrator decision in settings and making the completed changes live; release selected as 1.4.0, with the existing explicit no-media-kit waiver. Coordinator owns integration from actual origin/master 170949d4 in `.cache/cash-policy-live`; old feature branch remains intact. Live 1.3.0 migrations 050–056 remain immutable; feature migrations renumber to 057–059 and configurable policy follows. Existing company policy defaults to warning-only; explicit strict choice applies under existing policy.manage permission, audited book lock and fresh posting reads. Preserve main Academy work and eight website outputs; snapshot hashes in `.cache/cash-policy-preservation/manifest.json`. Policy worker owns policy service/guard/settings/new migration/tests; UI worker resolves five front-controller/template merges; release worker performs read-only live discovery. Coordinator owns integration, package/website generation, combined tests, release and deploy. No customer data conversion or stakeholder messaging.

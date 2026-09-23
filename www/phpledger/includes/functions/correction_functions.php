@@ -120,6 +120,14 @@ function pl_correct_source(int $actorId, int $companyId, int $bookId, string $so
         if ($data['document_date'] < $reversalDate) { throw new DomainException('A corrected posting cannot precede its reversing entry.'); }
         if ($data['reference'] !== $raw['reference']) { throw new DomainException('A correction must retain the same document reference.'); }
         if ($sourceType !== 'general_journal' && $data['kind'] !== $sourceType) { throw new DomainException('A correction must retain the source kind.'); }
+        if ($sourceType !== 'general_journal') {
+            // Old callers can still correct an amount without discarding a known identity.
+            if (($data['party_id'] ?? null) === null) {
+                $priorSnapshot = json_decode($current['source_snapshot'], true, 512, JSON_THROW_ON_ERROR);
+                $data['party_id'] = isset($priorSnapshot['party_id']) ? (int)$priorSnapshot['party_id'] : (($raw['party_id'] ?? null) === null ? null : (int)$raw['party_id']);
+            }
+            $data = pl_document_party($companyId, $data);
+        }
         $snapshot = array_replace(pl_correction_snapshot($raw), $data, ['revision' => $expectedRevision + 1]);
         if ($sourceType === 'general_journal') {
             $payload = ['date' => $data['document_date'], 'currency' => $book['currency'], 'description' => $data['description'], 'lines' => $data['lines']];
@@ -134,8 +142,11 @@ function pl_correct_source(int $actorId, int $companyId, int $bookId, string $so
         $priorContext = pl_correction_context();
         pl_correction_context(['identity_id' => (int) $identity['id'], 'posting_key' => $payload['idempotency_key']]);
         try {
-            $reversal = pl_reverse_journal($actorId, $companyId, $bookId, $original['id'], $reversalDate, 'correction:' . $suffix . ':reverse', $reason);
-            $replacement = pl_post_journal($actorId, $companyId, $bookId, $payload);
+            [$reversal, $replacement] = pl_cash_atomic_change($companyId, $bookId, function () use ($actorId, $companyId, $bookId, $original, $reversalDate, $suffix, $reason, $payload): array {
+                $reversal = pl_reverse_journal($actorId, $companyId, $bookId, $original['id'], $reversalDate, 'correction:' . $suffix . ':reverse', $reason);
+                $replacement = pl_post_journal($actorId, $companyId, $bookId, $payload);
+                return [$reversal, $replacement];
+            });
             $snapshot['journal_id'] = $replacement['id'];
             $snapshot['updated_by'] = $actorId;
             $snapshot['updated_at'] = gmdate('Y-m-d H:i:s');

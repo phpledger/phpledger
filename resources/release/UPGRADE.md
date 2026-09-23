@@ -1,5 +1,11 @@
 # Upgrade and recovery — PHP Ledger
 
+## From 1.3.0 to 1.4.0 (prepared)
+
+Back up the complete 1.3.0 application, private configuration and database together, then rehearse the exact 1.4.0 package against a restored copy. Migrations 057–060 follow the published chain through 056 and are forward-only. They add optional document-party links, physical-cash/bank classification, explicit bank overdraft limits and the configurable book shortfall policy. Existing books start in warning-only mode; an administrator must explicitly select strict controls in Accounting policies. The choice affects future posting checks; it does not rewrite posted journals or invent an overdraft facility. Restore the matched application and database backup if recovery is needed; replacing PHP files alone cannot reverse a migrated schema.
+
+The 1.4.0 signed archive and hosted channels are still being prepared. Use the published 1.3.0 upgrade guidance below until the new release is verified and published.
+
 ## Command-line upgrade entry point
 
 For **1.3.0**, upgrade a backup copy of the complete 1.2.1 installation first, including its private installation receipt, publisher key and configuration. Pending migrations through 056 add the package/accounting workflow structures and retire the legacy membership role ENUM while retaining its original values as a deprecated text snapshot for compatibility with the 1.2.1 updater. They are not reversible individually; rollback means restoring the matched previous application and database backup. Keep the existing table namespace during upgrade. Configurable prefixes are an installation choice, not an in-place table renaming tool.

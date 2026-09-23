@@ -39,7 +39,11 @@
     "053_payroll_accounting",
     "054_year_end",
     "055_employee_links",
-    "056_membership_role_id"
+    "056_membership_role_id",
+    "057_document_parties",
+    "058_money_account_kind",
+    "059_bank_overdraft_limits",
+    "060_cash_balance_policy"
   ],
   "routes": [
     "/accounts",

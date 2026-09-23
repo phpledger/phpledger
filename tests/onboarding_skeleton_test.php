@@ -83,7 +83,7 @@ test('every bundled sample publishes a structure, and a structure carries no his
     // when that pack moves, instead of being offered against a chart it no longer matches.
     // Every committed structure is pinned to the pack that is on disk right now.
     foreach (array_keys(pl_demo_pack_catalog()) as $id) {
-        $document = json_decode((string) file_get_contents(pl_sample_structure_directory() . '/' . $id . '-1.0.0.json'), true, 64, JSON_THROW_ON_ERROR);
+        $document = json_decode((string) file_get_contents(pl_sample_structure_directory() . '/' . $id . '-' . pl_demo_pack($id)['version'] . '.json'), true, 64, JSON_THROW_ON_ERROR);
         assert_same(pl_demo_pack($id)['digest'], $document['source_digest'] ?? null,
             'The ' . $id . ' structure is pinned to a different pack than the one on disk; regenerate it with tools/build-sample-structures.py --write.');
         assert_true(pl_sample_structure_is_current($document['source_digest'], pl_demo_pack($id)['digest']));
@@ -221,6 +221,14 @@ test('a skeleton refuses a book that already holds records, and never replaces o
     $book = (int) $fixture['company']['book_id'];
     $accounts = pl_account_code_mapping($fixture['company']['accounts']);
     pl_save_and_post_general_draft($actor, $id, $book, [
+        'date' => '2026-02-01', 'reference' => 'M10 actual owner funding', 'description' => 'Owner funds the existing expense',
+        'creation_key' => 'm10-funding-' . bin2hex(random_bytes(6)),
+        'lines' => [
+            ['account_id' => $accounts['1000'], 'debit' => '15.0000', 'credit' => '0.0000', 'description' => 'Bank funding'],
+            ['account_id' => $accounts['3000'], 'debit' => '0.0000', 'credit' => '15.0000', 'description' => 'Owner capital'],
+        ],
+    ]);
+    pl_save_and_post_general_draft($actor, $id, $book, [
         'date' => '2026-02-02', 'reference' => 'M10 existing record', 'description' => 'An entry that already exists',
         'creation_key' => 'm10-existing-' . bin2hex(random_bytes(6)),
         'lines' => [
@@ -230,7 +238,7 @@ test('a skeleton refuses a book that already holds records, and never replaces o
     ]);
     assert_throws(fn () => pl_import_sample_skeleton($actor, $id, $book, 'trader', 'm10-refuse-' . bin2hex(random_bytes(6))),
         DomainException::class, 'new empty business');
-    assert_same(1, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE company_id = %i AND book_id = %i', $id, $book),
+    assert_same(2, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE company_id = %i AND book_id = %i', $id, $book),
         'The refused import touched the book.');
     assert_same(1, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_sample_imports WHERE company_id = %i', $id));
 });

@@ -2,12 +2,14 @@
 declare(strict_types=1);
 
 /** Balances keyed the way each pack authors them: the pre-conversion number where there is one. */
-function pack_balances(array $trial): array
+function pack_balances(array $trial, array $pack): array
 {
     $balances = [];
     foreach ($trial['accounts'] as $row) {
-        $balances[(string) (($row['legacy_code'] ?? '') !== '' ? $row['legacy_code'] : $row['code'])] = $row['balance'];
+        $balances[(string) $row['code']] = $row['balance'];
+        if (($row['legacy_code'] ?? '') !== '') { $balances[(string) $row['legacy_code']] = $row['balance']; }
     }
+    foreach (($pack['code_aliases'] ?? []) as $old => $code) { if (isset($balances[$code])) { $balances[$old] = $balances[$code]; } }
     return $balances;
 }
 
@@ -33,6 +35,33 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
         $snapshot = json_decode((string) DB::queryFirstField('SELECT snapshot FROM pl_template_installation_history WHERE company_id = %i AND book_id = %i AND snapshot_kind = %s ORDER BY id DESC LIMIT 1', $id, $book, 'sample'), true, 512, JSON_THROW_ON_ERROR);
         assert_true((int) ($snapshot['sample_pack']['operational_replay']['event_count'] ?? 0) > 0, 'Operational replay receipt has no events.');
         assert_true(in_array($snapshot['sample_pack']['operational_replay']['status'] ?? '', ['runtime_replayed', 'runtime_replayed_with_staged_vertical_evidence'], true), 'Operational replay receipt is missing.');
+        foreach (($pack['validation_issues'] ?? []) as $issue) {
+            $receipts = $snapshot['sample_pack']['operational_replay']['receipts'] ?? [];
+            $matches = array_values(array_filter($receipts, static fn (array $row): bool => $row['event_id'] === $issue['event_id']));
+            assert_same(1, count($matches), 'The invalid cash event must have one explicit replay receipt.');
+            assert_same('staged', $matches[0]['status']);
+            assert_same([], $matches[0]['journal_ids'], 'An unfunded sample transfer was posted.');
+            $expectedIssue = $issue; $actualIssue = $matches[0]['validation_issue'];
+            if ($issue['code'] === 'bank_shortfall') {
+                assert_same(true, $actualIssue['posted_balance_verified']); unset($actualIssue['posted_balance_verified']);
+                assert_same('0.0000', $issue['overdraft_limit']);
+                if (isset($matches[0]['unpaid_document_id'])) {
+                    $unpaidBill = pl_get_ar_document($actor, $id, $book, (int) $matches[0]['unpaid_document_id']);
+                    assert_true(bccomp($unpaidBill['outstanding_fc'], '0', 4) > 0, 'An unposted supplier payment cleared its payable.');
+                }
+            }
+            ksort($expectedIssue); ksort($actualIssue); assert_same($expectedIssue, $actualIssue);
+        }
+        if ($packId === 'service-agency') {
+            assert_same(25, count($pack['learning_story']['chapters']));
+            assert_same(count($pack['events']), count($snapshot['sample_pack']['story_sources']));
+            foreach ($snapshot['sample_pack']['story_sources'] as $journalId) {
+                assert_true((bool) DB::queryFirstField('SELECT id FROM pl_journals WHERE id=%i AND company_id=%i AND book_id=%i', $journalId, $id, $book), 'A story source escaped its company.');
+            }
+            $storyInvoices = DB::query('SELECT id FROM pl_ar_documents WHERE company_id=%i AND book_id=%i AND reference LIKE %s', $id, $book, 'service-agency/story-project-%');
+            assert_same(8, count($storyInvoices));
+            foreach ($storyInvoices as $invoice) { assert_same('paid', pl_get_ar_document($actor, $id, $book, (int) $invoice['id'])['payment_status']); }
+        }
         assert_same(2, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_template_installation_history WHERE company_id = %i AND book_id = %i', $id, $book));
         // The public demo is rebuilt from these packs and has to stand up from scratch on
         // 1.2.0. A book converted by migration 040 carries a pending contra review that
@@ -137,9 +166,9 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
             $quarterTotal = bcadd($quarterTotal, pl_profit_loss($actor, $id, $book, '2025-' . $start, '2025-' . $end)['net_profit'], 4);
         }
         assert_same($year['net_profit'], $quarterTotal);
-        $at2024 = pack_balances(pl_trial_balance($actor, $id, $book, '2024-12-31'));
-        $at2025 = pack_balances(pl_trial_balance($actor, $id, $book, '2025-12-31'));
-        $at2026 = pack_balances(pl_trial_balance($actor, $id, $book, '2026-01-31'));
+        $at2024 = pack_balances(pl_trial_balance($actor, $id, $book, '2024-12-31'), $pack);
+        $at2025 = pack_balances(pl_trial_balance($actor, $id, $book, '2025-12-31'), $pack);
+        $at2026 = pack_balances(pl_trial_balance($actor, $id, $book, '2026-01-31'), $pack);
         assert_same('800.0000', $at2024['1100']); assert_same('-420.0000', $at2024['2100']);
         assert_same('0.0000', $at2025['1100']); assert_same('0.0000', $at2025['2100']);
         assert_same('-550.0000', $at2025['2000']); assert_same('0.0000', $at2026['2000']);
@@ -161,7 +190,7 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
         foreach (pl_trial_balance($actor, $id, $book, '2025-12-31')['accounts'] as $row) {
             if ($row['is_contra']) { $contra[(string) (($row['legacy_code'] ?? '') !== '' ? $row['legacy_code'] : $row['code'])] = true; }
         }
-        foreach (['1390', '4-900-10001-00', '5-900-10001-00'] as $code) {
+        foreach ([$pack['code_aliases']['1390'] ?? '1390', '4-900-10001-00', '5-900-10001-00'] as $code) {
             assert_true(isset($contra[$code]), 'Contra account ' . $code . ' is not presented as a deduction.');
         }
         // Deferred income released a month at a time, fully earned by June 2025 (#94).
@@ -169,7 +198,7 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
         // One payroll month posted as totals per element with a payable each (#98).
         assert_same('120.0000', $at2025['5150']); assert_same('0.0000', $at2025['1500']);
         assert_same('0.0000', $at2025['2300']); assert_same('0.0000', $at2025['2310']);
-        $payrollAt = pack_balances(pl_trial_balance($actor, $id, $book, '2025-09-30'));
+        $payrollAt = pack_balances(pl_trial_balance($actor, $id, $book, '2025-09-30'), $pack);
         assert_same('-1135.0000', $payrollAt['2300']); assert_same('-90.0000', $payrollAt['2310']);
         assert_same('-45.0000', $payrollAt['2320']); assert_same('-150.0000', $payrollAt['2330']);
         assert_same('0.0000', $payrollAt['1500']);
@@ -235,7 +264,7 @@ foreach (array_keys(pl_demo_pack_catalog()) as $packId) {
         $input['date'] = '2026-02-04'; $input['amount'] = '13.5000';
         $edit = pl_save_document($actor, $id, $book, $input, $edit['id'], $edit['revision']);
         assert_same('posted', pl_post_document($actor, $id, $book, $edit['id'], $edit['revision'])['status']);
-        assert_same($at2025, pack_balances(pl_trial_balance($actor, $id, $book, '2025-12-31')));
+        assert_same($at2025, pack_balances(pl_trial_balance($actor, $id, $book, '2025-12-31'), $pack));
         assert_throws(fn () => pl_seed_demo_pack($actor, $id, $book, $packId), DomainException::class, 'empty');
         assert_throws(fn () => pl_setup_company($actor, array_replace($f['input'], ['sample_pack' => $packId === 'distributor' ? 'service-agency' : 'distributor']), $f['key']), DomainException::class, 'different');
     });

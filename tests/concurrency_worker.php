@@ -5,6 +5,16 @@ if (getenv('PL_ENV') !== 'test' || getenv('PL_DB_NAME') !== 'phpledger_test') {
 }
 require_once dirname(__DIR__) . '/www/phpledger/includes/bootstrap.php';
 $input = json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR);
+if ($input['mode'] === 'cash_post') {
+    // Establish a REPEATABLE READ snapshot before either competitor posts.
+    DB::startTransaction();
+    DB::query('SELECT id FROM pl_journals WHERE book_id=%i', $input['fixture']['book_id']);
+    if (isset($input['policy_snapshot_ready'])) {
+        // A non-locking read deliberately retains the old policy in this transaction's snapshot.
+        DB::queryFirstField('SELECT cash_shortfall_policy FROM pl_trading_policies WHERE company_id=%i AND book_id=%i', $input['fixture']['company_id'], $input['fixture']['book_id']);
+        touch($input['policy_snapshot_ready']);
+    }
+}
 $deadline = microtime(true) + 15;
 while (!is_file($input['barrier'])) {
     if (microtime(true) > $deadline) {
@@ -14,7 +24,16 @@ while (!is_file($input['barrier'])) {
 }
 $fixture = $input['fixture'];
 try {
-    if ($input['mode'] === 'year_close') {
+    if ($input['mode'] === 'cash_policy_set') {
+        $deadline = microtime(true) + 10;
+        while (!is_file($input['policy_snapshot_ready'])) {
+            if (microtime(true) > $deadline) { throw new RuntimeException('Policy snapshot barrier timed out.'); }
+            usleep(10000);
+        }
+        $result = pl_save_trading_policies($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], $input['policy_input']);
+        touch($input['policy_change_complete']);
+        $journal = ['id' => $result['revision']];
+    } elseif ($input['mode'] === 'year_close') {
         try {
             $result=pl_year_end_change($fixture['actor_id'],$fixture['company_id'],$fixture['book_id'],$input['year_id'],'close',$input['revision'],'Concurrent reviewed close',$input['key'],$input['close_input']);
             $journal=['id'=>$result['journal_id']??0];
@@ -25,6 +44,22 @@ try {
         pl_recurring_due($fixture['company_id'],$fixture['book_id'],$input['as_of'],100);
         $result=pl_scheduler_dispatch($fixture['company_id'],$fixture['book_id'],100);
         $journal=['id'=>$result['succeeded']];
+    } elseif ($input['mode'] === 'cash_post') {
+        if (isset($input['policy_change_complete'])) {
+            $deadline = microtime(true) + 10;
+            while (!is_file($input['policy_change_complete'])) {
+                if (microtime(true) > $deadline) { throw new RuntimeException('Policy change barrier timed out.'); }
+                usleep(10000);
+            }
+        }
+        try {
+            $journal = pl_post_journal($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], $input['payload']);
+            DB::commit();
+        } catch (DomainException $error) {
+            DB::rollback();
+            if (!str_contains($error->getMessage(), 'keep the document as a draft')) { throw $error; }
+            $journal = ['id' => 0];
+        }
     } elseif (in_array($input['mode'], ['purchase_receive','purchase_bill','opening_convert'], true)) {
         try {
             $result=match ($input['mode']) {
