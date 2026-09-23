@@ -1,6 +1,6 @@
 # Cash, bank controls, document parties, samples and guidance — local receipt
 
-Status: implementation is complete; combined verification and packaging are in progress. This receipt will be finalized before handoff.
+Status: local implementation, combined verification and exact-package checks are complete. No publication or deployment occurred.
 
 ## Scope and ownership
 
@@ -10,14 +10,18 @@ Base `1647c965`; branch `codex/cash-parties-sample-stories`; isolated worktree `
 
 The owner approved physical-cash blocking and linked parties, then explicitly approved physical/bank account classification and separately approved bank overdraft limits in this delivery. No cash-policy settings table or second ledger/party store was added. Existing names/codes do not imply a classification. Bank accounts default to zero borrowing allowance; only an explicit agreed limit permits negative units in the facility currency. An independent loan or credit line remains a liability; its unused limit is not bank funding.
 
-Migration050 adds the nullable indexed company-scoped party relationship and effective-view field. Migration051 adds nullable physical/bank classification. Migration052 adds disabled-by-default bank overdraft configuration with database constraints. All are new versioned migrations. Old journal values, source identifiers and migration receipts remain unchanged; no historical chart migration is rerun.
+Migration 050 adds the nullable indexed company-scoped party relationship and effective-view field. Migration 051 adds nullable physical/bank classification. Migration 052 adds disabled-by-default bank overdraft configuration with database constraints. All are new versioned migrations. Old journal values, source identifiers and migration receipts remain unchanged; no historical chart migration is rerun.
 
-## Evidence in progress
+## Release content decision
 
-- Focused MariaDB cash/bank49tests, zero failures; party/HTTP39tests, zero failures. Later read-DTO/retry/package additions are covered by the final combined gates below when complete.
-- Populated archived-baseline upgrades passed on MySQL8.4 and MariaDB10.11, preserving original columns/receipts, negative history and literal `null` name snapshots. New fields did not infer parties, classifications or facilities. The probes removed only their own random schemas.
-- Browser: unfunded physical cash25 refused and retained as draft; linked party inline creation retained amount/reference/memo through validation failure; separate fictional receipt25 posted; exact-balance cash expense25 posted; bank10 refused with no facility; explicit agreed10facility saved through audited account form; exact-limit expense posted.
-- Browser: receipt/expense workspace context, supplier selectable as payer, desktop1440/tablet768/phone390, one page-help control, Escape, report expansion independent of help, viewport-contained sheet, print-hidden help, native help/select without JavaScript.
+The owner explicitly required the demo, documentation and website to be included and waived the media kit for this delivery. The bundled demo resources, existing documentation, website source and generated pages are updated locally. This is a delivery-specific waiver; it does not rewrite the repository release policy. Published version/download metadata remains unchanged because publication is outside the authorized scope. A future hosted release must publish the matching application, demo and website together; no hosted demo reset or website deployment has occurred here.
+
+## Final verification results
+
+- Focused MariaDB cash/bank: 49 tests, zero failures; party/HTTP: 39 tests, zero failures. The final combined gates also cover the later read-DTO/retry/package additions.
+- Populated archived-baseline upgrades passed on MySQL 8.4 and MariaDB 10.11, preserving original columns/receipts, negative history and literal `null` name snapshots. New fields did not infer parties, classifications or facilities. The probes removed only their own random schemas.
+- Browser: unfunded physical cash 25.00 refused and retained as draft; linked party inline creation retained amount/reference/memo through validation failure; separate fictional receipt 25.00 posted; exact-balance cash expense 25.00 posted; bank payment 10.00 refused with no facility; explicit agreed 10.00 facility saved through audited account form; exact-limit expense posted.
+- Browser: receipt/expense workspace context, supplier selectable as payer, desktop 1440 / tablet 768 / phone 390 pixels, one page-help control, Escape, report expansion independent of help, viewport-contained sheet, print-hidden help, native help/select without JavaScript.
 - Independent review fixed a foreign-currency physical-cash bypass, preserved omitted legacy draft party links, and recovered draft views after an account becomes inactive. Follow-up bank-policy review found no additional actionable issue.
 
 ## References and external boundary
@@ -27,7 +31,7 @@ Repository instructions, design/architecture/accounting/demo/development/integra
 - [Intuit: negative book balances and uncleared transactions](https://quickbooks.intuit.com/community/reports-and-accounting-5/why-is-my-account-showing-two-separate-balances-and-one-is-a-negative-balance-58848).
 - [Intuit: separate line-of-credit liability and interest](https://quickbooks.intuit.com/learn-support/en-us/help-article/pay-bills/set-track-line-credit/L0KRxAKPI_US_en_US).
 - [Intuit: an issued cheque subsequently bouncing](https://quickbooks.intuit.com/learn-support/en-us/help-article/pay-bills/manage-bounced-check-wrote/L26onIB9m_US_en_US).
-- [ERPNext version15 source: optional balance-sign enforcement](https://raw.githubusercontent.com/frappe/erpnext/version-15/erpnext/accounts/doctype/gl_entry/gl_entry.py). This is a version-specific source observation, not a claim of equivalent future-date/overdraft enforcement.
+- [ERPNext version 15 source: optional balance-sign enforcement](https://raw.githubusercontent.com/frappe/erpnext/version-15/erpnext/accounts/doctype/gl_entry/gl_entry.py). This is a version-specific source observation, not a claim of equivalent future-date/overdraft enforcement.
 - [Akaunting: payment-account workflows](https://akaunting.com/hc/docs/banking-feeds-reconciliations/managing-accounts/). No documented hard bank-limit guarantee was established.
 
 No production database, hosting/provider action, payment, message to stakeholders, publication, push or deployment occurred. Browser fixtures and database services are local and fictional. Dependency preparation used cached Docker images and Composer dependencies with networking disabled. Raw secrets exposed: no.
@@ -39,11 +43,23 @@ The other ten companies intentionally have profiles and scenario summaries while
 
 ## Sample outcomes
 
-Current1.1.0 packs and structures retain all1.0.0 resources unchanged. All11 sample replays passed36 monthly checkpoints each (focused31tests, zero failures). Original historical source amounts and monthly totals are preserved. Six unfunded physical-cash transfers,16 unfunded bank outflows across9 samples, and3 dependent reversals are explicit staged/unposted practice evidence; source IDs and amounts are retained. No funding or bank credit was invented. Twelve zero-balance structures include the Accounting starter. Cedar has24 historical monthly chapters plus a separate2026 practice chapter and eight quarterly teaching pairs; ten other journeys are clearly incomplete.
+Current 1.1.0 packs and structures retain all 1.0.0 resources unchanged. All 11 sample replays passed 36 monthly checkpoints each (focused 31 tests, zero failures). Original historical source amounts and monthly totals are preserved. Six unfunded physical-cash transfers, 16 unfunded bank outflows across 9 samples, and 3 dependent reversals are explicit staged/unposted practice evidence; source IDs and amounts are retained. No funding or bank credit was invented. Twelve zero-balance structures include the Accounting starter. Cedar has 24 historical monthly chapters plus a separate 2026 practice chapter and eight quarterly teaching pairs; ten other journeys are clearly incomplete.
 
 ## Combined-run corrections
 
-The initial full MariaDB run reported625tests/7failures; MySQL reported625/6, with the cash-count fixture fix already loaded by its later stage. Six cases were older fixtures relying on unclassified/unfunded money or an implicit facility-currency change; one case was a bare country-code placeholder. Fixtures now explicitly classify and genuinely fund their intended scenarios, including owner equity before expenses, and confirm facility terms before testing currency immutability. The placeholder uses `pl_t()`; the untranslated ceiling remains12. A temporary exact-name driver reran all7 original failed closures from normal test definitions on each engine:7passed, zero failures each. Normal complete suite reruns follow; focused reruns are not represented as a full pass.
+The initial full MariaDB run reported 625 tests / 7 failures; MySQL reported 625 / 6, with the cash-count fixture fix already loaded by its later stage. Six cases were older fixtures relying on unclassified/unfunded money or an implicit facility-currency change; one case was a bare country-code placeholder. Fixtures now explicitly classify and genuinely fund their intended scenarios, including owner equity before expenses, and confirm facility terms before testing currency immutability. The placeholder uses `pl_t()`; the untranslated ceiling remains 12. A temporary exact-name driver reran all 7 original failed closures from normal test definitions on each engine: 7 passed, zero failures each. Subsequent normal full `composer check` runs passed on both engines: 625 tests, zero failures each, 368 PHP files linted without failures, PHPStan clean and sample validation passed. The runtime was unchanged throughout these final runs.
+
+## Reproducible commands and local evidence
+
+The runtime under test is `005384204faed83499b6145c6c4a364042a2d8bb`. Full checks use the normal `composer check` command in the two disposable engine environments. Logs are retained under `.cache/full-mysql-verified.log` and `.cache/full-maria-verified.log`; both runs completed successfully with 625 tests and zero failures each.
+
+Other commands completed: `python -X utf8 tools/build-demo-packs.py --check`, `python -X utf8 tools/build-sample-structures.py --check`, `python -X utf8 tests/sample-learning-test.py` (9 tests), `python -X utf8 tests/package-builder-test.py` (13 tests), `node --test www/website/sample-company-pages.test.mjs` (3 tests), and `node www/website/build.mjs --check` (87 pages, zero errors or warnings). All passed. Applicable JavaScript syntax checks passed. The changed-file encoding audit and `git diff --check 1647c965` were clean.
+
+Exact local archive: `.cache/cash-party-package-verified/phpledger-1.2.1.zip`, SHA-256 `b86fed0ef76488a7587b6b05dd44c2678c491d7943cf7b70baec11e08df05868`. The existing package version is a local validation artifact, not a newly published release. `tools/verify-m17-package.php` passed on both engines against the extracted unchanged payload: 53 fresh migrations, linked receipt snapshot, physical cash overspend refusal, exact bank limit acceptance/excess refusal, employee save, cash-count difference, checklist, encrypted round-trip, balanced reports and no-op migration replay. Evidence: `.cache/package-verified-codexcashplan-test.log` and `.cache/package-verified-codexcashplan-mariatest.log`.
+
+`tools/verify-cash-party-upgrade.php` tested populated archived-baseline upgrades on both engines. Evidence: `.cache/upgrade-mysql-final-seed.log`, `.cache/upgrade-mysql-final-check.log`, `.cache/upgrade-maria-final-seed.log`, and `.cache/upgrade-maria-final-check.log`. Only disposable local databases were migrated.
+
+Browser workflows used `/transactions?kind=expense`, `/transactions?kind=receipt`, their editor/detail/post/reversal journeys, account configuration, `/reports/trial-balance`, `/sample-chooser`, `/sample-guide` and a company-scoped `/journals/detail` source link. Website checks covered `/sample-companies/` and `/sample-companies/service-agency/`. Actual interactions included inline creation validation/cancellation, keyboard party selection, draft preservation, exact cash/overdraft balances, excess refusal, linked reversal, mobile overflow, independent report help, Escape dismissal, no-JavaScript fallback and print exclusion. Viewports: 1440, 768 and 390 pixels. Fictional Cedar provisioning and the historical chapter source link were exercised in the visitor's own company.
 
 ## Exact changed-file inventory
 
@@ -289,3 +305,5 @@ Repository-relative implementation delta from `1647c965`:
 - `www/website/sample-company-pages.test.mjs`
 - `www/website/src/css/31-sample-companies.css`
 - `www/website/src/partials/footer.html`
+
+Task-owned test database/helper/browser containers and network, acceptance browser, and local static preview server were closed after evidence capture. Logs, screenshots, validation archive and isolated source branch are retained; other projects were untouched.

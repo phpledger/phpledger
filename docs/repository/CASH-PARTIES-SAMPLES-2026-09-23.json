@@ -1,8 +1,8 @@
 {
-  "status": "combined validation running",
+  "status": "local implementation and verification complete",
   "scope": "local implementation only",
   "base": "1647c965",
-  "runtime_commit": "a10cb2d0ebb3e9163e2bdd376ee0581a130b33b8",
+  "runtime_commit": "005384204faed83499b6145c6c4a364042a2d8bb",
   "branch": "codex/cash-parties-sample-stories",
   "migrations": [
     "050_document_parties",
@@ -13,9 +13,9 @@
   "historical_migrations_changed": false,
   "existing_website_outputs_preserved": 8,
   "package": {
-    "path": ".cache/cash-party-package-accepted/phpledger-1.2.1.zip",
+    "path": ".cache/cash-party-package-verified/phpledger-1.2.1.zip",
     "purpose": "local validation archive, not a published release",
-    "sha256": "94b2824b316bcf7c274e63fb35fcc8cc294d998dabcd829c3b243800c82c15bf",
+    "sha256": "b86fed0ef76488a7587b6b05dd44c2678c491d7943cf7b70baec11e08df05868",
     "mysql_fresh_migrations": 53,
     "mariadb_fresh_migrations": 53
   },
@@ -55,8 +55,24 @@
     "populated_upgrade_mariadb": "passed",
     "exact_package_mysql": "passed",
     "exact_package_mariadb": "passed",
-    "full_mysql": "running",
-    "full_mariadb": "running",
+    "full_mysql": {
+      "command": "composer check",
+      "tests": 625,
+      "failures": 0,
+      "php_lint_files": 368,
+      "php_lint_failures": 0,
+      "phpstan": "passed",
+      "sample_validation": "passed"
+    },
+    "full_mariadb": {
+      "command": "composer check",
+      "tests": 625,
+      "failures": 0,
+      "php_lint_files": 368,
+      "php_lint_failures": 0,
+      "phpstan": "passed",
+      "sample_validation": "passed"
+    },
     "initial_full_mariadb": {
       "tests": 625,
       "failures": 7
@@ -115,5 +131,14 @@
   "production_changed": false,
   "published": false,
   "pushed": false,
-  "deployed": false
+  "deployed": false,
+  "release_scope": {
+    "bundled_demo_updated": true,
+    "documentation_updated": true,
+    "website_source_and_generated_output_updated": true,
+    "media_kit": "omitted by explicit owner instruction for this delivery",
+    "hosted_demo_updated": false,
+    "hosted_website_updated": false
+  },
+  "temporary_services": "task-owned Docker containers/network, acceptance browser and static preview server closed after verification"
 }
