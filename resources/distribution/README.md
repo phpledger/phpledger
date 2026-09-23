@@ -277,11 +277,11 @@ Unpinned active image/default versions target 1.3.0. The production Compose defa
 | `umbrel/phpledger/docker-compose.yml` | Replace the application tag and multi-architecture index digest together after the official image is published. Preserve the separately pinned MySQL image unless deliberately updating it. |
 | `umbrel/phpledger/umbrel-app.yml` | Bump application version alongside that verified image pin. |
 | `cloudron/CloudronVersions.json` | Preserve the historical 1.2.1 entry. Add 1.3.0 only after its separate Cloudron wrapper image exists and its platform checks pass; the active manifest/Dockerfile are candidate sources. |
-| `softaculous/info.xml` | Final ZIP measured: 1,648 files and 9,002,021 uncompressed bytes. Initial allowance is 11,534,336 bytes (25 percent headroom, rounded up to a whole MiB). Panel lifecycle testing and submission remain separate. |
+| `softaculous/info.xml` | Final ZIP measured: 1,649 files and 9,008,573 uncompressed bytes. Initial allowance is 11,534,336 bytes (25 percent headroom, rounded up to a whole MiB). Panel lifecycle testing and submission remain separate. |
 
 Final archive receipt, measured locally on 23 September 2026: `phpledger-1.3.0.zip`,
-SHA-256 `a2b4ca36ea3ff55ae1a5ac6bb7e2892d8243b41f4ad5d86d9b115dfb0f767120`,
-package version `1.3.0`, source commit `44fb5acc390d32e6109fe4f57fdaea155e41e59b`.
+SHA-256 `f2103a58bf3202f8e82bd974114b713b086b0e68825c5111442110bc87b97e12`,
+package version `1.3.0`, source commit `9a4d2872545e232d5c94933e701e5c5ae8cd1de1`.
 Counts exclude ZIP directory entries. The Softaculous allowance covers the initial
 application footprint and modest headroom, not growing business data or backups.
 This local receipt does not establish public download availability or provider acceptance.

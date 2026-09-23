@@ -50,7 +50,7 @@ ram.runtime = "50M"
 
     [resources.sources.main]
     url = "https://github.com/phpledger/phpledger/releases/download/v1.3.0/phpledger-1.3.0.zip"
-    sha256 = "a2b4ca36ea3ff55ae1a5ac6bb7e2892d8243b41f4ad5d86d9b115dfb0f767120"
+    sha256 = "f2103a58bf3202f8e82bd974114b713b086b0e68825c5111442110bc87b97e12"
     autoupdate.strategy = "latest_github_release"
     autoupdate.asset = "^phpledger-.*\\.zip$"
 

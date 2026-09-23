@@ -18,9 +18,9 @@
        placeholder - see NOTES.md. -->
   <softversion>4.0.6</softversion>
 
-  <!-- Measured from the final phpledger-1.3.0.zip: 1648 files,
-       9,002,021 bytes uncompressed; SHA256
-       a2b4ca36ea3ff55ae1a5ac6bb7e2892d8243b41f4ad5d86d9b115dfb0f767120.
+  <!-- Measured from the final phpledger-1.3.0.zip: 1649 files,
+       9,008,573 bytes uncompressed; SHA256
+       f2103a58bf3202f8e82bd974114b713b086b0e68825c5111442110bc87b97e12.
        Application footprint plus 25 percent, rounded up to a whole MiB (11 MiB).
        This initial allowance does not estimate growing records or backups. -->
   <space>11534336</space>
