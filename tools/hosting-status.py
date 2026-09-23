@@ -2,6 +2,9 @@
 
 Uses the established, machine-local Windows Credential Manager connection helper
 and pinned SSH host key. It does not deploy, restart, migrate, or write host files.
+Supports legacy application bind mounts and exact release images. Image layouts
+read only PACKAGE-MANIFEST.json inside web/scheduler; hosting mount and manifest
+hashes are reported alongside image IDs. No container environment is returned.
 See CLAUDE.md, docs/DEMO.md and www/website/README.md for deployment procedures.
 """
 from __future__ import annotations
@@ -21,7 +24,7 @@ HELPER = ROOT / ".cache/publish-website-1.0.0.py"
 REMOTE_STATUS = r'''
 from pathlib import Path
 from datetime import datetime, timezone
-import json, re, subprocess, urllib.request
+import hashlib, json, re, subprocess, urllib.request
 
 base = Path('/var/www/phpledger/data')
 vhost = Path('/etc/nginx/fastpanel2-sites/phpledger/phpledger.com.conf')
@@ -39,6 +42,8 @@ if len(roots) != 1 or not roots[0].startswith(str(base / 'releases') + '/') or n
 
 containers = []
 app_roots = []
+manifests = []
+layouts = []
 for role in ['web', 'scheduler', 'db']:
     name = 'phpledger-demo-demo-' + role + '-1'
     item = json.loads(run(['docker', 'inspect', name]))[0]
@@ -47,17 +52,47 @@ for role in ['web', 'scheduler', 'db']:
            'image_id': item['Image']}
     if role != 'db':
         roots_for_role = [m['Source'] for m in item['Mounts'] if m['Destination'] == '/var/www/phpledger/www/phpledger']
-        if len(roots_for_role) != 1:
-            raise RuntimeError('Unexpected application mount')
-        source = Path(roots_for_role[0]).parents[1]
+        if len(roots_for_role) > 1:
+            raise RuntimeError('Unexpected application mounts')
+        if roots_for_role:
+            layout = 'application-bind'
+            source = Path(roots_for_role[0]).parents[1]
+            if source.parent != base / 'releases':
+                raise RuntimeError('Application source outside release directory')
+            manifest_bytes = (source / 'PACKAGE-MANIFEST.json').read_bytes()
+        else:
+            layout = 'release-image'
+            relative, destination = {
+                'web': ('docker/shared-demo-guard.php', '/opt/phpledger-demo/request-guard.php'),
+                'scheduler': ('tools/shared-demo-scheduler.sh', '/var/www/phpledger/tools/shared-demo-scheduler.sh'),
+            }[role]
+            mounts = [m for m in item['Mounts'] if m['Destination'] == destination]
+            if len(mounts) != 1 or mounts[0].get('Type') != 'bind' or mounts[0].get('RW') is not False:
+                raise RuntimeError('Expected read-only hosting mount was not found')
+            mount = mounts[0]
+            mount_path = Path(mount['Source'])
+            source = mount_path.parents[1]
+            if mount_path != source / relative or source.parent != base / 'releases':
+                raise RuntimeError('Hosting mount outside reviewed release directory')
+            row['hosting_mount'] = {'source': str(mount_path), 'destination': destination,
+                'sha256': hashlib.sha256(mount_path.read_bytes()).hexdigest()}
+            # Read only the public package manifest, never environment/config files.
+            manifest_bytes = run(['docker', 'exec', name, 'cat', '/var/www/phpledger/PACKAGE-MANIFEST.json']).encode()
         if source.parent != base / 'releases':
             raise RuntimeError('Application source outside release directory')
+        manifest = json.loads(manifest_bytes)
+        if not isinstance(manifest.get('version'), str) or not isinstance(manifest.get('source_commit'), str):
+            raise RuntimeError('Invalid public package manifest')
+        manifests.append(manifest)
+        layouts.append(layout)
         app_roots.append(source)
         row['release'] = source.name
+        row['layout'] = layout
+        row['manifest_sha256'] = hashlib.sha256(manifest_bytes).hexdigest()
     containers.append(row)
 if app_roots[0] != app_roots[1]:
     raise RuntimeError('Web and scheduler use different release roots')
-manifest = json.loads((app_roots[0] / 'PACKAGE-MANIFEST.json').read_text())
+manifest = manifests[0]
 overlay_file = app_roots[0] / 'DEPLOYMENT-OVERLAY.json'
 overlay = json.loads(overlay_file.read_text()) if overlay_file.is_file() else None
 with urllib.request.urlopen('http://127.0.0.1:18202/demo/health', timeout=20) as response:
@@ -67,6 +102,10 @@ if health != {'http_status': 200, 'status': 'ok'}:
     problems.append('demo_health_failed')
 if containers[0]['image_id'] != containers[1]['image_id']:
     problems.append('web_scheduler_image_mismatch')
+if layouts[0] != layouts[1]:
+    problems.append('web_scheduler_layout_mismatch')
+if manifests[0] != manifests[1]:
+    problems.append('web_scheduler_manifest_mismatch')
 print(json.dumps({'ok': not problems, 'problems': problems,
     'checked_at': datetime.now(timezone.utc).isoformat(),
     'read_only': True, 'website': {'active_vhost': str(vhost),

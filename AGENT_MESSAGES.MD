@@ -1893,3 +1893,8 @@ Local codex/1.3-distribution-metadata from19b26c1: bump unpinned active deployme
 
 
 Distribution metadata handoff: active unpinned templates target1.3.0; productionCompose default pinned1.3.0; newInstallatron versionfolder andWikiRelease1.3+sidebar prepared. Client0.1.0 anddynamicfeedtemplate unchanged. Yunohost archivehash/version/URL, Umbrel imageindexdigest+version, historicalCloudronVersions andSoftaculous finalsize remainexplicitpending in resources/distribution/README. Seven scaffoldertests+seven imagetagtests passed;17JSON/XML/TOML/YAMLtemplates parsed; productionCompose configquietpassed; diffclean. No artifacts/hashes invented, deployments/providercalls orschema changes.
+
+## 2026-09-23 — Codex hosting-status compatibility scope
+Local codex/1.3-hosting-status from7ec60db0: read-only status tool supports exact release images and existing app-bind layout, selected public manifest/image/mount hashes only, no Config.Env output. Local mocked host fixtures; no live access or deployment. Matrix remains stopped while coordinator finishes its gate.
+
+Hosting-status compatibility outcome: selected release-image manifests are read with docker exec cat at the exact public manifest path for web/scheduler; reviewed read-only guard/scheduler bind mounts establish the release directory and expose file SHA256 receipts. Legacy application binds remain supported. Reports image/layout/manifest mismatches; no Config.Env is returned. Five fake-host tests pass, Python compilation and diff checks clean. No live connection, Docker runtime mutation or deployment was performed. Matrix stays stopped; coordinator will use GitHub CI for the broader matrix.
