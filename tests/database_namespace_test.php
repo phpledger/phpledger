@@ -99,10 +99,13 @@ test('installer identity, durable marker and shared demo retain their namespace'
         assert_throws(fn() => pl_database_configure($base + ['db_prefix'=>'other_', 'installation_directory'=>$directory]), DomainException::class, 'bound');
     } finally { unlink($directory . '/installed.json'); rmdir($directory); }
     $environment = getenv('PL_ENV');
+    $database = getenv('PL_DB_NAME');
     try {
         putenv('PL_ENV=demo-install');
+        assert_throws(fn() => pl_install_database_input([]), DomainException::class, 'not configured');
+        putenv('PL_DB_NAME=phpledger_demo');
         $demo = pl_install_database_input(['host'=>'attacker.invalid','database'=>'other','db_prefix'=>'other_','db_ssl_ca'=>'/missing','password'=>'ignored']);
         assert_same('pl_', $demo['db_prefix']);
         assert_same(getenv('PL_DB_HOST'), $demo['host']);
-    } finally { putenv('PL_ENV=' . $environment); }
+    } finally { putenv('PL_ENV=' . $environment); putenv('PL_DB_NAME=' . $database); }
 });

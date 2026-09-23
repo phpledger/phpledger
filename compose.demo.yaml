@@ -64,6 +64,8 @@ services:
   demo-reset:
     image: ${PL_DEMO_IMAGE:?Set the verified release image and digest}
     user: "0:0"
+    healthcheck:
+      disable: true
     profiles: ["maintenance"]
     environment:
       PL_ENV: demo-install
