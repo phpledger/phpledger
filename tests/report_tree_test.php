@@ -88,6 +88,9 @@ test('an account still numbered the old way keeps its balance under its own clas
     assert_same(1, count($tree));
     assert_same('1000.0000', $tree[0]['amount']);
     assert_same('Revenue', $tree[0]['label']);
+    $unstructured = tree_node($tree, 'unstructured:4-000-00000-00');
+    assert_same('Other accounts (unstructured codes)', $unstructured['label']);
+    assert_same('100.0000', $unstructured['amount']);
     $legacy = tree_node($tree, '4050');
     assert_same('account', $legacy['level']);
     assert_same('100.0000', $legacy['amount']);

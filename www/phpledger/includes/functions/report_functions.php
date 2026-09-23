@@ -201,7 +201,8 @@ function pl_report_tree(array $rows, array $measures): array
             $path = pl_account_code_ancestors($code);
         } else {
             // A legacy number keeps its classification only; it has no group of its own yet.
-            $path = [pl_account_code_format(pl_account_code_class_for_type((string) ($row['type'] ?? 'asset')), 0, 0, 0)];
+            $classCode = pl_account_code_format(pl_account_code_class_for_type((string) ($row['type'] ?? 'asset')), 0, 0, 0);
+            $path = [$classCode, 'unstructured:' . $classCode];
         }
         $nodes = pl_report_tree_insert($nodes, $path, $code, $row, $headings, $measures, 0);
     }
@@ -257,6 +258,13 @@ function pl_report_tree_leaf(string $code, array $row, array $measures, int $dep
 /** @return array<string,mixed> */
 function pl_report_tree_node(string $code, array $headings, array $measures, int $depth): array
 {
+    if (str_starts_with($code, 'unstructured:')) {
+        $node = ['code' => $code, 'short_code' => '', 'label' => 'Other accounts (unstructured codes)',
+            'name' => 'Other accounts (unstructured codes)', 'level' => 'group', 'depth' => $depth,
+            'is_heading' => true, 'is_contra' => false, 'children' => []];
+        foreach ($measures as $measure) { $node[$measure] = '0.0000'; }
+        return $node;
+    }
     $level = pl_account_code_level($code);
     $label = $headings[$code] ?? '';
     if ($label === '') {

@@ -2,7 +2,7 @@
 $columns = [['key' => 'amount', 'label' => $company['currency']]];
 $movements = $report['equity_movements'];
 ?>
-<div class="flex flex-col gap-4 py-5" style="--report-tree-columns:1">
+<div class="flex flex-col gap-4 py-5 report-columns-one">
 <?php pl_ui_page_header(pl_t('Balance sheet'),pl_t('{company} · As of {date} · Posted entries only', ['company' => $company['name'], 'date' => pl_date_label($asOf)]),static function () use ($asOf): void { ?>
 <a class="btn btn-secondary" href="<?= pl_e(pl_url('/reports/export',['report'=>'balance-sheet','to'=>$asOf])) ?>"><?= pl_icon('download') ?> <?= pl_e(pl_t('Export CSV')) ?></a>
 <?php }); ?>

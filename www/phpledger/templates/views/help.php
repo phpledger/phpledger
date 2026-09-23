@@ -1,6 +1,6 @@
 <?php declare(strict_types=1); ?>
 <section class="flex flex-col gap-4 py-5" aria-labelledby="help-title">
-    <?php pl_ui_page_header(pl_t('From first entry to a clear report'), pl_t('A short guide to the working accounting preview.'), static function (): void { ?>
+    <?php pl_ui_page_header(pl_t('From first entry to a clear report'), pl_t('Choose a workflow and follow its records into your reports.'), static function (): void { ?>
         <a class="btn btn-secondary" href="<?= pl_e(pl_url('/companies')) ?>"><?= pl_e(pl_t('Your businesses')) ?></a>
     <?php }, 'help-title'); ?>
     <section class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 mb-5" data-fold="task cards" aria-label="<?= pl_e(pl_t('Choose a task')) ?>">
@@ -41,13 +41,20 @@
     <details class="rounded-panel border border-border bg-surface"><summary class="cursor-pointer px-4 py-3 text-sm font-semibold"><?= pl_e(pl_t('Record a receipt or expense')) ?></summary><div class="border-t border-border p-4 text-sm">
         <ol>
             <li><?= pl_e(pl_t('Open the intended business and check its name and currency.')) ?></li>
-            <li><?= pl_e(pl_t('Create a receipt for money coming in or an expense for money going out. Enter the date, amount, cash/bank account, category, and a useful description.')) ?></li>
+            <li><?= pl_e(pl_t('Create a receipt for money coming in or an expense for money going out. Select or create the payer or payee, then enter the date, amount, cash/bank account, category, and a useful description.')) ?></li>
             <li><strong><?= pl_e(pl_t('Save draft')) ?></strong> <?= pl_e(pl_t('to keep your work. A saved draft does not affect the books.')) ?></li>
             <li><?= pl_e(pl_t('Review the saved details and journal effect, then')) ?> <strong><?= pl_e(pl_t('Post')) ?></strong> <?= pl_e(pl_t('when they are correct.')) ?></li>
             <li><?= pl_e(pl_t('Open the trial balance, select the affected account, and follow its activity back to the source transaction.')) ?></li>
         </ol>
         <p><?= pl_e(pl_t('Owners and accountants can write; viewers can inspect the books and reports. A saved draft is editable. A posted transaction is preserved.')) ?></p>
     </div></details>
+    <div class="rounded-panel border border-border bg-surface p-4">
+        <h2 class="section-title"><?= pl_e(pl_t('Cash available and the right payment workflow')) ?></h2>
+        <p><?= pl_e(pl_t('A balanced journal does not prove that cash was available. Physical cash payments cannot create or worsen a cash shortfall, including on later dates affected by a backdated entry. Drafts do not reserve cash. Record actual funding or correct the payment account before posting; bank payments are checked against zero or an explicitly configured agreed overdraft limit. A bank book balance and this limit check do not confirm bank clearance or available funds.')) ?></p>
+        <p><?= pl_e(pl_t('An overdraft permits an agreed negative bank balance. A separate loan or credit line is a liability: record an actual drawdown into the bank account before spending it. An unused credit limit is not a receipt and does not increase the bank balance. Record interest and charges separately from loan principal.')) ?></p>
+        <p><?= pl_e(pl_t('If a supplier has not been paid, record a bill instead of a cash expense. If an owner paid personally, use the appropriate owner funding or loan workflow. For a bank-to-cash transfer, record the actual transfer; do not record it as income.')) ?></p>
+        <p><?= pl_e(pl_t('Selecting a party identifies who paid or received the money. It does not settle an invoice or bill. Use Receivables or Payables for settlements and supported advances so income or expense is not recorded twice.')) ?></p>
+    </div>
     <details class="rounded-panel border border-border bg-surface"><summary class="cursor-pointer px-4 py-3 text-sm font-semibold"><?= pl_e(pl_t('Try the sample shop')) ?></summary><div class="border-t border-border p-4 text-sm">
         <p><?= pl_e(pl_t('The point-of-sale showcase has six fictional products. Add quantities, review the cart, enter cash received, and record the sale. Its receipt links to the same accounting journal and reports as other receipts.')) ?></p>
         <p><?= pl_e(pl_t('Check the business name before checkout: the sale is recorded in those books. No actual payment is collected. Inventory, cost of goods sold, tax, discounts, credit sales, and restaurant operations are not included.')) ?></p>

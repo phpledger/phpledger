@@ -83,7 +83,7 @@ test('every bundled sample publishes a structure, and a structure carries no his
     // when that pack moves, instead of being offered against a chart it no longer matches.
     // Every committed structure is pinned to the pack that is on disk right now.
     foreach (array_keys(pl_demo_pack_catalog()) as $id) {
-        $document = json_decode((string) file_get_contents(pl_sample_structure_directory() . '/' . $id . '-1.0.0.json'), true, 64, JSON_THROW_ON_ERROR);
+        $document = json_decode((string) file_get_contents(pl_sample_structure_directory() . '/' . $id . '-' . pl_demo_pack($id)['version'] . '.json'), true, 64, JSON_THROW_ON_ERROR);
         assert_same(pl_demo_pack($id)['digest'], $document['source_digest'] ?? null,
             'The ' . $id . ' structure is pinned to a different pack than the one on disk; regenerate it with tools/build-sample-structures.py --write.');
         assert_true(pl_sample_structure_is_current($document['source_digest'], pl_demo_pack($id)['digest']));

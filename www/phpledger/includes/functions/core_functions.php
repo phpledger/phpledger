@@ -31,7 +31,7 @@ function pl_page_accounts(int $actorId,int $companyId,int $bookId,array $filters
         $args=[$companyId,$bookId,$type,'all',$type,$status,'all',$status==='active'?1:0,$q,'',$q,$q];
         $total=(int)DB::queryFirstField('SELECT COUNT(*) FROM pl_accounts WHERE '.$where,...$args);
         $pages=max(1,(int)ceil($total/$size)); $page=min($pages,max(1,(int)($filters['page']??1)));
-        $rows=DB::query('SELECT id,code,legacy_code,name,type,role,is_active,is_contra FROM pl_accounts WHERE '.$where." ORDER BY FIELD(type,'asset','liability','equity','income','expense'), ".$order.' LIMIT %i OFFSET %i',...array_merge($args,[$size,($page-1)*$size]));
+        $rows=DB::query('SELECT id,code,legacy_code,name,type,role,money_kind,overdraft_enabled,overdraft_limit,is_active,is_contra FROM pl_accounts WHERE '.$where." ORDER BY FIELD(type,'asset','liability','equity','income','expense'), ".$order.' LIMIT %i OFFSET %i',...array_merge($args,[$size,($page-1)*$size]));
         foreach ($rows as &$row) {
             $row['id']=(int)$row['id']; $row['is_active']=(bool)$row['is_active']; $row['is_contra']=(bool)$row['is_contra'];
             $row['level']=pl_account_code_is_valid((string)$row['code'])?pl_account_code_level((string)$row['code']):'account';
@@ -45,17 +45,33 @@ function pl_get_account(int $actorId, int $companyId, int $bookId, int $id): arr
 {
     pl_require_company_access($actorId, $companyId);
     pl_ledger_book($companyId, $bookId);
-    $row = DB::queryFirstRow('SELECT id, code, legacy_code, name, type, role, report_classification, semantic_key, is_active, is_contra, revision, currency, is_monetary, revaluation_account_id, group_account_id FROM pl_accounts WHERE id = %i AND company_id = %i AND book_id = %i FOR SHARE', $id, $companyId, $bookId);
+    $row = DB::queryFirstRow('SELECT id, code, legacy_code, name, type, role, money_kind, overdraft_enabled, overdraft_limit, report_classification, semantic_key, is_active, is_contra, revision, currency, is_monetary, revaluation_account_id, group_account_id FROM pl_accounts WHERE id = %i AND company_id = %i AND book_id = %i FOR SHARE', $id, $companyId, $bookId);
     if (!$row) { throw new DomainException('This account is not available in the selected company and book.'); }
     $row['id'] = (int) $row['id'];
     $row['revision'] = (int) $row['revision'];
     $row['is_active'] = (bool) $row['is_active'];
     $row['is_contra'] = (bool) $row['is_contra'];
+    $row['overdraft_enabled'] = (bool) $row['overdraft_enabled'];
+    $row['overdraft_limit'] = pl_amount((string) $row['overdraft_limit']);
     $row['is_monetary'] = $row['is_monetary'] === null ? null : (bool) $row['is_monetary'];
     $row['level'] = pl_account_code_is_valid((string) $row['code']) ? pl_account_code_level((string) $row['code']) : 'account';
     $row['is_postable'] = pl_account_is_postable($companyId, $bookId, (string) $row['code']);
     foreach (['revaluation_account_id', 'group_account_id'] as $field) { $row[$field] = $row[$field] === null ? null : (int) $row[$field]; }
     return $row;
+}
+
+/** A configured facility is explicit bank credit, denominated in the account's currency. */
+function pl_account_overdraft_properties(array $input, array $existing = []): array
+{
+    $enabled = $input['overdraft_enabled'] ?? $existing['overdraft_enabled'] ?? false;
+    if (!is_bool($enabled)) { throw new DomainException('Choose whether an agreed bank overdraft facility exists.'); }
+    $limit = pl_amount($input['overdraft_limit'] ?? $existing['overdraft_limit'] ?? '0');
+    if (!$enabled) { return ['overdraft_enabled' => false, 'overdraft_limit' => '0.0000']; }
+    $kind = array_key_exists('money_kind', $input) ? $input['money_kind'] : ($existing['money_kind'] ?? null);
+    if ($kind !== 'bank' || ($input['role'] ?? $existing['role'] ?? null) !== 'cash_bank' || ($input['type'] ?? $existing['type'] ?? null) !== 'asset' || bccomp($limit, '0', 4) <= 0) {
+        throw new DomainException('An overdraft facility requires an explicitly classified bank account and a positive agreed limit.');
+    }
+    return ['overdraft_enabled' => true, 'overdraft_limit' => $limit];
 }
 
 /** Stable code, root type and operational role cannot be silently reclassified by an edit. */
@@ -100,6 +116,19 @@ function pl_save_account(int $actorId, int $companyId, int $bookId, array $input
     }
     $legacyHash = hash('sha256', json_encode($data, JSON_THROW_ON_ERROR));
     $data['is_contra'] = $contra;
+    if (array_key_exists('money_kind', $input)) {
+        $moneyKind = $input['money_kind'];
+        if ($moneyKind !== null && (!in_array($moneyKind, ['physical', 'bank'], true) || $role !== 'cash_bank')) {
+            throw new DomainException('Choose physical cash or bank only for a cash / bank asset account.');
+        }
+        $data['money_kind'] = $moneyKind;
+    }
+    if (array_key_exists('overdraft_enabled', $input)) {
+        if (!is_bool($input['overdraft_enabled'])) { throw new DomainException('Choose whether an agreed bank overdraft facility exists.'); }
+        $data['overdraft_enabled'] = $input['overdraft_enabled'];
+    }
+    if (array_key_exists('overdraft_limit', $input)) { $data['overdraft_limit'] = pl_amount($input['overdraft_limit']); }
+    if (($data['overdraft_enabled'] ?? null) === false) { $data['overdraft_limit'] = '0.0000'; }
     $currencyInput = $input;
     if ($id === null) { $data += pl_currency_account_properties($input); }
     if ($reportClassification !== null) { $data['report_classification'] = $reportClassification; }
@@ -112,14 +141,15 @@ function pl_save_account(int $actorId, int $companyId, int $bookId, array $input
             pl_currency_validate_account_links($companyId, $bookId, $data);
             $prior = DB::queryFirstRow('SELECT id, creation_hash FROM pl_accounts WHERE book_id = %i AND company_id = %i AND creation_key = %s FOR UPDATE', $bookId, $companyId, $key);
             if ($prior) {
-                if (!hash_equals((string) $prior['creation_hash'], $hash) && !(array_intersect_key($currencyInput, array_flip(['currency','is_monetary','revaluation_account_id','group_account_id','report_classification'])) === [] && hash_equals((string) $prior['creation_hash'], $legacyHash))) { throw new DomainException('This request already created a different account. Open the existing account.'); }
+                if (!hash_equals((string) $prior['creation_hash'], $hash) && !(array_intersect_key($currencyInput, array_flip(['currency','is_monetary','revaluation_account_id','group_account_id','report_classification','money_kind','overdraft_enabled','overdraft_limit'])) === [] && hash_equals((string) $prior['creation_hash'], $legacyHash))) { throw new DomainException('This request already created a different account. Open the existing account.'); }
                 return pl_get_account($actorId, $companyId, $bookId, (int) $prior['id']);
             }
             if (DB::queryFirstField('SELECT id FROM pl_accounts WHERE book_id = %i AND code = %s FOR SHARE', $bookId, $data['code'])) {
                 throw new DomainException('This account code is already in use. Choose a different code.');
             }
             pl_account_require_parent($companyId, $bookId, (string) $data['code'], (string) $data['type']);
-            DB::insert('pl_accounts', $data + ['company_id' => $companyId, 'book_id' => $bookId, 'creation_key' => $key, 'creation_hash' => $hash]);
+            $facility = pl_account_overdraft_properties($data);
+            DB::insert('pl_accounts', array_replace($data, $facility) + ['company_id' => $companyId, 'book_id' => $bookId, 'creation_key' => $key, 'creation_hash' => $hash]);
             $id = (int) DB::insertId();
             $before = null;
         } else {
@@ -129,12 +159,16 @@ function pl_save_account(int $actorId, int $companyId, int $bookId, array $input
                 if ($data[$field] !== $before[$field]) { throw new DomainException('Account code, classification and purpose are fixed. Create a new account and use a reviewed journal to correct classification.'); }
             }
             $properties = pl_currency_account_properties($currencyInput, $before);
+            $facility = pl_account_overdraft_properties($data, $before);
+            if ($properties['currency'] !== $before['currency'] && $facility['overdraft_enabled'] && !array_key_exists('overdraft_limit', $data)) {
+                throw new DomainException('Changing a bank account currency requires explicitly confirming its overdraft limit in the new currency.');
+            }
             pl_currency_validate_account_links($companyId, $bookId, $properties);
             if (($properties['currency'] !== $before['currency'] || $properties['is_monetary'] !== $before['is_monetary'])
                 && DB::queryFirstField('SELECT journal_id FROM pl_journal_lines WHERE account_id=%i AND company_id=%i AND book_id=%i LIMIT 1 FOR SHARE', $id, $companyId, $bookId)) {
                 throw new DomainException('Currency and monetary classification are fixed once this account has postings.');
             }
-            DB::update('pl_accounts', $properties + ['name' => $data['name'], 'is_active' => $data['is_active'], 'is_contra' => $data['is_contra'], 'report_classification'=>array_key_exists('report_classification',$currencyInput) ? $currencyInput['report_classification'] : $before['report_classification'], 'revision' => $before['revision'] + 1], 'id = %i AND company_id = %i AND book_id = %i', $id, $companyId, $bookId);
+            DB::update('pl_accounts', $properties + $facility + ['name' => $data['name'], 'is_active' => $data['is_active'], 'is_contra' => $data['is_contra'], 'money_kind' => array_key_exists('money_kind', $data) ? $data['money_kind'] : $before['money_kind'], 'report_classification'=>array_key_exists('report_classification',$currencyInput) ? $currencyInput['report_classification'] : $before['report_classification'], 'revision' => $before['revision'] + 1], 'id = %i AND company_id = %i AND book_id = %i', $id, $companyId, $bookId);
         }
         $account = pl_get_account($actorId, $companyId, $bookId, $id);
         pl_core_audit($actorId, $companyId, $bookId, 'account', $id, $before === null ? 'created' : 'updated', $reason, $before, $account);

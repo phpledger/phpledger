@@ -636,6 +636,7 @@ function pl_web_document_input(array $input): array
         'kind'=>pl_web_text($input,'kind'), 'date'=>pl_web_text($input,'date'),
         'amount'=>pl_web_text($input,'amount'), 'money_account_id'=>pl_web_id($input,'money_account_id'),
         'category_account_id'=>pl_web_id($input,'category_account_id'), 'counterparty'=>pl_web_text($input,'counterparty'),
+        'party_id'=>pl_web_id($input,'party_id') ?: null,
         'reference'=>pl_web_text($input,'reference'), 'memo'=>pl_web_text($input,'memo'), 'creation_key'=>pl_web_text($input,'creation_key'),
     ];
 }
@@ -729,7 +730,7 @@ function pl_web_editor_errors(array $input, string $screen): array
     };
     $check('date', static fn () => pl_ledger_date(pl_web_text($input, 'date')));
     $textFields = match ($screen) {
-        'transaction' => ['counterparty'=>['Paid to / received from',160,true], 'reference'=>['Reference',120,false], 'memo'=>['Memo',500,false]],
+        'transaction' => ['counterparty'=>['Paid to / received from',160,pl_web_id($input,'party_id') < 1], 'reference'=>['Reference',120,false], 'memo'=>['Memo',500,false]],
         'journal' => ['description'=>['Journal description',500,true], 'reference'=>['Reference',120,false]],
         default => ['reference'=>['Reference',120,false]],
     };

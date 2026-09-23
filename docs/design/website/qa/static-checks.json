@@ -11,9 +11,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 16200,
-        "eager": 327630,
-        "total": 416335
+        "html": 16248,
+        "eager": 330942,
+        "total": 419647
       },
       "budgets": {
         "eager": 600000,
@@ -22,7 +22,7 @@
       "eagerAssets": [
         {
           "file": "404.html",
-          "bytes": 16200
+          "bytes": 16248
         },
         {
           "file": "assets/brand/phpledger-horizontal.webp",
@@ -42,7 +42,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -93,9 +93,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 26980,
-        "eager": 338410,
-        "total": 427115
+        "html": 27028,
+        "eager": 341722,
+        "total": 430427
       },
       "budgets": {
         "eager": null,
@@ -104,7 +104,7 @@
       "eagerAssets": [
         {
           "file": "about/index.html",
-          "bytes": 26980
+          "bytes": 27028
         },
         {
           "file": "assets/brand/phpledger-horizontal.webp",
@@ -124,7 +124,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -175,9 +175,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31787,
-        "eager": 343217,
-        "total": 431922
+        "html": 31835,
+        "eager": 346529,
+        "total": 435234
       },
       "budgets": {
         "eager": 700000,
@@ -202,7 +202,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -210,7 +210,7 @@
         },
         {
           "file": "community/index.html",
-          "bytes": 31787
+          "bytes": 31835
         }
       ],
       "lazyAssets": [
@@ -257,9 +257,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29483,
-        "eager": 340913,
-        "total": 429618
+        "html": 29531,
+        "eager": 344225,
+        "total": 432930
       },
       "budgets": {
         "eager": null,
@@ -284,7 +284,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -292,7 +292,7 @@
         },
         {
           "file": "compare/akaunting-alternative/index.html",
-          "bytes": 29483
+          "bytes": 29531
         }
       ],
       "lazyAssets": [
@@ -339,9 +339,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28002,
-        "eager": 339432,
-        "total": 428137
+        "html": 28050,
+        "eager": 342744,
+        "total": 431449
       },
       "budgets": {
         "eager": null,
@@ -366,7 +366,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -374,7 +374,7 @@
         },
         {
           "file": "compare/bigcapital-alternative/index.html",
-          "bytes": 28002
+          "bytes": 28050
         }
       ],
       "lazyAssets": [
@@ -421,9 +421,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 27890,
-        "eager": 339320,
-        "total": 428025
+        "html": 27938,
+        "eager": 342632,
+        "total": 431337
       },
       "budgets": {
         "eager": null,
@@ -448,7 +448,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -456,7 +456,7 @@
         },
         {
           "file": "compare/dolibarr-alternative/index.html",
-          "bytes": 27890
+          "bytes": 27938
         }
       ],
       "lazyAssets": [
@@ -503,9 +503,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30234,
-        "eager": 341664,
-        "total": 430369
+        "html": 30282,
+        "eager": 344976,
+        "total": 433681
       },
       "budgets": {
         "eager": null,
@@ -530,7 +530,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -538,7 +538,7 @@
         },
         {
           "file": "compare/erpnext-alternative/index.html",
-          "bytes": 30234
+          "bytes": 30282
         }
       ],
       "lazyAssets": [
@@ -585,9 +585,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28192,
-        "eager": 339622,
-        "total": 428327
+        "html": 28240,
+        "eager": 342934,
+        "total": 431639
       },
       "budgets": {
         "eager": null,
@@ -612,7 +612,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -620,7 +620,7 @@
         },
         {
           "file": "compare/frontaccounting-alternative/index.html",
-          "bytes": 28192
+          "bytes": 28240
         }
       ],
       "lazyAssets": [
@@ -667,9 +667,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 27870,
-        "eager": 339300,
-        "total": 428005
+        "html": 27918,
+        "eager": 342612,
+        "total": 431317
       },
       "budgets": {
         "eager": null,
@@ -694,7 +694,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -702,7 +702,7 @@
         },
         {
           "file": "compare/index.html",
-          "bytes": 27870
+          "bytes": 27918
         }
       ],
       "lazyAssets": [
@@ -749,9 +749,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 33901,
-        "eager": 345331,
-        "total": 434036
+        "html": 33949,
+        "eager": 348643,
+        "total": 437348
       },
       "budgets": {
         "eager": null,
@@ -776,7 +776,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -784,7 +784,7 @@
         },
         {
           "file": "compare/open-source-accounting-software/index.html",
-          "bytes": 33901
+          "bytes": 33949
         }
       ],
       "lazyAssets": [
@@ -831,9 +831,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 20445,
-        "eager": 331875,
-        "total": 420580
+        "html": 20493,
+        "eager": 335187,
+        "total": 423892
       },
       "budgets": {
         "eager": 600000,
@@ -858,7 +858,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -866,7 +866,7 @@
         },
         {
           "file": "credits/index.html",
-          "bytes": 20445
+          "bytes": 20493
         }
       ],
       "lazyAssets": [
@@ -935,9 +935,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 37654,
-        "eager": 349084,
-        "total": 598721
+        "html": 37702,
+        "eager": 352396,
+        "total": 602033
       },
       "budgets": {
         "eager": 700000,
@@ -962,7 +962,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -970,7 +970,7 @@
         },
         {
           "file": "download/index.html",
-          "bytes": 37654
+          "bytes": 37702
         }
       ],
       "lazyAssets": [
@@ -1033,9 +1033,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31294,
-        "eager": 342724,
-        "total": 431429
+        "html": 31342,
+        "eager": 346036,
+        "total": 434741
       },
       "budgets": {
         "eager": null,
@@ -1060,7 +1060,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1068,7 +1068,7 @@
         },
         {
           "file": "for/accountants/index.html",
-          "bytes": 31294
+          "bytes": 31342
         }
       ],
       "lazyAssets": [
@@ -1115,9 +1115,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 18461,
-        "eager": 329891,
-        "total": 418596
+        "html": 18509,
+        "eager": 333203,
+        "total": 421908
       },
       "budgets": {
         "eager": null,
@@ -1142,7 +1142,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1150,7 +1150,7 @@
         },
         {
           "file": "for/analysts/index.html",
-          "bytes": 18461
+          "bytes": 18509
         }
       ],
       "lazyAssets": [
@@ -1197,9 +1197,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22169,
-        "eager": 333599,
-        "total": 422304
+        "html": 22217,
+        "eager": 336911,
+        "total": 425616
       },
       "budgets": {
         "eager": null,
@@ -1224,7 +1224,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1232,7 +1232,7 @@
         },
         {
           "file": "for/index.html",
-          "bytes": 22169
+          "bytes": 22217
         }
       ],
       "lazyAssets": [
@@ -1279,9 +1279,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29503,
-        "eager": 340933,
-        "total": 429638
+        "html": 29551,
+        "eager": 344245,
+        "total": 432950
       },
       "budgets": {
         "eager": null,
@@ -1306,7 +1306,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1314,7 +1314,7 @@
         },
         {
           "file": "for/small-businesses/index.html",
-          "bytes": 29503
+          "bytes": 29551
         }
       ],
       "lazyAssets": [
@@ -1361,9 +1361,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28982,
-        "eager": 340412,
-        "total": 429117
+        "html": 29030,
+        "eager": 343724,
+        "total": 432429
       },
       "budgets": {
         "eager": null,
@@ -1388,7 +1388,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1396,7 +1396,7 @@
         },
         {
           "file": "for/software-houses/index.html",
-          "bytes": 28982
+          "bytes": 29030
         }
       ],
       "lazyAssets": [
@@ -1443,9 +1443,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31120,
-        "eager": 342550,
-        "total": 431255
+        "html": 31168,
+        "eager": 345862,
+        "total": 434567
       },
       "budgets": {
         "eager": null,
@@ -1470,7 +1470,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1478,7 +1478,7 @@
         },
         {
           "file": "glossary/index.html",
-          "bytes": 31120
+          "bytes": 31168
         }
       ],
       "lazyAssets": [
@@ -1525,9 +1525,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31431,
-        "eager": 342861,
-        "total": 431566
+        "html": 31479,
+        "eager": 346173,
+        "total": 434878
       },
       "budgets": {
         "eager": null,
@@ -1552,7 +1552,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1560,7 +1560,7 @@
         },
         {
           "file": "guides/bank-reconciliation-walkthrough/index.html",
-          "bytes": 31431
+          "bytes": 31479
         }
       ],
       "lazyAssets": [
@@ -1607,9 +1607,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28999,
-        "eager": 340429,
-        "total": 429134
+        "html": 29047,
+        "eager": 343741,
+        "total": 432446
       },
       "budgets": {
         "eager": null,
@@ -1634,7 +1634,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1642,7 +1642,7 @@
         },
         {
           "file": "guides/correcting-a-posted-entry/index.html",
-          "bytes": 28999
+          "bytes": 29047
         }
       ],
       "lazyAssets": [
@@ -1689,9 +1689,9 @@
       "images": 7,
       "lazyImages": 5,
       "bytes": {
-        "html": 20203,
-        "eager": 331633,
-        "total": 527278
+        "html": 20251,
+        "eager": 334945,
+        "total": 530590
       },
       "budgets": {
         "eager": 700000,
@@ -1716,7 +1716,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1724,7 +1724,7 @@
         },
         {
           "file": "guides/daily-cash-check/index.html",
-          "bytes": 20203
+          "bytes": 20251
         }
       ],
       "lazyAssets": [
@@ -1779,9 +1779,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31737,
-        "eager": 343167,
-        "total": 431872
+        "html": 31785,
+        "eager": 346479,
+        "total": 435184
       },
       "budgets": {
         "eager": null,
@@ -1806,7 +1806,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1814,7 +1814,7 @@
         },
         {
           "file": "guides/first-week-on-the-books/index.html",
-          "bytes": 31737
+          "bytes": 31785
         }
       ],
       "lazyAssets": [
@@ -1861,9 +1861,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 26071,
-        "eager": 337501,
-        "total": 426206
+        "html": 26119,
+        "eager": 340813,
+        "total": 429518
       },
       "budgets": {
         "eager": null,
@@ -1888,7 +1888,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1896,7 +1896,7 @@
         },
         {
           "file": "guides/index.html",
-          "bytes": 26071
+          "bytes": 26119
         }
       ],
       "lazyAssets": [
@@ -1943,9 +1943,9 @@
       "images": 7,
       "lazyImages": 5,
       "bytes": {
-        "html": 20949,
-        "eager": 332379,
-        "total": 538604
+        "html": 20997,
+        "eager": 335691,
+        "total": 541916
       },
       "budgets": {
         "eager": 700000,
@@ -1970,7 +1970,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -1978,7 +1978,7 @@
         },
         {
           "file": "guides/monthly-closing/index.html",
-          "bytes": 20949
+          "bytes": 20997
         }
       ],
       "lazyAssets": [
@@ -2033,9 +2033,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30821,
-        "eager": 342251,
-        "total": 430956
+        "html": 30869,
+        "eager": 345563,
+        "total": 434268
       },
       "budgets": {
         "eager": null,
@@ -2060,7 +2060,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2068,7 +2068,7 @@
         },
         {
           "file": "guides/opening-balances-cutover/index.html",
-          "bytes": 30821
+          "bytes": 30869
         }
       ],
       "lazyAssets": [
@@ -2115,9 +2115,9 @@
       "images": 7,
       "lazyImages": 5,
       "bytes": {
-        "html": 21138,
-        "eager": 332568,
-        "total": 518187
+        "html": 21186,
+        "eager": 335880,
+        "total": 521499
       },
       "budgets": {
         "eager": 700000,
@@ -2142,7 +2142,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2150,7 +2150,7 @@
         },
         {
           "file": "guides/quarterly-yearly-review/index.html",
-          "bytes": 21138
+          "bytes": 21186
         }
       ],
       "lazyAssets": [
@@ -2205,9 +2205,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 34539,
-        "eager": 345969,
-        "total": 434674
+        "html": 34587,
+        "eager": 349281,
+        "total": 437986
       },
       "budgets": {
         "eager": null,
@@ -2232,7 +2232,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2240,7 +2240,7 @@
         },
         {
           "file": "guides/retail-two-year-statements/index.html",
-          "bytes": 34539
+          "bytes": 34587
         }
       ],
       "lazyAssets": [
@@ -2287,9 +2287,9 @@
       "images": 14,
       "lazyImages": 11,
       "bytes": {
-        "html": 51303,
-        "eager": 430783,
-        "total": 990442
+        "html": 51351,
+        "eager": 434095,
+        "total": 993754
       },
       "budgets": {
         "eager": 760000,
@@ -2318,7 +2318,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2326,7 +2326,7 @@
         },
         {
           "file": "index.html",
-          "bytes": 51303
+          "bytes": 51351
         }
       ],
       "lazyAssets": [
@@ -2429,9 +2429,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30588,
-        "eager": 342018,
-        "total": 430723
+        "html": 30636,
+        "eager": 345330,
+        "total": 434035
       },
       "budgets": {
         "eager": null,
@@ -2456,7 +2456,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2464,7 +2464,7 @@
         },
         {
           "file": "learn/bank-reconciliation/index.html",
-          "bytes": 30588
+          "bytes": 30636
         }
       ],
       "lazyAssets": [
@@ -2511,9 +2511,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29823,
-        "eager": 341253,
-        "total": 429958
+        "html": 29871,
+        "eager": 344565,
+        "total": 433270
       },
       "budgets": {
         "eager": null,
@@ -2538,7 +2538,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2546,7 +2546,7 @@
         },
         {
           "file": "learn/cash-vs-accrual/index.html",
-          "bytes": 29823
+          "bytes": 29871
         }
       ],
       "lazyAssets": [
@@ -2593,9 +2593,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 32513,
-        "eager": 343943,
-        "total": 432648
+        "html": 32561,
+        "eager": 347255,
+        "total": 435960
       },
       "budgets": {
         "eager": null,
@@ -2620,7 +2620,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2628,7 +2628,7 @@
         },
         {
           "file": "learn/chart-of-accounts/index.html",
-          "bytes": 32513
+          "bytes": 32561
         }
       ],
       "lazyAssets": [
@@ -2675,9 +2675,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30760,
-        "eager": 342190,
-        "total": 430895
+        "html": 30808,
+        "eager": 345502,
+        "total": 434207
       },
       "budgets": {
         "eager": null,
@@ -2702,7 +2702,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2710,7 +2710,7 @@
         },
         {
           "file": "learn/correcting-mistakes-reversal-vs-edit/index.html",
-          "bytes": 30760
+          "bytes": 30808
         }
       ],
       "lazyAssets": [
@@ -2757,9 +2757,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31093,
-        "eager": 342523,
-        "total": 431228
+        "html": 31141,
+        "eager": 345835,
+        "total": 434540
       },
       "budgets": {
         "eager": null,
@@ -2784,7 +2784,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2792,7 +2792,7 @@
         },
         {
           "file": "learn/debits-and-credits/index.html",
-          "bytes": 31093
+          "bytes": 31141
         }
       ],
       "lazyAssets": [
@@ -2839,9 +2839,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31380,
-        "eager": 342810,
-        "total": 431515
+        "html": 31428,
+        "eager": 346122,
+        "total": 434827
       },
       "budgets": {
         "eager": null,
@@ -2866,7 +2866,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2874,7 +2874,7 @@
         },
         {
           "file": "learn/double-entry-bookkeeping/index.html",
-          "bytes": 31380
+          "bytes": 31428
         }
       ],
       "lazyAssets": [
@@ -2921,9 +2921,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 26527,
-        "eager": 337957,
-        "total": 426662
+        "html": 26575,
+        "eager": 341269,
+        "total": 429974
       },
       "budgets": {
         "eager": null,
@@ -2948,7 +2948,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -2956,7 +2956,7 @@
         },
         {
           "file": "learn/index.html",
-          "bytes": 26527
+          "bytes": 26575
         }
       ],
       "lazyAssets": [
@@ -3003,9 +3003,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30059,
-        "eager": 341489,
-        "total": 430194
+        "html": 30107,
+        "eager": 344801,
+        "total": 433506
       },
       "budgets": {
         "eager": null,
@@ -3030,7 +3030,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3038,7 +3038,7 @@
         },
         {
           "file": "learn/journal-entry/index.html",
-          "bytes": 30059
+          "bytes": 30107
         }
       ],
       "lazyAssets": [
@@ -3085,9 +3085,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30598,
-        "eager": 342028,
-        "total": 430733
+        "html": 30646,
+        "eager": 345340,
+        "total": 434045
       },
       "budgets": {
         "eager": null,
@@ -3112,7 +3112,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3120,7 +3120,7 @@
         },
         {
           "file": "learn/opening-balances-and-cutover/index.html",
-          "bytes": 30598
+          "bytes": 30646
         }
       ],
       "lazyAssets": [
@@ -3167,9 +3167,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29762,
-        "eager": 341192,
-        "total": 429897
+        "html": 29810,
+        "eager": 344504,
+        "total": 433209
       },
       "budgets": {
         "eager": null,
@@ -3194,7 +3194,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3202,7 +3202,7 @@
         },
         {
           "file": "learn/profit-and-loss-vs-balance-sheet/index.html",
-          "bytes": 29762
+          "bytes": 29810
         }
       ],
       "lazyAssets": [
@@ -3249,9 +3249,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29579,
-        "eager": 341009,
-        "total": 429714
+        "html": 29627,
+        "eager": 344321,
+        "total": 433026
       },
       "budgets": {
         "eager": null,
@@ -3276,7 +3276,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3284,7 +3284,7 @@
         },
         {
           "file": "learn/trial-balance/index.html",
-          "bytes": 29579
+          "bytes": 29627
         }
       ],
       "lazyAssets": [
@@ -3331,9 +3331,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 18949,
-        "eager": 330379,
-        "total": 419084
+        "html": 18997,
+        "eager": 333691,
+        "total": 422396
       },
       "budgets": {
         "eager": 650000,
@@ -3358,7 +3358,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3366,7 +3366,7 @@
         },
         {
           "file": "news/0-1-0-preview/index.html",
-          "bytes": 18949
+          "bytes": 18997
         }
       ],
       "lazyAssets": [
@@ -3413,9 +3413,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 20139,
-        "eager": 331569,
-        "total": 420274
+        "html": 20187,
+        "eager": 334881,
+        "total": 423586
       },
       "budgets": {
         "eager": 650000,
@@ -3440,7 +3440,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3448,7 +3448,7 @@
         },
         {
           "file": "news/0-1-3-preview/index.html",
-          "bytes": 20139
+          "bytes": 20187
         }
       ],
       "lazyAssets": [
@@ -3495,9 +3495,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 18762,
-        "eager": 330192,
-        "total": 418897
+        "html": 18810,
+        "eager": 333504,
+        "total": 422209
       },
       "budgets": {
         "eager": 650000,
@@ -3522,7 +3522,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3530,7 +3530,7 @@
         },
         {
           "file": "news/0-1-4-preview/index.html",
-          "bytes": 18762
+          "bytes": 18810
         }
       ],
       "lazyAssets": [
@@ -3577,9 +3577,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 19215,
-        "eager": 330645,
-        "total": 419350
+        "html": 19263,
+        "eager": 333957,
+        "total": 422662
       },
       "budgets": {
         "eager": null,
@@ -3604,7 +3604,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3612,7 +3612,7 @@
         },
         {
           "file": "news/0-1-5-preview/index.html",
-          "bytes": 19215
+          "bytes": 19263
         }
       ],
       "lazyAssets": [
@@ -3659,9 +3659,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 19623,
-        "eager": 331053,
-        "total": 419758
+        "html": 19671,
+        "eager": 334365,
+        "total": 423070
       },
       "budgets": {
         "eager": 650000,
@@ -3686,7 +3686,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3694,7 +3694,7 @@
         },
         {
           "file": "news/0-1-6-preview/index.html",
-          "bytes": 19623
+          "bytes": 19671
         }
       ],
       "lazyAssets": [
@@ -3741,9 +3741,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 20792,
-        "eager": 332222,
-        "total": 420927
+        "html": 20840,
+        "eager": 335534,
+        "total": 424239
       },
       "budgets": {
         "eager": 650000,
@@ -3768,7 +3768,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3776,7 +3776,7 @@
         },
         {
           "file": "news/0-2-1-preview/index.html",
-          "bytes": 20792
+          "bytes": 20840
         }
       ],
       "lazyAssets": [
@@ -3823,9 +3823,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 23798,
-        "eager": 335228,
-        "total": 423933
+        "html": 23846,
+        "eager": 338540,
+        "total": 427245
       },
       "budgets": {
         "eager": null,
@@ -3850,7 +3850,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3858,7 +3858,7 @@
         },
         {
           "file": "news/0-3-0-preview/index.html",
-          "bytes": 23798
+          "bytes": 23846
         }
       ],
       "lazyAssets": [
@@ -3905,9 +3905,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 32493,
-        "eager": 343923,
-        "total": 683157
+        "html": 32541,
+        "eager": 347235,
+        "total": 686469
       },
       "budgets": {
         "eager": 650000,
@@ -3932,7 +3932,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -3940,7 +3940,7 @@
         },
         {
           "file": "news/0-4-0-preview/index.html",
-          "bytes": 32493
+          "bytes": 32541
         }
       ],
       "lazyAssets": [
@@ -3995,9 +3995,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22261,
-        "eager": 333691,
-        "total": 422396
+        "html": 22309,
+        "eager": 337003,
+        "total": 425708
       },
       "budgets": {
         "eager": null,
@@ -4022,7 +4022,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4030,7 +4030,7 @@
         },
         {
           "file": "news/0-5-0-preview/index.html",
-          "bytes": 22261
+          "bytes": 22309
         }
       ],
       "lazyAssets": [
@@ -4077,9 +4077,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 22646,
-        "eager": 334076,
-        "total": 612373
+        "html": 22694,
+        "eager": 337388,
+        "total": 615685
       },
       "budgets": {
         "eager": null,
@@ -4104,7 +4104,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4112,7 +4112,7 @@
         },
         {
           "file": "news/0-6-0-preview/index.html",
-          "bytes": 22646
+          "bytes": 22694
         }
       ],
       "lazyAssets": [
@@ -4175,9 +4175,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 23899,
-        "eager": 335329,
-        "total": 546788
+        "html": 23947,
+        "eager": 338641,
+        "total": 550100
       },
       "budgets": {
         "eager": null,
@@ -4202,7 +4202,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4210,7 +4210,7 @@
         },
         {
           "file": "news/1-0-0/index.html",
-          "bytes": 23899
+          "bytes": 23947
         }
       ],
       "lazyAssets": [
@@ -4273,9 +4273,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22188,
-        "eager": 333618,
-        "total": 422323
+        "html": 22236,
+        "eager": 336930,
+        "total": 425635
       },
       "budgets": {
         "eager": null,
@@ -4300,7 +4300,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4308,7 +4308,7 @@
         },
         {
           "file": "news/1-1-0/index.html",
-          "bytes": 22188
+          "bytes": 22236
         }
       ],
       "lazyAssets": [
@@ -4355,9 +4355,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22860,
-        "eager": 334290,
-        "total": 422995
+        "html": 22908,
+        "eager": 337602,
+        "total": 426307
       },
       "budgets": {
         "eager": null,
@@ -4382,7 +4382,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4390,7 +4390,7 @@
         },
         {
           "file": "news/1-1-1/index.html",
-          "bytes": 22860
+          "bytes": 22908
         }
       ],
       "lazyAssets": [
@@ -4437,9 +4437,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22878,
-        "eager": 334308,
-        "total": 423013
+        "html": 22926,
+        "eager": 337620,
+        "total": 426325
       },
       "budgets": {
         "eager": null,
@@ -4464,7 +4464,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4472,7 +4472,7 @@
         },
         {
           "file": "news/1-1-2/index.html",
-          "bytes": 22878
+          "bytes": 22926
         }
       ],
       "lazyAssets": [
@@ -4519,9 +4519,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 21751,
-        "eager": 333181,
-        "total": 421886
+        "html": 21799,
+        "eager": 336493,
+        "total": 425198
       },
       "budgets": {
         "eager": null,
@@ -4546,7 +4546,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4554,7 +4554,7 @@
         },
         {
           "file": "news/1-1-3/index.html",
-          "bytes": 21751
+          "bytes": 21799
         }
       ],
       "lazyAssets": [
@@ -4601,9 +4601,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28019,
-        "eager": 339449,
-        "total": 428154
+        "html": 28067,
+        "eager": 342761,
+        "total": 431466
       },
       "budgets": {
         "eager": 650000,
@@ -4628,7 +4628,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4636,7 +4636,7 @@
         },
         {
           "file": "news/index.html",
-          "bytes": 28019
+          "bytes": 28067
         }
       ],
       "lazyAssets": [
@@ -4683,9 +4683,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 30623,
-        "eager": 342053,
-        "total": 544530
+        "html": 30671,
+        "eager": 345365,
+        "total": 547842
       },
       "budgets": {
         "eager": 700000,
@@ -4710,7 +4710,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4718,7 +4718,7 @@
         },
         {
           "file": "point-of-sale/index.html",
-          "bytes": 30623
+          "bytes": 30671
         }
       ],
       "lazyAssets": [
@@ -4777,9 +4777,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28077,
-        "eager": 339507,
-        "total": 428212
+        "html": 28125,
+        "eager": 342819,
+        "total": 431524
       },
       "budgets": {
         "eager": 700000,
@@ -4804,7 +4804,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4812,7 +4812,7 @@
         },
         {
           "file": "pricing/index.html",
-          "bytes": 28077
+          "bytes": 28125
         }
       ],
       "lazyAssets": [
@@ -4859,9 +4859,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 19694,
-        "eager": 331124,
-        "total": 419829
+        "html": 19742,
+        "eager": 334436,
+        "total": 423141
       },
       "budgets": {
         "eager": null,
@@ -4886,7 +4886,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4894,7 +4894,7 @@
         },
         {
           "file": "privacy/index.html",
-          "bytes": 19694
+          "bytes": 19742
         }
       ],
       "lazyAssets": [
@@ -4941,9 +4941,9 @@
       "images": 30,
       "lazyImages": 28,
       "bytes": {
-        "html": 63334,
-        "eager": 374764,
-        "total": 2510417
+        "html": 63382,
+        "eager": 378076,
+        "total": 2513729
       },
       "budgets": {
         "eager": 700000,
@@ -4968,7 +4968,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -4976,7 +4976,7 @@
         },
         {
           "file": "product/index.html",
-          "bytes": 63334
+          "bytes": 63382
         }
       ],
       "lazyAssets": [
@@ -5215,9 +5215,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 36500,
-        "eager": 347930,
-        "total": 436635
+        "html": 36548,
+        "eager": 351242,
+        "total": 439947
       },
       "budgets": {
         "eager": null,
@@ -5242,7 +5242,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5250,7 +5250,7 @@
         },
         {
           "file": "research/fbr-digital-invoicing/index.html",
-          "bytes": 36500
+          "bytes": 36548
         }
       ],
       "lazyAssets": [
@@ -5297,9 +5297,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 27069,
-        "eager": 338499,
-        "total": 427204
+        "html": 27117,
+        "eager": 341811,
+        "total": 430516
       },
       "budgets": {
         "eager": null,
@@ -5324,7 +5324,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5332,7 +5332,7 @@
         },
         {
           "file": "research/index.html",
-          "bytes": 27069
+          "bytes": 27117
         }
       ],
       "lazyAssets": [
@@ -5379,9 +5379,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 38032,
-        "eager": 349462,
-        "total": 438167
+        "html": 38080,
+        "eager": 352774,
+        "total": 441479
       },
       "budgets": {
         "eager": null,
@@ -5406,7 +5406,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5414,7 +5414,7 @@
         },
         {
           "file": "research/open-source-accounting-landscape/index.html",
-          "bytes": 38032
+          "bytes": 38080
         }
       ],
       "lazyAssets": [
@@ -5461,9 +5461,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 38631,
-        "eager": 350061,
-        "total": 438766
+        "html": 38679,
+        "eager": 353373,
+        "total": 442078
       },
       "budgets": {
         "eager": null,
@@ -5488,7 +5488,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5496,7 +5496,7 @@
         },
         {
           "file": "research/pakistan-sme-bookkeeping/index.html",
-          "bytes": 38631
+          "bytes": 38679
         }
       ],
       "lazyAssets": [
@@ -5543,9 +5543,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30461,
-        "eager": 341891,
-        "total": 430596
+        "html": 30509,
+        "eager": 345203,
+        "total": 433908
       },
       "budgets": {
         "eager": null,
@@ -5570,7 +5570,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5578,7 +5578,7 @@
         },
         {
           "file": "research/php-hosting-availability-2026/index.html",
-          "bytes": 30461
+          "bytes": 30509
         }
       ],
       "lazyAssets": [
@@ -5625,9 +5625,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 35778,
-        "eager": 347208,
-        "total": 435913
+        "html": 35826,
+        "eager": 350520,
+        "total": 439225
       },
       "budgets": {
         "eager": 650000,
@@ -5652,7 +5652,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5660,7 +5660,1043 @@
         },
         {
           "file": "roadmap/index.html",
-          "bytes": 35778
+          "bytes": 35826
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/distributor/index.html": {
+      "path": "/sample-companies/distributor/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Harbor Supply Company: a fictional company story | PHP Ledger",
+      "descriptionLength": 136,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 20844,
+        "eager": 336039,
+        "total": 424744
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/distributor.svg",
+          "bytes": 501
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/distributor/index.html",
+          "bytes": 20844
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/index.html": {
+      "path": "/sample-companies/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Meet the fictional sample companies | PHP Ledger",
+      "descriptionLength": 147,
+      "images": 17,
+      "lazyImages": 15,
+      "bytes": {
+        "html": 25410,
+        "eager": 340104,
+        "total": 433812
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/index.html",
+          "bytes": 25410
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "assets/sample-companies/distributor.svg",
+          "bytes": 501
+        },
+        {
+          "file": "assets/sample-companies/jewelry-studio.svg",
+          "bytes": 480
+        },
+        {
+          "file": "assets/sample-companies/light-manufacturing.svg",
+          "bytes": 424
+        },
+        {
+          "file": "assets/sample-companies/membership-club.svg",
+          "bytes": 460
+        },
+        {
+          "file": "assets/sample-companies/pharmacy.svg",
+          "bytes": 451
+        },
+        {
+          "file": "assets/sample-companies/restaurant.svg",
+          "bytes": 463
+        },
+        {
+          "file": "assets/sample-companies/retail-shop.svg",
+          "bytes": 445
+        },
+        {
+          "file": "assets/sample-companies/seasonal-business.svg",
+          "bytes": 478
+        },
+        {
+          "file": "assets/sample-companies/service-agency.svg",
+          "bytes": 339
+        },
+        {
+          "file": "assets/sample-companies/service-workshop.svg",
+          "bytes": 475
+        },
+        {
+          "file": "assets/sample-companies/trader.svg",
+          "bytes": 487
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/jewelry-studio/index.html": {
+      "path": "/sample-companies/jewelry-studio/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Lantern Finch Jewelry Studio: a fictional company story | PHP Ledger",
+      "descriptionLength": 145,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 20044,
+        "eager": 335218,
+        "total": 423923
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/jewelry-studio.svg",
+          "bytes": 480
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/jewelry-studio/index.html",
+          "bytes": 20044
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/light-manufacturing/index.html": {
+      "path": "/sample-companies/light-manufacturing/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Maple Bench Works: a fictional company story | PHP Ledger",
+      "descriptionLength": 139,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 21572,
+        "eager": 336690,
+        "total": 425395
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/light-manufacturing.svg",
+          "bytes": 424
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/light-manufacturing/index.html",
+          "bytes": 21572
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/membership-club/index.html": {
+      "path": "/sample-companies/membership-club/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Riverside Community Club: a fictional company story | PHP Ledger",
+      "descriptionLength": 142,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 21260,
+        "eager": 336414,
+        "total": 425119
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/membership-club.svg",
+          "bytes": 460
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/membership-club/index.html",
+          "bytes": 21260
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/pharmacy/index.html": {
+      "path": "/sample-companies/pharmacy/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Meadow Training Pharmacy: a fictional company story | PHP Ledger",
+      "descriptionLength": 159,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 20694,
+        "eager": 335839,
+        "total": 424544
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/pharmacy.svg",
+          "bytes": 451
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/pharmacy/index.html",
+          "bytes": 20694
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/restaurant/index.html": {
+      "path": "/sample-companies/restaurant/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Cedar Table: a fictional company story | PHP Ledger",
+      "descriptionLength": 131,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 19933,
+        "eager": 335090,
+        "total": 423795
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/restaurant.svg",
+          "bytes": 463
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/restaurant/index.html",
+          "bytes": 19933
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/retail-shop/index.html": {
+      "path": "/sample-companies/retail-shop/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Willow Corner Shop: a fictional company story | PHP Ledger",
+      "descriptionLength": 132,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 23133,
+        "eager": 338272,
+        "total": 426977
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/retail-shop.svg",
+          "bytes": 445
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/retail-shop/index.html",
+          "bytes": 23133
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/seasonal-business/index.html": {
+      "path": "/sample-companies/seasonal-business/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Sunrise Garden Services: a fictional company story | PHP Ledger",
+      "descriptionLength": 143,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 19993,
+        "eager": 335165,
+        "total": 423870
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/seasonal-business.svg",
+          "bytes": 478
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/seasonal-business/index.html",
+          "bytes": 19993
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/service-agency/index.html": {
+      "path": "/sample-companies/service-agency/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Cedar Studio: a fictional company story | PHP Ledger",
+      "descriptionLength": 145,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 66641,
+        "eager": 381674,
+        "total": 470379
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/service-agency.svg",
+          "bytes": 339
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/service-agency/index.html",
+          "bytes": 66641
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/service-workshop/index.html": {
+      "path": "/sample-companies/service-workshop/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Wheel & Spoke Workshop: a fictional company story | PHP Ledger",
+      "descriptionLength": 141,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 20776,
+        "eager": 335945,
+        "total": 424650
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/service-workshop.svg",
+          "bytes": 475
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/service-workshop/index.html",
+          "bytes": 20776
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "sample-companies/trader/index.html": {
+      "path": "/sample-companies/trader/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Harbour Trade: a fictional company story | PHP Ledger",
+      "descriptionLength": 134,
+      "images": 7,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 20658,
+        "eager": 335839,
+        "total": 424544
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/sample-companies/trader.svg",
+          "bytes": 487
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "sample-companies/trader/index.html",
+          "bytes": 20658
         }
       ],
       "lazyAssets": [
@@ -5707,9 +6743,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29402,
-        "eager": 340832,
-        "total": 429537
+        "html": 29450,
+        "eager": 344144,
+        "total": 432849
       },
       "budgets": {
         "eager": null,
@@ -5734,7 +6770,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5742,7 +6778,7 @@
         },
         {
           "file": "self-hosting/backup-and-restore/index.html",
-          "bytes": 29402
+          "bytes": 29450
         }
       ],
       "lazyAssets": [
@@ -5789,9 +6825,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31150,
-        "eager": 342580,
-        "total": 431285
+        "html": 31198,
+        "eager": 345892,
+        "total": 434597
       },
       "budgets": {
         "eager": null,
@@ -5816,7 +6852,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5824,7 +6860,7 @@
         },
         {
           "file": "self-hosting/docker/index.html",
-          "bytes": 31150
+          "bytes": 31198
         }
       ],
       "lazyAssets": [
@@ -5871,9 +6907,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 27628,
-        "eager": 339058,
-        "total": 427763
+        "html": 27676,
+        "eager": 342370,
+        "total": 431075
       },
       "budgets": {
         "eager": null,
@@ -5898,7 +6934,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5906,7 +6942,7 @@
         },
         {
           "file": "self-hosting/index.html",
-          "bytes": 27628
+          "bytes": 27676
         }
       ],
       "lazyAssets": [
@@ -5953,9 +6989,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30655,
-        "eager": 342085,
-        "total": 430790
+        "html": 30703,
+        "eager": 345397,
+        "total": 434102
       },
       "budgets": {
         "eager": null,
@@ -5980,7 +7016,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -5988,7 +7024,7 @@
         },
         {
           "file": "self-hosting/php-version-compatibility/index.html",
-          "bytes": 30655
+          "bytes": 30703
         }
       ],
       "lazyAssets": [
@@ -6035,9 +7071,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29686,
-        "eager": 341116,
-        "total": 429821
+        "html": 29734,
+        "eager": 344428,
+        "total": 433133
       },
       "budgets": {
         "eager": null,
@@ -6062,7 +7098,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -6070,7 +7106,7 @@
         },
         {
           "file": "self-hosting/requirements/index.html",
-          "bytes": 29686
+          "bytes": 29734
         }
       ],
       "lazyAssets": [
@@ -6117,9 +7153,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 34914,
-        "eager": 346344,
-        "total": 435049
+        "html": 34962,
+        "eager": 349656,
+        "total": 438361
       },
       "budgets": {
         "eager": null,
@@ -6144,7 +7180,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -6152,7 +7188,7 @@
         },
         {
           "file": "self-hosting/shared-hosting-cpanel/index.html",
-          "bytes": 34914
+          "bytes": 34962
         }
       ],
       "lazyAssets": [
@@ -6199,9 +7235,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 34013,
-        "eager": 345443,
-        "total": 434148
+        "html": 34061,
+        "eager": 348755,
+        "total": 437460
       },
       "budgets": {
         "eager": null,
@@ -6226,7 +7262,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -6234,7 +7270,7 @@
         },
         {
           "file": "self-hosting/vps-install/index.html",
-          "bytes": 34013
+          "bytes": 34061
         }
       ],
       "lazyAssets": [
@@ -6303,9 +7339,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 18350,
-        "eager": 329780,
-        "total": 418485
+        "html": 18398,
+        "eager": 333092,
+        "total": 421797
       },
       "budgets": {
         "eager": null,
@@ -6330,7 +7366,7 @@
         },
         {
           "file": "assets/site.css",
-          "bytes": 36457
+          "bytes": 39721
         },
         {
           "file": "assets/site.js",
@@ -6338,7 +7374,7 @@
         },
         {
           "file": "terms/index.html",
-          "bytes": 18350
+          "bytes": 18398
         }
       ],
       "lazyAssets": [
@@ -6380,7 +7416,7 @@
   "errors": [],
   "warnings": [],
   "summary": {
-    "pages": 75,
+    "pages": 87,
     "redirectStubs": 2,
     "errors": 0,
     "warnings": 0

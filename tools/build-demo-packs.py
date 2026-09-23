@@ -11,6 +11,7 @@ import hashlib
 import json
 from pathlib import Path
 from datetime import date, timedelta
+from sample_pack_learning import normalize_pack, enrich_cedar, learning_story, attach_parties
 
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / "resources" / "demo-packs"
@@ -646,6 +647,8 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
         ("5600", "Loan interest", "expense", "expense"),
         ("4800", "Gain or loss on asset disposal", "income", None),
     ]
+    if slug == "service-agency":
+        accounts += [("1150", "Design-review receivables", "asset", "receivables")]
     if inventory:
         accounts += [("1400", "Stock - manual support schedule", "asset", None),
                      ("5700", "Cost of sales - manual schedule", "expense", "expense")]
@@ -801,6 +804,7 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
                                  "salary_source": "payroll_journal_by_element" if ym == PAYROLL_MONTH else "single_monthly_line",
                                  "stock_purchases": money(purchases), "cost_of_sales": money(cost),
                                  "units_in": units_in, "units_out": units_out, "unit_cost": money(unit_cost)})
+    enrich_cedar(slug, events, monthly_schedule, line)
     events.sort(key=lambda e: (e["date"], e["key"]))
     # Expand the authored sources independently of PHP's posting/report implementation.
     postings = []
@@ -834,7 +838,7 @@ def build(slug, name, business, revenue, inventory, capability_note=None, status
               {"key": "practice-expense", "kind": "expense", "date": "2026-02-03", "amount": "65.0000", "counterparty": "Harbor Office Supply", "reference": "PRACTICE-EXPENSE", "memo": "Editable practice expense. No effect on books until posted."},
               {"key": "practice-petty", "kind": "expense", "date": "2026-02-04", "amount": "12.5000", "money_code": "1030", "counterparty": "Fictional local stationery", "reference": "PRACTICE-PETTY", "memo": "Compare the petty cash statement before and after posting."}]
     # 85 sources for a sole trader; a partnership splits capital and drawings per partner.
-    assert len(events) + len(drafts) == 85 + len(partners or []), len(events) + len(drafts)
+    assert len(events) + len(drafts) == 85 + len(partners or []) + (24 if slug == "service-agency" else 0), len(events) + len(drafts)
     # Everything below anticipates a 1.3 feature that does not exist yet. Each block is
     # derived from the same postings the checkpoints reconcile, so it can never drift from
     # the ledger, and each one says in its own words that no screen produces it today.
@@ -990,7 +994,10 @@ def main():
              build("service-workshop", "Wheel & Spoke Workshop", "Service workshop", 3100, (500, 450, 50, 45, 10), "Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.", "preview_only")]
     files = {}
     catalog = []
+    starter = json.loads((ROOT / "resources/coa/core-starter-1.2.0.json").read_text())
+    packs = [normalize_pack(attach_parties(pack), starter) for pack in packs]
     for pack in packs:
+        pack["learning_story"] = learning_story(pack)
         filename = f"{pack['id']}-{pack['version']}.json"
         content = json.dumps(pack, indent=2, ensure_ascii=False) + "\n"
         files[filename] = content

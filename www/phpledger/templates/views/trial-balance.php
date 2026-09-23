@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 $columns = [['key' => 'debit', 'label' => pl_t('Debit')], ['key' => 'credit', 'label' => pl_t('Credit')]];
 ?>
-<section class="flex flex-col gap-4 py-5" aria-labelledby="trial-title" style="--report-tree-columns:2">
+<section class="flex flex-col gap-4 py-5 report-columns-two" aria-labelledby="trial-title">
 <?php pl_ui_page_header(pl_t('Trial balance'),pl_t('{company} · {currency} · Through {asOf} · Posted entries only',['company'=>$company['name'],'currency'=>$company['currency'],'asOf'=>pl_date_label($asOf)]),static function () use ($asOf): void { ?>
 <a class="btn btn-secondary" href="<?= pl_e(pl_url('/reports/export',['report'=>'trial-balance','to'=>$asOf])) ?>"><?= pl_icon('download') ?> <?= pl_e(pl_t('Export CSV')) ?></a>
 <?php },'trial-title'); ?>

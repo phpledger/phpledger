@@ -29,4 +29,11 @@
         </div>
         <div class="panel-actions full-width" data-fold="primary action"><button class="btn btn-primary" type="submit"><?= pl_e(pl_t('Create this separate sample')) ?></button><a class="btn btn-secondary" href="<?= pl_e(pl_url('/companies')) ?>"><?= pl_e(pl_t('Cancel')) ?></a></div>
     </form>
+    <details class="rounded-panel border border-border p-4"><summary><?= pl_e(pl_t('Meet the fictional companies')) ?></summary>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+        <?php foreach (pl_demo_pack_catalog() as $entry): $preview = pl_demo_pack($entry['id']); $story = $preview['learning_story'] ?? null; if (!is_array($story)) { continue; } ?>
+            <article><img src="<?= pl_e(pl_url($story['logo']['path'])) ?>" width="48" height="48" alt="<?= pl_e($preview['name'] . ' fictional company logo') ?>"><h2><?= pl_e($preview['name']) ?></h2><p><?= pl_e($story['origin']) ?></p><p class="small muted"><?= pl_e($story['status'] === 'complete_history' ? pl_t('Monthly 2024–2025 journey and separate 2026 practice chapter.') : $story['journey_note']) ?></p></article>
+        <?php endforeach; ?>
+        </div>
+    </details>
 </section>

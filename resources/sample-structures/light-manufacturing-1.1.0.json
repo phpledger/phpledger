@@ -1,0 +1,273 @@
+{
+  "contract": 1,
+  "id": "light-manufacturing",
+  "version": "1.1.0",
+  "name": "Maple Bench Works",
+  "business": "Light manufacturing",
+  "source_digest": "6b23bf090eb94e79edacfda301490e079118ffdbcdb424827f41cc4aa8b07d66",
+  "note": "The structure of this sample company: its chart, the modules it needs, its numbering and its customers, suppliers and products. None of its transactions, balances or stock is here, and none is created when it is brought in.",
+  "accounts": [
+    {
+      "code": "1-130-00000-00",
+      "name": "Inventory",
+      "type": "asset"
+    },
+    {
+      "code": "4-200-00000-00",
+      "name": "Other Income",
+      "type": "income"
+    },
+    {
+      "code": "5-200-00000-00",
+      "name": "Cost of Sales",
+      "type": "expense"
+    },
+    {
+      "code": "1-100-21010-00",
+      "name": "Reserve bank",
+      "type": "asset",
+      "role": "cash_bank",
+      "money_kind": "bank"
+    },
+    {
+      "code": "1-100-21020-00",
+      "name": "Cash till",
+      "type": "asset",
+      "role": "cash_bank",
+      "money_kind": "physical"
+    },
+    {
+      "code": "1-100-21030-00",
+      "name": "Petty cash",
+      "type": "asset",
+      "role": "cash_bank",
+      "money_kind": "physical"
+    },
+    {
+      "code": "1-120-21200-00",
+      "name": "Prepaid insurance",
+      "type": "asset"
+    },
+    {
+      "code": "1-200-21300-00",
+      "name": "Equipment at cost",
+      "type": "asset"
+    },
+    {
+      "code": "1-900-21390-00",
+      "name": "Accumulated depreciation",
+      "type": "asset",
+      "is_contra": true
+    },
+    {
+      "code": "1-120-21500-00",
+      "name": "Staff advances",
+      "type": "asset"
+    },
+    {
+      "code": "2-100-22100-00",
+      "name": "Accrued staff bonus",
+      "type": "liability"
+    },
+    {
+      "code": "2-110-22200-00",
+      "name": "Term loan",
+      "type": "liability"
+    },
+    {
+      "code": "2-100-22300-00",
+      "name": "Net salaries payable",
+      "type": "liability"
+    },
+    {
+      "code": "2-100-22310-00",
+      "name": "Withholding tax payable",
+      "type": "liability"
+    },
+    {
+      "code": "2-100-22320-00",
+      "name": "Social security payable",
+      "type": "liability"
+    },
+    {
+      "code": "2-100-22330-00",
+      "name": "Provident fund payable",
+      "type": "liability"
+    },
+    {
+      "code": "2-120-22400-00",
+      "name": "Deferred support income",
+      "type": "liability"
+    },
+    {
+      "code": "5-100-25100-00",
+      "name": "Fictional staff salaries",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25150-00",
+      "name": "Employer contributions",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25200-00",
+      "name": "Rent",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25300-00",
+      "name": "Utilities",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25400-00",
+      "name": "Insurance expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25500-00",
+      "name": "Depreciation expense",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "5-100-25600-00",
+      "name": "Loan interest",
+      "type": "expense",
+      "role": "expense"
+    },
+    {
+      "code": "4-200-24800-00",
+      "name": "Gain or loss on asset disposal",
+      "type": "income"
+    },
+    {
+      "code": "1-130-21400-00",
+      "name": "Stock - manual support schedule",
+      "type": "asset"
+    },
+    {
+      "code": "5-200-25700-00",
+      "name": "Cost of sales - manual schedule",
+      "type": "expense",
+      "role": "expense",
+      "report_classification": "cost_of_sales"
+    },
+    {
+      "code": "1-130-31410-00",
+      "name": "Raw material inventory",
+      "type": "asset"
+    },
+    {
+      "code": "1-130-31420-00",
+      "name": "Production in progress",
+      "type": "asset"
+    },
+    {
+      "code": "1-130-31430-00",
+      "name": "Finished goods inventory",
+      "type": "asset"
+    },
+    {
+      "code": "4-100-34100-00",
+      "name": "Manufactured product income",
+      "type": "income"
+    },
+    {
+      "code": "5-200-35110-00",
+      "name": "Manufactured cost of sales",
+      "type": "expense",
+      "report_classification": "cost_of_sales"
+    },
+    {
+      "code": "5-100-35120-00",
+      "name": "Production workshop costs",
+      "type": "expense"
+    },
+    {
+      "code": "5-100-35130-00",
+      "name": "Abnormal production losses",
+      "type": "expense"
+    }
+  ],
+  "open_item_accounts": [
+    "1-110-10001-00",
+    "2-100-10001-00"
+  ],
+  "money_account_kinds": {
+    "1-100-10001-00": "bank",
+    "1-100-21010-00": "bank",
+    "1-100-21020-00": "physical",
+    "1-100-21030-00": "physical"
+  },
+  "modules": [
+    "inventory",
+    "purchasing"
+  ],
+  "packages": [],
+  "number_series": [
+    {
+      "type": "bill",
+      "prefix": "BILL",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    },
+    {
+      "type": "supplier_credit",
+      "prefix": "SC",
+      "padding": 6,
+      "year_segment": true,
+      "reset_rule": "yearly"
+    }
+  ],
+  "policies": {},
+  "parties": [
+    {
+      "legal_name": "Civic Studio Interiors (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": true,
+      "is_vendor": false,
+      "ar_code": "1-110-10001-00",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    },
+    {
+      "legal_name": "Mill Road Timber (Sample)",
+      "entity_type": "private_company",
+      "country_code": "ZZ",
+      "is_customer": false,
+      "is_vendor": true,
+      "ap_code": "2-100-10001-00",
+      "notes": "Brought in from a sample company's structure. No balance and no document was copied."
+    }
+  ],
+  "products": [
+    {
+      "sku": "BENCH-FINISHED",
+      "name": "Finished bench teaching unit (Sample)",
+      "kind": "stock",
+      "base_unit": "piece",
+      "selling_price": "650.0000",
+      "sales_code": "4-100-34100-00",
+      "purchase_code": "5-100-10001-00",
+      "inventory_code": "1-130-31430-00",
+      "cogs_code": "5-200-35110-00"
+    },
+    {
+      "sku": "BENCH-SERVICE",
+      "name": "Bench finishing service (Sample)",
+      "kind": "nonstock",
+      "base_unit": "job",
+      "selling_price": "120.0000",
+      "sales_code": "4-100-34100-00",
+      "purchase_code": "5-100-10001-00"
+    }
+  ],
+  "tax_codes": []
+}

@@ -456,6 +456,12 @@ function pl_seed_core_sample(int $actorId, int $companyId, int $bookId): void
             throw new RuntimeException('The core sample identity is invalid.');
         }
         $accounts = array_column($company['accounts'], 'id', 'semantic_key');
+        // The identity-checked, empty-company core sample explicitly reconciles its money
+        // account as `expected.bank`. This authored fixture decision is not a rule for real charts.
+        $sampleBank = pl_get_account($actorId, $companyId, $bookId, (int) $accounts['core.cash_bank']);
+        pl_save_account($actorId, $companyId, $bookId, array_replace($sampleBank, [
+            'money_kind' => 'bank', 'reason' => 'The authored core-accounting sample reconciles this account as its bank balance.',
+        ]), $sampleBank['id'], $sampleBank['revision']);
         foreach (['posted', 'drafts'] as $group) {
             foreach ($sample[$group] as $item) {
                 $document = pl_save_document($actorId, $companyId, $bookId, [

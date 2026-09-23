@@ -141,12 +141,15 @@ function pl_sample_structure_validate(array $document, string $id, string $versi
         }
         $structure[$key] = $value;
     }
-    foreach (['policies', 'company_profile'] as $key) {
+    foreach (['policies', 'company_profile', 'money_account_kinds'] as $key) {
         $value = $document[$key] ?? [];
         if (!is_array($value)) {
             throw new DomainException('A sample structure declares ' . $key . ' as a map.');
         }
         $structure[$key] = $value;
+    }
+    foreach ($structure['money_account_kinds'] as $code => $kind) {
+        if (!is_string($code) || !in_array($kind, ['physical', 'bank'], true)) { throw new DomainException('A sample structure declares explicit bank or physical-cash account kinds.'); }
     }
     pl_sample_structure_check_accounts($structure['accounts']);
     pl_sample_structure_check_modules($structure['modules']);
@@ -410,11 +413,12 @@ function pl_import_sample_skeleton(int $actorId, int $companyId, int $bookId, st
             // the file, so a structure cannot hand a business a chart of disabled accounts.
             $account = pl_save_account($actorId, $companyId, $bookId, [
                 'code' => $definition['code'], 'name' => $definition['name'], 'type' => $definition['type'],
-                'role' => $definition['role'] ?? null, 'is_contra' => ($definition['is_contra'] ?? false) === true,
+                'role' => $definition['role'] ?? null, 'money_kind' => $definition['money_kind'] ?? null, 'is_contra' => ($definition['is_contra'] ?? false) === true,
                 'is_active' => true, 'reason' => $reason, 'creation_key' => $prefix . 'account:' . $definition['code'],
             ] + (isset($definition['report_classification']) ? ['report_classification' => $definition['report_classification']] : []));
             $mapping[(string) $definition['code']] = (int) $account['id'];
         }
+        pl_demo_classify_money_accounts($actorId, $companyId, $bookId, $mapping, $structure['money_account_kinds']);
         $resolve = static function (string $code) use ($mapping): int {
             if (!isset($mapping[$code])) {
                 throw new DomainException('This sample structure refers to the account ' . $code . ', which its own chart does not create.');

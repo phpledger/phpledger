@@ -301,6 +301,9 @@ function pl_install_step_label(string $version): string
         '044_ownership_register' => 'Adding the ownership register and share ledger',
         '045_chart_headings' => 'Naming the chart of accounts classes and groups',
         '049_secret_store' => 'Adding the encrypted secret store for package credentials',
+        '050_document_parties' => 'Link receipt and expense parties',
+        '051_money_account_kind' => 'Classify physical cash and bank accounts',
+        '052_bank_overdraft_limits' => 'Record agreed bank overdraft limits',
         '046_fixed_assets' => 'Adding the fixed-asset register',
         '048_employee_master' => 'Adding the employee register',
     ];

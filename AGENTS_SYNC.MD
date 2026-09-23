@@ -284,3 +284,8 @@ Local takeover in agent-a2c82cf1a04045756: migration 049, authenticated private-
 ## 23 September 2026 — M17 period-close takeover handoff
 
 Codex completed the paused period-close/reversing-journal/cash-count lane locally on actual branch `worktree-agent-a473613d91ab7aa9d` (the older claim named `m17/period-close`). Migration 047 remains reserved. Targeted PHP 8.3/MySQL 8.4 suite: **36 tests, zero failures**, including HTTP write controls and concurrency/rollback evidence; changed PHP lint and diff check clean. Coordinator integrates the local commit and owns combined engine/package/browser gates and plugin API snapshot. No merge, push, release or live change from this lane. See the latest agent message and `docs/design/1.2-2026-09/PERIOD-CLOSE.md`.
+
+
+## 2026-09-23 — Cash, parties, samples and guidance implementation scope
+
+Codex owns isolated branch `codex/cash-parties-sample-stories`, worktree `.cache/cash-parties-sample-stories`, from `1647c965`. Eight pre-existing main website outputs are backed up separately with verified SHA-256; they are outside this implementation lane. Cash/account policy, linked parties/workspaces, sample/stories, and help/integration have separate agent ownership. Owner approved nullable party migration050, explicit cash/bank classification051, then separately approved agreed bank overdraft limits052. Bank limits use account-currency units; a separate borrowing facility remains a liability, not fabricated bank funds. No publication, deployment, provider action, live reset or customer conversion is authorised. Verification is local on disposable MySQL8.4/MariaDB10.11 and browser fixtures. Final outcomes and exact changed-file receipt follow here.

@@ -48,6 +48,8 @@ function assert_throws(callable $action, string $class = Throwable::class, ?stri
 
 $suites = ['auth_test.php', 'ledger_test.php', 'concurrency_test.php', 'document_test.php', 'regional_test.php', 'report_test.php', 'pos_test.php', 'core_test.php', 'opening_test.php', 'period_test.php', 'reconciliation_test.php', 'core_completion_test.php', 'module_test.php', 'installer_test.php', 'connection_test.php', 'demo_pack_test.php'];
 $suites = array_merge($suites, ['currency_test.php', 'party_test.php', 'outbound_test.php', 'open_item_test.php', 'correction_test.php']);
+$suites[] = 'document_party_test.php';
+$suites[] = 'document_party_http_test.php';
 $suites = array_merge($suites, ['ar_ap_test.php','inventory_test.php','inventory_location_test.php','purchasing_test.php','opening_conversion_test.php','tax_test.php','starter_module_test.php','starter_demo_test.php','shell_test.php']);
 $suites[] = 'list_test.php';
 $suites[] = 'home_test.php';
@@ -100,6 +102,7 @@ $suites[] = 'plugin_surface_test.php';
 $suites[] = 'asset_test.php';
 $suites[] = 'period_close_test.php';
 $suites[] = 'cash_count_test.php';
+$suites[] = 'cash_control_test.php';
 if (($argv[1] ?? '') === '--suite=period-close') {
     $suites = ['ledger_test.php', 'period_test.php', 'period_close_test.php', 'cash_count_test.php'];
 }
@@ -184,7 +187,7 @@ if (($argv[1] ?? '') === '--suite=modules') {
 }
 if (($argv[1] ?? '') === '--suite=onboarding') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php',
-        'module_test.php', 'inventory_test.php', 'purchasing_test.php', 'tax_test.php', 'document_series_test.php',
+        'module_test.php', 'ar_ap_test.php', 'inventory_test.php', 'purchasing_test.php', 'tax_test.php', 'document_series_test.php',
         'onboarding_skeleton_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=owner') {
@@ -193,6 +196,11 @@ if (($argv[1] ?? '') === '--suite=owner') {
 if (($argv[1] ?? '') === '--suite=stock-documents') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'stock_document_test.php'];
 }
+
+if (($argv[1] ?? '') === '--suite=document-parties') { $suites = ['ledger_test.php','concurrency_test.php','document_test.php','document_party_test.php','document_party_http_test.php']; }
+if (($argv[1] ?? '') === '--suite=cash-controls') { $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'cash_control_test.php']; }
+if (($argv[1] ?? '') === '--suite=guidance') { $suites = ['guidance_test.php']; }
+if (($argv[1] ?? '') === '--suite=context-help') { $suites = ['ledger_test.php', 'guidance_test.php', 'report_tree_test.php']; }
 foreach ($suites as $suite) {
     if (is_file(__DIR__ . '/' . $suite)) {
         require __DIR__ . '/' . $suite;

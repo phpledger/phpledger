@@ -53,7 +53,7 @@ test('prior company review preserves renamed accounts and posted history', funct
     $journal = pl_post_journal($f['actor_id'], $f['company_id'], $f['book_id'], ledger_payload($f));
     // Reproduce the pre-002 records after their additive columns exist.
     DB::delete('pl_template_installations', 'company_id = %i', $f['company_id']);
-    DB::update('pl_accounts', ['semantic_key' => null, 'role' => null], 'book_id = %i', $f['book_id']);
+    DB::update('pl_accounts', ['semantic_key' => null, 'role' => null, 'money_kind' => null, 'overdraft_enabled' => 0, 'overdraft_limit' => '0.0000'], 'book_id = %i', $f['book_id']);
     DB::update('pl_accounts', ['name' => 'My renamed operating bank'], 'id = %i', $f['accounts']['1000']);
     DB::update('pl_companies', ['setup_status' => 'review_required'], 'id = %i', $f['company_id']);
     assert_throws(fn () => pl_post_journal($f['actor_id'], $f['company_id'], $f['book_id'], ledger_payload($f)), DomainException::class, 'Review');
@@ -126,6 +126,7 @@ test('document permissions and scoped account roles fail closed', function (): v
     assert_throws(fn () => pl_post_document($f['actor_id'], $f['company_id'], $other['book_id'], $document['id'], 1), DomainException::class);
     foreach ([$other['accounts']['1000'], $f['accounts']['1100']] as $badId) {
         $bad = $input;
+        $bad['creation_key'] = bin2hex(random_bytes(16));
         $bad['money_account_id'] = $badId;
         assert_throws(fn () => pl_save_document($f['actor_id'], $f['company_id'], $f['book_id'], $bad), DomainException::class, 'cash/bank');
     }

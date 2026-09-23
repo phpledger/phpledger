@@ -259,29 +259,6 @@ document.querySelectorAll('[data-dismiss]').forEach(button => {
 // reads without any of this. Everything here is comfort on top — Escape, clicking elsewhere, and
 // only one bubble open at a time. Nothing moves focus into the bubble, so focus is never trapped
 // and the reading order after the question mark is the explanation itself.
-document.querySelectorAll('details[data-help]').forEach(help => {
-    const summary = help.querySelector('summary');
-    help.addEventListener('toggle', () => {
-        if (!help.open) return;
-        document.querySelectorAll('details[data-help][open]').forEach(other => { if (other !== help) other.open = false; });
-    });
-    help.addEventListener('keydown', event => {
-        if (event.key !== 'Escape' || !help.open) return;
-        event.stopPropagation();
-        help.open = false;
-        summary?.focus();
-    });
-});
-document.addEventListener('keydown', event => {
-    if (event.key !== 'Escape') return;
-    document.querySelectorAll('details[data-help][open]').forEach(help => { help.open = false; });
-});
-document.addEventListener('click', event => {
-    document.querySelectorAll('details[data-help][open]').forEach(help => {
-        if (!help.contains(event.target)) help.open = false;
-    });
-});
-
 const terminalZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 document.querySelectorAll('[data-timezone]').forEach(node => { node.textContent = terminalZone; });
 document.querySelectorAll('time[data-local-time]').forEach(node => {

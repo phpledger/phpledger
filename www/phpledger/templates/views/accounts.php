@@ -3,9 +3,12 @@ declare(strict_types=1);
 $canManage = pl_can_write($company) && !pl_demo_enabled();
 $types = ['asset' => 'Asset', 'liability' => 'Liability', 'equity' => 'Equity', 'income' => 'Income', 'expense' => 'Expense'];
 $roles = ['' => 'No operational purpose', 'cash_bank' => 'Cash / bank — Asset', 'receivables' => 'Receivables — Asset', 'payables' => 'Payables — Liability', 'customer_advances' => 'Customer advances — Liability', 'supplier_advances' => 'Supplier advances — Asset', 'owner_equity' => 'Owner equity — Equity', 'income' => 'Income — Income', 'expense' => 'Expense — Expense'];
+$moneyKinds = ['' => 'Not classified — choose before paying out', 'physical' => 'Physical cash — petty cash, till or cash box', 'bank' => 'Bank account'];
 $hasFailure = pl_web_text($form, 'message') !== '';
 $isActive = $hasFailure ? pl_web_text($input, 'is_active') === '1' : (bool) ($input['is_active'] ?? true);
 $isContra = $hasFailure ? pl_web_text($input, 'is_contra') === '1' : (bool) ($input['is_contra'] ?? false);
+$hasOverdraft = $hasFailure ? pl_web_text($input, 'overdraft_enabled') === '1' : (bool) ($input['overdraft_enabled'] ?? false);
+$facilityCurrency = $account['currency'] ?? $company['currency'];
 $levels = ['class' => 'Class heading', 'group' => 'Group heading', 'account' => 'Account', 'sub_account' => 'Sub-account'];
 ?>
 <div class="flex flex-col gap-4 py-5">
@@ -58,11 +61,23 @@ $levels = ['class' => 'Class heading', 'group' => 'Group heading', 'account' => 
         <?php if ($operationalWarning): ?><?php pl_ui_strip(pl_t('This account supports cash/bank, receivable, payable or tax operations. Deactivating it prevents new entries that need it. Existing balances and history remain; review affected workflows before saving.'), 'warning'); ?><?php endif; ?>
         <label class="flex items-start gap-2 text-sm"><input type="checkbox" name="is_active" value="1" <?= $isActive ? 'checked' : '' ?>><span><?= pl_e(pl_t('Active — available for new entries')) ?></span></label>
         <label class="flex items-start gap-2 text-sm"><input type="checkbox" name="is_contra" value="1" <?= $isContra ? 'checked' : '' ?>><span><?= pl_e(pl_t('Contra account — presented as a deduction inside its own section')) ?><span class="block text-xs text-ink-muted"><?= pl_e(pl_t('Accumulated depreciation and provisions against assets, sales returns and discounts allowed, purchase returns and discounts received, and drawings. The flag changes presentation only: no posted entry moves, and clearing it restores the earlier presentation exactly.')) ?></span></span></label>
+        <?php if (!$account || $account['role'] === 'cash_bank'): ?>
+        <label class="field" for="account-money-kind"><?= pl_e(pl_t('Cash / bank kind')) ?><select class="select" id="account-money-kind" name="money_kind" aria-describedby="account-money-kind-help"><?php foreach ($moneyKinds as $value => $label): ?><option value="<?= pl_e($value) ?>" <?= pl_web_text($input, 'money_kind') === $value ? 'selected' : '' ?>><?= pl_e(pl_t($label)) ?></option><?php endforeach; ?></select></label>
+        <p class="text-xs text-ink-muted" id="account-money-kind-help"><?= pl_e(pl_t('For cash / bank accounts, choose what this account actually holds. Physical cash cannot create or worsen a recorded shortfall. A bank account cannot go below zero unless an agreed overdraft facility is explicitly recorded below. Leave other account purposes unclassified. Existing combined accounts need your explicit decision before paying out.')) ?></p>
+        <fieldset class="flex flex-col gap-2"><legend class="field-label"><?= pl_e(pl_t('Agreed bank overdraft facility')) ?></legend>
+            <input type="hidden" name="overdraft_configured" value="1">
+            <label class="flex items-start gap-2 text-sm"><input type="checkbox" name="overdraft_enabled" value="1" <?= $hasOverdraft ? 'checked' : '' ?> aria-describedby="overdraft-help"><span><?= pl_e(pl_t('An agreed overdraft facility exists for this bank account')) ?></span></label>
+            <label class="field" for="overdraft-limit"><?= pl_e(pl_t('Agreed limit in {currency}', ['currency' => $facilityCurrency])) ?><input class="input" id="overdraft-limit" name="overdraft_limit" inputmode="decimal" value="<?= pl_e(pl_web_text($input, 'overdraft_limit', '0')) ?>" maxlength="21" pattern="(?:0|[1-9][0-9]*)(?:\.[0-9]{1,4})?" aria-describedby="overdraft-help"></label>
+            <p id="overdraft-help" class="text-xs text-ink-muted"><?= pl_e(pl_t('Enter the limit actually agreed with the bank, in this account’s designated currency or the book currency when none is designated. Other currencies receive no borrowing allowance. Turning the facility off sets its permitted floor to zero. Saving changes requires a reason and preserves existing journals; it does not arrange borrowing or confirm cleared or available bank funds.')) ?></p>
+        </fieldset>
+        <?php endif; ?>
         <label class="field"><?= pl_e($account ? pl_t('Reason for this change') : pl_t('Reason for adding this account')) ?><textarea name="reason" rows="2" maxlength="500" required><?= pl_e(pl_web_text($input, 'reason')) ?></textarea></label>
         <div class="panel-actions"><?php if ($account): ?><a class="btn btn-secondary" href="<?= pl_e(pl_url('/reports/account', ['id' => $account['id']])) ?>"><?= pl_e(pl_t('Open statement')) ?></a><?php endif; ?></div>
     </form>
     <?php else: ?>
     <dl class="record-details"><div><dt><?= pl_e(pl_t('Code')) ?></dt><dd><?= pl_e($account['code']) ?></dd></div><div><dt><?= pl_e(pl_t('Classification')) ?></dt><dd><?= pl_e(pl_t($types[$account['type']] ?? $account['type'])) ?></dd></div><div><dt><?= pl_e(pl_t('Purpose')) ?></dt><dd><?= pl_e(pl_t($roles[$account['role'] ?? ''] ?? 'No operational purpose')) ?></dd></div><div><dt><?= pl_e(pl_t('Status')) ?></dt><dd><?= pl_e($account['is_active'] ? pl_t('Active') : pl_t('Inactive')) ?></dd></div></dl>
+    <?php if ($account['role'] === 'cash_bank'): ?><p><?= pl_e(pl_t($moneyKinds[$account['money_kind'] ?? ''])) ?></p><?php endif; ?>
+    <?php if ($account['money_kind'] === 'bank'): ?><p><?= pl_e($account['overdraft_enabled'] ? pl_t('Agreed overdraft limit: {currency} {limit}.', ['currency' => $facilityCurrency, 'limit' => pl_money($account['overdraft_limit'])]) : pl_t('No overdraft facility is configured; the permitted floor is zero.')) ?></p><?php endif; ?>
     <a class="btn btn-secondary" href="<?= pl_e(pl_url('/reports/account', ['id' => $account['id']])) ?>"><?= pl_e(pl_t('Open statement')) ?></a>
     <p class="muted small core-footnote"><?= pl_e(pl_demo_enabled() ? pl_t('Account changes are unavailable in the public demo.') : pl_t('Your role can view accounts and their history.')) ?></p>
     <?php endif; ?>

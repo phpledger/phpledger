@@ -66,7 +66,9 @@ SERIES_PREFIX = {
 # The starter chart every book is created with (resources/coa/core-starter-1.2.0.json), by the
 # legacy number a pack refers to it by. A structure never recreates these, and it never carries
 # the chart's class and group headings either: those come with the chart, not with a sample.
-STARTER_CODES = {"1000", "1100", "2000", "3000", "4000", "5000"}
+STARTER_CHART = json.loads((ROOT / "resources/coa/core-starter-1.2.0.json").read_text())
+STARTER_ALIASES = {a["legacy_code"]: a["code"] for a in STARTER_CHART["accounts"] if a.get("legacy_code")}
+STARTER_CODES = {a["code"] for a in STARTER_CHART["accounts"]}
 
 # Where a semantic account the sample's own chart does not carry falls back to, by the role the
 # pack gives it. Only the six purposes the starter chart actually has.
@@ -96,7 +98,7 @@ def chart(pack):
     """The sample's own chart: its declared accounts plus its vertical profile's accounts."""
     accounts, seen = [], set(STARTER_CODES)
     profile = evidence_of(pack).get("industry_profile", {}) or {}
-    for definition in list(pack.get("accounts", [])) + list(profile.get("accounts", [])):
+    for definition in list(pack.get("account_headings", [])) + list(pack.get("accounts", [])) + list(profile.get("accounts", [])):
         code = str(definition["code"])
         if code in seen:
             continue
@@ -104,6 +106,10 @@ def chart(pack):
         entry = {"code": code, "name": definition["name"], "type": definition["type"]}
         if definition.get("role"):
             entry["role"] = definition["role"]
+        if definition.get("report_classification"):
+            entry["report_classification"] = definition["report_classification"]
+        if definition.get("money_kind"):
+            entry["money_kind"] = definition["money_kind"]
         if definition.get("is_contra"):
             entry["is_contra"] = True
         # A vertical cost-of-goods account is presented under cost of sales, the way the
@@ -129,7 +135,7 @@ def semantic_codes(pack):
     for definition in evidence_of(pack).get("semantic_accounts", []) or []:
         key, role = definition.get("key"), definition.get("fixture_role")
         if key and role in STARTER_FOR_ROLE:
-            starter[key] = STARTER_FOR_ROLE[role]
+            starter[key] = STARTER_ALIASES[STARTER_FOR_ROLE[role]]
     return vertical, starter
 
 
@@ -145,8 +151,8 @@ def parties(pack):
             "country_code": "ZZ",
             "is_customer": role == "customer",
             "is_vendor": role == "vendor",
-            "ar_code": "1100" if role == "customer" else None,
-            "ap_code": "2000" if role == "vendor" else None,
+            "ar_code": STARTER_ALIASES["1100"] if role == "customer" else None,
+            "ap_code": STARTER_ALIASES["2000"] if role == "vendor" else None,
             "notes": "Brought in from a sample company's structure. No balance and no document was copied.",
         })
     for entry in result:
@@ -182,8 +188,8 @@ def products(pack, modules, chart_codes):
         stock = product.get("kind") not in ("service", "nonstock")
         sales = resolve(product.get("income_account_key"),
                         "sales_revenue" if stock else "service_revenue", None) \
-            or roles.get("sales_revenue") or "4000"
-        cost = resolve(product.get("cost_account_key"), "cost_of_goods_sold", "5000")
+            or roles.get("sales_revenue") or STARTER_ALIASES["4000"]
+        cost = resolve(product.get("cost_account_key"), "cost_of_goods_sold", STARTER_ALIASES["5000"])
         inventory = resolve(product.get("inventory_account_key"), "inventory", None)
         if stock and (inventory is None or inventory not in chart_codes or cost not in chart_codes):
             continue
@@ -198,7 +204,7 @@ def products(pack, modules, chart_codes):
             "sales_code": sales,
             # A purchase of a stock item is received into stock, not expensed, so the purchase
             # account is the general expense account, exactly as the starter playground sets it.
-            "purchase_code": "5000",
+            "purchase_code": STARTER_ALIASES["5000"],
         }
         if stock:
             entry["inventory_code"] = inventory
@@ -219,7 +225,8 @@ def series(modules):
 
 
 def build(slug):
-    path = PACKS / (slug + "-1.0.0.json")
+    entry = next(p for p in json.loads((PACKS / "catalog.json").read_text()) if p["id"] == slug)
+    path = PACKS / entry["file"]
     pack, raw = read_pack(path)
     modules = MODULES[slug]
     accounts = chart(pack)
@@ -228,9 +235,9 @@ def build(slug):
     product_rows = products(pack, modules, codes)
     open_items = []
     if any(row["is_customer"] for row in party_rows):
-        open_items.append("1100")
+        open_items.append(STARTER_ALIASES["1100"])
     if any(row["is_vendor"] for row in party_rows):
-        open_items.append("2000")
+        open_items.append(STARTER_ALIASES["2000"])
     structure = {
         "contract": CONTRACT,
         "id": pack["id"],
@@ -243,6 +250,7 @@ def build(slug):
                  "balances or stock is here, and none is created when it is brought in."),
         "accounts": accounts,
         "open_item_accounts": open_items,
+        "money_account_kinds": pack.get("money_account_kinds", {}),
         "modules": modules,
         "packages": [],
         "number_series": series(modules),
@@ -270,7 +278,7 @@ def main():
     failures = []
     for slug in sorted(MODULES):
         structure = build(slug)
-        target = DEST / (slug + "-1.0.0.json")
+        target = DEST / (slug + "-" + structure["version"] + ".json")
         rendered = render(structure)
         if arguments.write:
             target.write_text(rendered, encoding="utf-8", newline="\n")
@@ -282,6 +290,20 @@ def main():
             failures.append("%s is missing" % target.name)
         elif target.read_text(encoding="utf-8").replace("\r\n", "\n") != rendered:
             failures.append("%s does not match its pack; regenerate with --write" % target.name)
+    # The empty starter has no history pack. Normalize its explicitly authored
+    # predecessor with the same fixed mapping used by the PHP playground.
+    from sample_pack_learning import remap
+    starter = json.loads((DEST / "accounting-starter-1.0.0.json").read_text())
+    starter_map = STARTER_ALIASES | {"1300":"1-130-21300-00","1350":"1-110-21350-00", "2100":"2-100-22100-00", "2150":"2-100-22150-00", "5100":"5-200-25100-00", "5200":"5-100-25200-00"}
+    starter = remap(starter, starter_map)
+    starter["version"] = "1.1.0"
+    starter["money_account_kinds"] = {STARTER_ALIASES["1000"]: "bank"}
+    starter["accounts"] = [{"code":"1-130-00000-00","name":"Inventory","type":"asset"}, {"code":"5-200-00000-00","name":"Cost of Sales","type":"expense"}] + starter["accounts"]
+    target = DEST / "accounting-starter-1.1.0.json"
+    if arguments.write:
+        target.write_text(render(starter), encoding="utf-8", newline="\n")
+    elif not target.exists() or target.read_text(encoding="utf-8") != render(starter):
+        failures.append("accounting-starter-1.1.0.json does not match; regenerate with --write")
     if arguments.check:
         if failures:
             for failure in failures:

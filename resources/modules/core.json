@@ -32,7 +32,10 @@
     "045_chart_headings",
     "047_period_close",
     "048_employee_master",
-    "049_secret_store"
+    "049_secret_store",
+    "050_document_parties",
+    "051_money_account_kind",
+    "052_bank_overdraft_limits"
   ],
   "routes": [
     "/accounts",

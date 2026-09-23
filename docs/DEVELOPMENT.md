@@ -658,3 +658,12 @@ check; do not run it against a hosted database. See the local redesign upgrade
 receipt for fixture coverage and limitations. The new migration chain currently
 continues through `031_posting_source_lookup`; historical migration checksums stay
 unchanged.
+
+
+## Local cash, bank and document-party upgrade
+
+The additive chain now includes `050_document_parties`, `051_money_account_kind`, and `052_bank_overdraft_limits`. Keep all earlier migration bytes unchanged, particularly036; never rerun historical chart conversion to repair customer accounts. Migration050 adds a nullable indexed document-to-party relationship scoped to the company and updates the effective document view. Migration051 adds explicit physical/bank classification without guessing from names or codes. Migration052 defaults every account to no overdraft, with a database check requiring a positive limit and bank classification when enabled. Its limit is denominated in the designated account currency, or the book currency when none is designated. These migrations do not alter posted history, infer historical parties, grant borrowing, or renumber accounts.
+
+Use `tools/verify-cash-party-upgrade.php seed BASELINE_ROOT STATE_FILE` then `check STATE_FILE` for a populated upgrade rehearsal. The probe is guarded to disposable test root connections on `db_test` or `maria_test`, creates a random isolated schema, seeds it with archived baseline code, compares every original column and migration receipt, verifies new defaults and subsequent cash/party operations, and removes only its own schema on success. Do not use this probe with hosted or real-company data. The exact-package probe `tools/verify-m17-package.php EXTRACTED_PACKAGE_ROOT` loads only the unchanged extracted archive and now includes physical cash refusal, linked snapshots and exact-limit/excess bank payments in addition to the existing first-operation checks.
+
+Focused commands are `php tests/run.php --suite=cash-controls`, `--suite=document-parties`, `--suite=guidance`, `--suite=demo-packs`, and `--suite=onboarding`. Full `composer check` remains the combined application gate on both MySQL and MariaDB. Run `python tools/build-demo-packs.py --check`, `python tools/build-sample-structures.py --check`, `python tests/sample-learning-test.py`, `python tests/package-builder-test.py`, `node --test www/website/sample-company-pages.test.mjs`, and `node www/website/build.mjs --check` for the separate resource/package/site gates. Build shared CSS with `npm run build:css` after editing its source.

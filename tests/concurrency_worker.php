@@ -5,6 +5,11 @@ if (getenv('PL_ENV') !== 'test' || getenv('PL_DB_NAME') !== 'phpledger_test') {
 }
 require_once dirname(__DIR__) . '/www/phpledger/includes/bootstrap.php';
 $input = json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR);
+if ($input['mode'] === 'cash_post') {
+    // Establish a REPEATABLE READ snapshot before either competitor posts.
+    DB::startTransaction();
+    DB::query('SELECT id FROM pl_journals WHERE book_id=%i', $input['fixture']['book_id']);
+}
 $deadline = microtime(true) + 15;
 while (!is_file($input['barrier'])) {
     if (microtime(true) > $deadline) {
@@ -14,7 +19,16 @@ while (!is_file($input['barrier'])) {
 }
 $fixture = $input['fixture'];
 try {
-    if (in_array($input['mode'], ['purchase_receive','purchase_bill','opening_convert'], true)) {
+    if ($input['mode'] === 'cash_post') {
+        try {
+            $journal = pl_post_journal($fixture['actor_id'], $fixture['company_id'], $fixture['book_id'], $input['payload']);
+            DB::commit();
+        } catch (DomainException $error) {
+            DB::rollback();
+            if (!str_contains($error->getMessage(), 'keep the document as a draft')) { throw $error; }
+            $journal = ['id' => 0];
+        }
+    } elseif (in_array($input['mode'], ['purchase_receive','purchase_bill','opening_convert'], true)) {
         try {
             $result=match ($input['mode']) {
                 'purchase_receive'=>pl_receive_purchase_order($fixture['actor_id'],$fixture['company_id'],$fixture['book_id'],$input['order_id'],$input['receipt_input']),

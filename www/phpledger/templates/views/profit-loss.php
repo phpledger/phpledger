@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 $columns = [['key' => 'amount', 'label' => $company['currency']]];
 ?>
-<div class="flex flex-col gap-4 py-5" style="--report-tree-columns:1">
+<div class="flex flex-col gap-4 py-5 report-columns-one">
 <?php pl_ui_page_header(pl_t('Profit & loss'), pl_t('{company} · {from} to {to} · Posted entries only', ['company' => $company['name'], 'from' => pl_date_label($from), 'to' => pl_date_label($to)]), static function () use ($from,$to): void { ?>
 <a class="btn btn-secondary" href="<?= pl_e(pl_url('/reports/export',['report'=>'profit-loss','from'=>$from,'to'=>$to])) ?>"><?= pl_icon('download') ?> <?= pl_e(pl_t('Export CSV')) ?></a>
 <?php }); ?>

@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+require_once __DIR__ . '/../partials/ui/components.php';
 /*
  * Setup, laid out as the Workbench (owner decision, 20 September 2026, direction B
  * in docs/design/installer-2026-09). One task per screen, sized for a laptop without
@@ -52,9 +53,11 @@ $blocking = array_values(array_filter($requirements, static fn (array $check): b
 <?php if ($view === 'migrating'): $progress = pl_install_progress($schema ?? []); ?>
 <style nonce="<?= pl_e($styleNonce) ?>">#install-progress-bar{width:<?= (int) $progress['percent'] ?>%}</style>
 <?php endif; ?>
+<script src="<?= pl_e(pl_url('/assets/help.js')) ?>" defer></script>
 <script src="<?= pl_e(pl_url('/assets/install.js', ['v' => pl_app_version()])) ?>" defer></script>
 </head><body><main class="install-frame">
 <div class="bench-chrome">
+<?php pl_ui_page_help('install'); ?>
 <img class="bench-logo" src="<?= pl_e(pl_url('/assets/brand/phpledger-horizontal.png')) ?>" alt="<?= pl_e(pl_t('PHP Ledger')) ?>" width="2172" height="724">
 <?php if (!in_array($view, ['locked', 'blocked'], true)): ?>
 <ol class="bench-tray" aria-label="<?= pl_e(pl_t('Installation stages')) ?>">

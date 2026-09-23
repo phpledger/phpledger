@@ -1,0 +1,33 @@
+.sample-intro{max-width:760px;margin-bottom:var(--space-7)}
+.sample-company-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-5)}
+.sample-company-card{display:flex;flex-direction:column;align-items:flex-start;background:var(--white);border:1px solid var(--line);border-radius:var(--radius-l);padding:var(--space-6);box-shadow:var(--shadow-card)}
+.sample-company-card h2{font-size:var(--size-h3);margin-top:var(--space-2)}
+.sample-company-card h2 a{color:var(--navy);text-decoration:none}
+.sample-company-logo{display:block;width:96px;height:96px;flex-shrink:0;margin-bottom:var(--space-5)}
+.sample-company-card .eyebrow{margin-top:0}
+.sample-status{font-size:var(--size-small);color:var(--muted);font-weight:600}
+.sample-read{margin-top:auto;padding-top:var(--space-4);font-weight:600}
+.sample-note{background:var(--paper);border-left:3px solid var(--navy);padding:var(--space-5);border-radius:var(--radius-s)}
+.sample-company-profile{max-width:960px}
+.sample-profile-header{display:flex;align-items:center;gap:var(--space-6);margin:var(--space-7) 0}
+.sample-profile-header .sample-company-logo{margin-bottom:0}
+.sample-profile-header h1{margin:var(--space-2) 0}
+.sample-characters{display:flex;flex-wrap:wrap;gap:var(--space-7);padding:var(--space-4) 0}
+.sample-characters span{font-size:var(--size-small);color:var(--muted)}
+.sample-company-profile section{margin-top:var(--space-7)}
+.sample-months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--space-2);margin:var(--space-5) 0}
+.sample-months a{display:block;text-align:center;padding:var(--space-3);border:1px solid var(--line);border-radius:var(--radius-s);font-family:var(--font-figures)}
+.sample-chapter{padding-top:var(--space-5);border-top:1px solid var(--line);scroll-margin-top:100px}
+.sample-chapter dt{font-weight:700;color:var(--navy);margin-top:var(--space-4)}
+.sample-chapter dd{margin-left:0;margin-top:var(--space-1)}
+.sample-event-list{margin-top:var(--space-5);padding:var(--space-4);background:var(--paper);border-radius:var(--radius-s)}
+.sample-event-list summary{cursor:pointer;font-weight:600;min-height:var(--touch);display:list-item;padding:var(--space-2)}
+.sample-event-list li{margin:var(--space-3) 0;overflow-wrap:anywhere}
+.sample-event-date,.sample-event-amount{font-family:var(--font-figures);font-size:var(--size-small)}
+.sample-event-date{display:block;color:var(--muted)}
+.sample-event-amount{display:block;font-weight:600}
+.sample-next{margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--line)}
+.sample-next .button{margin-right:var(--space-4);margin-bottom:var(--space-3)}
+@media(max-width:1000px){.sample-company-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.sample-company-grid{grid-template-columns:minmax(0,1fr)}.sample-company-card{padding:var(--space-5)}.sample-profile-header{align-items:flex-start;gap:var(--space-4)}.sample-profile-header .sample-company-logo{width:72px;height:72px}.sample-months{grid-template-columns:repeat(3,minmax(0,1fr))}.sample-characters{gap:var(--space-5)}}
+@media print{.sample-company-grid{display:block}.sample-company-card,.sample-chapter{break-inside:avoid;box-shadow:none}.sample-months,.sample-next .button{display:none}}
