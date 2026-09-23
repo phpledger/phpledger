@@ -1936,3 +1936,11 @@ AEO wording outcome: both FAIL lines resolved with two factual product-name ment
 Update only Umbrel application version/tag/index digest to published1.3.0, using the coordinator-supplied multi-architecture index. Preserve the MySQL digest and unsubmitted/untested platform warnings. No application, website, provider submission or external mutation.
 
 Umbrel metadata outcome: both YAML files parse; application1.3.0 and exact index5277187a140c459c852f6b1cb1b7649a1754c189ebaef426d289c94c2d890d73 agree; existing MySQL8.4 digest unchanged. README current pin rows updated; unsubmitted/untested NOTES unchanged. No provider runtime/acceptance claim, migration/schema, secret exposure, external call or live change. Coordinator owns registry architecture verification and publication.
+
+## 2026-09-23 — Public release and bounded hosting recovery
+
+Owner-authorized 1.3.0 is public at immutable application source 9a4d2872545e232d5c94933e701e5c5ae8cd1de1, with the signed ZIP, versioned media kit, verified GHCR and Docker Hub multi-architecture images, eleven signed sample repositories, Wiki and About metadata. Separate Expense and Receipt screens are included. Exact artifact and registry evidence is in RELEASE-1.3.0-RC4-GATES.md and RELEASE-1.3.0-REGISTRY-VERIFICATION.md.
+
+First shared-installer demo cutover encountered a Linux-only initialization failure: the mode-0644 shell file was sourced by MySQL, leaking nounset into its entrypoint. Immediate rollback restored the original 1.1.0 demo; public health returned 200 at 02:40 UTC. Old volumes/network were preserved. Failed-attempt resources are retained for diagnosis. The website remains unchanged; its 355-file candidate and the isolated installation-notice receiver are staged, and private vhost candidates are prepared but not applied.
+
+Coordinator owns serialized hosting recovery and public verification. Secret-store lane owns only the shell-option isolation fix and a fresh mode-0644 regression. Host-review lane owns a narrowly pinned retry operator supporting the actual restored baseline and separate retry resources. Preserve published application artifacts and all prior rollback files. No unrelated accounting/schema work, no campaigns, and no private credential output.
