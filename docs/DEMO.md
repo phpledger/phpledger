@@ -4,7 +4,7 @@
 
 The 1.3 hosting configuration uses one disposable installation (`PL_ENV=demo-install`). Visitors complete the real installer and normal onboarding; everyone then shares that installation until the next UTC hour. This section describes the release candidate. The publication receipt is the authority for what is live.
 
-- The database stage remains in the installer, but hosting supplies every connection field. No database name, username, password, host, port or configuration download is shown or accepted from visitors. Forged fields cannot change the connection.
+- The database stage remains in the installer, but hosting supplies every connection field. The usual fields show clearly labelled, read-only example values. No real database name, username, password, host or configuration download is exposed, and browser-submitted settings are never used. Forged fields cannot change the connection.
 - The application account is public: **demo / DemoLedger123!**. It is displayed at login and during account setup. Its identity, password and installation access remain fixed so subsequent visitors can sign in. These are public application credentials, not database credentials.
 - Visitors use ordinary company onboarding and accounting workflows with fictional data. A banner explains the shared workspace and hourly reset. Hosting isolates outbound services and keeps application code read-only; installing executable extensions is a self-hosted operation.
 - `compose.demo.yaml` gives the application access only to its dedicated database. An edge proxy exposes the app while the app and database stay on an internal network. The root-owned host directory holds the generation marker and reset lock; the web user can write only disposable runtime storage.
