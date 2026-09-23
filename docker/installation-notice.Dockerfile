@@ -1,5 +1,5 @@
 # Reuse the published production Apache/PHP runtime; no database or app bootstrap is loaded.
-ARG NOTICE_BASE_IMAGE=ghcr.io/phpledger/phpledger:1.2.1
+ARG NOTICE_BASE_IMAGE=ghcr.io/phpledger/phpledger:1.3.0
 FROM ${NOTICE_BASE_IMAGE}
 USER root
 RUN a2enmod remoteip && mkdir -p /var/lib/phpledger-notices && chown www-data:www-data /var/lib/phpledger-notices && chmod 700 /var/lib/phpledger-notices
