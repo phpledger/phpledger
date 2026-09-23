@@ -22,6 +22,8 @@ The MySQL initialization script must work when staged with ordinary mode `0644`,
 
 This initializer is a hosting bind mount, excluded from the application ZIP and production image payload. Its portability fix requires a new immutable hosting bundle; it does not require changing the published application tag, signed archive or image.
 
+The public TLS proxy forwards its scheme through the loopback edge proxy. The demo Apache vhost maps `X-Forwarded-Proto: https` to PHP's `HTTPS` marker only when the actual connection peer equals the single exact `PL_TRUSTED_PROXY_IPS` address configured by this Compose file. Missing, HTTP or untrusted-peer headers do not enable that marker. This keeps the normal installer's HTTPS check accurate behind TLS termination without trusting arbitrary clients. See Apache's [SetEnvIfExpr](https://httpd.apache.org/docs/2.4/mod/mod_setenvif.html#setenvifexpr) and [expression variables/functions](https://httpd.apache.org/docs/2.4/expr.html) references. Validate with `python tests/demo-proxy-https-test.py` before deploying a changed vhost.
+
 ## Historical deployments and restricted-demo operations
 
 The sections below retain previous deployment receipts and the older `PL_ENV=demo` model. Their visitor-isolation, restricted-account and seeded-reset instructions do not describe the 1.3 shared installer configuration.
