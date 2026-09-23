@@ -250,16 +250,16 @@ def run(skip_period_lock: bool) -> dict:
     require_ok(created, "Setup confirmation")
     check(urlparse(created.url).path == "/transactions" and company_name in created.body, "Setup creates an isolated fresh company")
 
-    editor = session.request("/transactions/new")
+    editor = session.request("/expenses/new")
     require_ok(editor, "New expense")
-    draft_form = editor.markup.form_for("/transactions/save")
+    draft_form = editor.markup.form_for("/expenses/save")
     company_id = int(draft_form.fields["company_id"])
     book_id = int(draft_form.fields["book_id"])
     expense_account = next(option["value"] for option in draft_form.options["category_account_id"] if option.get("data-category-kind") == "expense")
     injected_name = "HTTP <script>alert('sample')</script>"
     values = {"kind": "expense", "date": date, "amount": "not-a-number", "category_account_id": expense_account, "counterparty": injected_name, "reference": "HTTP-" + uuid.uuid4().hex[:8], "memo": "Preserve this sample input after validation."}
     invalid = session.submit(draft_form, values)
-    invalid_form = invalid.markup.form_for("/transactions/save")
+    invalid_form = invalid.markup.form_for("/expenses/save")
     check(invalid.status == 422 and all(invalid_form.fields.get(key) == value for key, value in values.items()), "Invalid save preserves entered values")
     check("<script>alert('sample')</script>" not in invalid.body, "Retained untrusted text is escaped")
     saved = session.submit(invalid_form, {"amount": "125.50"})
@@ -304,8 +304,8 @@ def run(skip_period_lock: bool) -> dict:
     check(totals(session.request("/reports/trial-balance?as_of=" + date)) == (Decimal("0"), Decimal("0")), "Original and reversal reconcile to zero net balances")
 
     if not skip_period_lock:
-        next_editor = session.request("/transactions/new")
-        next_form = next_editor.markup.form_for("/transactions/save")
+        next_editor = session.request("/expenses/new")
+        next_form = next_editor.markup.form_for("/expenses/save")
         next_saved = session.submit(next_form, values | {"amount": "7.25", "counterparty": "HTTP Closed Period", "memo": "Preserve this draft during period rejection."})
         require_ok(next_saved, "Closed-period draft save")
         next_post = next_saved.markup.form_for("/transactions/post")

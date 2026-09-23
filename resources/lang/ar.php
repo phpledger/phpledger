@@ -304,4 +304,18 @@ return [
     'Review revised loan terms' => 'مراجعة شروط القرض المعدلة',
     'Refresh report' => 'تحديث التقرير',
     'Occurrences processed' => 'مرات التكرار المعالجة',
+
+    'Paid to' => 'مدفوع إلى',
+    'Received from' => 'مستلم من',
+    'Paid from account' => 'الحساب المدفوع منه',
+    'Received into account' => 'الحساب المستلم فيه',
+    'Expense category' => 'فئة المصروف',
+    'Income category' => 'فئة الدخل',
+    'Choose the screen for the money you are recording.' => 'اختر الشاشة المناسبة للمبلغ الذي تسجله.',
+    'Record money paid from your cash or bank account.' => 'سجّل مبلغًا مدفوعًا من حسابك النقدي أو البنكي.',
+    'Record money received into your cash or bank account.' => 'سجّل مبلغًا مستلمًا في حسابك النقدي أو البنكي.',
+    'The transaction type does not match this screen.' => 'نوع المعاملة لا يطابق هذه الشاشة.',
+    'A saved draft cannot change between an expense and a receipt. Create a separate draft instead.' => 'لا يمكن تغيير المسودة المحفوظة بين مصروف وإيصال. أنشئ مسودة منفصلة.',
+    'Choose an expense or a receipt.' => 'اختر مصروفًا أو إيصالًا.',
+    'The selected business changed. Enter the transaction again.' => 'تغيّر النشاط المحدد. أدخل المعاملة من جديد.',
 ];

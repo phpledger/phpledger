@@ -174,8 +174,8 @@ def run() -> dict:
     check(denied.status == 422, "Forged viewer opening preview is rejected by the server")
 
     def save_draft(kind: str, amount: str, reference: str, date: str = "2026-01-02"):
-        editor = owner.request("/transactions/new")
-        form = editor.markup.form_for("/transactions/save")
+        editor = owner.request("/receipts/new" if kind == "receipt" else "/expenses/new")
+        form = editor.markup.form_for("/receipts/save" if kind == "receipt" else "/expenses/save")
         return owner.submit(form, {"kind": kind, "amount": amount, "date": date,
                                   "money_account_id": str(f["accounts"]["1000"]),
                                   "category_account_id": str(f["accounts"]["4000" if kind == "receipt" else "5000"]),

@@ -257,4 +257,18 @@ return [
     '{count} item' => ['one' => '{count} شے', 'other' => '{count} اشیا'],
     '{quantity} unit' => ['one' => '{quantity} اکائی', 'other' => '{quantity} اکائیاں'],
     '{units} unit' => ['one' => '{units} اکائی', 'other' => '{units} اکائیاں'],
+
+    'Paid to' => 'کس کو ادا کیا',
+    'Received from' => 'کس سے وصول ہوا',
+    'Paid from account' => 'ادائیگی کا اکاؤنٹ',
+    'Received into account' => 'وصولی کا اکاؤنٹ',
+    'Expense category' => 'اخراجات کی قسم',
+    'Income category' => 'آمدنی کی قسم',
+    'Choose the screen for the money you are recording.' => 'جس رقم کا اندراج کر رہے ہیں اس کے لیے اسکرین منتخب کریں۔',
+    'Record money paid from your cash or bank account.' => 'اپنے نقد یا بینک اکاؤنٹ سے ادا کی گئی رقم درج کریں۔',
+    'Record money received into your cash or bank account.' => 'اپنے نقد یا بینک اکاؤنٹ میں وصول ہونے والی رقم درج کریں۔',
+    'The transaction type does not match this screen.' => 'لین دین کی قسم اس اسکرین سے مطابقت نہیں رکھتی۔',
+    'A saved draft cannot change between an expense and a receipt. Create a separate draft instead.' => 'محفوظ مسودے کو خرچ سے وصولی یا وصولی سے خرچ میں تبدیل نہیں کیا جا سکتا۔ الگ مسودہ بنائیں۔',
+    'Choose an expense or a receipt.' => 'خرچ یا وصولی منتخب کریں۔',
+    'The selected business changed. Enter the transaction again.' => 'منتخب کاروبار تبدیل ہو گیا ہے۔ لین دین دوبارہ درج کریں۔',
 ];

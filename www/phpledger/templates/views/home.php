@@ -25,7 +25,7 @@ if ($overview['bank_lines'] > 0 && !pl_demo_enabled()) { $attention[] = ['/bank-
 }); ?>
 <?php if (pl_can_write($company)): ?>
 <nav class="flex flex-wrap items-center gap-2" aria-label="<?= pl_e(pl_t('Quick actions')) ?>" data-fold="quick actions">
-<?php foreach ([['/transactions/new?kind=expense','Expense','receipt-2',true],['/transactions/new?kind=receipt','Receipt','receipt',true],['/ar?new=1','Invoice','file-invoice',$homeVisibility['show_ar']],['/ap?new=1','Bill','file-dollar',$homeVisibility['show_ap']],['/general-journals/new','Journal','book-2',true]] as [$href,$label,$icon,$visible]): if (!$visible) { continue; } ?>
+<?php foreach ([['/expenses/new','Expense','receipt-2',true],['/receipts/new','Receipt','receipt',true],['/ar?new=1','Invoice','file-invoice',$homeVisibility['show_ar']],['/ap?new=1','Bill','file-dollar',$homeVisibility['show_ap']],['/general-journals/new','Journal','book-2',true]] as [$href,$label,$icon,$visible]): if (!$visible) { continue; } ?>
 <a class="btn btn-secondary btn-sm" href="<?= pl_e(pl_url($href)) ?>"><?= pl_icon($icon) ?><?= pl_e(pl_t($label)) ?></a><?php endforeach; ?>
 </nav>
 <?php endif; ?>

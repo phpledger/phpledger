@@ -407,7 +407,7 @@ test('every route renders under the pseudo-locale and the document language foll
         return str_contains($stripped, "\u{27e6}");
     };
 
-    $routes = ['/login', '/', '/home', '/companies', '/accounts', '/transactions', '/transactions/new', '/general-journals',
+    $routes = ['/login', '/', '/home', '/companies', '/accounts', '/transactions', '/transactions/new', '/expenses/new', '/receipts/new', '/general-journals',
         '/general-journals/new', '/reports', '/reports/trial-balance', '/reports/balance-sheet', '/reports/profit-loss',
         '/reports/cash-forecast', '/reports/ageing', '/periods', '/cash-counts', '/opening-balances', '/bank-reconciliation', '/parties',
         '/ar', '/ap', '/inventory', '/purchasing', '/tax', '/modules', '/connections', '/help', '/pos',
@@ -579,4 +579,15 @@ test('the untranslated interface text in the source only falls', function (): vo
         . ' template files (ceiling ' . $ceiling . '); most: ' . implode(', ', $named) . ".\n";
     assert_true($total <= $ceiling, 'Untranslated interface text rose to ' . $total . ', above the recorded ceiling of '
         . $ceiling . '. Put the new strings through pl_t() rather than raising the ceiling.');
+});
+
+
+test('separate expense and receipt labels use the shipped draft catalogues', function (): void {
+    foreach (['ar','ur'] as $locale) {
+        i18n_with_locale($locale, static function (): void {
+            foreach (['Paid to','Received from','Paid from account','Received into account','Expense category','Income category'] as $key) {
+                assert_true(pl_t($key) !== $key && pl_t($key) !== '', 'Missing transaction screen label: ' . $key);
+            }
+        });
+    }
 });

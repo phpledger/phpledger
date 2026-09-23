@@ -711,7 +711,7 @@ function pl_web_ageing_return(array $input, string $path = ''): array
 /** A workflow keeps structured, validated report filters, never a caller's redirect URL. */
 function pl_workflow_url(string $path, array $query = [], ?array $input = null): string
 {
-    $allowed = ['/transactions','/transactions/new','/transactions/edit','/transactions/detail','/transactions/save','/transactions/post','/transactions/reverse',
+    $allowed = ['/expenses/new','/expenses/edit','/expenses/save','/receipts/new','/receipts/edit','/receipts/save','/transactions','/transactions/new','/transactions/edit','/transactions/detail','/transactions/save','/transactions/post','/transactions/reverse',
         '/general-journals','/general-journals/new','/general-journals/edit','/general-journals/detail','/general-journals/save','/general-journals/post','/general-journals/reverse',
         '/journals/detail','/ar','/ap','/purchasing'];
     if (!in_array($path, $allowed, true)) { throw new DomainException('Unsupported workflow destination.'); }
@@ -784,7 +784,7 @@ function pl_web_editor_errors(array $input, string $screen): array
 
 function pl_render(string $view, array $data = []): never
 {
-    $allowed = ['home','ar','ap','parties','inventory','purchasing','tax','opening-conversion','login', 'companies', 'sample-chooser', 'onboarding', 'setup-review', 'transactions', 'editor',
+    $allowed = ['home','ar','ap','parties','inventory','purchasing','tax','opening-conversion','login', 'companies', 'sample-chooser', 'onboarding', 'setup-review', 'transactions', 'editor', 'transaction-chooser',
         'trial-balance', 'account', 'journal', 'help', 'error', 'demo', 'reports', 'balance-sheet', 'profit-loss', 'cash-forecast', 'pos', 'ageing', 'settlement', 'stock-count', 'goods-receipt',
         'accounts', 'general-journals', 'general-editor', 'general-detail', 'modules', 'opening-balances', 'periods', 'cash-counts', 'year-end',
         'bank-reconciliation', 'connections', 'oauth-consent', 'sample-guide', 'numbering', 'owner',
@@ -813,7 +813,7 @@ function pl_render(string $view, array $data = []): never
     if (!in_array($view, $allowed, true)) {
         throw new LogicException('Unknown template.');
     }
-    $accountReturn=in_array($view,['journal','general-detail','general-editor','transactions','editor','ar','ap','settlement','purchasing'],true)?pl_web_account_return($_GET):[];
+    $accountReturn=in_array($view,['journal','general-detail','general-editor','transactions','editor','transaction-chooser','ar','ap','settlement','purchasing'],true)?pl_web_account_return($_GET):[];
     $ageingReturn=in_array($view,['journal','ar','ap','settlement','purchasing'],true)?pl_web_ageing_return($_GET,'/'.$view):[];
     extract($data, EXTR_SKIP);
     $title = $data['title'] ?? 'PHP Ledger';

@@ -624,3 +624,18 @@ Internal worked examples in `tests/schedules_test.php` include 100 split over th
 Optional sample packages use the existing package registry and bounded ZIP scanner. Data-only manifests, pinned inventories, private read-only preloads, onboarding resolution and publication instructions are documented in [DEMO.md](DEMO.md#optional-data-only-sample-packages-13). Production has no repository fallback for optional samples; GET package pages make no network requests.
 
 Installation-wide suspension and anonymisation preserve an active protected Owner in every company where the account owns books, even when initiated from a different company. Affected company rows lock in ID order before the target account; a concurrent membership outside that locked set causes a retry refusal. Existing selected-company users.manage authorization remains unchanged. Inactive extra Owners can be removed when another active Owner remains.
+
+### Separate receipt and expense entry
+
+Browser entry is split into `/expenses/new` and `/receipts/new`, with corresponding
+`/edit?id=…` and POST `/save` routes. Each endpoint fixes the document kind on the
+server; a conflicting submitted kind is refused. Saved drafts retain their kind,
+identifier and revision. Categories are filtered on the server so the screens work
+without JavaScript. Preview still uses the central document service without saving.
+
+`/transactions/new` offers an explicit choice; legacy `?kind=expense|receipt` and
+`/transactions/edit?id=…` links resolve to the matching screen. Legacy
+`/transactions/save` remains supported with strict kind validation and cannot convert
+a saved draft. Validated list/account return context is preserved. Failed form input
+is discarded when the selected company/book changes. History and posting/reversal
+routes remain shared. No accounting or API contract changed.

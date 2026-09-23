@@ -332,21 +332,6 @@ document.querySelectorAll('[data-open-details]').forEach(link => {
 
 const documentForm = document.querySelector('[data-document-form]');
 if (documentForm) {
-    const category = documentForm.elements.category_account_id;
-    const filterCategories = () => {
-        const kind = documentForm.elements.kind.value;
-        const heading = document.getElementById(documentForm.dataset.headingId || '');
-        const headingText = kind === 'receipt' ? documentForm.dataset.receiptHeading : documentForm.dataset.expenseHeading;
-        if (heading && headingText) heading.textContent = headingText;
-        [...category.options].forEach(option => {
-            const mismatch = !!option.dataset.categoryKind && option.dataset.categoryKind !== kind;
-            option.hidden = mismatch;
-            option.disabled = mismatch;
-        });
-        if (category.selectedOptions[0]?.disabled) category.value = '';
-    };
-    documentForm.querySelectorAll('[name="kind"]').forEach(input => input.addEventListener('change', filterCategories));
-    filterCategories();
     let changed = false;
     documentForm.addEventListener('input', () => { changed = true; });
     documentForm.addEventListener('input', () => {

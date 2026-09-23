@@ -67,6 +67,8 @@ $routes = [
     '/setup/review' => ['GET', 'POST'], '/transactions' => ['GET'], '/transactions/detail' => ['GET'],
     '/opening-balances' => ['GET', 'POST'], '/periods' => ['GET', 'POST'], '/periods/schedule-reversal' => ['POST'], '/cash-counts' => ['GET', 'POST'], '/year-end' => ['GET', 'POST'], '/bank-reconciliation' => ['GET', 'POST'],
     '/numbering' => ['GET', 'POST'], '/accounting-policies' => ['GET', 'POST'], '/company-profile' => ['GET', 'POST'],
+    '/expenses/new' => ['GET'], '/expenses/edit' => ['GET'], '/expenses/save' => ['POST'],
+    '/receipts/new' => ['GET'], '/receipts/edit' => ['GET'], '/receipts/save' => ['POST'],
     '/transactions/new' => ['GET'], '/transactions/edit' => ['GET'], '/transactions/save' => ['POST'],
     '/transactions/post' => ['POST'], '/transactions/reverse' => ['POST'],
     '/reports/trial-balance' => ['GET'], '/reports/account' => ['GET'], '/journals/detail' => ['GET'], '/reports/export' => ['GET'],
@@ -771,23 +773,41 @@ try {
         }
         pl_render('setup-review', ['title' => 'Review business setup', 'user' => $user, 'company' => $company, 'template' => pl_starter_template(), 'form' => pl_form_state('/setup/review')]);
     }
-    if ($path === '/transactions/save') {
+    if (in_array($path, ['/transactions/save','/expenses/save','/receipts/save'], true)) {
         $documentId = pl_web_id($_POST, 'id');
         $returnFilters = pl_return_list_filters($_POST, 'transactions');
-        $return = $documentId ? pl_workflow_url('/transactions/edit', ['id' => $documentId]) : pl_workflow_url('/transactions/new');
+        $endpointKind = $path === '/expenses/save' ? 'expense' : ($path === '/receipts/save' ? 'receipt' : null);
+        $kind = $endpointKind ?? pl_web_text($_POST, 'kind', 'expense');
+        $kind = $kind === 'receipt' ? 'receipt' : 'expense';
+        $return = pl_workflow_url('/' . ($kind === 'receipt' ? 'receipts' : 'expenses') . ($documentId ? '/edit' : '/new'), $documentId ? ['id'=>$documentId] : []);
+        $retained = $_POST;
         try {
             pl_web_assert_scope($company, $_POST);
-            $input = pl_web_document_input($_POST);
+            if ($endpointKind === null && !in_array(pl_web_text($_POST, 'kind'), ['expense','receipt'], true)) {
+                throw new DomainException('Choose an expense or a receipt.');
+            }
+            $existing = $documentId ? pl_get_document($actorId, $companyId, $bookId, $documentId) : null;
+            if ($existing) {
+                $return = pl_workflow_url('/' . ($existing['kind'] === 'receipt' ? 'receipts' : 'expenses') . '/edit', ['id'=>$documentId]);
+                $retained['kind'] = $existing['kind'];
+                if ($kind !== $existing['kind']) { throw new DomainException('A saved draft cannot change between an expense and a receipt. Create a separate draft instead.'); }
+            }
+            $retained['kind'] = $kind;
+            if ($endpointKind !== null && array_key_exists('kind', $_POST) && pl_web_text($_POST, 'kind') !== $endpointKind) {
+                throw new DomainException('The transaction type does not match this screen.');
+            }
+            $input = pl_web_document_input($retained);
             if (pl_web_text($_POST, 'editor_action') === 'preview') {
                 if (!pl_can_write($company)) { throw new DomainException('Your role can read transactions but cannot edit them.'); }
                 pl_preview_document($actorId, $companyId, $bookId, $input);
-                pl_form_failure($return, $_POST, '', 200);
+                pl_form_failure($return, $retained, '', 200);
             }
             $saved = pl_save_document($actorId, $companyId, $bookId, $input, $documentId ?: null, $documentId ? pl_web_id($_POST, 'revision') : null);
             pl_notice('Draft saved. Your accounts have not changed.');
             pl_redirect(pl_workflow_url('/transactions', ['id' => $saved['id']] + $returnFilters));
         } catch (DomainException $error) {
-            pl_form_failure($return, $_POST, $error->getMessage());
+            if (pl_web_id($retained, 'company_id') !== $companyId || pl_web_id($retained, 'book_id') !== $bookId) { $retained = []; }
+            pl_form_failure($return, $retained, $error->getMessage());
         }
     }
     if ($path === '/transactions/post' || $path === '/transactions/reverse') {
@@ -808,24 +828,39 @@ try {
             pl_form_failure($return, $_POST, $error->getMessage());
         }
     }
-    if ($path === '/transactions/new' || $path === '/transactions/edit') {
-        if (!pl_can_write($company)) {
-            throw new DomainException('Your role can view these books, but cannot edit transactions.');
-        }
+    if (in_array($path, ['/transactions/new','/transactions/edit','/expenses/new','/expenses/edit','/receipts/new','/receipts/edit'], true)) {
+        if (!pl_can_write($company)) { throw new DomainException('Your role can view these books, but cannot edit transactions.'); }
+        $editing = str_ends_with($path, '/edit');
         $id = pl_web_id($_GET, 'id');
-        $document = $path === '/transactions/edit' ? pl_get_document($actorId, $companyId, $bookId, $id) : null;
-        if ($document && $document['status'] !== 'draft') {
-            pl_redirect(pl_workflow_url('/transactions/detail', ['id' => $id]));
+        $document = $editing ? pl_get_document($actorId, $companyId, $bookId, $id) : null;
+        $form = pl_form_state(pl_workflow_url($path, $editing ? ['id'=>$id] : []));
+        if ($form['input'] !== [] && (pl_web_id($form['input'], 'company_id') !== $companyId || pl_web_id($form['input'], 'book_id') !== $bookId)) {
+            $form = ['input'=>[], 'message'=>'The selected business changed. Enter the transaction again.'];
         }
-        $form = pl_form_state($document ? pl_workflow_url('/transactions/edit', ['id' => $id]) : pl_workflow_url('/transactions/new'));
-        $input = $form['input'] ?: ($document ?? ['kind' => pl_web_text($_GET, 'kind', 'expense'), 'date' => gmdate('Y-m-d'), 'creation_key' => bin2hex(random_bytes(24))]);
+        $returnFilters = pl_return_list_filters($form['input'] ?: $_GET, 'transactions');
+        if ($document && $document['status'] !== 'draft') { pl_redirect(pl_workflow_url('/transactions/detail', ['id'=>$id] + $returnFilters)); }
+        $kind = $document['kind'] ?? (str_starts_with($path, '/receipts/') ? 'receipt' : (str_starts_with($path, '/expenses/') ? 'expense' : pl_web_text($form['input'] ?: $_GET, 'kind')));
+        if (!in_array($kind, ['expense','receipt'], true)) {
+            pl_render('transaction-chooser', ['title'=>'New transaction', 'user'=>$user, 'company'=>$company, 'returnFilters'=>$returnFilters]);
+        }
+        $screen = $kind === 'receipt' ? 'receipts' : 'expenses';
+        $canonical = '/' . $screen . ($editing ? '/edit' : '/new');
+        if ($path !== $canonical) {
+            $target = pl_workflow_url($canonical, ($editing ? ['id'=>$id] : []) + ['return_filters'=>$returnFilters]);
+            if ($form['input'] !== []) {
+                // Transfer legacy validation/preview state using the canonical form key.
+                pl_form_failure(pl_workflow_url($canonical, $editing ? ['id'=>$id] : []), $form['input'], $form['message'], (int)($form['status'] ?? 422));
+            }
+            pl_redirect($target);
+        }
+        $input = $form['input'] ?: ($document ?? ['date'=>gmdate('Y-m-d'), 'creation_key'=>bin2hex(random_bytes(24))]);
+        $input['kind'] = $kind;
         $preview = null;
         if (pl_web_text($input, 'editor_action') === 'preview') {
             try { $preview = pl_preview_document($actorId, $companyId, $bookId, pl_web_document_input($input)); }
             catch (DomainException $error) { $form['message'] = $error->getMessage(); }
         }
-        $returnFilters = pl_return_list_filters($form['input'] ?: $_GET, 'transactions');
-        pl_render('editor', ['title' => $document ? 'Edit draft' : 'New transaction', 'user' => $user, 'company' => $company, 'document' => $document, 'input' => $input, 'form' => $form, 'preview'=>$preview, 'returnFilters'=>$returnFilters]);
+        pl_render('editor', ['title'=>$document ? 'Edit draft' : ($kind === 'receipt' ? 'New receipt' : 'New expense'), 'user'=>$user, 'company'=>$company, 'document'=>$document, 'input'=>$input, 'form'=>$form, 'preview'=>$preview, 'returnFilters'=>$returnFilters, 'screen'=>$screen]);
     }
     if ($path === '/transactions' || $path === '/transactions/detail') {
         $filters = pl_list_filters($_GET, 'transactions');

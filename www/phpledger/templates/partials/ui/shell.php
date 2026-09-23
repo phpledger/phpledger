@@ -4,7 +4,7 @@ $visibility = pl_company_visibility((int)$user['id'], (int)$company['id']);
 $moduleVisible = static fn (string $id): bool => pl_module_available((int)$user['id'], (int)$company['id'], (int)$company['book_id'], $id);
 $navGroups = [
     'Daily work' => [
-        ['/transactions', pl_t('Receipts & expenses'), 'receipt', ['transactions','editor'], true],
+        ['/transactions', pl_t('Receipts & expenses'), 'receipt', ['transactions','editor','transaction-chooser'], true],
         ['/counter', pl_t('Counter sale'), 'cash-register', ['counter','counter-receipt'], $visibility['show_ar'] && $moduleVisible('inventory')],
         ['/pos', pl_t('Point of sale (sample)'), 'receipt', ['pos'], $moduleVisible('pos-showcase')],
         ['/general-journals', pl_t('Journals'), 'book', ['general-journals','general-editor','general-detail'], true],
@@ -76,8 +76,8 @@ if (function_exists('pl_plugin_navigation_groups')) {
     $navGroups = pl_plugin_navigation_groups($navGroups, ['actor_id' => (int) $user['id'], 'company_id' => (int) $company['id'], 'view' => $view]);
 }
 $quickCreate = [
-    ['/transactions/new?kind=expense', pl_t('Expense'), true],
-    ['/transactions/new?kind=receipt', pl_t('Receipt'), true],
+    ['/expenses/new', pl_t('Expense'), true],
+    ['/receipts/new', pl_t('Receipt'), true],
     ['/ar?new=1', pl_t('Invoice'), $visibility['show_ar']],
     ['/ap?new=1', pl_t('Bill'), $visibility['show_ap']],
     ['/general-journals/new', pl_t('Journal entry'), true],
