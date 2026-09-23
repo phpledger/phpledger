@@ -2,7 +2,7 @@ manifestVersion: 1
 id: phpledger
 category: finance
 name: PHP Ledger
-version: "1.2.1"
+version: "1.3.0"
 tagline: Complete double-entry accounting that runs on your own PHP hosting
 description: >-
   PHP Ledger is complete double-entry accounting you install on your own server:

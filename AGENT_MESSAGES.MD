@@ -1931,3 +1931,8 @@ Rc4 metadata outcome: ZIP/checksum and internal manifest verified: version1.3.0/
 Local isolated lane fixes the two audit failures: missing product name in roadmap body and generated directory body source. No app, release metadata or generated output changes; coordinator rebuilds before independent local responsive checks.
 
 AEO wording outcome: both FAIL lines resolved with two factual product-name mentions. Local site build, AEO audit and generator JavaScript syntax pass; diff check clean. Generated output remains coordinator-owned and excluded from this commit. No schema/migration, secret exposure, external request or live change. Responsive local browser check follows coordinator rebuild.
+
+## 2026-09-23 — Final Umbrel image pin scope
+Update only Umbrel application version/tag/index digest to published1.3.0, using the coordinator-supplied multi-architecture index. Preserve the MySQL digest and unsubmitted/untested platform warnings. No application, website, provider submission or external mutation.
+
+Umbrel metadata outcome: both YAML files parse; application1.3.0 and exact index5277187a140c459c852f6b1cb1b7649a1754c189ebaef426d289c94c2d890d73 agree; existing MySQL8.4 digest unchanged. README current pin rows updated; unsubmitted/untested NOTES unchanged. No provider runtime/acceptance claim, migration/schema, secret exposure, external call or live change. Coordinator owns registry architecture verification and publication.

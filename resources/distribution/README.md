@@ -274,8 +274,8 @@ Unpinned active image/default versions target 1.3.0. The production Compose defa
 | File | Required final evidence before changing the remaining pin |
 |---|---|
 | `yunohost/manifest.toml` | Version `1.3.0~ynh1`, release URL and SHA-256 now match the final archive receipt below. Actual YunoHost lifecycle testing and submission remain separate. |
-| `umbrel/phpledger/docker-compose.yml` | Replace the application tag and multi-architecture index digest together after the official image is published. Preserve the separately pinned MySQL image unless deliberately updating it. |
-| `umbrel/phpledger/umbrel-app.yml` | Bump application version alongside that verified image pin. |
+| `umbrel/phpledger/docker-compose.yml` | Application pinned to published `1.3.0@sha256:5277187a140c459c852f6b1cb1b7649a1754c189ebaef426d289c94c2d890d73` (multi-architecture index). The separately pinned MySQL image is unchanged; actual Umbrel testing and submission remain pending. |
+| `umbrel/phpledger/umbrel-app.yml` | Application version `1.3.0` matches that image pin; this is not provider acceptance. |
 | `cloudron/CloudronVersions.json` | Preserve the historical 1.2.1 entry. Add 1.3.0 only after its separate Cloudron wrapper image exists and its platform checks pass; the active manifest/Dockerfile are candidate sources. |
 | `softaculous/info.xml` | Final ZIP measured: 1,649 files and 9,008,573 uncompressed bytes. Initial allowance is 11,534,336 bytes (25 percent headroom, rounded up to a whole MiB). Panel lifecycle testing and submission remain separate. |
 
