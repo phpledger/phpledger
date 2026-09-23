@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-membership-club",
+  "version": "1.0.0",
+  "archive_bytes": 17100,
+  "archive_sha256": "798477e066a89ed2b22d50ec5c0301ba0f31640b500e3abfbe2989524df44f02",
+  "manifest_sha256": "3a7c0cbbf2a2d971406b1df258df294222a0be524f946c5aacdcb12ef0f1d860",
+  "files": {
+    "pack.json": "59608630a1042db50a9d61d487a0db260388a719831de94b79566bc84aee4c47",
+    "structure.json": "2b9d27af7e4a7cd3efac234fc159e61783d95015ad2c792168c0e3aafaca2a48"
+  }
+}

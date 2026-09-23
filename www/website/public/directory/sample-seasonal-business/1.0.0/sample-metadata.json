@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-seasonal-business",
+  "version": "1.0.0",
+  "archive_bytes": 16289,
+  "archive_sha256": "23e4be308fcc129a5405366ec3c4bb93669ae82e5047884291412e6fb321ee8b",
+  "manifest_sha256": "6b28ae55fa69bb293cfe68a26ff734f9a4f123878762b372c7eee82fc35a61ac",
+  "files": {
+    "pack.json": "0651cb9099abd22345b1b2c4efb9cc1d6ad5a482f6e31f92051e930129319817",
+    "structure.json": "4f78d8bf7c2b6ad2505b9c766ba3f172356fd50266c064cc59f917ffe75077a1"
+  }
+}

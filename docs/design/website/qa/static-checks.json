@@ -11,9 +11,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 16200,
-        "eager": 327630,
-        "total": 416335
+        "html": 16193,
+        "eager": 327623,
+        "total": 416328
       },
       "budgets": {
         "eager": 600000,
@@ -22,7 +22,7 @@
       "eagerAssets": [
         {
           "file": "404.html",
-          "bytes": 16200
+          "bytes": 16193
         },
         {
           "file": "assets/brand/phpledger-horizontal.webp",
@@ -93,9 +93,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 26980,
-        "eager": 338410,
-        "total": 427115
+        "html": 26999,
+        "eager": 338429,
+        "total": 427134
       },
       "budgets": {
         "eager": null,
@@ -104,7 +104,7 @@
       "eagerAssets": [
         {
           "file": "about/index.html",
-          "bytes": 26980
+          "bytes": 26999
         },
         {
           "file": "assets/brand/phpledger-horizontal.webp",
@@ -175,9 +175,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31787,
-        "eager": 343217,
-        "total": 431922
+        "html": 32982,
+        "eager": 344412,
+        "total": 433117
       },
       "budgets": {
         "eager": 700000,
@@ -210,7 +210,7 @@
         },
         {
           "file": "community/index.html",
-          "bytes": 31787
+          "bytes": 32982
         }
       ],
       "lazyAssets": [
@@ -257,9 +257,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29483,
-        "eager": 340913,
-        "total": 429618
+        "html": 29512,
+        "eager": 340942,
+        "total": 429647
       },
       "budgets": {
         "eager": null,
@@ -292,7 +292,7 @@
         },
         {
           "file": "compare/akaunting-alternative/index.html",
-          "bytes": 29483
+          "bytes": 29512
         }
       ],
       "lazyAssets": [
@@ -339,9 +339,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28002,
-        "eager": 339432,
-        "total": 428137
+        "html": 28043,
+        "eager": 339473,
+        "total": 428178
       },
       "budgets": {
         "eager": null,
@@ -374,7 +374,7 @@
         },
         {
           "file": "compare/bigcapital-alternative/index.html",
-          "bytes": 28002
+          "bytes": 28043
         }
       ],
       "lazyAssets": [
@@ -421,9 +421,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 27890,
-        "eager": 339320,
-        "total": 428025
+        "html": 27927,
+        "eager": 339357,
+        "total": 428062
       },
       "budgets": {
         "eager": null,
@@ -456,7 +456,7 @@
         },
         {
           "file": "compare/dolibarr-alternative/index.html",
-          "bytes": 27890
+          "bytes": 27927
         }
       ],
       "lazyAssets": [
@@ -503,9 +503,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30234,
-        "eager": 341664,
-        "total": 430369
+        "html": 30271,
+        "eager": 341701,
+        "total": 430406
       },
       "budgets": {
         "eager": null,
@@ -538,7 +538,7 @@
         },
         {
           "file": "compare/erpnext-alternative/index.html",
-          "bytes": 30234
+          "bytes": 30271
         }
       ],
       "lazyAssets": [
@@ -585,9 +585,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28192,
-        "eager": 339622,
-        "total": 428327
+        "html": 28199,
+        "eager": 339629,
+        "total": 428334
       },
       "budgets": {
         "eager": null,
@@ -620,7 +620,7 @@
         },
         {
           "file": "compare/frontaccounting-alternative/index.html",
-          "bytes": 28192
+          "bytes": 28199
         }
       ],
       "lazyAssets": [
@@ -667,9 +667,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 27870,
-        "eager": 339300,
-        "total": 428005
+        "html": 27902,
+        "eager": 339332,
+        "total": 428037
       },
       "budgets": {
         "eager": null,
@@ -702,7 +702,7 @@
         },
         {
           "file": "compare/index.html",
-          "bytes": 27870
+          "bytes": 27902
         }
       ],
       "lazyAssets": [
@@ -749,9 +749,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 33901,
-        "eager": 345331,
-        "total": 434036
+        "html": 33911,
+        "eager": 345341,
+        "total": 434046
       },
       "budgets": {
         "eager": null,
@@ -784,7 +784,7 @@
         },
         {
           "file": "compare/open-source-accounting-software/index.html",
-          "bytes": 33901
+          "bytes": 33911
         }
       ],
       "lazyAssets": [
@@ -831,9 +831,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 20445,
-        "eager": 331875,
-        "total": 420580
+        "html": 20438,
+        "eager": 331868,
+        "total": 420573
       },
       "budgets": {
         "eager": 600000,
@@ -866,7 +866,7 @@
         },
         {
           "file": "credits/index.html",
-          "bytes": 20445
+          "bytes": 20438
         }
       ],
       "lazyAssets": [
@@ -926,18 +926,966 @@
       ],
       "lazyAssets": []
     },
+    "directory/index.html": {
+      "path": "/directory/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Sample company directory",
+      "descriptionLength": 136,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 21137,
+        "eager": 332567,
+        "total": 421272
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/index.html",
+          "bytes": 21137
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-distributor/index.html": {
+      "path": "/directory/sample-distributor/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Harbor Supply Company sample company",
+      "descriptionLength": 139,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 18036,
+        "eager": 329466,
+        "total": 418171
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-distributor/index.html",
+          "bytes": 18036
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-jewelry-studio/index.html": {
+      "path": "/directory/sample-jewelry-studio/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Lantern Finch Jewelry Studio sample company",
+      "descriptionLength": 146,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 18043,
+        "eager": 329473,
+        "total": 418178
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-jewelry-studio/index.html",
+          "bytes": 18043
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-light-manufacturing/index.html": {
+      "path": "/directory/sample-light-manufacturing/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Maple Bench Works sample company",
+      "descriptionLength": 135,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 18004,
+        "eager": 329434,
+        "total": 418139
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-light-manufacturing/index.html",
+          "bytes": 18004
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-membership-club/index.html": {
+      "path": "/directory/sample-membership-club/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Riverside Community Club sample company",
+      "descriptionLength": 142,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 17979,
+        "eager": 329409,
+        "total": 418114
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-membership-club/index.html",
+          "bytes": 17979
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-pharmacy/index.html": {
+      "path": "/directory/sample-pharmacy/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Meadow Training Pharmacy sample company",
+      "descriptionLength": 142,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 18000,
+        "eager": 329430,
+        "total": 418135
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-pharmacy/index.html",
+          "bytes": 18000
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-restaurant/index.html": {
+      "path": "/directory/sample-restaurant/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Cedar Table sample company",
+      "descriptionLength": 129,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 17835,
+        "eager": 329265,
+        "total": 417970
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-restaurant/index.html",
+          "bytes": 17835
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-retail-shop/index.html": {
+      "path": "/directory/sample-retail-shop/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Willow Corner Shop sample company",
+      "descriptionLength": 136,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 17973,
+        "eager": 329403,
+        "total": 418108
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-retail-shop/index.html",
+          "bytes": 17973
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-seasonal-business/index.html": {
+      "path": "/directory/sample-seasonal-business/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Sunrise Garden Services sample company",
+      "descriptionLength": 141,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 18018,
+        "eager": 329448,
+        "total": 418153
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-seasonal-business/index.html",
+          "bytes": 18018
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-service-agency/index.html": {
+      "path": "/directory/sample-service-agency/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Cedar Studio sample company",
+      "descriptionLength": 130,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 17885,
+        "eager": 329315,
+        "total": 418020
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-service-agency/index.html",
+          "bytes": 17885
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-service-workshop/index.html": {
+      "path": "/directory/sample-service-workshop/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Wheel & Spoke Workshop sample company",
+      "descriptionLength": 140,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 18063,
+        "eager": 329493,
+        "total": 418198
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-service-workshop/index.html",
+          "bytes": 18063
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "directory/sample-trader/index.html": {
+      "path": "/directory/sample-trader/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "Harbour Trade sample company",
+      "descriptionLength": 131,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 17868,
+        "eager": 329298,
+        "total": 418003
+      },
+      "budgets": null,
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "directory/sample-trader/index.html",
+          "bytes": 17868
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
     "download/index.html": {
       "path": "/download/",
       "redirectStub": false,
       "indexable": true,
-      "title": "Download PHP Ledger 1.1.3 (PHP 8.2+, MySQL or MariaDB)",
-      "descriptionLength": 142,
+      "title": "Download PHP Ledger: verified packages and installation",
+      "descriptionLength": 157,
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 37654,
-        "eager": 349084,
-        "total": 598721
+        "html": 38484,
+        "eager": 349914,
+        "total": 599551
       },
       "budgets": {
         "eager": 700000,
@@ -970,7 +1918,7 @@
         },
         {
           "file": "download/index.html",
-          "bytes": 37654
+          "bytes": 38484
         }
       ],
       "lazyAssets": [
@@ -1033,9 +1981,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31294,
-        "eager": 342724,
-        "total": 431429
+        "html": 31287,
+        "eager": 342717,
+        "total": 431422
       },
       "budgets": {
         "eager": null,
@@ -1068,7 +2016,7 @@
         },
         {
           "file": "for/accountants/index.html",
-          "bytes": 31294
+          "bytes": 31287
         }
       ],
       "lazyAssets": [
@@ -1115,9 +2063,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 18461,
-        "eager": 329891,
-        "total": 418596
+        "html": 18454,
+        "eager": 329884,
+        "total": 418589
       },
       "budgets": {
         "eager": null,
@@ -1150,7 +2098,7 @@
         },
         {
           "file": "for/analysts/index.html",
-          "bytes": 18461
+          "bytes": 18454
         }
       ],
       "lazyAssets": [
@@ -1197,9 +2145,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22169,
-        "eager": 333599,
-        "total": 422304
+        "html": 22162,
+        "eager": 333592,
+        "total": 422297
       },
       "budgets": {
         "eager": null,
@@ -1232,7 +2180,7 @@
         },
         {
           "file": "for/index.html",
-          "bytes": 22169
+          "bytes": 22162
         }
       ],
       "lazyAssets": [
@@ -1279,9 +2227,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29503,
-        "eager": 340933,
-        "total": 429638
+        "html": 29580,
+        "eager": 341010,
+        "total": 429715
       },
       "budgets": {
         "eager": null,
@@ -1314,7 +2262,7 @@
         },
         {
           "file": "for/small-businesses/index.html",
-          "bytes": 29503
+          "bytes": 29580
         }
       ],
       "lazyAssets": [
@@ -1361,9 +2309,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28982,
-        "eager": 340412,
-        "total": 429117
+        "html": 29013,
+        "eager": 340443,
+        "total": 429148
       },
       "budgets": {
         "eager": null,
@@ -1396,7 +2344,7 @@
         },
         {
           "file": "for/software-houses/index.html",
-          "bytes": 28982
+          "bytes": 29013
         }
       ],
       "lazyAssets": [
@@ -1443,9 +2391,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31120,
-        "eager": 342550,
-        "total": 431255
+        "html": 31113,
+        "eager": 342543,
+        "total": 431248
       },
       "budgets": {
         "eager": null,
@@ -1478,7 +2426,7 @@
         },
         {
           "file": "glossary/index.html",
-          "bytes": 31120
+          "bytes": 31113
         }
       ],
       "lazyAssets": [
@@ -1525,9 +2473,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31431,
-        "eager": 342861,
-        "total": 431566
+        "html": 31424,
+        "eager": 342854,
+        "total": 431559
       },
       "budgets": {
         "eager": null,
@@ -1560,7 +2508,7 @@
         },
         {
           "file": "guides/bank-reconciliation-walkthrough/index.html",
-          "bytes": 31431
+          "bytes": 31424
         }
       ],
       "lazyAssets": [
@@ -1607,9 +2555,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28999,
-        "eager": 340429,
-        "total": 429134
+        "html": 28992,
+        "eager": 340422,
+        "total": 429127
       },
       "budgets": {
         "eager": null,
@@ -1642,7 +2590,7 @@
         },
         {
           "file": "guides/correcting-a-posted-entry/index.html",
-          "bytes": 28999
+          "bytes": 28992
         }
       ],
       "lazyAssets": [
@@ -1689,9 +2637,9 @@
       "images": 7,
       "lazyImages": 5,
       "bytes": {
-        "html": 20203,
-        "eager": 331633,
-        "total": 527278
+        "html": 20204,
+        "eager": 331634,
+        "total": 527279
       },
       "budgets": {
         "eager": 700000,
@@ -1724,7 +2672,7 @@
         },
         {
           "file": "guides/daily-cash-check/index.html",
-          "bytes": 20203
+          "bytes": 20204
         }
       ],
       "lazyAssets": [
@@ -1779,9 +2727,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31737,
-        "eager": 343167,
-        "total": 431872
+        "html": 31730,
+        "eager": 343160,
+        "total": 431865
       },
       "budgets": {
         "eager": null,
@@ -1814,7 +2762,7 @@
         },
         {
           "file": "guides/first-week-on-the-books/index.html",
-          "bytes": 31737
+          "bytes": 31730
         }
       ],
       "lazyAssets": [
@@ -1861,9 +2809,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 26071,
-        "eager": 337501,
-        "total": 426206
+        "html": 26069,
+        "eager": 337499,
+        "total": 426204
       },
       "budgets": {
         "eager": null,
@@ -1896,7 +2844,7 @@
         },
         {
           "file": "guides/index.html",
-          "bytes": 26071
+          "bytes": 26069
         }
       ],
       "lazyAssets": [
@@ -1943,9 +2891,9 @@
       "images": 7,
       "lazyImages": 5,
       "bytes": {
-        "html": 20949,
-        "eager": 332379,
-        "total": 538604
+        "html": 20978,
+        "eager": 332408,
+        "total": 538633
       },
       "budgets": {
         "eager": 700000,
@@ -1978,7 +2926,7 @@
         },
         {
           "file": "guides/monthly-closing/index.html",
-          "bytes": 20949
+          "bytes": 20978
         }
       ],
       "lazyAssets": [
@@ -2033,9 +2981,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30821,
-        "eager": 342251,
-        "total": 430956
+        "html": 30814,
+        "eager": 342244,
+        "total": 430949
       },
       "budgets": {
         "eager": null,
@@ -2068,7 +3016,7 @@
         },
         {
           "file": "guides/opening-balances-cutover/index.html",
-          "bytes": 30821
+          "bytes": 30814
         }
       ],
       "lazyAssets": [
@@ -2115,9 +3063,9 @@
       "images": 7,
       "lazyImages": 5,
       "bytes": {
-        "html": 21138,
-        "eager": 332568,
-        "total": 518187
+        "html": 21131,
+        "eager": 332561,
+        "total": 518180
       },
       "budgets": {
         "eager": 700000,
@@ -2150,7 +3098,7 @@
         },
         {
           "file": "guides/quarterly-yearly-review/index.html",
-          "bytes": 21138
+          "bytes": 21131
         }
       ],
       "lazyAssets": [
@@ -2205,9 +3153,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 34539,
-        "eager": 345969,
-        "total": 434674
+        "html": 34532,
+        "eager": 345962,
+        "total": 434667
       },
       "budgets": {
         "eager": null,
@@ -2240,7 +3188,7 @@
         },
         {
           "file": "guides/retail-two-year-statements/index.html",
-          "bytes": 34539
+          "bytes": 34532
         }
       ],
       "lazyAssets": [
@@ -2283,13 +3231,13 @@
       "redirectStub": false,
       "indexable": true,
       "title": "PHP Ledger: self-hosted double-entry accounting software",
-      "descriptionLength": 159,
+      "descriptionLength": 156,
       "images": 14,
       "lazyImages": 11,
       "bytes": {
-        "html": 51303,
-        "eager": 430783,
-        "total": 990442
+        "html": 52845,
+        "eager": 432325,
+        "total": 991984
       },
       "budgets": {
         "eager": 760000,
@@ -2326,7 +3274,7 @@
         },
         {
           "file": "index.html",
-          "bytes": 51303
+          "bytes": 52845
         }
       ],
       "lazyAssets": [
@@ -2429,9 +3377,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30588,
-        "eager": 342018,
-        "total": 430723
+        "html": 30581,
+        "eager": 342011,
+        "total": 430716
       },
       "budgets": {
         "eager": null,
@@ -2464,7 +3412,7 @@
         },
         {
           "file": "learn/bank-reconciliation/index.html",
-          "bytes": 30588
+          "bytes": 30581
         }
       ],
       "lazyAssets": [
@@ -2511,9 +3459,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29823,
-        "eager": 341253,
-        "total": 429958
+        "html": 29816,
+        "eager": 341246,
+        "total": 429951
       },
       "budgets": {
         "eager": null,
@@ -2546,7 +3494,7 @@
         },
         {
           "file": "learn/cash-vs-accrual/index.html",
-          "bytes": 29823
+          "bytes": 29816
         }
       ],
       "lazyAssets": [
@@ -2593,9 +3541,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 32513,
-        "eager": 343943,
-        "total": 432648
+        "html": 32506,
+        "eager": 343936,
+        "total": 432641
       },
       "budgets": {
         "eager": null,
@@ -2628,7 +3576,7 @@
         },
         {
           "file": "learn/chart-of-accounts/index.html",
-          "bytes": 32513
+          "bytes": 32506
         }
       ],
       "lazyAssets": [
@@ -2675,9 +3623,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30760,
-        "eager": 342190,
-        "total": 430895
+        "html": 30753,
+        "eager": 342183,
+        "total": 430888
       },
       "budgets": {
         "eager": null,
@@ -2710,7 +3658,7 @@
         },
         {
           "file": "learn/correcting-mistakes-reversal-vs-edit/index.html",
-          "bytes": 30760
+          "bytes": 30753
         }
       ],
       "lazyAssets": [
@@ -2757,9 +3705,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31093,
-        "eager": 342523,
-        "total": 431228
+        "html": 31086,
+        "eager": 342516,
+        "total": 431221
       },
       "budgets": {
         "eager": null,
@@ -2792,7 +3740,7 @@
         },
         {
           "file": "learn/debits-and-credits/index.html",
-          "bytes": 31093
+          "bytes": 31086
         }
       ],
       "lazyAssets": [
@@ -2839,9 +3787,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31380,
-        "eager": 342810,
-        "total": 431515
+        "html": 31373,
+        "eager": 342803,
+        "total": 431508
       },
       "budgets": {
         "eager": null,
@@ -2874,7 +3822,7 @@
         },
         {
           "file": "learn/double-entry-bookkeeping/index.html",
-          "bytes": 31380
+          "bytes": 31373
         }
       ],
       "lazyAssets": [
@@ -2921,9 +3869,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 26527,
-        "eager": 337957,
-        "total": 426662
+        "html": 26520,
+        "eager": 337950,
+        "total": 426655
       },
       "budgets": {
         "eager": null,
@@ -2956,7 +3904,7 @@
         },
         {
           "file": "learn/index.html",
-          "bytes": 26527
+          "bytes": 26520
         }
       ],
       "lazyAssets": [
@@ -3003,9 +3951,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30059,
-        "eager": 341489,
-        "total": 430194
+        "html": 30052,
+        "eager": 341482,
+        "total": 430187
       },
       "budgets": {
         "eager": null,
@@ -3038,7 +3986,7 @@
         },
         {
           "file": "learn/journal-entry/index.html",
-          "bytes": 30059
+          "bytes": 30052
         }
       ],
       "lazyAssets": [
@@ -3085,9 +4033,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30598,
-        "eager": 342028,
-        "total": 430733
+        "html": 30591,
+        "eager": 342021,
+        "total": 430726
       },
       "budgets": {
         "eager": null,
@@ -3120,7 +4068,7 @@
         },
         {
           "file": "learn/opening-balances-and-cutover/index.html",
-          "bytes": 30598
+          "bytes": 30591
         }
       ],
       "lazyAssets": [
@@ -3167,9 +4115,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29762,
-        "eager": 341192,
-        "total": 429897
+        "html": 29755,
+        "eager": 341185,
+        "total": 429890
       },
       "budgets": {
         "eager": null,
@@ -3202,7 +4150,7 @@
         },
         {
           "file": "learn/profit-and-loss-vs-balance-sheet/index.html",
-          "bytes": 29762
+          "bytes": 29755
         }
       ],
       "lazyAssets": [
@@ -3249,9 +4197,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29579,
-        "eager": 341009,
-        "total": 429714
+        "html": 29572,
+        "eager": 341002,
+        "total": 429707
       },
       "budgets": {
         "eager": null,
@@ -3284,7 +4232,7 @@
         },
         {
           "file": "learn/trial-balance/index.html",
-          "bytes": 29579
+          "bytes": 29572
         }
       ],
       "lazyAssets": [
@@ -3331,9 +4279,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 18949,
-        "eager": 330379,
-        "total": 419084
+        "html": 18942,
+        "eager": 330372,
+        "total": 419077
       },
       "budgets": {
         "eager": 650000,
@@ -3366,7 +4314,7 @@
         },
         {
           "file": "news/0-1-0-preview/index.html",
-          "bytes": 18949
+          "bytes": 18942
         }
       ],
       "lazyAssets": [
@@ -3413,9 +4361,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 20139,
-        "eager": 331569,
-        "total": 420274
+        "html": 20132,
+        "eager": 331562,
+        "total": 420267
       },
       "budgets": {
         "eager": 650000,
@@ -3448,7 +4396,7 @@
         },
         {
           "file": "news/0-1-3-preview/index.html",
-          "bytes": 20139
+          "bytes": 20132
         }
       ],
       "lazyAssets": [
@@ -3495,9 +4443,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 18762,
-        "eager": 330192,
-        "total": 418897
+        "html": 18755,
+        "eager": 330185,
+        "total": 418890
       },
       "budgets": {
         "eager": 650000,
@@ -3530,7 +4478,7 @@
         },
         {
           "file": "news/0-1-4-preview/index.html",
-          "bytes": 18762
+          "bytes": 18755
         }
       ],
       "lazyAssets": [
@@ -3577,9 +4525,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 19215,
-        "eager": 330645,
-        "total": 419350
+        "html": 19208,
+        "eager": 330638,
+        "total": 419343
       },
       "budgets": {
         "eager": null,
@@ -3612,7 +4560,7 @@
         },
         {
           "file": "news/0-1-5-preview/index.html",
-          "bytes": 19215
+          "bytes": 19208
         }
       ],
       "lazyAssets": [
@@ -3659,9 +4607,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 19623,
-        "eager": 331053,
-        "total": 419758
+        "html": 19616,
+        "eager": 331046,
+        "total": 419751
       },
       "budgets": {
         "eager": 650000,
@@ -3694,7 +4642,7 @@
         },
         {
           "file": "news/0-1-6-preview/index.html",
-          "bytes": 19623
+          "bytes": 19616
         }
       ],
       "lazyAssets": [
@@ -3741,9 +4689,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 20792,
-        "eager": 332222,
-        "total": 420927
+        "html": 20785,
+        "eager": 332215,
+        "total": 420920
       },
       "budgets": {
         "eager": 650000,
@@ -3776,7 +4724,7 @@
         },
         {
           "file": "news/0-2-1-preview/index.html",
-          "bytes": 20792
+          "bytes": 20785
         }
       ],
       "lazyAssets": [
@@ -3823,9 +4771,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 23798,
-        "eager": 335228,
-        "total": 423933
+        "html": 23791,
+        "eager": 335221,
+        "total": 423926
       },
       "budgets": {
         "eager": null,
@@ -3858,7 +4806,7 @@
         },
         {
           "file": "news/0-3-0-preview/index.html",
-          "bytes": 23798
+          "bytes": 23791
         }
       ],
       "lazyAssets": [
@@ -3905,9 +4853,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 32493,
-        "eager": 343923,
-        "total": 683157
+        "html": 32486,
+        "eager": 343916,
+        "total": 683150
       },
       "budgets": {
         "eager": 650000,
@@ -3940,7 +4888,7 @@
         },
         {
           "file": "news/0-4-0-preview/index.html",
-          "bytes": 32493
+          "bytes": 32486
         }
       ],
       "lazyAssets": [
@@ -3995,9 +4943,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22261,
-        "eager": 333691,
-        "total": 422396
+        "html": 22254,
+        "eager": 333684,
+        "total": 422389
       },
       "budgets": {
         "eager": null,
@@ -4030,7 +4978,7 @@
         },
         {
           "file": "news/0-5-0-preview/index.html",
-          "bytes": 22261
+          "bytes": 22254
         }
       ],
       "lazyAssets": [
@@ -4077,9 +5025,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 22646,
-        "eager": 334076,
-        "total": 612373
+        "html": 22639,
+        "eager": 334069,
+        "total": 612366
       },
       "budgets": {
         "eager": null,
@@ -4112,7 +5060,7 @@
         },
         {
           "file": "news/0-6-0-preview/index.html",
-          "bytes": 22646
+          "bytes": 22639
         }
       ],
       "lazyAssets": [
@@ -4175,9 +5123,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 23899,
-        "eager": 335329,
-        "total": 546788
+        "html": 23892,
+        "eager": 335322,
+        "total": 546781
       },
       "budgets": {
         "eager": null,
@@ -4210,7 +5158,7 @@
         },
         {
           "file": "news/1-0-0/index.html",
-          "bytes": 23899
+          "bytes": 23892
         }
       ],
       "lazyAssets": [
@@ -4273,9 +5221,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22188,
-        "eager": 333618,
-        "total": 422323
+        "html": 22181,
+        "eager": 333611,
+        "total": 422316
       },
       "budgets": {
         "eager": null,
@@ -4308,7 +5256,7 @@
         },
         {
           "file": "news/1-1-0/index.html",
-          "bytes": 22188
+          "bytes": 22181
         }
       ],
       "lazyAssets": [
@@ -4355,9 +5303,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22860,
-        "eager": 334290,
-        "total": 422995
+        "html": 22853,
+        "eager": 334283,
+        "total": 422988
       },
       "budgets": {
         "eager": null,
@@ -4390,7 +5338,7 @@
         },
         {
           "file": "news/1-1-1/index.html",
-          "bytes": 22860
+          "bytes": 22853
         }
       ],
       "lazyAssets": [
@@ -4437,9 +5385,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 22878,
-        "eager": 334308,
-        "total": 423013
+        "html": 22871,
+        "eager": 334301,
+        "total": 423006
       },
       "budgets": {
         "eager": null,
@@ -4472,7 +5420,7 @@
         },
         {
           "file": "news/1-1-2/index.html",
-          "bytes": 22878
+          "bytes": 22871
         }
       ],
       "lazyAssets": [
@@ -4519,9 +5467,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 21751,
-        "eager": 333181,
-        "total": 421886
+        "html": 21744,
+        "eager": 333174,
+        "total": 421879
       },
       "budgets": {
         "eager": null,
@@ -4554,7 +5502,89 @@
         },
         {
           "file": "news/1-1-3/index.html",
-          "bytes": 21751
+          "bytes": 21744
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
+    "news/1-3-0/index.html": {
+      "path": "/news/1-3-0/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "PHP Ledger 1.3.0: from the installer to a reviewed year end",
+      "descriptionLength": 157,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 23763,
+        "eager": 335193,
+        "total": 423898
+      },
+      "budgets": {
+        "eager": null,
+        "total": null
+      },
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 36457
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "news/1-3-0/index.html",
+          "bytes": 23763
         }
       ],
       "lazyAssets": [
@@ -4597,13 +5627,13 @@
       "redirectStub": false,
       "indexable": true,
       "title": "Release news and project updates | PHP Ledger",
-      "descriptionLength": 154,
+      "descriptionLength": 147,
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28019,
-        "eager": 339449,
-        "total": 428154
+        "html": 28619,
+        "eager": 340049,
+        "total": 428754
       },
       "budgets": {
         "eager": 650000,
@@ -4636,7 +5666,7 @@
         },
         {
           "file": "news/index.html",
-          "bytes": 28019
+          "bytes": 28619
         }
       ],
       "lazyAssets": [
@@ -4683,9 +5713,9 @@
       "images": 8,
       "lazyImages": 6,
       "bytes": {
-        "html": 30623,
-        "eager": 342053,
-        "total": 544530
+        "html": 30675,
+        "eager": 342105,
+        "total": 544582
       },
       "budgets": {
         "eager": 700000,
@@ -4718,7 +5748,7 @@
         },
         {
           "file": "point-of-sale/index.html",
-          "bytes": 30623
+          "bytes": 30675
         }
       ],
       "lazyAssets": [
@@ -4777,9 +5807,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28077,
-        "eager": 339507,
-        "total": 428212
+        "html": 28215,
+        "eager": 339645,
+        "total": 428350
       },
       "budgets": {
         "eager": 700000,
@@ -4812,7 +5842,7 @@
         },
         {
           "file": "pricing/index.html",
-          "bytes": 28077
+          "bytes": 28215
         }
       ],
       "lazyAssets": [
@@ -4854,14 +5884,14 @@
       "path": "/privacy/",
       "redirectStub": false,
       "indexable": true,
-      "title": "Website and demo privacy | PHP Ledger",
-      "descriptionLength": 144,
+      "title": "Website, demo and installation notice privacy | PHP Ledger",
+      "descriptionLength": 118,
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 19694,
-        "eager": 331124,
-        "total": 419829
+        "html": 20457,
+        "eager": 331887,
+        "total": 420592
       },
       "budgets": {
         "eager": null,
@@ -4894,7 +5924,7 @@
         },
         {
           "file": "privacy/index.html",
-          "bytes": 19694
+          "bytes": 20457
         }
       ],
       "lazyAssets": [
@@ -4936,14 +5966,14 @@
       "path": "/product/",
       "redirectStub": false,
       "indexable": true,
-      "title": "PHP Ledger features: everything in 1.0, workflow by workflow",
-      "descriptionLength": 153,
+      "title": "PHP Ledger features: daily books through year end",
+      "descriptionLength": 160,
       "images": 30,
       "lazyImages": 28,
       "bytes": {
-        "html": 63334,
-        "eager": 374764,
-        "total": 2510417
+        "html": 65866,
+        "eager": 377296,
+        "total": 2512949
       },
       "budgets": {
         "eager": 700000,
@@ -4976,7 +6006,7 @@
         },
         {
           "file": "product/index.html",
-          "bytes": 63334
+          "bytes": 65866
         }
       ],
       "lazyAssets": [
@@ -5215,9 +6245,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 36500,
-        "eager": 347930,
-        "total": 436635
+        "html": 36493,
+        "eager": 347923,
+        "total": 436628
       },
       "budgets": {
         "eager": null,
@@ -5250,7 +6280,7 @@
         },
         {
           "file": "research/fbr-digital-invoicing/index.html",
-          "bytes": 36500
+          "bytes": 36493
         }
       ],
       "lazyAssets": [
@@ -5297,9 +6327,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 27069,
-        "eager": 338499,
-        "total": 427204
+        "html": 27062,
+        "eager": 338492,
+        "total": 427197
       },
       "budgets": {
         "eager": null,
@@ -5332,7 +6362,7 @@
         },
         {
           "file": "research/index.html",
-          "bytes": 27069
+          "bytes": 27062
         }
       ],
       "lazyAssets": [
@@ -5379,9 +6409,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 38032,
-        "eager": 349462,
-        "total": 438167
+        "html": 38025,
+        "eager": 349455,
+        "total": 438160
       },
       "budgets": {
         "eager": null,
@@ -5414,7 +6444,7 @@
         },
         {
           "file": "research/open-source-accounting-landscape/index.html",
-          "bytes": 38032
+          "bytes": 38025
         }
       ],
       "lazyAssets": [
@@ -5461,9 +6491,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 38631,
-        "eager": 350061,
-        "total": 438766
+        "html": 38624,
+        "eager": 350054,
+        "total": 438759
       },
       "budgets": {
         "eager": null,
@@ -5496,7 +6526,7 @@
         },
         {
           "file": "research/pakistan-sme-bookkeeping/index.html",
-          "bytes": 38631
+          "bytes": 38624
         }
       ],
       "lazyAssets": [
@@ -5543,9 +6573,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30461,
-        "eager": 341891,
-        "total": 430596
+        "html": 30454,
+        "eager": 341884,
+        "total": 430589
       },
       "budgets": {
         "eager": null,
@@ -5578,7 +6608,7 @@
         },
         {
           "file": "research/php-hosting-availability-2026/index.html",
-          "bytes": 30461
+          "bytes": 30454
         }
       ],
       "lazyAssets": [
@@ -5620,14 +6650,14 @@
       "path": "/roadmap/",
       "redirectStub": false,
       "indexable": true,
-      "title": "Accounting development roadmap | PHP Ledger",
-      "descriptionLength": 145,
+      "title": "PHP Ledger roadmap: shipped work and remaining review",
+      "descriptionLength": 159,
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 35778,
-        "eager": 347208,
-        "total": 435913
+        "html": 21242,
+        "eager": 332672,
+        "total": 421377
       },
       "budgets": {
         "eager": 650000,
@@ -5660,7 +6690,7 @@
         },
         {
           "file": "roadmap/index.html",
-          "bytes": 35778
+          "bytes": 21242
         }
       ],
       "lazyAssets": [
@@ -5707,9 +6737,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29402,
-        "eager": 340832,
-        "total": 429537
+        "html": 29395,
+        "eager": 340825,
+        "total": 429530
       },
       "budgets": {
         "eager": null,
@@ -5742,7 +6772,7 @@
         },
         {
           "file": "self-hosting/backup-and-restore/index.html",
-          "bytes": 29402
+          "bytes": 29395
         }
       ],
       "lazyAssets": [
@@ -5789,9 +6819,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 31150,
-        "eager": 342580,
-        "total": 431285
+        "html": 31143,
+        "eager": 342573,
+        "total": 431278
       },
       "budgets": {
         "eager": null,
@@ -5824,7 +6854,7 @@
         },
         {
           "file": "self-hosting/docker/index.html",
-          "bytes": 31150
+          "bytes": 31143
         }
       ],
       "lazyAssets": [
@@ -5871,9 +6901,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 27628,
-        "eager": 339058,
-        "total": 427763
+        "html": 27665,
+        "eager": 339095,
+        "total": 427800
       },
       "budgets": {
         "eager": null,
@@ -5906,7 +6936,7 @@
         },
         {
           "file": "self-hosting/index.html",
-          "bytes": 27628
+          "bytes": 27665
         }
       ],
       "lazyAssets": [
@@ -5953,9 +6983,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 30655,
-        "eager": 342085,
-        "total": 430790
+        "html": 30686,
+        "eager": 342116,
+        "total": 430821
       },
       "budgets": {
         "eager": null,
@@ -5988,7 +7018,7 @@
         },
         {
           "file": "self-hosting/php-version-compatibility/index.html",
-          "bytes": 30655
+          "bytes": 30686
         }
       ],
       "lazyAssets": [
@@ -6035,9 +7065,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29686,
-        "eager": 341116,
-        "total": 429821
+        "html": 29715,
+        "eager": 341145,
+        "total": 429850
       },
       "budgets": {
         "eager": null,
@@ -6070,7 +7100,7 @@
         },
         {
           "file": "self-hosting/requirements/index.html",
-          "bytes": 29686
+          "bytes": 29715
         }
       ],
       "lazyAssets": [
@@ -6117,9 +7147,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 34914,
-        "eager": 346344,
-        "total": 435049
+        "html": 34943,
+        "eager": 346373,
+        "total": 435078
       },
       "budgets": {
         "eager": null,
@@ -6152,7 +7182,7 @@
         },
         {
           "file": "self-hosting/shared-hosting-cpanel/index.html",
-          "bytes": 34914
+          "bytes": 34943
         }
       ],
       "lazyAssets": [
@@ -6199,9 +7229,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 34013,
-        "eager": 345443,
-        "total": 434148
+        "html": 34069,
+        "eager": 345499,
+        "total": 434204
       },
       "budgets": {
         "eager": null,
@@ -6234,7 +7264,7 @@
         },
         {
           "file": "self-hosting/vps-install/index.html",
-          "bytes": 34013
+          "bytes": 34069
         }
       ],
       "lazyAssets": [
@@ -6303,9 +7333,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 18350,
-        "eager": 329780,
-        "total": 418485
+        "html": 18484,
+        "eager": 329914,
+        "total": 418619
       },
       "budgets": {
         "eager": null,
@@ -6338,7 +7368,7 @@
         },
         {
           "file": "terms/index.html",
-          "bytes": 18350
+          "bytes": 18484
         }
       ],
       "lazyAssets": [
@@ -6380,7 +7410,7 @@
   "errors": [],
   "warnings": [],
   "summary": {
-    "pages": 75,
+    "pages": 88,
     "redirectStubs": 2,
     "errors": 0,
     "warnings": 0

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-retail-shop",
+  "version": "1.0.0",
+  "archive_bytes": 18037,
+  "archive_sha256": "99bd765ec104d2eaebf355222edb7d648830d12e6763816afed11bb3c7a0e596",
+  "manifest_sha256": "164d8a6a974cd5aeee9791f8e45642f1dfab0fb0703c51fbf48ace6d53efd5c0",
+  "files": {
+    "pack.json": "c02858466fcdf3f0f29eeff625781da6896ce88387bc7ff9fe01151adf2037b3",
+    "structure.json": "92b3340973a403405acf7e9475c9fa4e50158f4eaf32896a26e10e4b9b47957e"
+  }
+}

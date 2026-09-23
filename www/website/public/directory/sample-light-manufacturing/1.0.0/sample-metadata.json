@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-light-manufacturing",
+  "version": "1.0.0",
+  "archive_bytes": 17194,
+  "archive_sha256": "75ba9ee5202483f32823689b917135badcfe8afd87e1cecb6c4e99c59d968934",
+  "manifest_sha256": "bdb918a780f307a19b89710c563762f2d6ba6c655f9b5429b7b0866bdf03f4f4",
+  "files": {
+    "pack.json": "9c63c622878ecf3e69a89f392ba3b673635ba951bd9e3757a2ce31aa80111b26",
+    "structure.json": "9324c0c3f277e4f432d0b780036f331a0ffc0f9dc65c91388626e9083d0059a5"
+  }
+}

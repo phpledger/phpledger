@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-pharmacy",
+  "version": "1.0.0",
+  "archive_bytes": 18263,
+  "archive_sha256": "625f0d178a3b8a0006d8d1649433905d77673b80b8e2314909ee147198a7ba83",
+  "manifest_sha256": "fd90671dab07252f31f0598354ddc58368052c4eca266c53ef3f722acfed468a",
+  "files": {
+    "pack.json": "235b95787c529afd428c99e85a72c31eb387bef9763346aa5e49278e3163f95e",
+    "structure.json": "9511910af8facbe58312eb58101c88b6ee59ff4e87c5a3a827d06163a5d9d557"
+  }
+}

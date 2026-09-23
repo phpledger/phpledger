@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-restaurant",
+  "version": "1.0.0",
+  "archive_bytes": 18050,
+  "archive_sha256": "2fcaf62dfc1e90d8825fcf08ed4bab3ee3f28dc30562e34042f3ef6687e443b1",
+  "manifest_sha256": "28f58acfb85e1088606edbdcd18a6023798ea4331c7b01322dec381b193a9855",
+  "files": {
+    "pack.json": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664",
+    "structure.json": "155018b38193729d87d373a7513aa59a241b2315c1a31fd45893a57964d78c6f"
+  }
+}

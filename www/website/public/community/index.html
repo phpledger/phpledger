@@ -78,7 +78,7 @@
       "url": "https://phpledger.com/",
       "name": "PHP Ledger",
       "alternateName": "phpledger",
-      "description": "PHP Ledger is open-source, self-hosted double-entry accounting software with core invoices, bills and payments, optional purchasing and inventory, and a manually configured tax engine. Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+, 1.1.3 is the current release: unzip it into any web folder, open it, and the browser installer starts; updates are publisher-signed. 1.0.0 was the first stable release; independent accounting and security review remain post-release commitments.",
+      "description": "PHP Ledger is open-source, self-hosted double-entry accounting software for small businesses. It brings invoices, bills, payments, stock, reconciliation and reports together with reviewed payroll accruals, loan schedules and period/year-end workflows. Run it on PHP 8.2+ with MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+. Use the browser installer, your own hosting and publisher-verified releases. Independent review and real-business acceptance remain separate gates.",
       "inLanguage": "en",
       "publisher": {
         "@id": "https://phpledger.com/#organization"
@@ -94,7 +94,7 @@
       "isPartOf": {
         "@id": "https://phpledger.com/#website"
       },
-      "dateModified": "2026-09-18",
+      "dateModified": "2026-09-23",
       "author": {
         "@id": "https://phpledger.com/#maintainer"
       },
@@ -190,7 +190,7 @@
     <a class="brand" href="/" aria-label="PHP Ledger home"><img src="/assets/brand/phpledger-horizontal.webp" width="640" height="213" alt="PHP Ledger"></a>
     <nav id="navigation" class="site-nav" aria-label="Main navigation">
       <a href="/product/">Product</a><a href="/point-of-sale/">Point of sale</a><a href="/pricing/">Pricing &amp; licence</a><a href="/community/" aria-current="page">Community</a><a href="/learn/">Learn</a><a href="/download/">Download</a>
-      <a class="site-nav-download" href="/download/">Download 1.2.1</a>
+      <a class="site-nav-download" href="/download/">Download 1.3.0</a>
     </nav>
     <div class="site-header-actions">
       <a class="button button--small" href="/demo/">Try the live demo</a>
@@ -202,7 +202,7 @@
 <section class="container intro intro--center section--tight" aria-labelledby="community-heading">
   <div class="page-intro">
     <h1 id="community-heading">Built in the open, with people who keep real books</h1>
-    <p class="lead">Questions, reviews and contributions all happen in public. The repository, the discussions and the release notes are on GitHub; announcements are mirrored on the project's social channels. Here is where to find each of them, and how to help the project reach a reviewed 1.0.</p>
+    <p class="lead">Questions, reviews and contributions all happen in public. The repository, the discussions and the release notes are on GitHub; announcements are mirrored on the project's social channels. Here is where to find each of them, and how to support its next improvements.</p>
   </div>
 </section>
 
@@ -227,7 +227,7 @@
 
 <section class="section section--white" aria-labelledby="review-heading">
   <div class="container">
-    <div class="section-heading"><h2 id="review-heading">Help us reach a reviewed 1.0</h2><p>Version 1.2.1 is released, but independent accounting review, independent security review and supervised pilots have not happened yet. If you can help with any of them, the maintainer wants to hear from you, and the work is credited in public.</p></div>
+    <div class="section-heading"><h2 id="review-heading">Help review PHP Ledger in real workflows</h2><p>Version 1.3.0 is released, but independent accounting review, independent security review and supervised pilots have not happened yet. If you can help with any of them, the maintainer wants to hear from you, and the work is credited in public.</p></div>
     <div class="grid-3">
       <div class="card"><h3>Accounting reviewers</h3><p>Review the chart of accounts packages, the journals and the financial reports for accounting correctness. Point out where the treatment of a transaction is wrong or unclear. Findings are tracked in public once they are safe to publish.</p><p><a class="button button--secondary" href="/pricing/#enquiry">Offer an accounting review</a></p></div>
       <div class="card"><h3>Security reviewers</h3><p>Review authentication, sessions, database access and file handling on your own installation. Report problems privately through the security policy first, so a fix can land before details are public. Credit in the release notes is yours to take or decline.</p><p><a class="button button--secondary" href="/pricing/#enquiry">Offer a security review</a></p></div>
@@ -247,6 +247,10 @@
     </div>
     <p class="small muted">Public issues and discussions use made-up figures only. Never post real figures from your books.</p>
   </div>
+</section>
+
+<section class="section section--paper" aria-labelledby="support-project-heading">
+  <div class="container"><div class="section-heading"><h2 id="support-project-heading">Help keep PHP Ledger growing</h2><p>If the software is useful to you and you can contribute, consider a donation or sponsorship. You can also help by trying a workflow, improving a guide or introducing the project to another business owner.</p></div><p><a class="button button--primary" href="https://github.com/phpledger/phpledger/discussions">Discuss a donation or sponsorship</a></p></div>
 </section>
 
 <section class="section section--white" aria-labelledby="informed-heading">
@@ -270,6 +274,8 @@
     </div>
   </div>
 </section>
+
+<section class="container section"><h2>Support the project</h2><p>Try a complete workflow and tell us where it became difficult. A reproducible issue, clearer installation guide, native Arabic review or tested correction helps the next person. Use fictional records in public examples.</p><div class="actions"><a class="button" href="https://github.com/phpledger/phpledger/discussions">Offer help or share feedback</a><a class="button button--secondary" href="/demo/">Try the installer demo</a></div><p>Paid installation and support require a separate agreed scope. Contributing time or feedback is welcome.</p></section>
 </main>
 <footer class="site-footer">
   <div class="container">
@@ -301,7 +307,7 @@
     </div>
     <nav class="trust-links" aria-label="Project policies"><a href="https://github.com/phpledger/phpledger/blob/master/LICENSE" rel="noopener">Licence</a><a href="https://github.com/phpledger/phpledger/blob/master/SECURITY.md" rel="noopener">Security contact</a><a href="https://github.com/phpledger/phpledger/blob/master/CODE_OF_CONDUCT.md" rel="noopener">Code of conduct</a><a href="/privacy/">Privacy and data boundaries</a></nav>
     <p class="footer-legal">New project-owned code uses AGPL-3.0-or-later; a commercial licence is available. The pre-adoption 0.1.0 through 0.1.5 previews retain MIT; dependencies, fonts, photographs and the archived 2015 application keep their own terms. Screens show a fictional sample business.</p>
-    <p class="footer-meta">Maintained by <a href="/about/" rel="author">Rana Mansoor Akbar Khan</a>, PHP Ledger project maintainer. Last reviewed <time datetime="2026-09-18">2026-09-18</time>.</p>
+    <p class="footer-meta">Maintained by <a href="/about/" rel="author">Rana Mansoor Akbar Khan</a>, PHP Ledger project maintainer. Last reviewed <time datetime="2026-09-23">2026-09-23</time>.</p>
   </div>
 </footer>
 <dialog id="screen-dialog" aria-labelledby="screen-dialog-title"><div class="dialog-heading"><h2 id="screen-dialog-title">Product screen</h2><button type="button" class="dialog-close" aria-label="Close enlarged screen"><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>Close</button></div><p id="screen-dialog-note">Screens show a fictional sample business</p><p class="dialog-hint" id="dialog-hint">Scroll the image to explore it. With a keyboard, focus the image area and use the arrow keys.</p><div class="dialog-image-wrap" tabindex="0" role="region" aria-label="Enlarged product image" aria-describedby="dialog-hint"><img id="dialog-image" width="1440" height="1200" alt=""></div></dialog>

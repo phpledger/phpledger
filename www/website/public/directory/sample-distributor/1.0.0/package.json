@@ -1,0 +1,51 @@
+{
+  "type": "sample",
+  "slug": "sample-distributor",
+  "version": "1.0.0",
+  "contract": 1,
+  "name": "Harbor Supply Company",
+  "description": "Distribution. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-distributor/",
+  "requires": {
+    "core": "1.0.0",
+    "inventory": "1.0.0",
+    "inventory-locations": "1.1.0",
+    "purchasing": "1.0.0",
+    "trading-documents": "1.0.0"
+  },
+  "sample": {
+    "id": "distributor",
+    "version": "1.0.0",
+    "name": "Harbor Supply Company",
+    "business": "Distribution",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "released_demo_only",
+    "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+    "scenario": {
+      "id": "route-settlement",
+      "title": "Follow a distribution route settlement",
+      "goal": "Review a distributor's stock, customer invoice, supplier bill, settlement and route-level bookkeeping evidence.",
+      "steps": [
+        "Review the opening stock, customer receivable and supplier payable evidence.",
+        "Trace stock receipt and a credit sale through inventory, cost and control accounts.",
+        "Apply the named customer and supplier settlements and inspect residuals.",
+        "Review the route and cash-transfer notes as bookkeeping references only."
+      ],
+      "checks": [
+        "The distribution scenario does not implement route planning, dispatch, delivery proof or fleet accounting.",
+        "Inventory uses one location and the shared moving-average service.",
+        "Customer and supplier settlement remains separate from operational delivery status."
+      ]
+    },
+    "file": "distributor-1.0.0.json",
+    "sha256": "fe250c50fc9e42d2948d21fefd9d1897b6373107d6a2bdbbafa92ee8767f02c7"
+  },
+  "files": {
+    "pack.json": "fe250c50fc9e42d2948d21fefd9d1897b6373107d6a2bdbbafa92ee8767f02c7",
+    "structure.json": "53c438f0b246fa3908223e1ff0acb348bdbb2899c631269cc63229bc33b3a13c"
+  }
+}

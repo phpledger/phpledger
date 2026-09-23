@@ -1,0 +1,49 @@
+{
+  "type": "sample",
+  "slug": "sample-jewelry-studio",
+  "version": "1.0.0",
+  "contract": 1,
+  "name": "Lantern Finch Jewelry Studio",
+  "description": "Jewelry studio. Jewelry bookkeeping example; precious-metal, gemstone, job-costing and commodity accounting are not implemented.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-jewelry-studio/",
+  "requires": {
+    "core": "1.0.0",
+    "inventory": "1.0.0",
+    "trading-documents": "1.0.0"
+  },
+  "sample": {
+    "id": "jewelry-studio",
+    "version": "1.0.0",
+    "name": "Lantern Finch Jewelry Studio",
+    "business": "Jewelry studio",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "preview_only",
+    "capability_note": "Jewelry bookkeeping example; precious-metal, gemstone, job-costing and commodity accounting are not implemented.",
+    "scenario": {
+      "id": "jewelry-materials",
+      "title": "Separate studio sales from material costs",
+      "goal": "Use a jewelry-studio bookkeeping example to distinguish finished-goods sales, material purchases, customer deposits and workshop costs.",
+      "steps": [
+        "Review the sample material and finished-piece accounts used by the example.",
+        "Trace a purchase and sale through the inventory, revenue and cost accounts.",
+        "Review a customer return or correction and its source link.",
+        "Compare the month-end result with the remaining material value."
+      ],
+      "checks": [
+        "Metal, gemstone and finished-piece amounts are illustrative and do not claim commodity or fair-value accounting.",
+        "Customer deposits, hallmarking, consignment, appraisal and workshop job costing are not implemented.",
+        "The pack is a bookkeeping preview; specialist treatment and runtime replay are outside this candidate contract."
+      ]
+    },
+    "file": "jewelry-studio-1.0.0.json",
+    "sha256": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538"
+  },
+  "files": {
+    "pack.json": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538",
+    "structure.json": "43e68ecf255653bb3c0910d68595396af26a84aa61708c70820f40b4e897a049"
+  }
+}

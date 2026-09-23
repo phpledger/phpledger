@@ -1,43 +1,38 @@
 # PHP Ledger
 
-> PHP Ledger is open-source, self-hosted double-entry accounting software with core invoices, bills and payments, optional purchasing and inventory, and a manually configured tax engine. Built on PHP 8.2+ with MySQL 8.4 or MariaDB 10.4+, 1.1.3 is the current release: unzip it into any web folder, open it, and the browser installer starts; updates are publisher-signed. 1.0.0 was the first stable release; independent accounting and security review remain post-release commitments.
+> PHP Ledger is open-source, self-hosted double-entry accounting software for small businesses. It brings invoices, bills, payments, stock, reconciliation and reports together with reviewed payroll accruals, loan schedules and period/year-end workflows. Run it on PHP 8.2+ with MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+. Use the browser installer, your own hosting and publisher-verified releases. Independent review and real-business acceptance remain separate gates.
 
-Current stable release: 1.2.1. PHP 8.2+ (8.3 recommended), MySQL 8.4 or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
+Current stable release: 1.3.0. PHP 8.2+ (8.3 recommended), MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
 
 New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-adoption 0.1.0 through 0.1.5 previews retain MIT; dependencies and archived code keep their own terms.
 
 ## Implemented scope
 
-- 0.6.0 workspace with a focused Home, sidebar and company switcher, search/jump, quick-create actions, URL-based list filters and 25/50/100-row pagination.
-- One-line-first invoice and bill editors, exact totals and posting previews; atomic allocation of one settlement across multiple open items; cost-of-sales classification, gross profit and P&L period presets.
-- Company setup in ten functional currencies, one immutable functional currency per book; account management and audit history.
-- Receipt, expense and general-journal drafts, balanced posting, linked dated reversals and correction mechanics preserving document identity.
-- Account ledgers, trial balance, profit and loss, balance sheet, core CSV exports, bank CSV reconciliation, period controls and reviewed opening-cutover workflow.
-- Core AR/AP: shared customer/vendor parties, invoices, bills, partial/final allocated payments, linked credits, historical ageing and control-account reconciliation. Owners can hide navigation without disabling services.
-- Optional Purchasing: purchase orders, partial goods receipts, later matched AP bills, reviewed variances, returns and received-but-unbilled reconciliation.
-- Optional Inventory: shared products, one stock location, moving weighted-average cost, stock invoice issues, source-linked returns, counts and reviewed value adjustments.
-- Core manual tax codes and dated rates, input/output account mappings, inclusive/exclusive price entry and frozen document snapshots; no automatic country rules.
-- Reviewed opening party/product conversion ties supported existing balances to shared ledgers without reposting the opening journal.
-- Cash POS with a sample catalogue and printable receipt; twelve demo choices: an Accounting starter playground plus eleven multi-year teaching histories. Cash POS does not issue shared stock.
-- Scoped, revocable read API and MCP connections, with the published client compatibility matrix defining tested clients.
-- Exact currency snapshots with manual document and settlement rates, realised FX settlement mechanics, same-identity corrections and an unconfigured retryable event outbox.
-- WordPress-style installation: upload the phpledger folder into any web folder and open it; the browser installer checks the host and database, runs the migration chain, creates the first account with a chosen username and optional logo, and starts business onboarding, without Composer, Node or a terminal.
-- Publisher-signed automatic updates from an independent maintenance interface, with automatic matched code/configuration/key/database backup before applying a release and automatic restoration if a migration or mutation fails.
+- Company-scoped books, confidential user permissions, exact-money central posting, reviewed drafts, immutable journals and traceable dated reversals.
+- Core invoices and bills, partial payments, credits, advances, refunds, historical ageing and control-account reconciliation.
+- Account statements, trial balance, profit and loss, balance sheet, bank reconciliation and reviewed opening cutover.
+- Optional purchasing, shared stock, multiple stock locations, transfers and a counter cash till over real inventory.
+- Period-close checklist, cash counts, reversing journals and fiscal-year close, roll-forward and explicit reopen controls.
+- Aggregate payroll accounting, staff advances and partial settlements, with a confidential employee register and explicit staff/driver links.
+- Recurring and accrual schedules create reviewable journal drafts; loan schedules disclose their rate/day conventions and split principal from interest.
+- Manual tax codes and dated rates, frozen currency snapshots, and source-linked ownership and related-party records.
+- Scoped read-only API/MCP connections, audited plugin lifecycle and a private encrypted plugin secret store.
+- Browser installation, installation-specific table prefixes and database TLS; Arabic draft translation with right-to-left layout.
+- Optional CC0 sample packages with validated JSON payloads, explicit directory downloads and isolated practice-company onboarding.
+- Publisher-verified application ZIPs and official GHCR/Docker Hub images built from the same ZIP; managed installations use matched backup and recovery.
 
 ## Outside the current workflows
 
-- Advances, unapplied credits, overpayments and cash refunds; Quotes remains a separate future plugin.
-- Multiple stock locations, batches, serials, expiry, landed cost, letters of credit, manufacturing and integration of cash POS with shared stock.
-- Country tax rules, withholding, compound or nonrecoverable tax policies, statutory filing and professionally accepted reporting packages.
-- Automated rate providers, outgoing payments from foreign-currency bank accounts, period-end revaluation and group consolidation.
-- Vetting enforcement, vendor bank change control and outbound connectors.
-- Financial write API/MCP, card processing, bank feeds, offline use, document scanning and detailed historical imports. New country account catalogues and advanced vertical workflows remain outside this release.
-- Mobile refinement and dark mode; complete visual/accessibility acceptance, consistent field-level validation recovery and full nested report/source/action return behavior remain unfinished.
-- Independent accounting review, independent security review, supervised pilots with a real month-end close, unfamiliar-operator installation observation and restricted shared-host recovery certification have not happened; these are post-release commitments, not completed acceptance.
+- Payroll is aggregate accounting, not per-person pay runs, payslips, statutory calculation or filing.
+- Loan conventions must be reviewed against the actual lender contract; automatic drafts still require review before posting.
+- Country tax certification, statutory filing, full manufacturing, batches/serials/expiry and advanced industry workflows are outside this release.
+- Financial write API/MCP, payment processing, bank feeds and offline use are not provided.
+- Arabic is a draft translation pending native language and accounting review.
+- Independent accounting/security review, supervised real-business pilots and restricted-host recovery qualification remain separate acceptance gates.
 
 ## Documentation and pages
 
-- [PHP Ledger: self-hosted double-entry accounting software](https://phpledger.com/): Open-source double-entry accounting with invoices, bills, stock and bank reconciliation, self-hosted on PHP 8.2+ with MySQL or MariaDB. Current release: 1.1.3.
+- [PHP Ledger: self-hosted double-entry accounting software](https://phpledger.com/): Self-hosted accounting with invoices, bills, stock, payroll accruals and year-end workflows. Try the real browser installer in the shared hourly-reset demo.
 - [About](https://phpledger.com/about/): Meet the project behind PHP Ledger: open-source, self-hosted accounting, its BixiSoft PHP architecture, contributors and development-preview boundaries.
 - [Community](https://phpledger.com/community/): Join the PHP Ledger community: GitHub Discussions and issues, accounting and security review, pilot businesses, and the project's social channels.
 - [Compare](https://phpledger.com/compare/): Compare accounting, invoicing and ERP software by licence, hosting, daily workflows and recovery, with fair alternatives and explicit PHP Ledger limits.
@@ -48,7 +43,19 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [FrontAccounting alternative](https://phpledger.com/compare/frontaccounting-alternative/): Compare FrontAccounting with PHP Ledger on PHP hosting, sales and purchases, accounting controls and migration, with clear development-preview limits.
 - [Open-source accounting software](https://phpledger.com/compare/open-source-accounting-software/): Choose open-source accounting software by licence, ledger scope, invoicing, ERP needs, self-hosting and recovery, using a practical five-family shortlist.
 - [Credits](https://phpledger.com/credits/): Photography, typeface, icon and company-logo credits for the PHP Ledger website, with the licence and source of each locally served asset.
-- [Download](https://phpledger.com/download/): Get the 1.1.3 package and checksum, check the requirements, then upload one phpledger folder to your website and install it from your browser.
+- [Sample company directory](https://phpledger.com/directory/): Optional fictional sample companies for practice or zero-balance onboarding. Download data-only CC0 packages separately from PHP Ledger.
+- [Harbor Supply Company sample company](https://phpledger.com/directory/sample-distributor/): Practise with Harbor Supply Company, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Lantern Finch Jewelry Studio sample company](https://phpledger.com/directory/sample-jewelry-studio/): Practise with Lantern Finch Jewelry Studio, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Maple Bench Works sample company](https://phpledger.com/directory/sample-light-manufacturing/): Practise with Maple Bench Works, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Riverside Community Club sample company](https://phpledger.com/directory/sample-membership-club/): Practise with Riverside Community Club, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Meadow Training Pharmacy sample company](https://phpledger.com/directory/sample-pharmacy/): Practise with Meadow Training Pharmacy, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Cedar Table sample company](https://phpledger.com/directory/sample-restaurant/): Practise with Cedar Table, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Willow Corner Shop sample company](https://phpledger.com/directory/sample-retail-shop/): Practise with Willow Corner Shop, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Sunrise Garden Services sample company](https://phpledger.com/directory/sample-seasonal-business/): Practise with Sunrise Garden Services, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Cedar Studio sample company](https://phpledger.com/directory/sample-service-agency/): Practise with Cedar Studio, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Wheel & Spoke Workshop sample company](https://phpledger.com/directory/sample-service-workshop/): Practise with Wheel & Spoke Workshop, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Harbour Trade sample company](https://phpledger.com/directory/sample-trader/): Practise with Harbour Trade, a fictional CC0 sample. Import its history into a sample business or its structure with zero balances.
+- [Download](https://phpledger.com/download/): Download the published PHP Ledger ZIP and checksum, check PHP and database requirements, or use an official container image built from the same verified ZIP.
 - [PHP Ledger guidance by role](https://phpledger.com/for/): Choose practical PHP Ledger evaluation guidance for accountants, software houses and small-business owners, with current preview limits.
 - [PHP Ledger for accountants: what to inspect before adopting it](https://phpledger.com/for/accountants/): An accountant’s evaluation of PHP Ledger: source trails, period controls, opening reconciliation, exact amounts and unfinished module boundaries.
 - [PHP Ledger for analysts: what you can get out of it](https://phpledger.com/for/analysts/): What a business graduate or analyst can get from PHP Ledger: collapsible statements, ageing, cash forecast, stock by location, cost visibility, a read-only API.
@@ -75,7 +82,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [How do opening balances and cutover work?](https://phpledger.com/learn/opening-balances-and-cutover/): Plan a reconciled move to a new ledger with opening balances, unpaid-document schedules, a clear cutoff and no duplicate recognition.
 - [Profit and loss versus balance sheet: what is the difference?](https://phpledger.com/learn/profit-and-loss-vs-balance-sheet/): Compare a period’s profit with financial position at a date, using original cash, borrowing and owner-funding examples.
 - [What does a trial balance prove?](https://phpledger.com/learn/trial-balance/): Read a trial balance, check a fictional 1,000.00 example, and distinguish balanced arithmetic from complete and correctly classified books.
-- [News](https://phpledger.com/news/): Read PHP Ledger release updates, including 1.1.2 (the 1.1.1 record corrected), 1.1.1 (setup you can watch), 1.1.0 (install from any web folder) and 1.0.0.
+- [News](https://phpledger.com/news/): Follow PHP Ledger releases, including 1.3.0: the installer demo, payroll and year-end workflows, optional sample packages and clear release limits.
 - [0.1.0-preview](https://phpledger.com/news/0-1-0-preview/): The first PHP Ledger evaluation package includes company setup, receipts, expenses, balanced journals, reports and a sample cash point of sale.
 - [0.1.3-preview](https://phpledger.com/news/0-1-3-preview/): Evaluate visible running balances, reviewed opening cutover, bank reconciliation, CSV exports and owner-controlled POS modules in PHP Ledger 0.1.3-preview.
 - [0.1.4-preview](https://phpledger.com/news/0-1-4-preview/): Profit & Loss and Balance Sheet panels fit without horizontal scrolling. Account ledgers keep running balances and filters visible on tablets.
@@ -91,16 +98,17 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [1.1.1](https://phpledger.com/news/1-1-1/): PHP Ledger 1.1.1 rebuilds browser setup into six stages with green and red checks, and accepts a local database account with no password.
 - [1.1.2](https://phpledger.com/news/1-1-2/): PHP Ledger 1.1.2 corrects the 1.1.1 record (it carried migration 034), counts POS cash in whole minor units and restores signed update metadata.
 - [1.1.3](https://phpledger.com/news/1-1-3/): PHP Ledger 1.1.3 fixes the in-app updater. An installation on 1.1.2 can install it from /maintenance.php; older ones use the manual procedure.
+- [1.3.0](https://phpledger.com/news/1-3-0/): Try the real installer, explore payroll and loan drafts, review year end, and install optional sample packages in PHP Ledger 1.3.0. See the scope and limits.
 - [Point of sale](https://phpledger.com/point-of-sale/): An optional cash POS for small counters: cart, cash and change, printable receipt and one balanced journal. No stock, tax or card payments at the counter yet.
 - [Pricing and licence](https://phpledger.com/pricing/): PHP Ledger is free under AGPL-3.0-or-later. A commercial licence and paid installation, training and pilot services are available on request; no hidden prices.
-- [Privacy](https://phpledger.com/privacy/): How PHP Ledger's website and temporary demo use sessions, sample records, country hints and operational logs, and how to contact the maintainer.
-- [Product](https://phpledger.com/product/): A workflow-by-workflow tour of PHP Ledger 1.0: invoices, bills, purchase orders, stock, bank reconciliation, financial reports, setup and signed updates.
+- [Privacy](https://phpledger.com/privacy/): How PHP Ledger handles shared demo sessions, optional installation notices, private registration and operational logs.
+- [Product](https://phpledger.com/product/): Explore invoices, stock, payroll accruals, loan drafts, employee records and reviewed period/year-end workflows, with explicit limits and source-linked reports.
 - [Research](https://phpledger.com/research/): Read dated research on bookkeeping tools, PHP hosting and electronic invoicing, with primary sources, explicit evidence gaps and product boundaries.
 - [FBR digital invoicing](https://phpledger.com/research/fbr-digital-invoicing/): Understand FBR digital-invoicing evidence and verification gaps. PHP Ledger has manual tax configuration, with no FBR client or built-in country rules.
 - [Accounting software landscape](https://phpledger.com/research/open-source-accounting-landscape/): A primary-source survey of accounting, ERP, invoice and personal-ledger projects, examining licence changes, deployment evidence and unresolved quality claims.
 - [Pakistan SME bookkeeping](https://phpledger.com/research/pakistan-sme-bookkeeping/): A dated study of Pakistan bookkeeping apps, download bands and historical engagement, separating verified listings from unproven market and pricing claims.
 - [PHP hosting availability](https://phpledger.com/research/php-hosting-availability-2026/): A dated four-source study of PHP hosting availability, separating panel support, provider defaults, individual plans and complete application compatibility.
-- [Roadmap](https://phpledger.com/roadmap/): PHP Ledger’s release sequence: 1.1.3 with the updater fix, 1.2 stock locations, trading documents and plugins, then 1.3 Arabic and platform work.
+- [Roadmap](https://phpledger.com/roadmap/): Track PHP Ledger accounting and hosting work, optional packages and the separate gates for statutory features, independent review and real-business acceptance.
 - [Self-host accounting software with a recovery plan](https://phpledger.com/self-hosting/): Understand the hosting, maintenance and recovery work behind self-hosted accounting, then choose a realistic PHP Ledger installation route.
 - [Back up and restore PHP Ledger](https://phpledger.com/self-hosting/backup-and-restore/): Build a matched PHP Ledger recovery set, rehearse restoration and preserve migration guards and database view access during populated upgrades.
 - [Use PHP Ledger locally with Docker](https://phpledger.com/self-hosting/docker/): Run the repository’s local Docker Compose environment, install its schema and use the isolated test profile without treating it as a production appliance.

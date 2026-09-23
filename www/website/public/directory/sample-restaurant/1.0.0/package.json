@@ -1,0 +1,49 @@
+{
+  "type": "sample",
+  "slug": "sample-restaurant",
+  "version": "1.0.0",
+  "contract": 1,
+  "name": "Cedar Table",
+  "description": "Restaurant / cafe. Restaurant and catering bookkeeping example; tables, recipes, kitchen production and service operations are not implemented.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-restaurant/",
+  "requires": {
+    "core": "1.0.0",
+    "inventory": "1.0.0",
+    "pos-showcase": "1.0.0"
+  },
+  "sample": {
+    "id": "restaurant",
+    "version": "1.0.0",
+    "name": "Cedar Table",
+    "business": "Restaurant / cafe",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "preview_only",
+    "capability_note": "Restaurant and catering bookkeeping example; tables, recipes, kitchen production and service operations are not implemented.",
+    "scenario": {
+      "id": "table-kot",
+      "title": "Trace a table order through the books",
+      "goal": "Use a restaurant bookkeeping example to compare a cash sale, stock movement, supplier bill and correction.",
+      "steps": [
+        "Review the food and beverage items and the opening stock position.",
+        "Trace the table/KOT example to its cash sale and cost of goods sold.",
+        "Review the supplier purchase, payment and returned goods as separate accounting events.",
+        "Inspect the daily expense correction and its linked reversal."
+      ],
+      "checks": [
+        "The sample does not implement tables, kitchen production, recipes, modifiers or service workflow.",
+        "Food and beverage labels are sample teaching data, not food-safety or tax guidance.",
+        "Inventory and cash totals reconcile to the posted ledger events."
+      ]
+    },
+    "file": "restaurant-1.0.0.json",
+    "sha256": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664"
+  },
+  "files": {
+    "pack.json": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664",
+    "structure.json": "155018b38193729d87d373a7513aa59a241b2315c1a31fd45893a57964d78c6f"
+  }
+}
