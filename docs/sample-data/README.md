@@ -69,3 +69,18 @@ The command reads JSON only. It does not load application configuration, open a 
 Local PHP 8.5.5 syntax and data checks passed on 2026-09-14: seven packs, 77 events, 42 documents, 16 items; all eight corruption checks rejected. A separate agent independently recalculated the financial data with exact decimal arithmetic and reviewed account keys, van transfers and deferred dues. The main foundation validation report records target-runtime checks separately. This is arithmetic/provenance review; it is not accountant sign-off, a working importer or observed UI usability evidence.
 
 See [SCENARIOS.md](SCENARIOS.md) for the walk-throughs and expected totals, [SOURCES.md](SOURCES.md) for marketplace evidence/limits, and [account candidates](../coa/ACCOUNT_CANDIDATES.md) for the unreviewed chart keys. No Google Drive documents were read for this subtask. No migrations, schema, production or external accounts changed.
+
+## Separate signed package publication (1.3)
+
+The eleven versioned demo packs and sample structures are built by `tools/build-sample-packages.py`; they are separate from the seven early arithmetic fixtures described above. [Issue 72](https://github.com/phpledger/phpledger/issues/72) places each sample in its own `phpledger/sample-<slug>` repository. The repository contains exactly `LICENSE`, `README.md`, `package.json`, `pack.json`, and `structure.json`. A release carries only its ZIP, ZIP `.sha256` sidecar and `sample-envelope.json`. The application ZIP does not acquire these samples.
+
+`tools/publish-sample-packages.py` is an operator gate, not a signing tool. It uses Python `cryptography` and the pinned public key to verify all eleven signatures, signed archive sizes/hashes, three-member data-only ZIP inventories, directory metadata, five-file source trees, signing receipts and byte-equivalent four-file read-only preloads. Its default mode makes only read-only GitHub API calls and writes a local review plan. An existing target repository, including an empty one, is a collision; authentication/network failures never count as absence.
+
+```text
+python tools/publish-sample-packages.py --artifacts <signed-package-output> --preloads <signed-readonly-preloads> --plan <review-plan.json>
+python tests/sample_publication_test.py
+```
+
+Review that exact plan before execution. The script checks fresh inputs against it, freezes only the allowed source/asset bytes, and checks every repository for collisions again before the first external write. `--execute --receipt <new-receipt.json>` explicitly creates public repositories and draft releases; adding `--publish` publishes the drafts only after all eleven drafts exist and their downloaded assets match the expected bytes. Execution requires authenticated `gh`, configured Git author identity, and owner authorization. Do not run either write mode while publication is on hold.
+
+The execution receipt records each repository commit, tag, release URL, asset hash and last completed step. Existing receipts are never overwritten at the start. A partial failure requires operator inspection using that receipt; there is no force-push, overwrite, deletion or automatic recovery of a colliding repository. Release publication does not deploy the website directory or send announcements. Those remain separately verified coordinator actions.
