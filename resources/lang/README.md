@@ -7,7 +7,7 @@ existing interface text through `pl_t()` and added the first catalogue.
 
 ## What is here today
 
-`ur.php`, a **draft, unreviewed** Urdu catalogue, and this file.
+`ur.php` and `ar.php`, **machine-authored, unreviewed draft** Urdu and Arabic catalogues, and this file.
 
 - **English (`en`) is the source language.** Its keys are its strings, so it has no catalogue
   file and loads none. `pl_t('Save the invoice.')` returns `Save the invoice.`
@@ -24,9 +24,15 @@ existing interface text through `pl_t()` and added the first catalogue.
 - **A language is not "supported" until a named person has reviewed its wording**, on real screens,
   with real figures and dates (decision B3). That review is a release gate this directory cannot
   satisfy by itself. Nothing in the application claims a reviewed translation today.
-- **Arabic has no catalogue.** Its six CLDR plural forms are declared in `pl_i18n_plural_table()`
-  so the table shape is proven, and nothing else about it is guessed at: no number rules, no date
-  pattern, no wording.
+- **Arabic (`ar`) is a machine-authored draft in 1.3.** It covers common navigation, actions,
+  document/accounting labels, Gregorian month names, and accounting-depth screens. It uses the
+  existing six-form plural selector and RTL document direction. The explicit draft presentation
+  uses Latin digits, three-digit grouping (`1,234,567.89`) and `d F Y` dates with Arabic month
+  names; this is a product convention, not a claim about every Arabic-speaking jurisdiction.
+  Regional tags such as `ar-SA` inherit these defaults and the base catalogue. There is no Hijri
+  calendar conversion or localized financial-input parsing. Missing text stays English, and
+  mixed-script values retain the existing bidirectional isolation. Native-language and accounting
+  terminology review has **not** occurred; the selector and review-state API report `draft`.
 
 ## Adding a catalogue
 
@@ -83,3 +89,13 @@ operation.
    `reviewed` **in the same change** that records who reviewed it, and update this file. The test
    `tests/i18n_test.php` asserts today that nothing claims `reviewed`; that assertion is what will
    tell you the claim has to be made deliberately.
+
+## Reviewing the Arabic draft
+
+Read the UNREVIEWED header in `ar.php`, then choose العربية from the existing language menu.
+Review navigation, sign-in, document editing, reports, printing and the 1.3 financial screens at
+desktop, tablet and phone widths. Verify six plural categories (0, 1, 2, 3–10, 11–99, and other),
+named placeholders, negative amounts, account codes, dates and mixed Arabic/Latin party names.
+Confirm that posted amounts and dates remain unchanged and that canonical inputs retain their
+ordinary validation. Record the reviewer and any regional convention before changing Arabic's
+review state to `reviewed`. Automated catalogue checks and screenshots cannot supply that sign-off.

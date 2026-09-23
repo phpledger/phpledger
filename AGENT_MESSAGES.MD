@@ -1845,3 +1845,7 @@ Coordinator implements the recorded P6 notice: explicit installer controls (anon
 
 
 Owner final demo refinement: normal database fields now show read-only example values, while actual connection values remain server-side and forged browser fields remain ignored. Repeated full installer/onboarding browser run passed with all five dummy fields checked, private-value absence and nine responsive captures; install template lint passed. Local candidate only.
+### Codex Arabic lane claim — 23 September 2026
+Owner-approved 1.3 Arabic/RTL scope, isolated codex/1.3-arabic at89485d3. Add a machine-authored, explicitly unreviewed Arabic catalogue using existing locale/plural/font/formatting seams; retain English per-key fallback and canonical financial input. Register language choice, package file, focused tests and responsive RTL proof. No schema, financial-rule, live or provider changes. Coordinator owns integration/publication; native review remains a separately stated gate.
+
+Arabic lane outcome: machine-authored ar draft offered with visible unreviewed notice, six plural forms, regional fallback, Latin exact-money presentation and Gregorian dates. Focused i18n suite 15/15 passed; changed PHP lint clean; desktop 1440, tablet 768 and mobile 390 browser screenshots retained under output/playwright/arabic-*.png. Mobile document width 390, RTL and font loaded. Existing report inline-style CSP warning observed; no localization code emits that style. Native language/accounting review pending; no schema or live changes.

@@ -214,7 +214,7 @@ test('the formatting seams exist and leave todays written amounts and dates unch
     assert_same($southAsian, pl_number_format_rules('en-PK'), 'English for a South Asian reader groups in lakhs.');
     assert_same($rules, pl_number_format_rules('en'));
     assert_same($rules, pl_number_format_rules('en-GB'), 'A region with no row of its own falls back to its language.');
-    assert_same($rules, pl_number_format_rules('ar'), 'Arabic has no reviewed rules yet and must not be guessed at.');
+    assert_same($rules, pl_number_format_rules('ar'), 'The Arabic draft explicitly uses Latin digits with three-digit grouping.');
     assert_same($rules, pl_number_format_rules('zu'));
     assert_same('d F Y', pl_date_format_pattern('ur'));
     assert_same('d F Y', pl_date_format_pattern('ur-PK'));
@@ -285,6 +285,7 @@ test('the language switch offers a short honest list and says which wording is o
     assert_true(!array_key_exists(PL_LOCALE_PSEUDO, $offered), 'The pseudo-locale must never be offered to a person.');
     assert_same('source', $offered['en']['review']);
     assert_same('draft', $offered['ur']['review'], 'Urdu is an unreviewed draft until a named reviewer has passed it.');
+    assert_same('draft', $offered['ar']['review'], 'Arabic must not claim native review.');
     foreach ($offered as $tag => $entry) {
         assert_same(strtolower((string) $tag), pl_normalize_locale((string) $tag), 'An offered locale must be a valid tag.');
         assert_true($entry['label'] !== '' && $entry['english'] !== '', 'Offered locale ' . $tag . ' has no name to show.');
@@ -295,6 +296,26 @@ test('the language switch offers a short honest list and says which wording is o
     assert_same('draft', pl_locale_review_state('ur-PK'), 'A region is exactly as reviewed as its language.');
     assert_same('source', pl_locale_review_state('en-GB'));
     assert_same('unknown', pl_locale_review_state('zu'));
+});
+
+test('the Arabic draft preserves placeholders six plural forms regional fallback and exact financial presentation', function (): void {
+    pl_i18n_reset();$catalogue=pl_i18n_catalogue('ar');assert_true(count($catalogue)>250);
+    foreach($catalogue as $key=>$value) {
+        preg_match_all('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/',$key,$source);$expected=$source[1];sort($expected);
+        if(is_array($value)) { assert_same(pl_i18n_plural_table()['ar']['forms'],array_keys($value)); }
+        foreach(is_array($value)?$value:[$value] as $text) {
+            assert_true(is_string($text) && trim($text)!=='' && !str_contains($text,'<'));
+            preg_match_all('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/',$text,$translated);$actual=$translated[1];sort($actual);assert_same($expected,$actual,'Arabic placeholders differ for '.$key);
+        }
+    }
+    pl_set_locale('ar-SA');assert_same('draft',pl_locale_review_state());assert_same('rtl',pl_text_direction());assert_same('حفظ',pl_t('Save'));
+    assert_same('Missing sample English key',pl_t('Missing sample English key'));
+    assert_same("\u{2066}-1,234,567.89\u{2069}",pl_money('-1234567.89'));assert_same("\u{2066}05 يناير 2026\u{2069}",pl_date_label('2026-01-05'));
+    foreach([0=>'zero',1=>'one',2=>'two',3=>'few',11=>'many',100=>'other'] as $count=>$form) { assert_same(str_replace('{count}',(string)$count,$catalogue['{count} item'][$form]),pl_tn('{count} item','{count} items',$count,['count'=>$count])); }
+    assert_same('0.0001',pl_amount('0.0001'));assert_throws(fn()=>pl_amount('١٢٫٣٤'),DomainException::class);
+    assert_true(str_contains((string)file_get_contents(PL_ROOT.'/resources/lang/ar.php'),'MACHINE-AUTHORED DRAFT, UNREVIEWED'));
+    assert_true(str_contains((string)file_get_contents(PL_ROOT.'/tools/package-files.json'),'"resources/lang/ar.php"'));
+    pl_i18n_reset();
 });
 
 test('the bundled Urdu draft is a well-formed catalogue that only uses the forms Urdu has', function (): void {
@@ -474,6 +495,12 @@ test('every route renders under the pseudo-locale and the document language foll
         [, $body] = $request('/home');
         assert_true(str_contains($body, '<html lang="ur" dir="rtl"'), 'Choosing Urdu did not turn the document round: '
             . substr($body, 0, 200));
+        preg_match('/name="csrf" value="([a-f0-9]+)"/', $body, $match);
+        $request('/locale', http_build_query(['locale'=>'ar','return'=>'/home','csrf'=>$match[1]??'']));
+        [, $body]=$request('/home');
+        assert_true(str_contains($body,'<html lang="ar" dir="rtl"'));
+        assert_true(str_contains($body,'لم تخضع للمراجعة'),'Arabic must visibly retain its unreviewed status.');
+        foreach(['/transactions','/general-journals/new','/reports/trial-balance','/employees'] as $route) { [$status,$arabicBody]=$request($route);assert_same(200,$status,'Arabic route '.$route);assert_true(str_contains($arabicBody,'<html lang="ar" dir="rtl"')); }
         preg_match('/name="csrf" value="([a-f0-9]+)"/', $body, $match);
         $request('/locale', http_build_query(['locale' => '', 'return' => '/home', 'csrf' => $match[1] ?? '']));
         [, $body] = $request('/home');

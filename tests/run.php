@@ -207,6 +207,9 @@ if (($argv[1] ?? '') === '--suite=stock-documents') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'ar_ap_test.php', 'inventory_test.php', 'inventory_location_test.php', 'stock_document_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=year-end') { $suites = ['ledger_test.php','concurrency_test.php','year_end_test.php']; }
+if (($argv[1] ?? '') === '--suite=i18n') {
+    $suites = ['i18n_test.php'];
+}
 foreach ($suites as $suite) {
     if (is_file(__DIR__ . '/' . $suite)) {
         require __DIR__ . '/' . $suite;

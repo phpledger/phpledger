@@ -137,6 +137,7 @@ function pl_i18n_offered_locales(): array
         // The endonym is written in its own script, as a language menu should be: a person who
         // cannot read the current interface language has to recognise their own.
         'ur'    => ['label' => 'اردو', 'english' => 'Urdu', 'review' => 'draft'],
+        'ar'    => ['label' => 'العربية', 'english' => 'Arabic', 'review' => 'draft'],
     ];
 }
 
@@ -463,6 +464,9 @@ function pl_number_format_rules(?string $locale = null): array
         // written 1,23,456.78, not with Eastern Arabic-Indic digits, and an accounting figure a
         // person has to check against a bank statement must be written the way the statement is.
         'ur' => $southAsian,
+        // Explicit draft presentation: Latin digits and three-digit grouping. This is not
+        // a jurisdiction-wide Arabic formatting claim; canonical financial input is unchanged.
+        'ar' => $western,
         'en-pk' => $southAsian, 'en-in' => $southAsian, 'en-bd' => $southAsian,
         'en-lk' => $southAsian, 'en-np' => $southAsian,
     ];
@@ -509,7 +513,7 @@ function pl_date_format_pattern(?string $locale = null): string
 {
     $tag = $locale === null ? pl_locale() : pl_normalize_locale($locale);
     /** @var array<string, string> $patterns */
-    $patterns = ['ur' => 'd F Y'];
+    $patterns = ['ur' => 'd F Y', 'ar' => 'd F Y'];
     return $patterns[$tag] ?? $patterns[pl_locale_language($tag)] ?? 'd M Y';
 }
 

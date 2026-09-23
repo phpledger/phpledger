@@ -1539,6 +1539,10 @@
       "destination": "resources/lang/ur.php"
     },
     {
+      "source": "resources/lang/ar.php",
+      "destination": "resources/lang/ar.php"
+    },
+    {
       "source": "www/phpledger/includes/functions/sample_structure_functions.php",
       "destination": "www/phpledger/includes/functions/sample_structure_functions.php"
     },
