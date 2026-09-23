@@ -27,6 +27,7 @@ return [
     'counter-receipt' => 'page-pos',
     'demo' => 'page-getting-started',
     'editor' => 'page-money-documents',
+    'employee-links' => 'page-people',
     'employees' => 'page-people',
     'error' => 'page-access',
     'general-detail' => 'page-journals',
@@ -70,4 +71,9 @@ return [
     'trial-balance' => 'page-reports',
     'users' => 'page-people',
     'van-settlement' => 'page-stock',
+    'payroll' => 'page-payroll',
+    'scheduling' => 'page-scheduling',
+    'transaction-chooser' => 'page-money-documents',
+    'updates' => 'page-installation',
+    'year-end' => 'page-periods',
 ];

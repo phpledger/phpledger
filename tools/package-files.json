@@ -1811,6 +1811,14 @@
       "destination": "resources/guidance/concepts/page-parties.php"
     },
     {
+      "source": "resources/guidance/concepts/page-payroll.php",
+      "destination": "resources/guidance/concepts/page-payroll.php"
+    },
+    {
+      "source": "resources/guidance/concepts/page-scheduling.php",
+      "destination": "resources/guidance/concepts/page-scheduling.php"
+    },
+    {
       "source": "resources/guidance/concepts/page-people.php",
       "destination": "resources/guidance/concepts/page-people.php"
     },

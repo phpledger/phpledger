@@ -7,7 +7,7 @@ return [
     "ALTER TABLE pl_accounts
         ADD overdraft_enabled TINYINT(1) NOT NULL DEFAULT 0 AFTER money_kind,
         ADD overdraft_limit DECIMAL(20,4) NOT NULL DEFAULT 0.0000 AFTER overdraft_enabled,
-        ADD CONSTRAINT chk_account_overdraft CHECK (
+        ADD CONSTRAINT ck_account_overdraft CHECK (
             (overdraft_enabled=0 AND overdraft_limit=0) OR
             (overdraft_enabled=1 AND overdraft_limit>0 AND money_kind IS NOT NULL AND money_kind='bank' AND role IS NOT NULL AND role='cash_bank' AND type='asset')
         )",

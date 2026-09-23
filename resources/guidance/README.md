@@ -86,3 +86,5 @@ added to `tools/package-files.json`, or they will not ship in the release archiv
 ## Page coverage
 
 `pages.php` maps every application view to its contextual concept; `routes.php` lists browser page routes, including installation and account-access screens. POST actions and file downloads have no independent page header. Unknown extension views receive recovery guidance until their own coverage is registered. The guidance suite checks the view and route catalogues against the source. `help.js` provides optional dismissal; native details remain readable without JavaScript.
+
+The 1.3 integration includes explicit coverage for payroll, employee links, recurring and financing schedules, year-end, installation updates, and the receipt/expense chooser and canonical editor routes. Payroll and scheduling guidance distinguishes review drafts and accounting entries from external payroll calculations or sending payments.

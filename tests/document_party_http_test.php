@@ -28,9 +28,11 @@ test('receipt and expense party workflow preserves entered values without JavaSc
         assert_same(200,$status);
         [$status]=$request('/login',['email'=>$email,'password'=>$password,'csrf'=>$field($html,'csrf')]); assert_same(303,$status);
         [, $html]=$request('/companies'); $request('/company/select',['company_id'=>$f['company_id'],'csrf'=>$field($html,'csrf')]);
-        [$status,$html]=$request('/transactions/new?kind=expense'); assert_same(200,$status);
+        [$status,,$location]=$request('/transactions/new?kind=expense'); assert_same(303,$status);
+        assert_same('/expenses/new',parse_url($location,PHP_URL_PATH));
+        [$status,$html]=$request($location); assert_same(200,$status);
         assert_true(!str_contains($html,'Foreign private party '.$suffix));
-        assert_true(str_contains($html,'Posted book balance') && str_contains($html,'Choose physical cash or bank'),'The initially selected legacy account did not show its balance and classification advisory.');
+        assert_true(str_contains($html,'Posted book balance') && str_contains($html,'Classify this account as physical cash or bank'),'The initially selected legacy account did not show its balance and classification advisory.');
         $post=['csrf'=>$field($html,'csrf'),'company_id'=>$f['company_id'],'book_id'=>$f['book_id'],'kind'=>'expense','date'=>'2026-09-14','amount'=>'18.25','money_account_id'=>$f['accounts']['1000'],'category_account_id'=>$f['accounts']['5000'],'reference'=>'KEPT-'.$suffix,'memo'=>'Keep this unfinished memo','creation_key'=>$field($html,'creation_key'),'return_filters'=>['kind'=>'expense','q'=>'kept','status'=>'draft']];
         [$status,,$location]=$request('/transactions/save',$post); assert_same(303,$status);
         [$status,$html]=$request($location); assert_same(422,$status); assert_true(str_contains($html,'Choose who the money'));
@@ -55,7 +57,9 @@ test('receipt and expense party workflow preserves entered values without JavaSc
         [$status,$html]=$request('/transactions?kind=expense&id='.$doc['id']);
         assert_same(200,$status); assert_true(str_contains($html,'Cash balance preview unavailable') && str_contains($html,'Edit draft'),'Inactive saved account hid the draft or its edit control.');
         [$status,$html]=$request('/transactions/detail?kind=expense&id='.$doc['id']); assert_same(200,$status); assert_true(str_contains($html,'Cash balance preview unavailable'));
-        [$status,$html]=$request('/transactions/edit?id='.$doc['id']); assert_same(200,$status); assert_true(str_contains($html,'Unavailable saved account'));
+        [$status,,$location]=$request('/transactions/edit?id='.$doc['id']); assert_same(303,$status);
+        assert_same('/expenses/edit',parse_url($location,PHP_URL_PATH));
+        [$status,$html]=$request($location); assert_same(200,$status); assert_true(str_contains($html,'Unavailable saved account'));
         $replacement=pl_save_account($actor,$f['company_id'],$f['book_id'],['code'=>'HTTP-BANK','name'=>'Fictional replacement bank','type'=>'asset','role'=>'cash_bank','money_kind'=>'bank','is_active'=>true,'reason'=>'Recover the sample draft','creation_key'=>'replacement-'.$suffix]);
         $post['id']=$doc['id']; $post['revision']=1; $post['money_account_id']=$replacement['id'];
         [$status,,$location]=$request('/transactions/save',$post); assert_same(303,$status);
@@ -67,7 +71,7 @@ test('receipt and expense party workflow preserves entered values without JavaSc
         assert_true(str_contains($html,'Agreed overdraft limit') && str_contains($html,'25.00') && str_contains($html,'not cleared or available funds'),'The agreed bank facility or clearance boundary was not shown.');
         [$status,$html]=$request('/transactions?kind=receipt'); assert_same(200,$status); assert_true(str_contains($html,'New receipt'));
         // A read-only member cannot create parties or reach the editor through these new paths.
-        DB::update('pl_company_members',['role'=>'viewer'],'company_id=%i AND user_id=%i',$f['company_id'],$actor);
+        DB::update('pl_company_members',['role_id'=>DB::queryFirstField("SELECT id FROM pl_roles WHERE company_id IS NULL AND slug='viewer'")],'company_id=%i AND user_id=%i',$f['company_id'],$actor);
         [$status,$html]=$request('/transactions/new?kind=expense'); assert_true($status>=400); assert_true(!str_contains($html,'New fictional payee '.$suffix));
         $post['editor_action']='create_party'; $post['party_creation_key']=bin2hex(random_bytes(16)); $post['new_party_name']='Forbidden party '.$suffix;
         $request('/transactions/save',$post);
