@@ -1,5 +1,7 @@
 # Browser installer
 
+Browser installation, CLI migrations and the copied in-app updater initialize the same approved capability catalogue and protected company-role grants. A current schema alone is insufficient: the first account must be able to confirm onboarding and read its new business. Installation tests exercise that HTTP continuation; updater tests verify newly introduced Owner grants before any application migration replay.
+
 Status: published in **1.0.0** (18 September 2026) as part of the consolidated 0.6.1/0.7/0.8 stable release; general shared-host qualification and unfamiliar-operator acceptance remain open post-release commitments. The [stable release checklist](ROADMAP.md#current-delivery-contract-first-stable-10) now controls sequencing. The original WordPress-style request remains: hosting-panel preparation, then browser setup without Composer, Node or shell. Existing CLI installation remains available. The installer-created customer website remains parked. Independent review and unfamiliar-operator/host acceptance remain separate gates.
 
 ## WordPress-style installation (1.1.0, published 19 September 2026)

@@ -6,7 +6,8 @@ function pl_module_registry(): array
 {
     $registry = [];
     foreach (['core', 'ar', 'ap', 'inventory', 'inventory-locations', 'purchasing', 'pos-showcase', 'trading-documents', 'fixed-assets'] as $id) {
-        $path = PL_ROOT . '/resources/modules/' . $id . '.json';
+        // The browser installer reads metadata before the application bootstrap defines PL_ROOT.
+        $path = (defined('PL_ROOT') ? PL_ROOT : dirname(__DIR__, 4)) . '/resources/modules/' . $id . '.json';
         $source = is_file($path) ? file_get_contents($path) : false;
         if ($source === false) { throw new DomainException('A bundled module manifest is missing. Restore the reviewed package.'); }
         try { $manifest = json_decode($source, true, 32, JSON_THROW_ON_ERROR); }

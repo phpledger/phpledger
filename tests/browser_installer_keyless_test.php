@@ -46,7 +46,7 @@ function keyless_http(string $url, ?array $data, string $cookieFile): array
 
 function keyless_token(array $response): string
 {
-    if (!preg_match('/name="csrf_token" value="([a-f0-9]{64})"/', $response['body'], $match)) {
+    if (!preg_match('/name="csrf(?:_token)?" value="([a-f0-9]{64})"/', $response['body'], $match)) {
         throw new RuntimeException('Installer response did not contain a CSRF token.');
     }
     return $match[1];
@@ -179,6 +179,22 @@ function keyless_install(bool $localDatabase, bool $localAccount = false): void
             && str_contains($image['headers'], 'nosniff') && !str_contains($image['headers'], 'Set-Cookie'), 'The installation logo is not served as the same PNG.');
         $page = keyless_http($origin . '/onboarding', null, $cookie);
         keyless_assert(str_contains($page['body'], '/logo?v=') && str_contains($page['body'], 'alt="Business logo"'), 'The logo does not appear in the app.');
+        // Continue in the same real browser session: a schema alone is not a usable installation.
+        $businessToken = keyless_token($page);
+        foreach ([
+            ['stage' => 'start', 'start_mode' => 'fresh'],
+            ['stage' => 'business', 'name' => 'Sample first business', 'currency' => 'USD', 'start_date' => '2026-01-01', 'entity_type' => 'other', 'fiscal_year_end_choice' => '12-31'],
+            ['stage' => 'source', 'source' => 'blank', 'zero_balances_confirmed' => '1'],
+        ] as $answers) {
+            $next = keyless_http($origin . '/onboarding', ['action' => 'next', 'csrf' => $businessToken] + $answers, $cookie);
+            keyless_assert($next['status'] === 303, 'First-business stage did not advance: ' . $answers['stage']);
+        }
+        $review = keyless_http($origin . '/onboarding?stage=review', null, $cookie);
+        keyless_assert($review['status'] === 200 && str_contains($review['body'], 'Sample first business'), 'First business did not reach review.');
+        $confirmed = keyless_http($origin . '/onboarding?stage=review', ['action' => 'confirm', 'csrf' => keyless_token($review)], $cookie);
+        keyless_assert($confirmed['status'] === 303 && str_contains($confirmed['headers'], 'stage=ready'), 'Fresh browser installer did not grant first-owner company access.');
+        $ready = keyless_http($origin . '/onboarding?stage=ready', null, $cookie);
+        keyless_assert($ready['status'] === 200 && str_contains($ready['body'], 'Sample first business'), 'First owner cannot read the created business.');
         pl_install_connect(['host' => 'db_test', 'port' => 3306, 'database' => $fixture, 'user' => $fixture, 'password' => $password]);
         keyless_assert(pl_authenticate('keyless-owner', $ownerPassword, 'keyless-fixture')['email'] === 'keyless-owner@example.invalid', 'The owner cannot sign in with the username.');
         keyless_assert((int) DB::queryFirstField('SELECT COUNT(*) FROM pl_users') === 1, 'Setup created extra users.');

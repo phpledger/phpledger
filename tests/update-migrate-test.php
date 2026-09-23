@@ -31,12 +31,18 @@ try {
     // and a bootstrap that defers to the repository's real bootstrap for the fresh runtime probe.
     $functions = 'www/phpledger/includes/functions/';
     $tree = [];
-    foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'database_functions.php', 'update_channel_functions.php', 'install_functions.php', 'runtime_functions.php'] as $name) {
+    foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'database_functions.php', 'update_channel_functions.php', 'install_functions.php', 'runtime_functions.php', 'module_functions.php', 'capability_functions.php', 'shared_demo_functions.php'] as $name) {
         $tree[$functions . $name] = (string) file_get_contents($repository . '/' . $functions . $name);
     }
     foreach (glob($repository . '/www/phpledger/install/migrations/[0-9]*.php') ?: [] as $file) {
         $tree['www/phpledger/install/migrations/' . basename($file)] = (string) file_get_contents($file);
     }
+    foreach (glob($repository . '/resources/modules/*.json') ?: [] as $file) {
+        $tree['resources/modules/' . basename($file)] = (string) file_get_contents($file);
+    }
+    // Model newly introduced company capabilities absent from the installed release.
+    DB::query("DELETE rc FROM pl_role_capabilities rc JOIN pl_capabilities c ON c.id = rc.capability_id WHERE c.capability IN %ls", ['payroll.manage', 'schedules.manage']);
+    $check((int) DB::queryFirstField("SELECT COUNT(*) FROM pl_role_capabilities rc JOIN pl_capabilities c ON c.id=rc.capability_id WHERE c.capability IN %ls", ['payroll.manage', 'schedules.manage']) === 0, 'installed roles do not already have the new grants');
     $loader = (string) file_get_contents($repository . '/www/phpledger/public/maintenance.php');
     $tree['www/phpledger/public/maintenance.php'] = $loader;
     $tree['www/phpledger/public/index.php'] = '<?php echo "installed";';
@@ -123,6 +129,9 @@ try {
     $check($phases === ['backup', 'apply', 'migrate', 'verify', 'runtime', 'complete'], 'real migrate and health phases complete under the copied recovery runtime');
     $check(!str_contains($serverLog, 'Cannot redeclare'), 'no function is declared twice between the recovery runtime and the updated application');
     $check(pl_install_database_check()['pending'] === 0 && (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_schema_migrations WHERE version = %s AND status = 'applied'", end($versions)) === 1, 'the update applied the pending migration of the new release');
+    foreach (['company.read', 'company.write', 'payroll.manage', 'schedules.manage'] as $capability) {
+        $check((int) DB::queryFirstField("SELECT COUNT(*) FROM pl_role_capabilities rc JOIN pl_capabilities c ON c.id=rc.capability_id JOIN pl_roles r ON r.id=rc.role_id WHERE r.company_id IS NULL AND r.slug='owner' AND c.capability=%s", $capability) === 1, 'copied updater initializes Owner grant ' . $capability);
+    }
     $check(pl_update_json($private . '/updates/last.json')['phase'] === 'complete' && !is_file($private . '/updates/active.json'), 'maintenance is released after the fresh runtime probe');
     [$status, $body] = $request('/');
     $check($status === 200 && $body === 'updated', 'the updated application serves after the update');

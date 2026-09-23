@@ -324,9 +324,15 @@ function pl_migrate(?int $limit = null, ?float $seconds = null): array
         // plugin can add to it without one (capability_functions.php). Registering it is
         // idempotent, never removes a capability or a grant, and runs on every migrate so an
         // upgraded copy gains the release's new capabilities without a second command.
-        if (function_exists('pl_sync_capability_catalogue') && in_array('pl_capabilities', pl_install_tables(), true)) {
+        if (in_array('pl_capabilities', pl_install_tables(), true)) {
+            // Browser setup and the copied updater deliberately omit application bootstrap.
+            // Still initialize the same approved company-role grants as a CLI migration.
+            if (!function_exists('pl_module_registry')) { require_once __DIR__ . '/module_functions.php'; }
+            if (!function_exists('pl_sync_capability_catalogue')) { require_once __DIR__ . '/capability_functions.php'; }
             pl_sync_capability_catalogue();
-            pl_seed_installation_admin();
+            // Installation-admin seeding needs the full transaction/audit services. Normal
+            // bootstrap migrations and first-company creation retain that existing path.
+            if (function_exists('pl_ledger_transaction')) { pl_seed_installation_admin(); }
         }
         return $result;
     } finally {
