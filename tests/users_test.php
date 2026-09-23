@@ -511,8 +511,9 @@ test('migration 056 preserves explicit custom roles and backfills only missing l
         assert_same(users_role_id('owner'), (int) DB::queryFirstField('SELECT role_id FROM pl_membership_upgrade_sample WHERE user_id=1'));
         assert_same($custom['id'], (int) DB::queryFirstField('SELECT role_id FROM pl_membership_upgrade_sample WHERE user_id=2'));
         assert_throws(fn()=>DB::insert('pl_membership_upgrade_sample',['company_id'=>$f['company_id'],'user_id'=>3,'role_id'=>null]));
-        assert_same([],DB::query("SHOW COLUMNS FROM pl_membership_upgrade_sample LIKE 'role'"));
-        assert_same([],DB::query("SHOW COLUMNS FROM pl_company_members LIKE 'role'"));
+        assert_same('varchar(10)', DB::queryFirstRow("SHOW COLUMNS FROM pl_membership_upgrade_sample LIKE 'role'")['Type']);
+        assert_same(['owner', 'viewer'], DB::queryFirstColumn('SELECT role FROM pl_membership_upgrade_sample ORDER BY user_id'));
+        assert_same('varchar(10)', DB::queryFirstRow("SHOW COLUMNS FROM pl_company_members LIKE 'role'")['Type']);
     } finally { DB::query('DROP TEMPORARY TABLE pl_membership_upgrade_sample'); }
 });
 
@@ -524,6 +525,7 @@ test('role-only membership rejects foreign company roles and derives write acces
     sample_membership_insert(['company_id'=>$f['company_id'],'user_id'=>$other['actor_id'],'role_id'=>$writer['id']]);
     assert_same('accountant',pl_require_company_access($other['actor_id'],$f['company_id'],true)['role']);
     pl_save_role($f['actor_id'],$f['company_id'],['name'=>$writer['name'],'reason'=>'Revoke writing','capabilities'=>['company.read']],$writer['id'],$writer['revision']);
+    DB::update('pl_company_members', ['role'=>'owner'], 'company_id=%i AND user_id=%i', $f['company_id'], $other['actor_id']);
     assert_same('viewer',pl_require_company_access($other['actor_id'],$f['company_id'])['role']);
     assert_throws(fn()=>pl_require_company_access($other['actor_id'],$f['company_id'],true),DomainException::class);
 });

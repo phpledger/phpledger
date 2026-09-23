@@ -15,7 +15,8 @@ require_once __DIR__ . '/shared_demo_functions.php';
  * got; pl_user_can() answers a yes/no question for someone who is already through the gate, and
  * answers "no" rather than throwing for anyone who is not.
  *
- * Migration 056 removes the 1.2 ENUM mirror. role_id and its scoped grants are authoritative;
+ * Migration 056 retires the ENUM into an inert VARCHAR snapshot for old updater verification.
+ * role_id and its scoped grants are authoritative;
  * existing module/screen role labels are computed by pl_role_access_label(), never persisted.
  *
  * INSTALLATION SCOPE
