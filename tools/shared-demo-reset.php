@@ -33,12 +33,20 @@ try {
     if (realpath($base) !== $base || is_link($base)) {
         throw new RuntimeException('Dedicated demo volume unavailable.');
     }
+    // The web identity must not be able to rename the protected host directory.
+    if (!chown($base, 0) || !chgrp($base, 0) || !chmod($base, 0755)) {
+        throw new RuntimeException('Dedicated demo volume ownership unavailable.');
+    }
     $host = $base . '/host';
     if (!is_dir($host) && !mkdir($host, 0755)) {
         throw new RuntimeException('Maintenance storage unavailable.');
     }
     if (realpath($host) !== $host || is_link($host)) {
         throw new RuntimeException('Maintenance storage is not a dedicated directory.');
+    }
+    if (!chown($host, 0) || !chgrp($host, 0) || !chmod($host, 0755)
+        || is_link($host . '/reset.lock') || is_link($host . '/generation.json')) {
+        throw new RuntimeException('Maintenance storage ownership unavailable.');
     }
     $lock = fopen($host . '/reset.lock', 'c+');
     if ($lock === false) {

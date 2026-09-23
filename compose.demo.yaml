@@ -14,11 +14,8 @@ services:
     depends_on:
       - demo-web
   demo-web:
-    image: phpledger-demo-app:${PL_DEMO_RELEASE:-local}
-    build:
-      context: .
-      args:
-        PHP_VERSION: ${PL_PHP_VERSION:-8.3.33}
+    image: ${PL_DEMO_IMAGE:?Set the verified release image and digest}
+    entrypoint: ["apache2-foreground"]
     restart: unless-stopped
     environment:
       PL_ENV: demo-install
@@ -34,9 +31,12 @@ services:
       PL_OAUTH_KEY_DIRECTORY: /var/lib/phpledger/runtime/oauth
       PL_INSTALL_DIRECTORY: /var/lib/phpledger/runtime/installation
       PL_INSTALL_CONFIG_PATH: /var/lib/phpledger/runtime/config.local.php
+      PL_SAMPLE_PACKAGE_DIRECTORY: /opt/phpledger-demo/samples
+      PL_SAMPLE_PACKAGES_READONLY: "1"
+      PL_UPDATE_PUBLIC_KEY: /opt/phpledger-demo/publisher.pem
     volumes:
-      - ./www/phpledger:/var/www/phpledger/www/phpledger:ro
-      - ./resources:/var/www/phpledger/resources:ro
+      - ${PL_DEMO_SAMPLE_DIRECTORY:?Set the signed sample preload directory}:/opt/phpledger-demo/samples:ro
+      - ./resources/release/publisher-public.pem:/opt/phpledger-demo/publisher.pem:ro
       - ./docker/demo-apache.conf:/etc/apache2/sites-available/000-default.conf:ro
       - ./docker/shared-demo-guard.php:/opt/phpledger-demo/request-guard.php:ro
       - ./docker/shared-demo.ini:/usr/local/etc/php/conf.d/shared-demo.ini:ro
@@ -62,11 +62,8 @@ services:
       timeout: 5s
       retries: 40
   demo-reset:
-    image: phpledger-demo-app:${PL_DEMO_RELEASE:-local}
-    build:
-      context: .
-      args:
-        PHP_VERSION: ${PL_PHP_VERSION:-8.3.33}
+    image: ${PL_DEMO_IMAGE:?Set the verified release image and digest}
+    user: "0:0"
     profiles: ["maintenance"]
     environment:
       PL_ENV: demo-install
@@ -76,9 +73,8 @@ services:
       PL_DB_PASSWORD: ${PL_DEMO_RESET_PASSWORD:?Set a dedicated scheduler password}
       PL_DEMO_RESET_MODE: "1"
     volumes:
-      - ./www/phpledger:/var/www/phpledger/www/phpledger:ro
-      - ./resources:/var/www/phpledger/resources:ro
-      - ./tools:/var/www/phpledger/tools:ro
+      - ./tools/shared-demo-reset.php:/var/www/phpledger/tools/shared-demo-reset.php:ro
+      - ./tools/shared-demo-scheduler.sh:/var/www/phpledger/tools/shared-demo-scheduler.sh:ro
       - shared_demo_private:/var/lib/phpledger
     depends_on:
       demo-db:
