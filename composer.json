@@ -18,7 +18,7 @@
     "sergeytsalkov/meekrodb": "3.1.5"
   },
   "require-dev": { "phpstan/phpstan": "2.2.14" },
-  "config": { "sort-packages": true, "allow-plugins": false, "platform": { "php": "8.2.0" } },
+  "config": { "sort-packages": true, "allow-plugins": false, "platform": { "php": "8.2.0" }, "process-timeout": 900 },
   "scripts": {
     "lint": "php tools/lint.php",
     "analyse": "phpstan analyse --no-progress --memory-limit=512M",

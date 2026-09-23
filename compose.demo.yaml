@@ -8,7 +8,7 @@ services:
     volumes:
       - ./docker/shared-demo-proxy.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
-      default:
+      shared:
         ipv4_address: ${PL_DEMO_INTERNAL_PROXY_IP:-10.204.83.10}
       edge: {}
     depends_on:
@@ -17,6 +17,7 @@ services:
     image: ${PL_DEMO_IMAGE:?Set the verified release image and digest}
     entrypoint: ["apache2-foreground"]
     restart: unless-stopped
+    networks: [shared]
     environment:
       PL_ENV: demo-install
       PL_BASE_PATH: /demo
@@ -47,6 +48,7 @@ services:
     init: true
   demo-db:
     image: mysql:8.4
+    networks: [shared]
     restart: unless-stopped
     command: ["--log-bin-trust-function-creators=1"]
     environment:
@@ -67,6 +69,7 @@ services:
     healthcheck:
       disable: true
     profiles: ["maintenance"]
+    networks: [shared]
     environment:
       PL_ENV: demo-install
       PL_DB_HOST: demo-db
@@ -93,8 +96,8 @@ volumes:
   shared_demo_private:
 networks:
   edge: {}
-  default:
-    name: ${COMPOSE_PROJECT_NAME:-phpledger-demo}_shared
+  shared:
+    name: ${COMPOSE_PROJECT_NAME:-phpledger-demo}_shared_install
     internal: true
     ipam:
       config:
