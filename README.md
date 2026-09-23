@@ -46,7 +46,7 @@ This branch is preparing **1.3.0**. The [published releases](https://github.com/
 
 | Your task | How PHP Ledger helps |
 |---|---|
-| Keep the books | Record receipts, expenses and general journals; review drafts before posting. |
+| Keep the books | Use separate receipt and expense entry screens, or general journals; review drafts before posting. |
 | Track customers and suppliers | Create invoices and bills, record partial payments and credits, and review outstanding balances and ageing. |
 | Understand the numbers | Explore account statements, trial balance, profit and loss and balance sheet, with links back to journals and source records. |
 | Manage day-to-day operations | Use optional Purchasing, Inventory, Stock locations and a simple cash point of sale. Each module has its own documented scope. |
