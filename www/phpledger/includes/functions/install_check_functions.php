@@ -302,6 +302,13 @@ function pl_install_step_label(string $version): string
         '045_chart_headings' => 'Naming the chart of accounts classes and groups',
         '049_secret_store' => 'Adding the encrypted secret store for package credentials',
         '046_fixed_assets' => 'Adding the fixed-asset register',
+        '047_period_close' => 'Adding period review and cash counts',
+        '050_scheduler_jobs' => 'Preparing scheduled review drafts',
+        '051_recurring_schedules' => 'Adding recurring documents and release plans',
+        '052_loan_schedules' => 'Adding loan schedules and interest review',
+        '054_year_end' => 'Preparing reviewed fiscal-year closing',
+        '055_employee_links' => 'Linking employees to operational records',
+        '056_membership_role_id' => 'Completing role-based company access',
         '053_payroll_accounting' => 'Adding aggregate payroll accounting',
         '048_employee_master' => 'Adding the employee register',
     ];
