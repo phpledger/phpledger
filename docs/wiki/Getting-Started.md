@@ -8,7 +8,7 @@ Automated test suites, fault-injection update/recovery tests, exact-artifact ins
 
 Start at [the PHP Ledger website](https://phpledger.com/) or [open the demonstration](https://phpledger.com/demo/).
 
-**[Download the current published package](https://github.com/phpledger/phpledger/releases/latest).** Choose the application ZIP and its SHA-256 file; GitHub source archives do not include production dependencies. Follow the INSTALL and UPGRADE instructions for that exact version. This documentation prepares the 1.3 workflow; the published release receipt identifies completed gates.
+**[Download the current published package](https://github.com/phpledger/phpledger/releases/latest).** Choose the application ZIP and its SHA-256 file; GitHub source archives do not include production dependencies. Follow the INSTALL and UPGRADE instructions for that exact version. These instructions describe the 1.3 workflow; the published release receipt identifies completed gates.
 
 Modern source is in `www/phpledger`; historical code remains only in Git history. Developers can use the [development guide](https://github.com/phpledger/phpledger/blob/master/docs/DEVELOPMENT.md). New project-owned code and documentation are [AGPL-3.0-or-later licensed](https://github.com/phpledger/phpledger/blob/master/LICENSE); [licence scope](https://github.com/phpledger/phpledger/blob/master/LICENSE-SCOPE.md) preserves separate historical, dependency and asset terms.
 
@@ -69,6 +69,6 @@ Reviewed opening trial-balance/CSV cutover, period administration, bank CSV reco
 
 ## Connected reporting and richer samples
 
-This combined preview retains company/book permissions, chart management, receipt/expense/general-journal drafts, balanced posting, linked reversals, opening cutover with a reconciled unpaid-document register, period controls, bank CSV reconciliation, reports, running account balances and CSV exports.
+The application retains company/book permissions, chart management, receipt/expense/general-journal drafts, balanced posting, linked reversals, opening cutover with a reconciled unpaid-document register, period controls, bank CSV reconciliation, reports, running account balances and CSV exports.
 
 Scoped API/MCP reads and existing-user OAuth/Connections join four fictional businesses: service agency, retail shop, seasonal business and distributor. Each includes 74 sources, 2024–2025 history, an open 2026 practice period and three editable drafts. Follow [[Reporting walkthroughs|Reporting-Guides]] and [[Read integrations|Integrations]].

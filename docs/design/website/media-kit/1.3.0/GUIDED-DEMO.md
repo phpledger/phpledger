@@ -16,7 +16,7 @@ On your own installation, open Packages to review available samples. Directory r
 
 ## 3. Post a small fictional transaction
 
-Choose the intended company and currency. Create a receipt or expense with fictional amounts, inspect the accounts and balanced preview, then post. Open the resulting journal and account statement. Find the same amount in the trial balance. Do not assume an old screenshot's numbers will match your shared demo session.
+Choose the intended company and currency. From Home, choose Receipt for money received or Expense for money paid. Each opens its own form with matching payer/payee and category labels. Enter fictional amounts, inspect the accounts and balanced preview, then post. Open the resulting journal and account statement. Find the same amount in the trial balance. Do not assume an old screenshot's numbers will match your shared demo session.
 
 Try a correction and inspect its linked reversal. Posted history remains traceable. If another visitor changes a shared record, reload and review the current state before proceeding.
 
