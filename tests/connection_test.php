@@ -118,9 +118,10 @@ test('every advertised business operation returns an authorized source or report
     $scope = ['company_id' => $f['company_id'], 'book_id' => $f['book_id']];
     $draft = pl_save_general_draft($f['actor_id'], $f['company_id'], $f['book_id'], ['date' => '2026-09-14', 'reference' => 'CATALOG-SOURCE', 'description' => 'Sample catalog coverage', 'creation_key' => bin2hex(random_bytes(16)), 'lines' => [['account_id' => $f['accounts']['1000'], 'debit' => '12.3400', 'credit' => '0'], ['account_id' => $f['accounts']['4000'], 'debit' => '0', 'credit' => '12.3400']]]);
     $posted = pl_post_general_draft($f['actor_id'], $f['company_id'], $f['book_id'], $draft['id'], $draft['revision']);
+    $year=pl_year_end_create($f['actor_id'],$f['company_id'],$f['book_id'],'2026-12-31',['treatment'=>'company','legal_basis'=>'Fictional company','review_note'=>'API fixture','destination_account_id'=>$f['accounts']['3000']],'catalog-year');
     foreach (pl_read_catalog() as $operation => $definition) {
         $args = $operation === 'companies' ? [] : $scope;
-        foreach (['as_of' => '2026-09-15', 'from' => '2026-01-01', 'to' => '2026-09-15', 'account_id' => $f['accounts']['1000'], 'journal_id' => $posted['journal_id'], 'source_id' => $posted['id'], 'source_type' => 'general_journal'] as $name => $value) {
+        foreach (['as_of' => '2026-09-15', 'from' => '2026-01-01', 'to' => '2026-09-15', 'account_id' => $f['accounts']['1000'], 'journal_id' => $posted['journal_id'], 'source_id' => $posted['id'], 'source_type' => 'general_journal', 'year_id'=>$year['year_id']] as $name => $value) {
             if (in_array($name, $definition['schema']['required'], true)) { $args[$name] = $value; }
         }
         $response = pl_integration_response('/api/v1/' . str_replace('_', '-', $operation), connection_request('/api/v1/' . str_replace('_', '-', $operation), 'GET', $f['token'], $args));

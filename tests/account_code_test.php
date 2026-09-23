@@ -94,7 +94,7 @@ test('a new book is born numbered and keeps each account reachable by its 1.0.0 
     assert_same($mapping['1-100-10001-00'], $mapping['1000']);
     // Thirteen posting accounts, nineteen class and group headings, and the six numbers the 1.0.0
     // chart used, which still resolve.
-    assert_same(14 + 19 + 6, count($mapping));
+    assert_same(21 + 19 + 6, count($mapping));
     foreach ($accounts as $row) {
         assert_same(true, pl_account_code_is_valid((string) $row['code']));
     }
@@ -158,6 +158,7 @@ test('the conversion migration renumbers a populated chart without touching iden
     // Migration 047's provision cannot exist before migration 036 in a real upgrade.
     // Remove that later-only row before reconstructing the historical chart.
     DB::delete('pl_accounts', 'company_id = %i AND semantic_key = %s', $company, 'core.expense.cash_over_short');
+    DB::query("DELETE FROM pl_accounts WHERE company_id=%i AND semantic_key LIKE 'core.payroll.%'",$company);
     // Put the book back the way a 1.1.x installation actually looks: the six chart accounts that
     // existed before 1.2 carry their old numbers and nothing has been converted yet.
     DB::query('UPDATE pl_accounts SET code = legacy_code, legacy_code = NULL WHERE company_id = %i AND legacy_code IS NOT NULL', $company);

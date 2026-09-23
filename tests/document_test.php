@@ -23,8 +23,8 @@ test('setup pins one chart and rejects stale previews and changed requests', fun
     assert_same('core-starter', $company['template']['id']);
     assert_same(pl_starter_template()['digest'], $company['template']['digest']);
     // Thirteen starter purposes, one postable over/short provision and nineteen headings.
-    assert_same(14 + 19, count($company['accounts']));
-    assert_same(14, count(array_filter($company['accounts'], static fn (array $row): bool => $row['is_postable'])));
+    assert_same(21 + 19, count($company['accounts']));
+    assert_same(21, count(array_filter($company['accounts'], static fn (array $row): bool => $row['is_postable'])));
     assert_same($company['id'], pl_setup_company($f['actor_id'], $input, $key)['id']);
     $changed = $input;
     $changed['name'] .= ' changed';
