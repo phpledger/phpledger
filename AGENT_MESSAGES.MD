@@ -1926,3 +1926,8 @@ Issue104 outcome: dedicated Expense/Receipt new/edit/save screens with server-fi
 Refresh only YunoHost and Softaculous final-artifact references after issue104 rebuild from9a4d2872545e232d5c94933e701e5c5ae8cd1de1. Archive remains immutable; no app, website, Umbrel, Cloudron or publication changes.
 
 Rc4 metadata outcome: ZIP/checksum and internal manifest verified: version1.3.0/source9a4d2872545e232d5c94933e701e5c5ae8cd1de1, SHA256 f2103a58bf3202f8e82bd974114b713b086b0e68825c5111442110bc87b97e12. Archive CRC passes; 1649 files/9008573 uncompressed bytes; 25 percent headroom rounded up remains11534336 bytes (11MiB). TOML/XML parsing and exact URL/hash/size/documentation assertions pass. No application artifact mutation, schema/migration, secret exposure, provider/live call or publication; provider acceptance remains unverified.
+
+## 2026-09-23 — Final website AEO wording scope
+Local isolated lane fixes the two audit failures: missing product name in roadmap body and generated directory body source. No app, release metadata or generated output changes; coordinator rebuilds before independent local responsive checks.
+
+AEO wording outcome: both FAIL lines resolved with two factual product-name mentions. Local site build, AEO audit and generator JavaScript syntax pass; diff check clean. Generated output remains coordinator-owned and excluded from this commit. No schema/migration, secret exposure, external request or live change. Responsive local browser check follows coordinator rebuild.
