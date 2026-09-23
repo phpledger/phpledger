@@ -421,7 +421,7 @@ function pl_plugin_bootstrap_initial_owner(int $actorId): void
         require_once __DIR__ . '/installation_state_functions.php';
         require_once __DIR__ . '/install_web_functions.php';
         $receipt=pl_install_read_state('installed.json');
-        $databaseId=pl_install_database_identity(['host'=>DB::$host,'port'=>DB::$port,'database'=>DB::$dbName]);
+        $databaseId=pl_install_database_identity(['host'=>DB::$host,'port'=>DB::$port,'database'=>DB::$dbName,'db_prefix'=>pl_database_prefix()]);
         if ($actorId > 0 && ($receipt['format'] ?? null) === 1 && is_string($receipt['database_id'] ?? null) && hash_equals($databaseId,$receipt['database_id']) && is_int($receipt['initial_owner_id'] ?? null) && $receipt['initial_owner_id'] === $actorId) {
             pl_set_installation_grant($actorId,$actorId,'installation.admin',true,'Initial installed owner package access before first business',true);
         }

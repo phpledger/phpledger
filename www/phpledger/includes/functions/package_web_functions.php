@@ -137,7 +137,7 @@ function pl_web_packages_post(int $actorId, array $company): void
             pl_redirect($return);
         }
         if ($action === 'discard') {
-            pl_plugin_require_admin($actorId);
+            pl_plugin_require_mutation($actorId);
             if (pl_plugin_record($slug) !== null) {
                 throw new DomainException(pl_t('This package is installed. Remove it from its card instead.'));
             }
