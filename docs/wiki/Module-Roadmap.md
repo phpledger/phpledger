@@ -1,26 +1,30 @@
-## Current package: 1.1.3
-
-**1.1.3**, published 20 September 2026, is the current package; see the [[1.1.3 release notes|Release-1.1.3]]. **1.1.0**, published 19 September 2026, installs like WordPress: upload the `phpledger` folder into any web folder and open its address, and the installer starts by itself. It adds MariaDB 10.4+, a chosen username, an optional logo, and the first signed update metadata. [Download 1.1.0](https://github.com/phpledger/phpledger/releases/tag/v1.1.0) and its [matching media kit](https://github.com/phpledger/phpledger/releases/download/v1.1.0/phpledger-1.1.0-media-kit.zip). [[Release notes|Release-1.1.0]]. **1.0.0**, published 18 September 2026, was the first stable release. Independent accounting review, independent security review, supervised pilots with a real month-end close and unfamiliar-operator installation observation have **not** happened; they continue as post-release commitments.
-
 # Core accounting and optional modules
 
-1.1.0 (like 1.0.0 before it) combines the required accounting core (chart of accounts, journals, AR/AP with manually configured tax) with optional bundled Purchasing and Inventory, a scoped read API/MCP with OAuth/Connections, browser installation and signed automatic updates. Only individually tested API/MCP clients enter the verified compatibility matrix; other clients remain pending.
+Use the [published release](https://github.com/phpledger/phpledger/releases/latest) and its verification receipt for the version available now. This page describes the 1.3 release line; earlier [[1.1.3 notes|Release-1.1.3]], [[1.1.0 notes|Release-1.1.0]] and [[first stable package|First-Package]] remain historical records.
 
-The core is country-neutral and useful with optional modules disabled. Regional connectors, product workflows and client interfaces reuse the same identities, company/book permissions, fixed-precision money and posting service.
+PHP Ledger combines the required chart, journals, AR/AP and manually configured tax with optional purchasing, inventory, stock locations and a stock-connected counter till. Permissions, exact money, company/book scope and the posting service are shared across workflows. API/MCP financial access remains read-only; only tested clients belong in the published compatibility matrix.
 
-## Delivery order after 1.1.0
+## Implemented workflows in the 1.3 line
 
-1. **1.1.1:** corrected demo labels, the owner's demo and installer feedback, and the first packaging step: demo packs leave the release ZIP and the core reads sample packages from a package directory.
-2. **1.2 — stock locations, trading documents and plugins**, in this order: a bundled Stock locations module (warehouses and vans, transfers at carrying value, per-location moving weighted-average cost; work started 19 September 2026); a bundled trading-document module (product packs with pack-and-unit entry, line discounts and free-goods lines, per-type document number series, sales-staff and area dimensions, cash received on the invoice, printable invoice, receipt and statement templates); on-account receipts with oldest-first allocation, unapplied credit and batch receipts in core AR; the plugin runtime (hooks, manifest, loader, activation, plugin migrations with their own receipt table) with the phpledger.com package directory and in-app installer, a verified marketplace and owner uploads behind warnings; the Users module capability catalogue and per-company roles; reviewed Urdu/RTL; and the container image on the release feed.
-3. **1.3:** reviewed Arabic/RTL; table prefix and MeekroORM models with portable SQL; the installation notice; cloud-hosted databases; Packagist, app catalogues and Softaculous/Installatron; demand-led reporting refinements. PostgreSQL follows 1.3; SQLite ships with the Windows bundle.
-4. Regional tax/e-invoicing connector framework. Pakistan FBR is one planned connector alongside ZATCA, UAE Peppol PINT and Oman; enable applicable reviewed rules before affected production use.
-5. Further stock and costing (batches, serials, expiry, landed cost); multiple locations and transfers ship in 1.2.
-6. A stock/tax-integrated shop POS, then e-commerce/storefront. The bundled cash POS remains an illustrative demonstration, not a production retail module.
-7. Controlled API/MCP write commands with explicit authority and durable retry receipts. 1.1.0 exposes read-only API/MCP access.
-8. Restaurant POS, pharmacy POS, exporter, freelancer invoicing, distribution operations and other specialists as **directory plugins**, each with a paired sample company package, never inside the core package (owner decision of 19 September 2026, [package directory](https://github.com/phpledger/phpledger/blob/master/docs/strategy/PLATFORM-ROADMAP.md#package-directory-plugins-and-sample-companies)).
+- Trading documents, pack/unit entry, discounts and free-goods lines, document numbering, advances, unapplied amounts and reviewed allocation workflows.
+- Plugin lifecycle, hooks, scoped capabilities and a private encrypted plugin secret store. These are foundations, not proof that a provider connector has shipped.
+- A confidential employee register with explicit sales-staff/driver links and preserved historical labels. Employment, ordinary trade association and related-party designation are separate choices.
+- Aggregate payroll accruals, advances and partial settlement through reviewed journal drafts. No per-person pay-run, payslip or statutory payroll service.
+- Recurring, accrual and loan schedules that prepare drafts. Loan conventions are disclosed and require review against the actual contract.
+- Period-close checklists, cash counts, dated reversals and fiscal-year close/roll-forward/reopen with explicit legal treatment, destination accounts and any reviewed partner ratios.
+- Browser installation, publisher-verified releases, installation-specific table prefixes, database TLS and MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+. Arabic is a draft RTL translation pending native language and accounting review.
+- Optional technical installation notices with user control; named registration is a separate opt-in. Existing installations remain silent until an administrator chooses.
+- Separate validated CC0 sample packages. The neutral starter remains in core. Directory refresh/install is explicit; dependencies are never silently installed. The shared demo uses verified read-only preloads.
+- Official GHCR and Docker Hub image channels built from the same verified application ZIP, with final tags/digests and shared-installer demo checks recorded during publication.
 
-Owner/partner equity reporting and phone-friendly entry remain planned cross-cutting work. Native desktop/Android clients remain planned paid add-ons over the API/MCP contracts. Offline means queued drafts; only the server posts, controls periods and reverses.
+The public demo is one shared disposable installation, not private books for each visitor. Its fixed public login is **demo / DemoLedger123!**. Database fields show labelled dummy values; real host settings are protected. The hourly reset removes fictional records and PHP sessions.
 
-The installer-created customer website is parked. Khata is a reserved, optional unposted-subledger concept; formalisation uses normal accounting services. No module may hide posted entries or create a second ledger. [[Licensing]] requires advance declaration of future commercial modules; none is declared by 1.0.0.
+## Future work and independent acceptance
 
-See the [detailed module roadmap](https://github.com/phpledger/phpledger/blob/master/docs/MODULE-ROADMAP.md), [installer plan](https://github.com/phpledger/phpledger/blob/master/docs/INSTALLER.md) and [[Roadmap]]. Accounting review, access isolation, exact reconciliation, installation/recovery and observed use remain acceptance gates for each future module.
+Regional tax/e-invoicing connectors, statutory payroll, advanced batches/serials/expiry, full manufacturing, e-commerce, controlled financial API/MCP writes, native/offline clients and specialist industry plugins need their own implementation and acceptance evidence. A sample labelled pharmacy, restaurant or manufacturing is teaching data, not a complete industry product or certification.
+
+PostgreSQL, SQLite/Windows packaging and additional managed-provider/catalogue acceptance remain separate work; do not treat table-prefix/TLS support as acceptance of every provider. No future ordering here is a delivery-date promise.
+
+Independent accounting and security review, supervised real-business pilots, a real month-end close, native Arabic review, unfamiliar-operator installation observation and restricted-host recovery qualification remain explicit gates. Published automated or developer-operated tests do not replace them.
+
+The installer-created customer website remains parked. Khata remains an optional unposted-subledger concept. No module may hide posted entries or create a second ledger. See [[Licensing]], the [detailed module roadmap](https://github.com/phpledger/phpledger/blob/master/docs/MODULE-ROADMAP.md), [installer guide](https://github.com/phpledger/phpledger/blob/master/docs/INSTALLER.md) and [[Roadmap]].

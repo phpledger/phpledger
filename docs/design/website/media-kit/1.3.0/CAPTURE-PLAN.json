@@ -1,0 +1,86 @@
+{
+  "version": "1.3.0",
+  "status": "capture plan only; no final screenshots supplied",
+  "source_archive_sha256": null,
+  "suggested_screenshots": [
+    {
+      "id": "installer-database",
+      "route": "/install",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "purpose": "Shared demo shows labelled dummy fields, no real database credentials."
+    },
+    {
+      "id": "shared-login",
+      "route": "/login",
+      "viewport": [
+        390,
+        844
+      ],
+      "purpose": "Fixed public demo sign-in and readable phone layout."
+    },
+    {
+      "id": "onboarding",
+      "route": "/onboarding",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "purpose": "Neutral starter and verified installed package choice."
+    },
+    {
+      "id": "payroll",
+      "route": "/payroll",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "purpose": "Reviewed aggregate payroll and partial-settlement state using fictional totals."
+    },
+    {
+      "id": "loans",
+      "route": "/loans",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "purpose": "Displayed loan convention and draft review state."
+    },
+    {
+      "id": "year-end",
+      "route": "/year-end",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "purpose": "Explicit fiscal-year preview/policy; verify actual route before capture."
+    },
+    {
+      "id": "packages",
+      "route": "/packages",
+      "viewport": [
+        768,
+        1024
+      ],
+      "purpose": "Verified read-only sample preloads or normal package administration, context labelled."
+    },
+    {
+      "id": "arabic",
+      "route": "/home",
+      "viewport": [
+        390,
+        844
+      ],
+      "purpose": "Draft Arabic RTL with fictional data; no native-review claim."
+    }
+  ],
+  "operator_requirements": [
+    "Capture from the exact final application ZIP; retain its SHA-256.",
+    "Visually inspect every image for personal data, private credentials, readable layout and truthful captions.",
+    "Copy original PNG bytes only; no generated interface content.",
+    "Record image SHA-256, actual route, dimensions, caption, alt text and capture context in the evidence file.",
+    "Source filenames, viewport suggestions and routes are plans, not observed evidence."
+  ]
+}
