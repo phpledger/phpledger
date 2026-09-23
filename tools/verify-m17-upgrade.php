@@ -9,10 +9,10 @@ if (PHP_SAPI !== 'cli' || getenv('PL_ENV') !== 'test' || getenv('PL_DB_HOST') !=
     exit(2);
 }
 $mode = $argv[1] ?? '';
-if (!in_array($mode, ['seed', 'check'], true)) {
+if (!in_array($mode, ['seed', 'check', 'verify', 'verify-candidate'], true)) {
     throw new DomainException('Choose seed or check; seed also takes the archived v1.2.1 source directory.');
 }
-$source = $mode === 'seed' ? realpath($argv[2] ?? '') : dirname(__DIR__);
+$source = isset($argv[2]) ? realpath($argv[2]) : dirname(__DIR__);
 if (!$source || !is_file($source . '/www/phpledger/includes/bootstrap.php')) {
     throw new DomainException('The source directory must contain the application.');
 }
@@ -24,7 +24,7 @@ require $source . '/www/phpledger/install/migrate.php';
 if (DB::$host !== 'db_test' || DB::$dbName !== 'phpledger_test' || DB::$user !== 'root') {
     throw new RuntimeException('Effective configuration is not the disposable test service.');
 }
-$receiptPath = '/tmp/phpledger-m17-upgrade.json';
+$receiptPath = getenv('PL_UPGRADE_RECEIPT') ?: '/tmp/phpledger-m17-upgrade.json';
 
 function m17_upgrade_require(bool $ok, string $message): void
 {
@@ -54,8 +54,9 @@ if ($mode === 'seed') {
         // Use the actual release fixture builders and services, never current helpers
         // against an old schema. Merely loading test files does not run their tests.
         function test(string $name, callable $action): void {}
-        require $source . '/tests/ledger_test.php';
-        require $source . '/tests/ar_ap_test.php';
+        $fixtures = getenv('PL_BASELINE_FIXTURES') ?: $source;
+        require $fixtures . '/tests/ledger_test.php';
+        require $fixtures . '/tests/ar_ap_test.php';
         $fixture = m17_upgrade_fixture('ar_ap_fixture');
         $args = [$fixture['actor_id'], $fixture['company_id'], $fixture['book_id']];
         pl_post_journal(...array_merge($args, [m17_upgrade_fixture('ledger_payload', $fixture, '125.0000', 'm17-baseline-cash')]));
@@ -72,6 +73,7 @@ if ($mode === 'seed') {
         $trial = pl_trial_balance(...$args);
         m17_upgrade_require($trial['balanced'], 'Baseline must balance before the upgrade.');
         $receipt = ['database' => $database, 'fixture' => $fixture, 'rows' => $snapshot,
+            'memberships' => DB::query('SELECT company_id,user_id,role,role_id FROM pl_company_members ORDER BY company_id,user_id'),
             'receipts' => DB::query('SELECT * FROM pl_schema_migrations ORDER BY version'),
             'total_debit' => $trial['total_debit'], 'total_credit' => $trial['total_credit']];
         $oldMask = umask(0077);
@@ -93,9 +95,14 @@ $database = (string) ($receipt['database'] ?? '');
 m17_upgrade_require((bool) preg_match('/^phpledger_m17_verify_[a-f0-9]{24}$/D', $database), 'Invalid disposable schema receipt.');
 DB::useDB($database);
 try {
-    $migration = pl_migrate();
-    foreach (['047_period_close', '048_employee_master', '049_secret_store'] as $version) {
-        m17_upgrade_require(in_array($version, $migration['applied'], true), 'Expected new migration not applied: ' . $version);
+    $migration = in_array($mode, ['verify', 'verify-candidate'], true) ? ['applied'=>[]] : pl_migrate();
+    foreach ($mode === 'verify' ? [] : ['047_period_close', '048_employee_master', '049_secret_store', '050_scheduler_jobs', '051_recurring_schedules', '052_loan_schedules', '053_payroll_accounting', '054_year_end', '055_employee_links', '056_membership_role_id'] as $version) {
+        m17_upgrade_require($mode === 'verify-candidate' ? DB::queryFirstField('SELECT status FROM pl_schema_migrations WHERE version=%s',$version)==='applied' : in_array($version, $migration['applied'], true), 'Expected new migration not applied: ' . $version);
+    }
+    if ($mode !== 'verify') {
+        foreach (['company.read', 'company.write', 'payroll.view', 'payroll.manage', 'schedules.view', 'schedules.manage', 'loans.view', 'loans.manage'] as $capability) {
+            m17_upgrade_require((int) DB::queryFirstField("SELECT COUNT(*) FROM pl_role_capabilities rc JOIN pl_capabilities c ON c.id=rc.capability_id JOIN pl_roles r ON r.id=rc.role_id WHERE r.company_id IS NULL AND r.slug='owner' AND c.capability=%s", $capability) === 1, 'Owner capability was not initialized by the upgrade: ' . $capability);
+        }
     }
     foreach ($receipt['rows'] as $table => $rows) {
         $fields = array_keys($rows[0]);
@@ -103,16 +110,20 @@ try {
         $after = DB::query('SELECT ' . $select . ' FROM %b WHERE id IN %li ORDER BY id', $table, array_column($rows, 'id'));
         m17_upgrade_require($after === $rows, 'Historical rows changed during upgrade: ' . $table);
     }
+    m17_upgrade_require(DB::query('SELECT company_id,user_id,role,role_id FROM pl_company_members ORDER BY company_id,user_id') === $receipt['memberships'], 'Original membership IDs and compatibility labels changed.');
     $oldReceipts = DB::query('SELECT * FROM pl_schema_migrations WHERE version IN %ls ORDER BY version', array_column($receipt['receipts'], 'version'));
     m17_upgrade_require($oldReceipts === $receipt['receipts'], 'Published migration receipts changed.');
     $f = $receipt['fixture'];
     $trial = pl_trial_balance($f['actor_id'], $f['company_id'], $f['book_id']);
     m17_upgrade_require($trial['balanced'] && $trial['total_debit'] === $receipt['total_debit']
         && $trial['total_credit'] === $receipt['total_credit'], 'Historical trial balance changed.');
-    m17_upgrade_require(pl_migrate()['applied'] === [], 'Migration replay was not a no-op.');
+    if ($mode === 'verify') { m17_upgrade_require(DB::query('SELECT * FROM pl_schema_migrations ORDER BY version') === $receipt['receipts'], 'Restoration did not recover the exact original migration receipts.'); }
+    else { m17_upgrade_require(pl_migrate()['applied'] === [], 'Migration replay was not a no-op.'); }
     echo 'Upgrade passed: ' . count($migration['applied']) . " migrations from v1.2.1, historical accounts/periods/posted journals/partially paid invoice unchanged, old receipts preserved, balanced totals and no-op replay.\n";
 } finally {
-    DB::useDB('phpledger_test');
-    DB::query('DROP DATABASE %b', $database);
-    unlink($receiptPath);
+    if (getenv('PL_UPGRADE_KEEP') !== '1') {
+        DB::useDB('phpledger_test');
+        DB::query('DROP DATABASE %b', $database);
+        unlink($receiptPath);
+    }
 }
