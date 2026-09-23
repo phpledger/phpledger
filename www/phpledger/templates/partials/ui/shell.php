@@ -66,6 +66,7 @@ $navGroups = [
         // (B44, onboarding decision 10), so the item is shown and the controls are what the
         // capability gates on the screen itself.
         ['/packages', pl_t('Packages'), 'adjustments-horizontal', ['packages'], !pl_demo_enabled()],
+        ['/updates', pl_t('Updates and privacy'), 'adjustments-horizontal', ['updates'], pl_user_can((int)$user['id'],0,'installation.admin')],
         ['/connections', pl_t('Connections & API'), 'external-link', ['connections'], true],
     ],
 ];

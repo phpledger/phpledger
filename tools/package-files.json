@@ -1809,6 +1809,18 @@
     {
       "source": "www/phpledger/install/migrations/052_loan_schedules.php",
       "destination": "www/phpledger/install/migrations/052_loan_schedules.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/installation_notice_functions.php",
+      "destination": "www/phpledger/includes/functions/installation_notice_functions.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/installation_notice_web_functions.php",
+      "destination": "www/phpledger/includes/functions/installation_notice_web_functions.php"
+    },
+    {
+      "source": "www/phpledger/templates/views/updates.php",
+      "destination": "www/phpledger/templates/views/updates.php"
     }
   ]
 }

@@ -621,8 +621,14 @@ function pl_install_http(): never
                                 throw new InvalidArgumentException('The two passwords do not match. Type the same password in both fields.');
                             }
                             require_once __DIR__ . '/branding_functions.php';
+                            require_once __DIR__ . '/installation_notice_functions.php';
+                            if (!pl_shared_demo_enabled() && pl_web_text($_POST,'register_installation')==='1') {
+                                if (pl_web_text($_POST,'installation_notice')!=='1') { throw new DomainException('Enable the installation notice to register, or leave both choices off.'); }
+                                pl_install_notice_registration(['name'=>pl_web_text($_POST,'name'),'email'=>pl_web_text($_POST,'email'),'site'=>pl_web_text($_POST,'registration_site'),'company'=>pl_web_text($_POST,'registration_company')]);
+                            }
                             $logo = pl_logo_from_upload($_FILES['logo'] ?? null);
                             $user = pl_install_finish($sessionConfig, $runtimeConfig, pl_web_text($_POST, 'email'), pl_web_text($_POST, 'name'), $password, $state, pl_web_text($_POST, 'username'), $logo);
+                            pl_install_notice_after_setup($_POST);
                             // Itemise what was built before the setup session is cleared.
                             $completion = pl_install_completion_lines(pl_shared_demo_enabled() ? pl_shared_demo_account()['username'] : pl_web_text($_POST, 'username'), pl_install_database_check());
                             // 1.2 M7 made a sign-in durable: a server-side session row, not just the

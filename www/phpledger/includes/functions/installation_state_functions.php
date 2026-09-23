@@ -119,7 +119,7 @@ function pl_install_create_exclusive(string $path, string $contents): bool
 /** @return array<string, mixed> */
 function pl_install_read_state(string $name = 'setup.json'): array
 {
-    if (!in_array($name, ['setup.json', 'installed.json', 'attempts.json'], true)) {
+    if (!in_array($name, ['setup.json', 'installed.json', 'attempts.json', 'notice.json'], true)) {
         throw new InvalidArgumentException('Unknown installation state.');
     }
     $path = pl_install_directory() . '/' . $name;
@@ -137,7 +137,7 @@ function pl_install_read_state(string $name = 'setup.json'): array
 /** @param array<string, mixed> $state */
 function pl_install_save_state(array $state, string $name = 'setup.json'): void
 {
-    if (!in_array($name, ['setup.json', 'installed.json', 'attempts.json'], true)) {
+    if (!in_array($name, ['setup.json', 'installed.json', 'attempts.json', 'notice.json'], true)) {
         throw new InvalidArgumentException('Unknown installation state.');
     }
     pl_install_write_private(pl_install_directory(true) . '/' . $name, json_encode($state, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT) . "\n");
@@ -146,7 +146,7 @@ function pl_install_save_state(array $state, string $name = 'setup.json'): void
 /** @return resource */
 function pl_install_operation_lock(string $name = 'install.lock')
 {
-    if (!in_array($name, ['install.lock', 'application.lock'], true)) {
+    if (!in_array($name, ['install.lock', 'application.lock', 'notice.lock'], true)) {
         throw new InvalidArgumentException('Unknown installation lock.');
     }
     $mask = umask(0077);

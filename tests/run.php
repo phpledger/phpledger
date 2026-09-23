@@ -107,6 +107,7 @@ $suites[] = 'plugin_surface_test.php';
 // 1.3 M14: the Fixed assets module.
 $suites[] = 'asset_test.php';
 $suites[] = 'year_end_test.php';
+$suites[] = 'installation_notice_test.php';
 $suites[] = 'period_close_test.php';
 $suites[] = 'cash_count_test.php';
 if (($argv[1] ?? '') === '--suite=period-close') {
@@ -172,6 +173,7 @@ if (($argv[1] ?? '') === '--suite=shell') {
 if (($argv[1] ?? '') === '--suite=lists') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'reconciliation_test.php', 'list_test.php'];
 }
+if (($argv[1] ?? '') === '--suite=installation-notice') { $suites=['ledger_test.php','installation_notice_test.php']; }
 if (($argv[1] ?? '') === '--suite=i18n') {
     $suites = ['ledger_test.php', 'i18n_test.php'];
 }

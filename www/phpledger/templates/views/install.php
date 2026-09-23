@@ -270,6 +270,14 @@ $blocking = array_values(array_filter($requirements, static fn (array $check): b
 <div class="field"><label class="field-label" for="owner-password-confirm"><?= pl_e(pl_t('Type it again')) ?></label><input class="input" id="owner-password-confirm" name="password_confirm" type="password" required minlength="12" maxlength="72" autocomplete="new-password"></div>
 </div>
 <p class="field-hint" id="password-hint"><?= pl_e(pl_t('At least 12 characters. You will sign in with your username or your email address.')) ?></p>
+<fieldset class="flex flex-col gap-3"><legend class="field-label"><?= pl_e(pl_t('Help the project understand its installations')) ?></legend><input type="hidden" name="notice_choices_present" value="1">
+<label><input type="checkbox" name="installation_notice" value="1" <?= $field('installation_notice',$field('notice_choices_present')===''?'1':'0')==='1'?'checked':'' ?>> <?= pl_e(pl_t('Tell phpledger.com this copy was installed.')) ?></label>
+<p class="field-hint"><?= pl_e(pl_t('Sends a random installation ID, version, channel, PHP and database versions, operating-system family, installation mode and time. No credentials or financial data. Optional, and never required to use PHP Ledger.')) ?></p>
+<label><input type="checkbox" name="register_installation" value="1" <?= $field('register_installation')==='1'?'checked':'' ?>> <?= pl_e(pl_t('Also register my name and email above, and the optional details below, for release announcements and support.')) ?></label>
+<div class="field"><label class="field-label" for="registration-site"><?= pl_e(pl_t('Public site address (optional)')) ?></label><input class="input" id="registration-site" name="registration_site" type="url" maxlength="480" value="<?= pl_e($field('registration_site')) ?>"></div>
+<div class="field"><label class="field-label" for="registration-company"><?= pl_e(pl_t('Company name (optional)')) ?></label><input class="input" id="registration-company" name="registration_company" maxlength="160" value="<?= pl_e($field('registration_company')) ?>"></div>
+<p class="field-hint"><?= pl_e(pl_t('You can turn either choice off later in Updates and privacy.')) ?> <a href="https://phpledger.com/privacy/" target="_blank" rel="noopener"><?= pl_e(pl_t('Privacy details')) ?></a></p>
+</fieldset>
 <?php endif; ?>
 <div class="field"><label class="field-label" for="owner-logo"><?= pl_e(pl_t('Your logo (optional)')) ?></label><input class="input" id="owner-logo" name="logo" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="logo-hint"><p class="field-hint" id="logo-hint"><?= pl_e(pl_t('PNG, JPEG or WebP up to 1 MB. It replaces the PHP Ledger logo in the menu and on the sign-in page.')) ?></p></div>
 </form>

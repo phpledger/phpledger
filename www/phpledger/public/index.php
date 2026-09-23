@@ -95,6 +95,7 @@ $routes = [
     // 1.3 M17: the employee master (issue #98's blocker). 'employees' is not a directory under
     // www/phpledger/public (only 'assets' is), so this does not repeat B90.
     '/employees' => ['GET', 'POST'], '/employees/links' => ['GET', 'POST'], '/payroll' => ['GET', 'POST'],
+    '/updates' => ['GET','POST'],
     '/recurring' => ['GET', 'POST'], '/schedules' => ['GET', 'POST'], '/loans' => ['GET', 'POST'],
     '/reports/schedules' => ['GET'], '/reports/loans' => ['GET'],
     '/contra-review' => ['GET'], '/contra-review/confirm' => ['POST'],
@@ -356,6 +357,10 @@ try {
     if ($path === '/packages') {
         require_once dirname(__DIR__) . '/includes/functions/package_web_functions.php';
         pl_web_packages($actorId, $companyId, $bookId, $user, $company, $method);
+    }
+    if ($path === '/updates') {
+        require_once dirname(__DIR__) . '/includes/functions/installation_notice_web_functions.php';
+        pl_web_updates($actorId,$user,$company,$method);
     }
     if ($path === '/users' || $path === '/roles' || $path === '/cost-visibility') {
         require_once dirname(__DIR__) . '/includes/functions/user_web_functions.php';
