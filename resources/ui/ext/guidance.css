@@ -125,8 +125,8 @@
 }
 
 @layer components {
-  .field > .inline-heading { display: flex; align-items: center; gap: .375rem; margin-block-end: .25rem; }
-  .field > .inline-heading > .field-label { margin: 0; }
+  .field > .inline-heading, .party-picker > .inline-heading { display: flex; align-items: center; gap: .375rem; margin-block-end: .25rem; }
+  .field > .inline-heading > .field-label, .party-picker > .inline-heading > .field-label { margin: 0; }
   .context-help-header { display: flex; justify-content: flex-end; margin-block-end: .25rem; }
   .page-help { display: inline-flex; align-items: center; }
   .page-help .help > summary { inline-size: 2rem; block-size: 2rem; }
