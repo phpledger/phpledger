@@ -136,4 +136,12 @@ installation. Verified against the published 1.2.1 asset: 1585 entries, all unde
 
 ## 1.3.0 candidate metadata
 
-Active unpinned template versions now target 1.3.0. Earlier 1.2.1 measurements and checks above remain historical. Recheck the exact final artifact and provider contract before submission; this metadata update does not establish provider acceptance or publication. The disk-space allowance must be remeasured from the final ZIP before submission.
+Active unpinned template versions now target 1.3.0. Earlier 1.2.1 measurements and checks above remain historical. Recheck the provider contract before submission; this metadata update does not establish provider acceptance or publication.
+
+The final 1.3.0 archive was measured locally on 23 September 2026: 1,648 files
+(excluding directory entries), 9,002,021 uncompressed bytes, SHA-256
+`a2b4ca36ea3ff55ae1a5ac6bb7e2892d8243b41f4ad5d86d9b115dfb0f767120`.
+Its package manifest records source `44fb5acc390d32e6109fe4f57fdaea155e41e59b`.
+`info.xml` allows 11,534,336 bytes: the initial application footprint plus 25 percent,
+rounded up to a whole MiB. Growing records and backups require separate capacity.
+The panel-specific stripped archive and real panel lifecycle tests remain pending.
