@@ -27,6 +27,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { writeReleaseFeed } from './releases-feed.mjs';
+import { sampleDirectoryPages, writeSampleDirectory } from './sample-directory.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(ROOT, 'src');
@@ -132,7 +133,7 @@ function loadPages() {
   const dir = path.join(SRC, 'pages');
   const names = fs.readdirSync(dir).filter((name) => name.endsWith('.html')).sort();
   if (!names.length) fail('src/pages has no .html files');
-  const pages = names.map((name) => parsePage(path.join(dir, name), `src/pages/${name}`));
+  const pages = [...names.map((name) => parsePage(path.join(dir, name), `src/pages/${name}`)), ...sampleDirectoryPages(path.join(SRC, 'directory.json'))];
   const byPath = new Map();
   for (const page of pages) {
     if (byPath.has(page.path)) fail(`${page.id}: path ${page.path} is also used by ${byPath.get(page.path).id}`);
@@ -591,6 +592,7 @@ function build() {
   writeText(path.join(PUBLIC, 'sitemap.xml'), sitemap);
   if (assets.hasFeed) writeText(path.join(PUBLIC, 'news', 'feed.xml'), feedXml(articles));
   if (site.indexNowKey) writeText(path.join(PUBLIC, `${site.indexNowKey}.txt`), site.indexNowKey);
+  writeSampleDirectory(PUBLIC, path.join(SRC, 'directory.json'));
   writeReleaseFeed(PUBLIC, ROOT);
 
   const sitemapCount = (sitemap.match(/<loc>/g) || []).length;

@@ -111,7 +111,7 @@ function pl_demo_require_setup_action(): void
  */
 function pl_sample_companies_allowed(): bool
 {
-    return in_array(getenv('PL_ENV'), ['local', 'test'], true) || pl_shared_demo_enabled() || (pl_demo_enabled() && pl_demo_provisioning());
+    return in_array(getenv('PL_ENV'), ['local', 'test'], true) || (pl_demo_enabled() && pl_demo_provisioning()) || pl_sample_installed_packages() !== [];
 }
 
 function pl_require_sample_companies_allowed(): void

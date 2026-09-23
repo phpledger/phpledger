@@ -71,8 +71,8 @@
       "source": "www/phpledger/includes/functions/demo_functions.php"
     },
     {
-      "destination": "www/phpledger/includes/functions/shared_demo_functions.php",
-      "source": "www/phpledger/includes/functions/shared_demo_functions.php"
+      "source": "www/phpledger/includes/functions/shared_demo_functions.php",
+      "destination": "www/phpledger/includes/functions/shared_demo_functions.php"
     },
     {
       "destination": "www/phpledger/includes/functions/document_functions.php",
@@ -557,54 +557,6 @@
     {
       "source": "www/phpledger/templates/views/sample-guide.php",
       "destination": "www/phpledger/templates/views/sample-guide.php"
-    },
-    {
-      "source": "resources/demo-packs/catalog.json",
-      "destination": "resources/demo-packs/catalog.json"
-    },
-    {
-      "source": "resources/demo-packs/distributor-1.0.0.json",
-      "destination": "resources/demo-packs/distributor-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/jewelry-studio-1.0.0.json",
-      "destination": "resources/demo-packs/jewelry-studio-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/light-manufacturing-1.0.0.json",
-      "destination": "resources/demo-packs/light-manufacturing-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/membership-club-1.0.0.json",
-      "destination": "resources/demo-packs/membership-club-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/pharmacy-1.0.0.json",
-      "destination": "resources/demo-packs/pharmacy-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/retail-shop-1.0.0.json",
-      "destination": "resources/demo-packs/retail-shop-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/seasonal-business-1.0.0.json",
-      "destination": "resources/demo-packs/seasonal-business-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/service-agency-1.0.0.json",
-      "destination": "resources/demo-packs/service-agency-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/restaurant-1.0.0.json",
-      "destination": "resources/demo-packs/restaurant-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/service-workshop-1.0.0.json",
-      "destination": "resources/demo-packs/service-workshop-1.0.0.json"
-    },
-    {
-      "source": "resources/demo-packs/trader-1.0.0.json",
-      "destination": "resources/demo-packs/trader-1.0.0.json"
     },
     {
       "source": "www/phpledger/includes/functions/currency_functions.php",
@@ -1563,50 +1515,6 @@
       "destination": "resources/sample-structures/accounting-starter-1.0.0.json"
     },
     {
-      "source": "resources/sample-structures/distributor-1.0.0.json",
-      "destination": "resources/sample-structures/distributor-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/jewelry-studio-1.0.0.json",
-      "destination": "resources/sample-structures/jewelry-studio-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/light-manufacturing-1.0.0.json",
-      "destination": "resources/sample-structures/light-manufacturing-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/membership-club-1.0.0.json",
-      "destination": "resources/sample-structures/membership-club-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/pharmacy-1.0.0.json",
-      "destination": "resources/sample-structures/pharmacy-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/restaurant-1.0.0.json",
-      "destination": "resources/sample-structures/restaurant-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/retail-shop-1.0.0.json",
-      "destination": "resources/sample-structures/retail-shop-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/seasonal-business-1.0.0.json",
-      "destination": "resources/sample-structures/seasonal-business-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/service-agency-1.0.0.json",
-      "destination": "resources/sample-structures/service-agency-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/service-workshop-1.0.0.json",
-      "destination": "resources/sample-structures/service-workshop-1.0.0.json"
-    },
-    {
-      "source": "resources/sample-structures/trader-1.0.0.json",
-      "destination": "resources/sample-structures/trader-1.0.0.json"
-    },
-    {
       "source": "www/phpledger/includes/functions/hook_functions.php",
       "destination": "www/phpledger/includes/functions/hook_functions.php"
     },
@@ -1825,6 +1733,10 @@
     {
       "source": "www/phpledger/templates/views/updates.php",
       "destination": "www/phpledger/templates/views/updates.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/sample_package_functions.php",
+      "destination": "www/phpledger/includes/functions/sample_package_functions.php"
     }
   ]
 }

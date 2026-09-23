@@ -289,6 +289,12 @@ try {
         }
         pl_render('help', ['title' => 'Getting started', 'user' => $user, 'company' => $helpCompany]);
     }
+    if ($path === '/packages') {
+        require_once dirname(__DIR__) . '/includes/functions/package_web_functions.php';
+        $packageCompany=null;
+        if (!empty($_SESSION['company_id'])) { try { $packageCompany=pl_company_context($actorId,(int)$_SESSION['company_id']); } catch (DomainException) {} }
+        pl_web_packages($actorId,(int)($packageCompany['id']??0),(int)($packageCompany['book_id']??0),$user,$packageCompany,$method);
+    }
     $company = pl_web_context($actorId);
     $companyId = (int) $company['id'];
     $bookId = (int) $company['book_id'];
@@ -353,10 +359,6 @@ try {
     if ($path === '/modules') {
         require_once dirname(__DIR__) . '/includes/functions/module_web_functions.php';
         pl_web_modules($actorId, $companyId, $bookId, $user, $company, $method);
-    }
-    if ($path === '/packages') {
-        require_once dirname(__DIR__) . '/includes/functions/package_web_functions.php';
-        pl_web_packages($actorId, $companyId, $bookId, $user, $company, $method);
     }
     if ($path === '/updates') {
         require_once dirname(__DIR__) . '/includes/functions/installation_notice_web_functions.php';

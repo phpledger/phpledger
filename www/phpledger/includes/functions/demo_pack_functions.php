@@ -4,7 +4,12 @@ declare(strict_types=1);
 /** Only these original bundled pack identities are selectable, never a request path. */
 function pl_demo_pack_catalog(): array
 {
-    $catalog = json_decode((string) file_get_contents(PL_ROOT . '/resources/demo-packs/catalog.json'), true, 32, JSON_THROW_ON_ERROR);
+    $installed = [];
+    foreach (pl_sample_installed_packages() as $package) { $entry=$package['manifest']['sample']; $entry['package_path']=$package['path']; $entry['package_slug']=$package['slug']; $installed[$entry['id']]=$entry; }
+    if (!pl_sample_repository_fallback()) { return $installed; }
+    $catalogPath=pl_sample_repository_directory('demo-packs').'/catalog.json';
+    if (!is_file($catalogPath)) { return $installed; }
+    $catalog = json_decode((string) file_get_contents($catalogPath), true, 32, JSON_THROW_ON_ERROR);
     $allowed = ['service-agency', 'retail-shop', 'seasonal-business', 'distributor', 'trader', 'restaurant', 'membership-club', 'pharmacy', 'jewelry-studio', 'light-manufacturing', 'service-workshop'];
     $result = [];
     foreach ($catalog as $pack) {
@@ -18,14 +23,14 @@ function pl_demo_pack_catalog(): array
         $result[$pack['id']] = $pack;
     }
     if (count($result) !== count($allowed) || array_diff($allowed, array_keys($result)) !== []) { throw new RuntimeException('The bundled sample catalog is incomplete.'); }
-    return $result;
+    return $installed + $result;
 }
 
 function pl_demo_pack(string $id): array
 {
     $entry = pl_demo_pack_catalog()[$id] ?? null;
-    if ($entry === null) { throw new DomainException('Choose one of the eleven bundled sample companies.'); }
-    $raw = file_get_contents(PL_ROOT . '/resources/demo-packs/' . $entry['file']);
+    if ($entry === null) { throw new DomainException('Choose an installed sample company.'); }
+    $raw = file_get_contents(isset($entry['package_path']) ? $entry['package_path'].'/pack.json' : pl_sample_repository_directory('demo-packs').'/'.$entry['file']);
     if ($raw === false) { throw new RuntimeException('The selected sample is unavailable.'); }
     // Git may check out text with CRLF; the pinned fixture bytes use LF.
     $raw = str_replace("\r\n", "\n", $raw);

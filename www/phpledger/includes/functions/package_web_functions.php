@@ -10,18 +10,19 @@ declare(strict_types=1);
  * business without being able to change what code runs here. Nothing on this page decides a
  * permission; every service call below authorises itself.
  *
- * The Directory tab and the one-click and automatic updates of B51 are not built here — they
- * need the phpledger.com feed, which is a separate milestone. What exists is Installed and
+ * The executable-plugin directory and automatic updates of B51 remain separate work — they
+ * need the phpledger.com feed, which is a separate milestone. Data-only sample discovery uses explicit network actions; executable packages retain Installed and
  * Upload, and an upload is always Unverified, because nothing in this release signs a package.
  */
-function pl_web_packages(int $actorId, int $companyId, int $bookId, array $user, array $company, string $method): never
+function pl_web_packages(int $actorId, int $companyId, int $bookId, array $user, ?array $company, string $method): never
 {
     if (pl_demo_enabled()) {
         throw new DomainException(pl_t('Package administration is unavailable in the public sample.'));
     }
+    pl_plugin_bootstrap_initial_owner($actorId);
     $administers = pl_user_can($actorId, 0, 'installation.admin');
     if ($method === 'POST') {
-        pl_web_packages_post($actorId, $company);
+        pl_web_packages_post($actorId, $company ?? ['id'=>0,'book_id'=>0]);
     }
     $form = pl_form_state(pl_url('/packages'));
     // The full-page confirmation (onboarding decision 9): installing code that can change what a
@@ -40,9 +41,10 @@ function pl_web_packages(int $actorId, int $companyId, int $bookId, array $user,
         }
     }
     pl_render('packages', [
-        'title' => pl_t('Packages'), 'user' => $user, 'company' => $company,
+        'title' => pl_t('Packages'), 'user' => $user, 'company' => $company, 'packageScope'=>$company ?? ['id'=>0,'book_id'=>0],
         'administers' => $administers,
         'cards' => pl_plugin_cards(),
+        'samplePackages' => pl_sample_installed_packages(), 'sampleDirectory'=>pl_sample_directory_cached(), 'sampleReadonly'=>pl_sample_packages_readonly(),
         'staged' => $administers ? pl_web_packages_staged() : [],
         'review' => $review,
         'acknowledgements' => pl_plugin_acknowledgements(),
@@ -115,8 +117,13 @@ function pl_web_packages_post(int $actorId, array $company): void
         $slug = pl_web_text($_POST, 'slug');
         $reason = pl_web_text($_POST, 'reason');
         $key = pl_web_text($_POST, 'request_key');
+        if ($action === 'sample_refresh') { pl_sample_directory_refresh($actorId); pl_notice(pl_t('Sample directory refreshed.')); pl_redirect($return); }
+        if ($action === 'sample_install') { pl_sample_directory_install($actorId,$slug,$key); pl_notice(pl_t('Sample installed. It is available in business setup.')); pl_redirect($return); }
+        if ($action === 'sample_remove') { pl_sample_package_remove($actorId,$slug,$reason,$key); pl_notice(pl_t('Sample package removed. Existing businesses and their history are unchanged.')); pl_redirect($return); }
         if ($action === 'upload') {
+            $key = pl_request_key($key);
             $staged = pl_web_packages_upload($actorId);
+            if (($staged['type'] ?? null) === 'sample') { pl_sample_package_install($actorId,$staged['slug'],'Owner uploaded data-only sample',$key); pl_notice(pl_t('Data-only sample installed. It is available in business setup.')); pl_redirect($return); }
             pl_notice(pl_t('{name} was unpacked and has not been installed yet. Read what it says about itself, then confirm below.', ['name' => $staged['manifest']['name']]));
             pl_redirect(pl_url('/packages', ['confirm' => $staged['slug']]));
         }
@@ -160,7 +167,7 @@ function pl_web_packages_post(int $actorId, array $company): void
             pl_redirect($return);
         }
         throw new DomainException(pl_t('Choose a valid action.'));
-    } catch (DomainException $error) {
+    } catch (DomainException|JsonException $error) {
         $input = array_map(static fn (mixed $value): string => is_scalar($value) ? (string) $value : '', $_POST);
         pl_form_failure($return, $input, $error->getMessage());
     }
@@ -170,7 +177,7 @@ function pl_web_packages_post(int $actorId, array $company): void
  * Read the uploaded archive and stage it. Nothing is recorded and no plugin code runs here; the
  * confirmation page is next.
  *
- * @return array{slug:string, manifest:array<string, mixed>, files_digest:string}
+ * @return array{slug:string, manifest:array<string, mixed>, files_digest:string, type?:string}
  */
 function pl_web_packages_upload(int $actorId): array
 {

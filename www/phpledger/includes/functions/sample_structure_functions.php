@@ -48,7 +48,7 @@ function pl_sample_structure_directory(): string
     // boundary test reads this literal to decide what the code needs at runtime: written without
     // the slash it asks for a file named 'resources/sample-structures', which is not packaged
     // because the directory's contents are. resources/lang solves the same problem the same way.
-    return rtrim(PL_ROOT . '/resources/sample-structures/', '/');
+    return dirname(PL_ROOT . '/resources/sample-structures/accounting-starter-1.0.0.json');
 }
 
 /**
@@ -70,7 +70,11 @@ function pl_sample_structure_read(string $id): ?array
         $structure['digest'] = hash('sha256', json_encode($sample['structure'], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES));
         return $structure;
     }
-    $path = pl_sample_structure_directory() . '/' . $id . '-' . $sample['version'] . '.json';
+    $package = $id === 'accounting-starter' ? null : (pl_demo_pack_catalog()[$id] ?? null);
+    if (isset($package['package_path'])) { $path=$package['package_path'].'/structure.json'; }
+    elseif ($id === 'accounting-starter') { $path=pl_sample_structure_directory().'/accounting-starter-1.0.0.json'; }
+    elseif (pl_sample_repository_fallback()) { $path=pl_sample_repository_directory('sample-structures').'/'.$id.'-'.$sample['version'].'.json'; }
+    else { return null; }
     if (!is_file($path)) {
         return null;
     }

@@ -43,6 +43,19 @@ $badge = static function (string $trust, string $status): void {
         </div>
     <?php endif; ?>
 
+<section class="rounded-panel border border-border bg-surface p-4" aria-labelledby="sample-packages-title">
+<h2 class="section-title" id="sample-packages-title"><?= pl_e(pl_t('Sample companies')) ?></h2>
+<p><?= pl_e(pl_t('Optional data-only packages provide fictional practice history or a zero-balance business structure. They never execute code. Installing or removing a package does not change an existing business.')) ?></p>
+<p><a class="link" href="https://phpledger.com/directory/" target="_blank" rel="noopener"><?= pl_e(pl_t('Browse the sample directory')) ?></a></p>
+<?php if($sampleReadonly): ?><p role="status"><?= pl_e(pl_t('This host supplies verified sample packages read-only. Its operator manages installation and removal. Available samples work without network access.')) ?></p><?php endif; ?>
+<div class="grid md:grid-cols-2 gap-4 my-3">
+<?php foreach($samplePackages as $sample): $sm=$sample['manifest']; ?><article class="rounded-panel border border-border p-4"><h3 class="section-title"><?= pl_e($sm['name'].' '.$sm['version']) ?></h3><p><?= pl_e($sm['description']) ?></p><p><?= pl_e($sm['author'].' · '.$sm['licence'].' · '.$sample['trust']) ?></p><a class="link" href="<?= pl_e(pl_url('/onboarding')) ?>"><?= pl_e(pl_t('Use in business setup')) ?></a>
+<?php if($administers&&!$sampleReadonly): ?><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field().pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_remove"><input type="hidden" name="slug" value="<?= pl_e($sample['slug']) ?>"><input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(16))) ?>"><label class="field"><?= pl_e(pl_t('Reason')) ?><input class="input" name="reason" required></label><button class="btn btn-secondary"><?= pl_e(pl_t('Remove sample package')) ?></button></form><?php endif; ?></article><?php endforeach; ?>
+</div>
+<?php if($administers&&!$sampleReadonly): ?><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field().pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_refresh"><button class="btn btn-secondary"><?= pl_e(pl_t('Refresh directory')) ?></button></form><p class="muted"><?= pl_e(pl_t('Refresh and Install contact phpledger.com. Opening this page does not make a network request. Upload a sample ZIP below for an offline installation.')) ?></p>
+<?php foreach($sampleDirectory['packages'] as $entry): ?><article class="rounded-panel border border-border p-4 my-3"><h3><?= pl_e($entry['name'].' '.$entry['version']) ?></h3><p><?= pl_e($entry['description']) ?></p><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field().pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_install"><input type="hidden" name="slug" value="<?= pl_e($entry['slug']) ?>"><input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(16))) ?>"><button class="btn btn-primary"><?= pl_e(pl_t('Verify and install sample')) ?></button></form></article><?php endforeach; endif; ?>
+</section>
+
 <?php if ($review !== null): /* ----------------------------------- the full-page confirmation */ ?>
     <?php $manifest = $review['manifest']; ?>
     <section class="rounded-panel border border-border bg-surface p-4 text-sm" aria-labelledby="package-review-title">
@@ -74,7 +87,7 @@ $badge = static function (string $trust, string $status): void {
             </tbody></table>
         </div>
         <form class="flex flex-col gap-3 border-t border-border pt-3" method="post" action="<?= pl_e(pl_url('/packages')) ?>">
-            <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?>
+            <?= pl_csrf_field() ?><?= pl_scope_fields($packageScope) ?>
             <input type="hidden" name="action" value="confirm_upload">
             <input type="hidden" name="slug" value="<?= pl_e($review['slug']) ?>">
             <input type="hidden" name="request_key" value="<?= pl_e($packagesInput['request_key'] ?? bin2hex(random_bytes(20))) ?>">
@@ -102,7 +115,7 @@ $badge = static function (string $trust, string $status): void {
                 <div class="flex flex-wrap gap-2">
                     <?php if ($item['problem'] === ''): ?><a class="btn btn-primary" href="<?= pl_e(pl_url('/packages', ['confirm' => $item['slug']])) ?>"><?= pl_e(pl_t('Review and install')) ?></a><?php endif; ?>
                     <form method="post" action="<?= pl_e(pl_url('/packages')) ?>">
-                        <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?>
+                        <?= pl_csrf_field() ?><?= pl_scope_fields($packageScope) ?>
                         <input type="hidden" name="action" value="discard"><input type="hidden" name="slug" value="<?= pl_e($item['slug']) ?>">
                         <button class="btn btn-secondary"><?= pl_e(pl_t('Delete these files')) ?></button>
                     </form>
@@ -140,7 +153,7 @@ $badge = static function (string $trust, string $status): void {
             <p class="muted"><?= pl_e(pl_t('An installation administrator decides whether this package runs.')) ?></p>
         <?php else: ?>
         <form class="flex flex-wrap items-end gap-3 border-t border-border pt-3" method="post" action="<?= pl_e(pl_url('/packages')) ?>">
-            <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?>
+            <?= pl_csrf_field() ?><?= pl_scope_fields($packageScope) ?>
             <input type="hidden" name="slug" value="<?= pl_e($card['slug']) ?>">
             <input type="hidden" name="request_key" value="<?= pl_e($cardInput['request_key'] ?? bin2hex(random_bytes(20))) ?>">
             <div class="field flex-1 min-w-48 max-w-sm">
@@ -173,7 +186,7 @@ $badge = static function (string $trust, string $status): void {
         <h2 class="section-title" id="packages-upload-title"><?= pl_e(pl_t('Upload a package')) ?></h2>
         <p><?= pl_e(pl_t('A package you upload has not been reviewed by the project. Uploading unpacks it and shows you what it says about itself; nothing is installed and no code runs until you confirm on the next page.')) ?></p>
         <form class="flex flex-wrap items-end gap-3" method="post" action="<?= pl_e(pl_url('/packages')) ?>" enctype="multipart/form-data">
-            <?= pl_csrf_field() ?><?= pl_scope_fields($company) ?>
+            <?= pl_csrf_field() ?><?= pl_scope_fields($packageScope) ?>
             <input type="hidden" name="action" value="upload">
             <label class="field"><?= pl_e(pl_t('Package ZIP')) ?><input class="input" type="file" name="package" accept=".zip,application/zip" required></label>
             <button class="btn btn-secondary"><?= pl_e(pl_t('Unpack and review')) ?></button>

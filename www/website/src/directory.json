@@ -1,0 +1,850 @@
+{
+  "schema": 1,
+  "packages": [
+    {
+      "type": "sample",
+      "slug": "sample-service-agency",
+      "version": "1.0.0",
+      "name": "Cedar Studio",
+      "description": "Professional services / agency. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-service-agency/",
+      "requires": {
+        "core": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-service-agency",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Cedar Studio",
+        "description": "Professional services / agency. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-service-agency/",
+        "requires": {
+          "core": "1.0.0"
+        },
+        "sample": {
+          "id": "service-agency",
+          "version": "1.0.0",
+          "name": "Cedar Studio",
+          "business": "Professional services / agency",
+          "source_count": 87,
+          "journal_count": 85,
+          "draft_count": 3,
+          "status": "released_demo_only",
+          "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+          "scenario": {
+            "id": "agency-month-end",
+            "title": "Review project income and operating costs",
+            "goal": "Follow a professional-services month from client receipts and cash sales to staff, rent, insurance and a corrected expense.",
+            "steps": [
+              "Trace a monthly client receipt and separate cash activity in the bank and till accounts.",
+              "Review recurring staff, rent, utilities and insurance entries in the month-end journal.",
+              "Follow the year-end customer collection without recording income twice.",
+              "Review the mistaken cost, linked reversal and corrected replacement."
+            ],
+            "checks": [
+              "Staff entries are illustrative support schedules, not payroll, withholding or employment compliance.",
+              "Client work is represented by general-ledger examples, not project management or time billing.",
+              "The open 2026 drafts are separate practice records and do not alter closed history."
+            ]
+          },
+          "file": "service-agency-1.0.0.json",
+          "sha256": "ef5dc27ba100dbcdb61e034e7093d4b6ba081b8fc1b06b92fd1fae02445d1d94"
+        },
+        "files": {
+          "pack.json": "ef5dc27ba100dbcdb61e034e7093d4b6ba081b8fc1b06b92fd1fae02445d1d94",
+          "structure.json": "aa25cc817576a3763705a5f1017e30f3ff023ccb1f06f816d1596543d96e421e"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-service-agency",
+        "version": "1.0.0",
+        "archive_bytes": 16391,
+        "archive_sha256": "54c6d2bbb10593d99428fa63ca2ee1c80c6dcf42113dafd9ef53a3d950912a7b",
+        "manifest_sha256": "4ea8081c4741c0cba2c06b6a6743ec594abd629b18e145e8fd9089c6514802a7",
+        "files": {
+          "pack.json": "ef5dc27ba100dbcdb61e034e7093d4b6ba081b8fc1b06b92fd1fae02445d1d94",
+          "structure.json": "aa25cc817576a3763705a5f1017e30f3ff023ccb1f06f816d1596543d96e421e"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-retail-shop",
+      "version": "1.0.0",
+      "name": "Willow Corner Shop",
+      "description": "Retail shop. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-retail-shop/",
+      "requires": {
+        "core": "1.0.0",
+        "inventory": "1.0.0",
+        "pos-showcase": "1.0.0",
+        "trading-documents": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-retail-shop",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Willow Corner Shop",
+        "description": "Retail shop. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-retail-shop/",
+        "requires": {
+          "core": "1.0.0",
+          "inventory": "1.0.0",
+          "pos-showcase": "1.0.0",
+          "trading-documents": "1.0.0"
+        },
+        "sample": {
+          "id": "retail-shop",
+          "version": "1.0.0",
+          "name": "Willow Corner Shop",
+          "business": "Retail shop",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "released_demo_only",
+          "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+          "scenario": {
+            "id": "register-close",
+            "title": "Check a sale, return and counted till",
+            "goal": "Compare a small retail sale, return, till deposit, stock balance and customer settlement.",
+            "steps": [
+              "Review the opening till, bank, receivable, payable and stock evidence.",
+              "Trace the stationery cash sale and its cost of goods sold.",
+              "Review the customer invoice, receipt and linked return credit.",
+              "Compare the counted till transfer with the cash and bank account movements."
+            ],
+            "checks": [
+              "A credit-note return does not create a second sale or cash receipt.",
+              "SKU identity survives the sale, return and stock reports.",
+              "Barcode scanning and register sessions remain future UI features."
+            ]
+          },
+          "file": "retail-shop-1.0.0.json",
+          "sha256": "5df40c8ea3e89f0e03ad0cac2d0fc936e41c56d91c2d29306374ea05a98e4103"
+        },
+        "files": {
+          "pack.json": "5df40c8ea3e89f0e03ad0cac2d0fc936e41c56d91c2d29306374ea05a98e4103",
+          "structure.json": "fb3507e45f4b544d8e62cf723c6c87799f5733cbfa4ed64cbd56c1c7d36d3bef"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-retail-shop",
+        "version": "1.0.0",
+        "archive_bytes": 17951,
+        "archive_sha256": "8648fae40c6c47fd922ae84631660089ead00232b97ba1b8a05e1158a60acea8",
+        "manifest_sha256": "39be52589b0fe837bd4a4c50b00821431695cecfc0bf6816fae99ba02564ed71",
+        "files": {
+          "pack.json": "5df40c8ea3e89f0e03ad0cac2d0fc936e41c56d91c2d29306374ea05a98e4103",
+          "structure.json": "fb3507e45f4b544d8e62cf723c6c87799f5733cbfa4ed64cbd56c1c7d36d3bef"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-seasonal-business",
+      "version": "1.0.0",
+      "name": "Sunrise Garden Services",
+      "description": "Seasonal business. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-seasonal-business/",
+      "requires": {
+        "core": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-seasonal-business",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Sunrise Garden Services",
+        "description": "Seasonal business. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-seasonal-business/",
+        "requires": {
+          "core": "1.0.0"
+        },
+        "sample": {
+          "id": "seasonal-business",
+          "version": "1.0.0",
+          "name": "Sunrise Garden Services",
+          "business": "Seasonal business",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "released_demo_only",
+          "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+          "scenario": {
+            "id": "seasonal-cash-cycle",
+            "title": "Compare a seasonal cash cycle",
+            "goal": "Compare monthly receipts across a seasonal service year while keeping operating costs, prepayments and settlements traceable.",
+            "steps": [
+              "Compare low-season and peak-season monthly receipt summaries.",
+              "Trace recurring operating costs and insurance release through the general ledger.",
+              "Review the cross-year customer collection and supplier payment.",
+              "Use the open 2026 drafts to test a new seasonal entry without changing history."
+            ],
+            "checks": [
+              "The receipt curve is a sample teaching pattern, not a forecast or business benchmark.",
+              "No workforce scheduling, weather model, contract pipeline or seasonal tax treatment is implemented.",
+              "Profit and cash are reviewed through the existing statements and account movements."
+            ]
+          },
+          "file": "seasonal-business-1.0.0.json",
+          "sha256": "b4c9d8c1aad89c37fb443a67c5b2e5e9545b8eaab73122a336f46135eec71d7a"
+        },
+        "files": {
+          "pack.json": "b4c9d8c1aad89c37fb443a67c5b2e5e9545b8eaab73122a336f46135eec71d7a",
+          "structure.json": "72bc7bad10f402ae14ff436d89026ca09e6be65aba5bec11d35aea851e5ee66b"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-seasonal-business",
+        "version": "1.0.0",
+        "archive_bytes": 16192,
+        "archive_sha256": "8a0c52b97f8865fd8f25107fe396f993562cf7ab8d09f1d47afafbeaed5639e0",
+        "manifest_sha256": "c72003e03b6b6718e1f85a969c9ea01d83c8c622eefbdb0fe12df1c5d6775afd",
+        "files": {
+          "pack.json": "b4c9d8c1aad89c37fb443a67c5b2e5e9545b8eaab73122a336f46135eec71d7a",
+          "structure.json": "72bc7bad10f402ae14ff436d89026ca09e6be65aba5bec11d35aea851e5ee66b"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-distributor",
+      "version": "1.0.0",
+      "name": "Harbor Supply Company",
+      "description": "Distribution. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-distributor/",
+      "requires": {
+        "core": "1.0.0",
+        "inventory": "1.0.0",
+        "inventory-locations": "1.1.0",
+        "purchasing": "1.0.0",
+        "trading-documents": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-distributor",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Harbor Supply Company",
+        "description": "Distribution. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-distributor/",
+        "requires": {
+          "core": "1.0.0",
+          "inventory": "1.0.0",
+          "inventory-locations": "1.1.0",
+          "purchasing": "1.0.0",
+          "trading-documents": "1.0.0"
+        },
+        "sample": {
+          "id": "distributor",
+          "version": "1.0.0",
+          "name": "Harbor Supply Company",
+          "business": "Distribution",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "released_demo_only",
+          "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+          "scenario": {
+            "id": "route-settlement",
+            "title": "Follow a distribution route settlement",
+            "goal": "Review a distributor's stock, customer invoice, supplier bill, settlement and route-level bookkeeping evidence.",
+            "steps": [
+              "Review the opening stock, customer receivable and supplier payable evidence.",
+              "Trace stock receipt and a credit sale through inventory, cost and control accounts.",
+              "Apply the named customer and supplier settlements and inspect residuals.",
+              "Review the route and cash-transfer notes as bookkeeping references only."
+            ],
+            "checks": [
+              "The distribution scenario does not implement route planning, dispatch, delivery proof or fleet accounting.",
+              "Inventory uses one location and the shared moving-average service.",
+              "Customer and supplier settlement remains separate from operational delivery status."
+            ]
+          },
+          "file": "distributor-1.0.0.json",
+          "sha256": "b39e3061b05720949bb273e37d3b1ed08563049987a224ef88f952b224d48f85"
+        },
+        "files": {
+          "pack.json": "b39e3061b05720949bb273e37d3b1ed08563049987a224ef88f952b224d48f85",
+          "structure.json": "f22efaa38953e32d33e73d46acba4faa0f137ff54f1fe4a85b21ec2df8857ee3"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-distributor",
+        "version": "1.0.0",
+        "archive_bytes": 18997,
+        "archive_sha256": "dfaaba44cb59f8db451978c16f727e31b071f3d7870156d0b3a20e94415e326a",
+        "manifest_sha256": "0d6615bd77978497527c84d2dfac0ee2cb8e1271004e39d7dbbd7c28d6f4bc9e",
+        "files": {
+          "pack.json": "b39e3061b05720949bb273e37d3b1ed08563049987a224ef88f952b224d48f85",
+          "structure.json": "f22efaa38953e32d33e73d46acba4faa0f137ff54f1fe4a85b21ec2df8857ee3"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-trader",
+      "version": "1.0.0",
+      "name": "Harbour Trade",
+      "description": "Wholesale / trader. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-trader/",
+      "requires": {
+        "core": "1.0.0",
+        "inventory": "1.0.0",
+        "purchasing": "1.0.0",
+        "trading-documents": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-trader",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Harbour Trade",
+        "description": "Wholesale / trader. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-trader/",
+        "requires": {
+          "core": "1.0.0",
+          "inventory": "1.0.0",
+          "purchasing": "1.0.0",
+          "trading-documents": "1.0.0"
+        },
+        "sample": {
+          "id": "trader",
+          "version": "1.0.0",
+          "name": "Harbour Trade",
+          "business": "Wholesale / trader",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "preview_only",
+          "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+          "scenario": {
+            "id": "trade-pricing",
+            "title": "Review a trade sale and settlement",
+            "goal": "Follow stock purchase, customer credit sale, partial collection, return and till-to-bank transfer.",
+            "steps": [
+              "Receive the boxed supply purchase at its recorded unit cost.",
+              "Post the trade-customer invoice and inspect the stock issue and receivable.",
+              "Apply the named customer receipt, then review the remaining balance and return credit.",
+              "Compare the cash transfer with the cash-on-hand and bank accounts."
+            ],
+            "checks": [
+              "A return is linked to the source invoice and does not create a second sale.",
+              "Customer and supplier balances remain in their respective control accounts.",
+              "The pack uses one stock location and does not claim pricing-list or sales-order functionality."
+            ]
+          },
+          "file": "trader-1.0.0.json",
+          "sha256": "edba8f2a3ba21b09efbb04e797ca50cbb86724de68a43def196df8c0066f994d"
+        },
+        "files": {
+          "pack.json": "edba8f2a3ba21b09efbb04e797ca50cbb86724de68a43def196df8c0066f994d",
+          "structure.json": "2cf79aac14d3f504fdf96e5901ab0af652ea1093b7c6a7d8d062318a3d89a3a0"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-trader",
+        "version": "1.0.0",
+        "archive_bytes": 18097,
+        "archive_sha256": "b6f91b9f53c9dce6a5d8dc4c1e77c9224ba19860ba81a230bfa4d487a1b063df",
+        "manifest_sha256": "849c929c98f5514eb1de07e5c91a4d27636de601919f99e9c6670f6547831aa7",
+        "files": {
+          "pack.json": "edba8f2a3ba21b09efbb04e797ca50cbb86724de68a43def196df8c0066f994d",
+          "structure.json": "2cf79aac14d3f504fdf96e5901ab0af652ea1093b7c6a7d8d062318a3d89a3a0"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-restaurant",
+      "version": "1.0.0",
+      "name": "Cedar Table",
+      "description": "Restaurant / cafe. Restaurant and catering bookkeeping example; tables, recipes, kitchen production and service operations are not implemented.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-restaurant/",
+      "requires": {
+        "core": "1.0.0",
+        "inventory": "1.0.0",
+        "pos-showcase": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-restaurant",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Cedar Table",
+        "description": "Restaurant / cafe. Restaurant and catering bookkeeping example; tables, recipes, kitchen production and service operations are not implemented.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-restaurant/",
+        "requires": {
+          "core": "1.0.0",
+          "inventory": "1.0.0",
+          "pos-showcase": "1.0.0"
+        },
+        "sample": {
+          "id": "restaurant",
+          "version": "1.0.0",
+          "name": "Cedar Table",
+          "business": "Restaurant / cafe",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "preview_only",
+          "capability_note": "Restaurant and catering bookkeeping example; tables, recipes, kitchen production and service operations are not implemented.",
+          "scenario": {
+            "id": "table-kot",
+            "title": "Trace a table order through the books",
+            "goal": "Use a restaurant bookkeeping example to compare a cash sale, stock movement, supplier bill and correction.",
+            "steps": [
+              "Review the food and beverage items and the opening stock position.",
+              "Trace the table/KOT example to its cash sale and cost of goods sold.",
+              "Review the supplier purchase, payment and returned goods as separate accounting events.",
+              "Inspect the daily expense correction and its linked reversal."
+            ],
+            "checks": [
+              "The sample does not implement tables, kitchen production, recipes, modifiers or service workflow.",
+              "Food and beverage labels are sample teaching data, not food-safety or tax guidance.",
+              "Inventory and cash totals reconcile to the posted ledger events."
+            ]
+          },
+          "file": "restaurant-1.0.0.json",
+          "sha256": "bb6565319d6738661e858fbd53a6808c8d419ff52d4b78f35a017d1be6999967"
+        },
+        "files": {
+          "pack.json": "bb6565319d6738661e858fbd53a6808c8d419ff52d4b78f35a017d1be6999967",
+          "structure.json": "d58717f54cd8ebd396b60e3e092bf946fe28409592bab82cfe2576ab0e29845d"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-restaurant",
+        "version": "1.0.0",
+        "archive_bytes": 17970,
+        "archive_sha256": "957c07a9b7010f53b66fa53357029a927fd9e69c60357d948152f4cb2151afeb",
+        "manifest_sha256": "f33ed9c6d729274e7eeafb830fb462e38ceeef009e6f4526fa2805216a3853fb",
+        "files": {
+          "pack.json": "bb6565319d6738661e858fbd53a6808c8d419ff52d4b78f35a017d1be6999967",
+          "structure.json": "d58717f54cd8ebd396b60e3e092bf946fe28409592bab82cfe2576ab0e29845d"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-membership-club",
+      "version": "1.0.0",
+      "name": "Riverside Community Club",
+      "description": "Membership club. Membership-income bookkeeping example; membership administration, renewals, charity status and dues compliance are not implemented.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-membership-club/",
+      "requires": {
+        "core": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-membership-club",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Riverside Community Club",
+        "description": "Membership club. Membership-income bookkeeping example; membership administration, renewals, charity status and dues compliance are not implemented.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-membership-club/",
+        "requires": {
+          "core": "1.0.0"
+        },
+        "sample": {
+          "id": "membership-club",
+          "version": "1.0.0",
+          "name": "Riverside Community Club",
+          "business": "Membership club",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "preview_only",
+          "capability_note": "Membership-income bookkeeping example; membership administration, renewals, charity status and dues compliance are not implemented.",
+          "scenario": {
+            "id": "membership-dues",
+            "title": "Separate membership income from cash timing",
+            "goal": "Follow a fictional club prepayment, recognition schedule, invoice, payment and expense bill.",
+            "steps": [
+              "Review the opening receivable and payable detail without reposting opening balances.",
+              "Trace a membership prepayment into deferred revenue.",
+              "Inspect the monthly recognition entry and compare it with the cash receipt.",
+              "Review the supplier bill, payment and the club's period result."
+            ],
+            "checks": [
+              "Deferred revenue is not recognised before the stated coverage period.",
+              "The club scenario does not claim charity, nonprofit, member administration or renewal compliance.",
+              "Opening AR/AP detail remains evidence reconciled to the opening control journal."
+            ]
+          },
+          "file": "membership-club-1.0.0.json",
+          "sha256": "11f3df030b8bd2199efd085dc496abb59d6f54937f07928542c869378c16841b"
+        },
+        "files": {
+          "pack.json": "11f3df030b8bd2199efd085dc496abb59d6f54937f07928542c869378c16841b",
+          "structure.json": "284906c5315d10bf08c51cbbf124dc46667f641eeb9064ca69960212c279eacf"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-membership-club",
+        "version": "1.0.0",
+        "archive_bytes": 17009,
+        "archive_sha256": "f0096b5eefdf2bf15f6f39cdedb1ffbf732be3d9d572444b389f825fe60e92de",
+        "manifest_sha256": "9d9d4eb6f96ae6f377a3115a5842e457f44b326fbdc2c17aa04309d39bef90a4",
+        "files": {
+          "pack.json": "11f3df030b8bd2199efd085dc496abb59d6f54937f07928542c869378c16841b",
+          "structure.json": "284906c5315d10bf08c51cbbf124dc46667f641eeb9064ca69960212c279eacf"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-pharmacy",
+      "version": "1.0.0",
+      "name": "Meadow Training Pharmacy",
+      "description": "Non-medicinal training inventory. Non-medicinal training products only; no medicines, dispensing, patient records, expiry controls or pharmacy compliance are implemented.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-pharmacy/",
+      "requires": {
+        "core": "1.0.0",
+        "inventory": "1.0.0",
+        "pos-showcase": "1.0.0",
+        "trading-documents": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-pharmacy",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Meadow Training Pharmacy",
+        "description": "Non-medicinal training inventory. Non-medicinal training products only; no medicines, dispensing, patient records, expiry controls or pharmacy compliance are implemented.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-pharmacy/",
+        "requires": {
+          "core": "1.0.0",
+          "inventory": "1.0.0",
+          "pos-showcase": "1.0.0",
+          "trading-documents": "1.0.0"
+        },
+        "sample": {
+          "id": "pharmacy",
+          "version": "1.0.0",
+          "name": "Meadow Training Pharmacy",
+          "business": "Non-medicinal training inventory",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "preview_only",
+          "capability_note": "Non-medicinal training products only; no medicines, dispensing, patient records, expiry controls or pharmacy compliance are implemented.",
+          "scenario": {
+            "id": "lot-expiry",
+            "title": "Review a lot-tracked training stock example",
+            "goal": "Trace non-medicinal training stock through lot identity, expiry metadata, sale, return and supplier settlement.",
+            "steps": [
+              "Review the training items, lot identifiers and stated expiry dates.",
+              "Trace the purchase and receipt into the stock and payable accounts.",
+              "Review the sale, returned quantity and linked customer credit.",
+              "Check the supplier payment and the remaining lot quantity/value."
+            ],
+            "checks": [
+              "All products are non-medicinal sample training items.",
+              "No dispensing, patient, prescription, controlled-substance or pharmacy compliance workflow is implemented.",
+              "Expiry metadata is illustrative fixture data, not a regulatory control."
+            ]
+          },
+          "file": "pharmacy-1.0.0.json",
+          "sha256": "6bcdc83cf502201ce308233a819b8994fc6937e4e0353f7bafc531b5e91ec7b2"
+        },
+        "files": {
+          "pack.json": "6bcdc83cf502201ce308233a819b8994fc6937e4e0353f7bafc531b5e91ec7b2",
+          "structure.json": "93aa85e945ee2f90a06340c881aeadb473090c4d4250a008497026b458f4899d"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-pharmacy",
+        "version": "1.0.0",
+        "archive_bytes": 18182,
+        "archive_sha256": "569216fd185158c5fb06d35620fee4e72c1e4563b6106e21d56ddd7d267747db",
+        "manifest_sha256": "4bef59255e42316371bc0e4575b78872daac502dd79699ce75a29fd5b59fed4d",
+        "files": {
+          "pack.json": "6bcdc83cf502201ce308233a819b8994fc6937e4e0353f7bafc531b5e91ec7b2",
+          "structure.json": "93aa85e945ee2f90a06340c881aeadb473090c4d4250a008497026b458f4899d"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-jewelry-studio",
+      "version": "1.0.0",
+      "name": "Lantern Finch Jewelry Studio",
+      "description": "Jewelry studio. Jewelry bookkeeping example; precious-metal, gemstone, job-costing and commodity accounting are not implemented.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-jewelry-studio/",
+      "requires": {
+        "core": "1.0.0",
+        "inventory": "1.0.0",
+        "trading-documents": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-jewelry-studio",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Lantern Finch Jewelry Studio",
+        "description": "Jewelry studio. Jewelry bookkeeping example; precious-metal, gemstone, job-costing and commodity accounting are not implemented.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-jewelry-studio/",
+        "requires": {
+          "core": "1.0.0",
+          "inventory": "1.0.0",
+          "trading-documents": "1.0.0"
+        },
+        "sample": {
+          "id": "jewelry-studio",
+          "version": "1.0.0",
+          "name": "Lantern Finch Jewelry Studio",
+          "business": "Jewelry studio",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "preview_only",
+          "capability_note": "Jewelry bookkeeping example; precious-metal, gemstone, job-costing and commodity accounting are not implemented.",
+          "scenario": {
+            "id": "jewelry-materials",
+            "title": "Separate studio sales from material costs",
+            "goal": "Use a jewelry-studio bookkeeping example to distinguish finished-goods sales, material purchases, customer deposits and workshop costs.",
+            "steps": [
+              "Review the sample material and finished-piece accounts used by the example.",
+              "Trace a purchase and sale through the inventory, revenue and cost accounts.",
+              "Review a customer return or correction and its source link.",
+              "Compare the month-end result with the remaining material value."
+            ],
+            "checks": [
+              "Metal, gemstone and finished-piece amounts are illustrative and do not claim commodity or fair-value accounting.",
+              "Customer deposits, hallmarking, consignment, appraisal and workshop job costing are not implemented.",
+              "The pack is a bookkeeping preview; specialist treatment and runtime replay are outside this candidate contract."
+            ]
+          },
+          "file": "jewelry-studio-1.0.0.json",
+          "sha256": "f9f4db604b8ab4f04ebfbc5b82fc9bd30d641acad18177ccfaae642784eb403b"
+        },
+        "files": {
+          "pack.json": "f9f4db604b8ab4f04ebfbc5b82fc9bd30d641acad18177ccfaae642784eb403b",
+          "structure.json": "ef069bf95a6359fd50ad5d42ae50071a79e9996fd9ad37218c25ac33e4d0efcf"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-jewelry-studio",
+        "version": "1.0.0",
+        "archive_bytes": 17042,
+        "archive_sha256": "1dc43f5d1c837e4f223859155125b48c7517cd684b41ffda8546b2d3d947217f",
+        "manifest_sha256": "b7d5c4f54af5c4d345e1b8fa87334a9110f659a9e980f98c5638cb0810074629",
+        "files": {
+          "pack.json": "f9f4db604b8ab4f04ebfbc5b82fc9bd30d641acad18177ccfaae642784eb403b",
+          "structure.json": "ef069bf95a6359fd50ad5d42ae50071a79e9996fd9ad37218c25ac33e4d0efcf"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-light-manufacturing",
+      "version": "1.0.0",
+      "name": "Maple Bench Works",
+      "description": "Light manufacturing. Light-manufacturing bookkeeping example; bills of material, production planning, work orders and recipes are not implemented.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-light-manufacturing/",
+      "requires": {
+        "core": "1.0.0",
+        "inventory": "1.0.0",
+        "purchasing": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-light-manufacturing",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Maple Bench Works",
+        "description": "Light manufacturing. Light-manufacturing bookkeeping example; bills of material, production planning, work orders and recipes are not implemented.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-light-manufacturing/",
+        "requires": {
+          "core": "1.0.0",
+          "inventory": "1.0.0",
+          "purchasing": "1.0.0"
+        },
+        "sample": {
+          "id": "light-manufacturing",
+          "version": "1.0.0",
+          "name": "Maple Bench Works",
+          "business": "Light manufacturing",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "preview_only",
+          "capability_note": "Light-manufacturing bookkeeping example; bills of material, production planning, work orders and recipes are not implemented.",
+          "scenario": {
+            "id": "workshop-conversion",
+            "title": "Review a simple materials-to-sales example",
+            "goal": "Use a light-manufacturing bookkeeping example to inspect material purchases, finished-goods movement, sales and operating costs.",
+            "steps": [
+              "Review the sample material and finished-goods balances at the start of the example.",
+              "Trace purchases and stock issues to their ledger accounts.",
+              "Review the finished-goods sale, customer settlement and any returned quantity.",
+              "Compare the period result and closing stock with the stated fixture checkpoints."
+            ],
+            "checks": [
+              "This does not implement bills of material, production orders, work-in-progress or overhead absorption.",
+              "The conversion amounts are fixed teaching data, not a production-costing policy.",
+              "The pack is a bookkeeping preview; production costing and conversion controls are outside the current module."
+            ]
+          },
+          "file": "light-manufacturing-1.0.0.json",
+          "sha256": "db334ecd674b99317e15482f0ac04e1e80736a9863195787bb64599f881fe480"
+        },
+        "files": {
+          "pack.json": "db334ecd674b99317e15482f0ac04e1e80736a9863195787bb64599f881fe480",
+          "structure.json": "f9ddbeebd2efda50bf8aaa9f2290542fa67a16cc4aafffc2326687b42777b15b"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-light-manufacturing",
+        "version": "1.0.0",
+        "archive_bytes": 17113,
+        "archive_sha256": "37aee8d6732a01e414c049e41c07fa51caa0c7985adb1eff8c57c5dc5397859d",
+        "manifest_sha256": "01c18d99e3805ce5d932a865d1d73014c3e1c046e082f077a3a9ba923fa375d0",
+        "files": {
+          "pack.json": "db334ecd674b99317e15482f0ac04e1e80736a9863195787bb64599f881fe480",
+          "structure.json": "f9ddbeebd2efda50bf8aaa9f2290542fa67a16cc4aafffc2326687b42777b15b"
+        }
+      }
+    },
+    {
+      "type": "sample",
+      "slug": "sample-service-workshop",
+      "version": "1.0.0",
+      "name": "Wheel & Spoke Workshop",
+      "description": "Service workshop. Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.",
+      "author": "PHP Ledger",
+      "licence": "CC0-1.0",
+      "homepage": "https://phpledger.com/directory/sample-service-workshop/",
+      "requires": {
+        "core": "1.0.0",
+        "inventory": "1.0.0",
+        "purchasing": "1.0.0"
+      },
+      "manifest": {
+        "type": "sample",
+        "slug": "sample-service-workshop",
+        "version": "1.0.0",
+        "contract": 1,
+        "name": "Wheel & Spoke Workshop",
+        "description": "Service workshop. Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.",
+        "author": "PHP Ledger",
+        "licence": "CC0-1.0",
+        "homepage": "https://phpledger.com/directory/sample-service-workshop/",
+        "requires": {
+          "core": "1.0.0",
+          "inventory": "1.0.0",
+          "purchasing": "1.0.0"
+        },
+        "sample": {
+          "id": "service-workshop",
+          "version": "1.0.0",
+          "name": "Wheel & Spoke Workshop",
+          "business": "Service workshop",
+          "source_count": 85,
+          "journal_count": 83,
+          "draft_count": 3,
+          "status": "preview_only",
+          "capability_note": "Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.",
+          "scenario": {
+            "id": "job-card",
+            "title": "Keep customer property separate from workshop stock",
+            "goal": "Follow parts, labour, customer-owned property and settlement examples without treating a job card as a posted module.",
+            "steps": [
+              "Review the opening workshop stock and the separate customer-owned bicycle reference.",
+              "Trace a parts purchase and a labour/service sale through the ledger.",
+              "Review the customer receipt, supplier payment and returned part.",
+              "Confirm that customer-owned property does not enter the inventory valuation."
+            ],
+            "checks": [
+              "Customer-owned property is excluded from stock balances and valuation.",
+              "The pack does not implement job cards, custody, scheduling or work-in-progress costing.",
+              "Parts and service income remain distinguishable in the teaching scenario."
+            ]
+          },
+          "file": "service-workshop-1.0.0.json",
+          "sha256": "7510c8ea6052243ad7aa0b70049adef0fa6d7a44a5af3431be9338536a068ea9"
+        },
+        "files": {
+          "pack.json": "7510c8ea6052243ad7aa0b70049adef0fa6d7a44a5af3431be9338536a068ea9",
+          "structure.json": "54491faa91445e606231b7d21287047b03ab66151837fbe40da89c01cd1b87d2"
+        }
+      },
+      "inventory": {
+        "schema": 1,
+        "type": "sample",
+        "slug": "sample-service-workshop",
+        "version": "1.0.0",
+        "archive_bytes": 18849,
+        "archive_sha256": "39f32f77351257dc3c1661b5856da28799bc3d497995553d5247970296654e0e",
+        "manifest_sha256": "3c68526280ed3408a272ccfe2f82c454a62b6368213b6f86f8c47c977834f679",
+        "files": {
+          "pack.json": "7510c8ea6052243ad7aa0b70049adef0fa6d7a44a5af3431be9338536a068ea9",
+          "structure.json": "54491faa91445e606231b7d21287047b03ab66151837fbe40da89c01cd1b87d2"
+        }
+      }
+    }
+  ]
+}

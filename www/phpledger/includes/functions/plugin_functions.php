@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/shared_demo_functions.php';
 
 /**
  * The plugin runtime: package manifests, the loader, activation state, options and plugin
@@ -408,8 +409,28 @@ function pl_plugin_record_failure(string $slug, string $message): void
 }
 
 /** Only an installation administrator changes what code runs here (B44). */
+function pl_plugin_require_mutation(int $actorId): void
+{
+    pl_plugin_require_admin($actorId);
+    if (pl_shared_demo_enabled()) { throw new DomainException('The shared demo host manages executable packages. Package changes are unavailable to public visitors.'); }
+}
+
+function pl_plugin_bootstrap_initial_owner(int $actorId): void
+{
+    if (!pl_user_can($actorId, 0, 'installation.admin') && (int)DB::queryFirstField('SELECT COUNT(*) FROM pl_companies') === 0) {
+        require_once __DIR__ . '/installation_state_functions.php';
+        require_once __DIR__ . '/install_web_functions.php';
+        $receipt=pl_install_read_state('installed.json');
+        $databaseId=pl_install_database_identity(['host'=>DB::$host,'port'=>DB::$port,'database'=>DB::$dbName]);
+        if ($actorId > 0 && ($receipt['format'] ?? null) === 1 && is_string($receipt['database_id'] ?? null) && hash_equals($databaseId,$receipt['database_id']) && is_int($receipt['initial_owner_id'] ?? null) && $receipt['initial_owner_id'] === $actorId) {
+            pl_set_installation_grant($actorId,$actorId,'installation.admin',true,'Initial installed owner package access before first business',true);
+        }
+    }
+}
+
 function pl_plugin_require_admin(int $actorId): void
 {
+    pl_plugin_bootstrap_initial_owner($actorId);
     if (!pl_user_can($actorId, 0, 'installation.admin')) {
         throw new DomainException('Only an installation administrator can install, activate or remove packages.');
     }
@@ -583,6 +604,7 @@ function pl_plugin_auto_deactivate(string $slug, string $reason): void
  */
 function pl_plugin_install(int $actorId, string $slug, string $trust, string $reason, string $key, array $acknowledgements = []): array
 {
+    pl_plugin_require_mutation($actorId);
     pl_demo_require_setup_action();
     $slug = pl_plugin_slug($slug);
     $key = pl_request_key($key);
@@ -636,6 +658,7 @@ function pl_plugin_acknowledgements(): array
  */
 function pl_plugin_activate(int $actorId, string $slug, string $reason, string $key): array
 {
+    pl_plugin_require_mutation($actorId);
     pl_demo_require_setup_action();
     $slug = pl_plugin_slug($slug);
     $key = pl_request_key($key);
@@ -674,6 +697,7 @@ function pl_plugin_activate(int $actorId, string $slug, string $reason, string $
 /** @return array<string, mixed> */
 function pl_plugin_deactivate(int $actorId, string $slug, string $reason, string $key): array
 {
+    pl_plugin_require_mutation($actorId);
     pl_demo_require_setup_action();
     $slug = pl_plugin_slug($slug);
     $key = pl_request_key($key);
@@ -711,6 +735,7 @@ function pl_plugin_deactivate(int $actorId, string $slug, string $reason, string
  */
 function pl_plugin_uninstall(int $actorId, string $slug, bool $deleteData, string $reason, string $key): array
 {
+    pl_plugin_require_mutation($actorId);
     pl_demo_require_setup_action();
     $slug = pl_plugin_slug($slug);
     $key = pl_request_key($key);
@@ -1156,10 +1181,11 @@ function pl_plugin_outbound_handlers(int $companyId, int $bookId): array
  * Every member is checked before a single byte is written, and ZipArchive::extractTo() is never
  * used, exactly as the core updater's stager already does.
  *
- * @return array{slug:string, manifest:array<string, mixed>, files_digest:string}
+ * @return array{slug:string, manifest:array<string, mixed>, files_digest:string, type?:string}
  */
 function pl_plugin_stage_archive(int $actorId, string $archive): array
 {
+    pl_plugin_require_mutation($actorId);
     pl_plugin_require_admin($actorId);
     if (!class_exists(ZipArchive::class)) {
         throw new DomainException('Enable PHP ZIP to upload a package.');
@@ -1205,7 +1231,13 @@ function pl_plugin_stage_archive(int $actorId, string $archive): array
             if ($expanded > 40000000) {
                 throw new DomainException('The expanded package exceeds the supported size.');
             }
-            $members[pl_plugin_manifest_path($name)] = $index;
+            $member = pl_plugin_manifest_path($name);
+            foreach (array_keys($members) as $existing) { if (strtolower($existing) === strtolower($member)) { throw new DomainException('Duplicate package archive member.'); } }
+            $members[$member] = $index;
+        }
+        if (isset($members['package.json'])) {
+            if (isset($members['plugin.json'])) { throw new DomainException('A package must have one manifest type.'); }
+            return pl_sample_stage_members($actorId,$zip,$members,$slug);
         }
         if (!isset($members['plugin.json'])) {
             throw new DomainException('A package archive carries plugin.json beside its files.');
@@ -1254,7 +1286,12 @@ function pl_plugin_write_staged(string $path, string $bytes): void
 /** Used to undo a staging that did not validate, and by an uninstall that may delete files. */
 function pl_plugin_remove_directory(string $path): bool
 {
-    $base = pl_plugin_directory();
+    return pl_package_remove_directory($path, pl_plugin_directory());
+}
+
+/** Remove only an explicitly scoped private package tree. */
+function pl_package_remove_directory(string $path, string $base): bool
+{
     $resolved = str_replace('\\', '/', (string) realpath($path));
     if ($resolved === '' || !str_starts_with($resolved, str_replace('\\', '/', $base) . '/') || !is_dir($resolved)) {
         return false;
@@ -1297,6 +1334,7 @@ function pl_plugin_cards(): array
         ];
     }
     foreach (pl_plugin_records() as $slug => $record) {
+        if ($record['type'] === 'sample') { continue; }
         /** @var array<string, mixed> $manifest */
         $manifest = $record['manifest'];
         $problem = '';

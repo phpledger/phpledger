@@ -163,7 +163,7 @@ class PackageTests(unittest.TestCase):
         # resources/distribution/ holds catalogue and hosting-panel manifests. Like
         # docker/release/*, they describe how to deploy a release; they are never
         # unzipped into one, so an entry here would ship build tooling to operators.
-        for prefix in ("docs/", "resources/distribution/", "resources/tax/", "resources/integrations/", "resources/sample-data/", "resources/ui/", "tests/"):
+        for prefix in ("docs/", "resources/distribution/", "resources/tax/", "resources/integrations/", "resources/sample-data/", "resources/demo-packs/", "resources/ui/", "tests/"):
             self.assertFalse(any(name.startswith(prefix) for name in destinations), prefix)
 
     def test_recovery_loader_matches_the_published_release(self):

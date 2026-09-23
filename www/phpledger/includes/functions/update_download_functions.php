@@ -18,6 +18,12 @@ function pl_update_download_url_allowed(string $url): bool
  */
 function pl_update_download_official(array $metadata, string $directory): string
 {
+    return pl_download_verified_archive($metadata, $directory, 'https://github.com/phpledger/phpledger/releases/download/v' . ($metadata['version'] ?? '') . '/phpledger-' . ($metadata['version'] ?? '') . '.zip');
+}
+
+/** Download bytes already authenticated by a pinned publisher envelope. */
+function pl_download_verified_archive(array $metadata, string $directory, string $initialUrl): string
+{
     $version = $metadata['version'] ?? '';
     $expectedSize = $metadata['archive_bytes'] ?? 0;
     $expectedHash = $metadata['archive_sha256'] ?? '';
@@ -34,7 +40,7 @@ function pl_update_download_official(array $metadata, string $directory): string
     if ($file === false) { throw new RuntimeException('Private download storage is not writable.'); }
     $success = false;
     try {
-        $url = 'https://github.com/phpledger/phpledger/releases/download/v' . $version . '/phpledger-' . $version . '.zip';
+        $url = $initialUrl;
         for ($redirects = 0; $redirects <= 5; $redirects++) {
             if (!pl_update_download_url_allowed($url)) { throw new DomainException('Release download redirected outside the supported publisher hosts.'); }
             if (!ftruncate($file, 0) || !rewind($file)) { throw new RuntimeException('Private download could not be reset.'); }

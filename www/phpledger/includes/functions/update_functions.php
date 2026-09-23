@@ -182,13 +182,10 @@ function pl_update_version_rank(string $version): string
     return str_ireplace('-preview', '-rc', $version);
 }
 
-function pl_update_verify_metadata(string $envelope, string $publicKey, string $channel, string $current): array
+/** Shared cryptographic envelope verification; each caller validates its own payload contract. */
+function pl_verify_publisher_envelope(string $envelope, string $publicKey): array
 {
-    if (strlen($envelope) > 4000000 || !in_array($channel, ['stable', 'preview'], true)) { throw new DomainException('Invalid update metadata or channel.'); }
-    // Without a well-formed installed version there is no downgrade protection to compare against.
-    if (!preg_match('/^\d+\.\d+\.\d+(?:-(?:preview|beta|rc)(?:\.[0-9]+)?)?$/D', $current)) {
-        throw new DomainException('The installed release version could not be determined. Use the documented hosting-panel upgrade procedure.');
-    }
+    if (strlen($envelope) > 4000000) { throw new DomainException('Publisher metadata is too large.'); }
     $message = json_decode($envelope, true, 8, JSON_THROW_ON_ERROR);
     $payload = base64_decode((string) ($message['payload'] ?? ''), true);
     $signature = base64_decode((string) ($message['signature'] ?? ''), true);
@@ -198,7 +195,19 @@ function pl_update_verify_metadata(string $envelope, string $publicKey, string $
         || openssl_verify($payload, $signature, $key, OPENSSL_ALGO_SHA256) !== 1) {
         throw new DomainException('Release signature does not match the pinned publisher key.');
     }
-    $metadata = json_decode($payload, true, 16, JSON_THROW_ON_ERROR);
+    $metadata = json_decode($payload, true, 32, JSON_THROW_ON_ERROR);
+    if (!is_array($metadata)) { throw new DomainException('Invalid signed publisher document.'); }
+    return $metadata;
+}
+
+function pl_update_verify_metadata(string $envelope, string $publicKey, string $channel, string $current): array
+{
+    if (strlen($envelope) > 4000000 || !in_array($channel, ['stable', 'preview'], true)) { throw new DomainException('Invalid update metadata or channel.'); }
+    // Without a well-formed installed version there is no downgrade protection to compare against.
+    if (!preg_match('/^\d+\.\d+\.\d+(?:-(?:preview|beta|rc)(?:\.[0-9]+)?)?$/D', $current)) {
+        throw new DomainException('The installed release version could not be determined. Use the documented hosting-panel upgrade procedure.');
+    }
+    $metadata = pl_verify_publisher_envelope($envelope, $publicKey);
     $version = $metadata['version'] ?? '';
     if (($metadata['schema'] ?? null) !== 1 || !is_string($version) || !preg_match('/^\d+\.\d+\.\d+(?:-(?:preview|beta|rc)(?:\.[0-9]+)?)?$/D', $version)
         || ($metadata['channel'] ?? '') !== $channel || (($channel === 'stable') === str_contains($version, '-'))

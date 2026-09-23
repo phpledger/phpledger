@@ -101,6 +101,7 @@ $suites[] = 'payroll_test.php';
 // directory of its own and points PL_PLUGIN_DIRECTORY at it; the last test clears both, so no
 // other suite and no child process the sweep starts ever sees a fixture package.
 $suites[] = 'plugin_test.php';
+$suites[] = 'sample_package_test.php';
 $suites[] = 'secret_store_test.php';
 $suites[] = 'schedules_test.php';
 $suites[] = 'plugin_surface_test.php';
@@ -214,6 +215,7 @@ if (($argv[1] ?? '') === '--suite=i18n') {
     $suites = ['i18n_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=database-platform') { $suites = ['installer_test.php', 'database_namespace_test.php']; }
+if (($argv[1] ?? '') === '--suite=sample-packages') { $suites = ['sample_package_test.php']; }
 foreach ($suites as $suite) {
     if (is_file(__DIR__ . '/' . $suite)) {
         require __DIR__ . '/' . $suite;

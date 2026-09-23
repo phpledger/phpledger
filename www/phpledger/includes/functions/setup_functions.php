@@ -297,8 +297,9 @@ function pl_setup_company(int $actorId, array $input, string $requestKey): array
         throw new DomainException('Choose a new business, existing business, or isolated sample.');
     }
     if ($mode === 'sample') {
-        // Whatever form or request supplied the draft, production never creates sample books.
+        // Ordinary installations create isolated practice books only from installed validated packages.
         pl_require_sample_companies_allowed();
+        if (!pl_sample_repository_fallback() && !isset(pl_demo_pack_catalog()[(string)($input['sample_pack'] ?? '')]['package_slug'])) { throw new DomainException('Choose a validated installed sample package for a practice company.'); }
     }
     if (!is_string($input['template_digest'] ?? null) || !hash_equals($template['digest'], $input['template_digest'])) {
         throw new DomainException('The starter chart changed. Review its latest preview before confirming.');

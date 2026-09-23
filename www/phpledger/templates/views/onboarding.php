@@ -41,6 +41,7 @@ $startLabels = [
     'sample' => pl_t('Explore a sample company'),
 ];
 ?>
+<p><a class="link" href="<?= pl_e(pl_url('/packages')) ?>"><?= pl_e(pl_t('Get more sample companies')) ?></a> · <a class="link" href="https://phpledger.com/directory/" target="_blank" rel="noopener"><?= pl_e(pl_t('Public package directory')) ?></a></p>
 <section class="bench-stage" aria-labelledby="onboarding-title">
 <ol class="bench-tray is-labelled" aria-label="<?= pl_e(pl_t('Business setup stages')) ?>">
 <?php foreach (array_values($stages) as $index => $label): ?>
