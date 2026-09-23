@@ -110,6 +110,7 @@ The following repository-relative paths are the implementation delta from the re
 - `resources/sample-structures/trader-1.1.0.json`
 - `resources/ui/ext/guidance.css`
 - `resources/ui/ext/reports.css`
+- `resources/ui/ext/setup.css`
 - `tests/cash_control_test.php`
 - `tests/concurrency_worker.php`
 - `tests/demo_pack_test.php`
