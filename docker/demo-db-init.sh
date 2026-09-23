@@ -1,4 +1,6 @@
 #!/bin/sh
+# MySQL sources non-executable init scripts. Keep strict options local in either mode.
+(
 set -eu
 # Generated hexadecimal passwords avoid SQL interpolation ambiguities.
 for value in "$PL_DEMO_WEB_PASSWORD" "$PL_DEMO_RESET_PASSWORD"; do
@@ -13,3 +15,4 @@ GRANT ALL PRIVILEGES ON phpledger_demo.* TO 'ledger_demo_web'@'%';
 CREATE USER 'ledger_demo_reset'@'%' IDENTIFIED BY '${PL_DEMO_RESET_PASSWORD}';
 GRANT ALL PRIVILEGES ON phpledger_demo.* TO 'ledger_demo_reset'@'%';
 SQL
+)
