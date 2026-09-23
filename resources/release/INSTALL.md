@@ -2,7 +2,7 @@
 
 > Minimum PHP 8.2; PHP 8.3 is recommended for deployment. Use a current security patch and run preflight with the same PHP version/extensions as web requests. The package includes compatible production dependencies; do not bypass Composer platform checks.
 
-This guide installs PHP Ledger into an **empty, dedicated database**. The short `README.txt` inside the package covers the usual upload-and-open installation; this guide adds the details. For any existing database, first read [UPGRADE.md](UPGRADE.md). Never run SQL dumps from the historical application against this database.
+This guide installs PHP Ledger into an **empty installation namespace**. A dedicated database remains recommended. The short `README.txt` inside the package covers the usual upload-and-open installation; this guide adds the details. For any existing database, first read [UPGRADE.md](UPGRADE.md). Never run SQL dumps from the historical application against this database.
 
 ## 1. Prepare the host
 
@@ -12,7 +12,7 @@ Arrange the following with your hosting administrator:
 |---|---|
 | PHP | 8.2 or newer for command-line and web requests; 8.3 recommended. The tested matrix is 8.2/8.3/8.4; other branches require validation. |
 | Extensions | BCMath, PDO, PDO MySQL, mbstring, curl, OpenSSL, fileinfo and working PHP sessions; standard JSON support must be available. |
-| Database | MySQL 8.4 LTS or MariaDB 10.4 or newer (10.6 or newer recommended), InnoDB. The automated suites run on MySQL 8.4 and MariaDB 10.4, 10.6, 10.11 and 11.4. |
+| Database | MySQL 8.0.19 or newer in the 8.0 branch, MySQL 8.4 LTS (recommended), or MariaDB 10.4 or newer (10.6 or newer recommended), InnoDB. The automated suites run on MySQL 8.4 and MariaDB 10.4, 10.6, 10.11 and 11.4. |
 | Web server | Apache or LiteSpeed reading the package's `.htaccess` files, for an upload into any website folder. Or any web server whose document root is `www/phpledger/public` with a front-controller fallback. HTTPS with a valid certificate is expected. Setup and the application also run over plain `http://`, warning on every screen, so a site can be tried before its certificate exists; sign-in details then travel unencrypted and Connections stay unavailable. |
 | Operator access | A hosting file manager or FTP to upload the package, and a hosting panel to create the database. Terminal access remains available for CLI setup and expert recovery. |
 | Session storage | A private writable PHP session directory, usable by the web PHP process. Match CLI and web configuration when checking it. |
@@ -177,3 +177,32 @@ The outbound dispatcher has no delivery adapter and is not part of the installat
 The country hint may send the visitor's public IP address from the server to `https://api.country.is/` once per browser session. The request is bounded; manual selection remains available when it fails or outbound access is blocked. It does not establish tax rules or choose the business's accounting policy. If outbound requests are disallowed, enforce that through hosting egress controls; no API key is needed.
 
 Forwarded IP headers are accepted only from explicitly configured trusted proxies (`PL_TRUSTED_PROXY_IPS`); have the host overwrite incoming forwarded headers before enabling that setting. Keep it unset for direct hosting. Follow [UPGRADE.md](UPGRADE.md) to establish and rehearse private backups before a pilot.
+
+
+## Table namespaces and cloud database TLS
+
+Each installation chooses `PL_DB_PREFIX` (private configuration: `db_prefix`), default `pl_`. The ordinary installer offers this field. Use 2–17 lowercase letters, digits or underscores, starting with a letter and ending with an underscore (`^[a-z][a-z0-9_]{0,15}_$`). For example, `accounts_` and `training_` can share one database. Prefixes cannot overlap, and an occupied namespace cannot be claimed by a fresh installer. Tables, views, guard triggers, constraints, migration receipts, ORM records and recovery snapshots use the same resolver. Historical migration files retain their original checksums.
+
+Keep the original prefix for the lifetime of an installation. Its private installed marker and installer database identity bind the namespace; editing configuration to select another prefix is refused. This is not a table-renaming tool. Existing installations with no prefix setting retain `pl_`. Recovery snapshots bind both database and prefix, and restore preserves neighboring namespaces. Cross-namespace foreign keys, views and triggers prevent automatic recovery. Stored routines/events still require operator-led recovery. A shared MariaDB database must already have the compatible Unicode default collation: the installer will not alter a populated neighbor's database defaults. Prefixes do not provide security isolation: an account granted the whole database can read its neighbors. Prefer separate databases and accounts for security boundaries.
+
+Cloud connections use the same MeekroDB/PDO connection as local installations. Configure these PHP environment variables, or equivalent keys in private `config.local.php`:
+
+| Environment | Private key | Meaning |
+|---|---|---|
+| `PL_DB_SSL_CA` | `db_ssl_ca` | Server-side path to the provider CA certificate/bundle; also available in the ordinary installer. |
+| `PL_DB_SSL_VERIFY` | `db_ssl_verify` | Boolean, default `true`: verify the server certificate. Keep enabled on real networks. |
+| `PL_DB_SSL_CERT` | `db_ssl_cert` | Optional client certificate path; configure with its key. |
+| `PL_DB_SSL_KEY` | `db_ssl_key` | Optional private client key path, outside the web root. |
+
+Saved private TLS settings take precedence over environment defaults; change the private configuration when replacing certificates after installation. Files must be readable by web PHP and CLI/recovery PHP. Certificate/key paths are not uploaded certificate contents. CA or client-certificate configuration requires a negotiated TLS cipher: a plaintext fallback is refused. Use the provider's DNS hostname matching its certificate, not an IP address or unrelated alias. The shared public demo ignores submitted database settings, fixes `pl_`, and takes TLS settings from its host environment.
+
+MySQL 8.0.19 is the minimum 8.0 patch because unchanged migrations use `DROP CONSTRAINT`, introduced in [MySQL 8.0.19](https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-19.html). This is an engine syntax floor, not advice to deploy an obsolete security patch. Use a maintained current patch, preferably 8.4 LTS. MySQL `CREATE TRIGGER` has no `DETERMINISTIC` characteristic; the binary-log/trust/privilege preflight above remains mandatory. Providers that cannot supply InnoDB foreign keys and immutable triggers are unsupported.
+
+Provider documentation reviewed 23 September 2026; **these are setup references, not completed managed-provider acceptance tests**:
+
+- AWS RDS MySQL: obtain the applicable [RDS trust certificate](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html), set the CA path, and arrange the [trigger parameter-group setting](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Troubleshooting.html) when binary logging requires it.
+- Azure Database for MySQL Flexible Server: follow its [TLS certificate guidance](https://learn.microsoft.com/en-gb/azure/mysql/flexible-server/security-tls) and verify the actual [server parameters](https://learn.microsoft.com/en-us/azure/mysql/flexible-server/concepts-server-parameters) with installer preflight.
+- Aiven for MySQL: use the service hostname and [project CA certificate](https://aiven.io/docs/platform/concepts/tls-ssl-certificates), with the existing [PHP PDO connection guidance](https://aiven.io/docs/products/mysql/howto/connect-with-php) as the provider reference. Verify trigger privileges during installation.
+- Google Cloud SQL for MySQL: select the intended CA mode and configure [server/client certificates](https://docs.cloud.google.com/sql/docs/mysql/authorize-ssl) as required by the instance. Keep certificate identity verification enabled and verify trigger preflight; a service connector/proxy deployment requires its own host-specific validation.
+
+Before accepting a provider, run installation, a balanced posting, refusal of direct journal mutation, backup and restoration in an isolated namespace, and a real TLS connection using the intended PHP runtime. No provider credentials or business data are needed in project fixtures.

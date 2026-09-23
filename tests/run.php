@@ -108,6 +108,7 @@ $suites[] = 'plugin_surface_test.php';
 $suites[] = 'asset_test.php';
 $suites[] = 'year_end_test.php';
 $suites[] = 'installation_notice_test.php';
+$suites[] = 'database_namespace_test.php';
 $suites[] = 'period_close_test.php';
 $suites[] = 'cash_count_test.php';
 if (($argv[1] ?? '') === '--suite=period-close') {
@@ -212,6 +213,7 @@ if (($argv[1] ?? '') === '--suite=year-end') { $suites = ['ledger_test.php','con
 if (($argv[1] ?? '') === '--suite=i18n') {
     $suites = ['i18n_test.php'];
 }
+if (($argv[1] ?? '') === '--suite=database-platform') { $suites = ['installer_test.php', 'database_namespace_test.php']; }
 foreach ($suites as $suite) {
     if (is_file(__DIR__ . '/' . $suite)) {
         require __DIR__ . '/' . $suite;

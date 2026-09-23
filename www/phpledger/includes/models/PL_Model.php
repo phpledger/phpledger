@@ -4,12 +4,8 @@ declare(strict_types=1);
 /**
  * The base for PHP Ledger's first MeekroORM records (release plan 1.2, milestone M7; B12).
  *
- * NO TABLE PREFIX, DELIBERATELY. A configurable table prefix is 1.3 work. Every model names its
- * table literally, exactly as the rest of the application does, and `_tablename()` consults no
- * setting. When the prefix lands, it is applied in ONE place — this class's `_tablename()` — and
- * every model inherits it. Until then `$_tablename` is always explicit, because a model whose
- * table name was inferred from its class name would be the one place that silently disagreed with
- * the prefix later.
+ * Every model names its canonical table explicitly. _tablename() resolves the installation
+ * prefix through the same database helper used by SQL and recovery.
  *
  * WHAT IT COSTS, MEASURED, NOT ASSUMED. MeekroORM discovers a model's columns by asking the
  * server: MeekroORMTable::table_struct() calls MeekroDB::columnList(), which on MySQL and MariaDB
@@ -32,8 +28,7 @@ declare(strict_types=1);
 abstract class PL_Model extends MeekroORM
 {
     /**
-     * Resolve the table for a model. 1.2 has no table prefix; when 1.3 adds one, it is applied
-     * here and nowhere else.
+     * Resolve the canonical model table through the installation namespace.
      */
     public static function _tablename()
     {
@@ -41,7 +36,7 @@ abstract class PL_Model extends MeekroORM
         if (!is_string($table) || $table === '') {
             throw new MeekroORMException(static::class . ' must name its table explicitly: PHP Ledger does not infer table names.');
         }
-        return $table;
+        return pl_database_table($table);
     }
 
     /** The record as a plain array, for a template, a JSON read or an audit snapshot. */

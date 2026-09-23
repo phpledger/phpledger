@@ -414,7 +414,7 @@ function pl_update_begin(string $root, string $archive, string $envelope, string
         // update_channel_functions.php travels with update_web_functions.php (1.2 M12): the
         // maintenance page reads pl_update_mode() from it, so it must be present wherever
         // that page's copy of update_web_functions.php runs.
-        foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'update_channel_functions.php'] as $name) {
+        foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'database_functions.php', 'update_channel_functions.php'] as $name) {
             pl_update_write($operation . '/runtime/' . $name, (string) file_get_contents(__DIR__ . '/' . $name));
         }
         pl_update_write($operation . '/runtime/meekrodb.php', (string) file_get_contents($root . '/vendor/sergeytsalkov/meekrodb/db.class.php'));

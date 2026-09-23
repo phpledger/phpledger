@@ -115,3 +115,8 @@ Check the six-step experience on desktop, tablet and mobile. Have a person unfam
 Expected implementation areas: shared bootstrap/config handling, existing install/preflight/migrate/create-admin services, a guarded installer controller/view, configuration persistence and release docs. No new accounting schema or migration content is proposed for the wizard itself; installation executes the existing migration chain. An additional installation-state schema is not assumed.
 
 References: [current package installation](../resources/release/INSTALL.md), [upgrade contract](../resources/release/UPGRADE.md), [architecture](ARCHITECTURE.md), [module roadmap](MODULE-ROADMAP.md), and [WordPress's installation flow](https://developer.wordpress.org/advanced-administration/before-install/howto-install/). The WordPress experience informs usability, not PHP Ledger's financial or permission rules. No Google Drive reference was required. This plan makes no production, DNS, schema or provider change.
+
+
+## 1.3 namespace and TLS boundary
+
+The ordinary database screen accepts a validated table prefix and a server-side TLS CA path. Prefix is part of the reviewed database identity, persisted private configuration and installed receipt; changing it after binding is refused. Existing receipts/configuration without a prefix mean `pl_`. The shared actual-installer demo forces `pl_` and host database/TLS settings server-side, ignoring submitted alternatives. Metadata checks and completion counts are installation-scoped; a prefixed fresh installation may coexist with unrelated tables. See the packaged [installation guide](../resources/release/INSTALL.md#table-namespaces-and-cloud-database-tls) for configuration and provider limits.

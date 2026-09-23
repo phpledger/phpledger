@@ -189,3 +189,8 @@ The phpledger.com endpoint is a small PHP script that validates, rate-limits and
 - **Email.** Invitations and resets use the outbound queue, with a copyable link when no mail service is configured.
 - **Hooks.** User created, invited, role changed and profile updated; a filter on capabilities.
 - **API.** Scopes aligned with capabilities, and a "current user" endpoint.
+
+
+### 1.3 database-platform implementation note (23 September 2026)
+
+The namespace/TLS lane implements one identifier resolver and lexical SQL adapter, existing prefix-aware MeekroORM records, scoped installation/recovery, TLS options and MySQL 8.0.19+ support (8.4 recommended). Historical migration bytes remain immutable: canonical identifiers are adapted at execution, with an exact compatibility case for migration 027's metadata query. New SQL may use `{{table}}` tokens; this release does not mechanically rewrite every historical/runtime query. Financial query/lock semantics remain unchanged. PostgreSQL and SQLite statement sets remain future work. Provider guidance is documented, but managed-provider acceptance is not claimed. The lane's exact evidence is recorded in AGENT_MESSAGES.MD and the release handoff.

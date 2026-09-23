@@ -4,7 +4,7 @@ declare(strict_types=1);
 /**
  * A person with an account on this installation (release plan 1.2, M7).
  *
- * Read the class comment on PL_Model first: there is no table prefix in 1.2, and this record
+ * Read the class comment on PL_Model first: it resolves the installation prefix, and this record
  * costs one `SHOW COLUMNS` per request that uses it, so it belongs on administration screens and
  * nowhere near sign-in or posting.
  *

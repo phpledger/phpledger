@@ -56,7 +56,8 @@ try {
     }
     $receipt = [
         'format' => 1,
-        'database_id' => hash('sha256', json_encode([DB::$host, (int) DB::$port, DB::$dbName], JSON_THROW_ON_ERROR)),
+        'db_prefix' => pl_database_prefix(),
+        'database_id' => hash('sha256', json_encode([DB::$host, (int) DB::$port, DB::$dbName, pl_database_prefix()], JSON_THROW_ON_ERROR)),
         'initial_owner_id' => $ownerId,
         'completed_at' => gmdate('c'),
         'schema_receipts' => (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_schema_migrations'),

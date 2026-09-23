@@ -7,7 +7,8 @@ if (PHP_SAPI !== 'cli') {
 }
 $plInstallServices = dirname(__DIR__) . '/includes/functions/install_functions.php';
 if (!is_file($plInstallServices) || !is_file(dirname(__DIR__) . '/includes/functions/runtime_functions.php')
-    || !is_file(dirname(__DIR__) . '/includes/functions/database_platform_functions.php')) {
+    || !is_file(dirname(__DIR__) . '/includes/functions/database_platform_functions.php')
+    || !is_file(dirname(__DIR__) . '/includes/functions/database_functions.php')) {
     fwrite(STDERR, "Installation service files are missing. Verify the complete release package.\n");
     exit(1);
 }

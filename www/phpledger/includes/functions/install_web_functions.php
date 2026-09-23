@@ -120,7 +120,7 @@ function pl_install_suggested_public_url(array $server): string
 function pl_install_database_input(array $input): array
 {
     if (pl_shared_demo_enabled()) {
-        return pl_shared_demo_database();
+        return pl_database_configuration(pl_shared_demo_database() + ['db_prefix'=>'pl_']);
     }
     $get = static function (string $name) use ($input): string {
         $value = $input[$name] ?? '';
@@ -142,12 +142,14 @@ function pl_install_database_input(array $input): array
     if (!$local && strtolower($user) === 'root') {
         throw new InvalidArgumentException('A database on another server needs a dedicated database account, not the MySQL root account.');
     }
-    return ['host' => $host, 'port' => (int) $port, 'database' => $database, 'user' => $user, 'password' => $password];
+    return pl_database_configuration(['host' => $host, 'port' => (int) $port, 'database' => $database, 'user' => $user, 'password' => $password,
+        'db_prefix' => $get('db_prefix') ?: 'pl_', 'db_ssl_ca' => $get('db_ssl_ca'),
+        'db_ssl_cert' => $get('db_ssl_cert'), 'db_ssl_key' => $get('db_ssl_key'), 'db_ssl_verify' => $input['db_ssl_verify'] ?? true]);
 }
 
 function pl_install_database_identity(array $config): string
 {
-    return hash('sha256', json_encode([$config['host'], (int) $config['port'], $config['database']], JSON_THROW_ON_ERROR));
+    return hash('sha256', json_encode([$config['host'], (int) $config['port'], $config['database'], pl_database_prefix((string) ($config['db_prefix'] ?? 'pl_'))], JSON_THROW_ON_ERROR));
 }
 
 /** Configure the existing single MeekroDB connection; no parallel database layer. */
@@ -156,14 +158,7 @@ function pl_install_connect(array $config): void
     pl_install_require_runtime();
     require_once dirname(__DIR__, 4) . '/vendor/autoload.php';
     DB::disconnect();
-    DB::$host = $config['host'];
-    DB::$port = (int) $config['port'];
-    DB::$dbName = $config['database'];
-    DB::$user = $config['user'];
-    DB::$password = $config['password'];
-    DB::$encoding = 'utf8mb4';
-    DB::$nested_transactions = true;
-    pl_database_use_dialect();
+    pl_database_configure($config);
     DB::query("SET time_zone = '+00:00'");
 }
 
@@ -232,7 +227,7 @@ function pl_install_check_target(array $config, array $state): array
     if (isset($state['database_id']) && !hash_equals((string) $state['database_id'], $identity)) {
         throw new DomainException('This setup is already bound to another database. The existing installation was preserved.');
     }
-    $tables = DB::queryFirstColumn('SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = DATABASE()');
+    $tables = pl_install_tables();
     if (in_array('pl_users', $tables, true) && (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_users') > 0
         && !isset($state['owner_email'])) {
         throw new DomainException('This database already has users. Browser installation cannot claim an existing application.');
@@ -258,6 +253,7 @@ function pl_install_check_existing_configuration(array $runtime): void
         if (!is_array($existing)) {
             throw new DomainException('The existing private configuration needs operator review.');
         }
+        $existing = pl_database_configuration($existing);
         foreach ($runtime as $key => $value) {
             if (!array_key_exists($key, $existing) || (string) $existing[$key] !== (string) $value) {
                 throw new DomainException('The existing private configuration was preserved. Use its database settings or review it in your hosting panel.');
@@ -310,6 +306,7 @@ function pl_install_verify_runtime(array $config): void
     // Check the view definers using the normal runtime identity, not only schema credentials.
     $views = DB::queryFirstColumn("SELECT TABLE_NAME FROM information_schema.views WHERE table_schema = DATABASE()");
     foreach ($views as $view) {
+        if (!pl_database_owns($view)) { continue; }
         DB::query('SELECT * FROM %b LIMIT 0', $view);
     }
     DB::startTransaction();
@@ -381,7 +378,7 @@ function pl_install_finish(array $schemaConfig, array $runtimeConfig, string $em
     if (!is_file($operatorKey)) {
         pl_install_write_private($operatorKey, bin2hex(random_bytes(32)) . "\n", false);
     }
-    $receipt = ['format' => 1, 'database_id' => pl_install_database_identity($runtimeConfig), 'initial_owner_id' => $id,
+    $receipt = ['format' => 1, 'db_prefix' => pl_database_prefix(), 'database_id' => pl_install_database_identity($runtimeConfig), 'initial_owner_id' => $id,
         'completed_at' => gmdate('c'), 'schema_receipts' => (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_schema_migrations')];
     pl_install_save_state($receipt, 'installed.json');
     $state['phase'] = 'complete';

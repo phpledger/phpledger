@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+if (!function_exists('pl_database_prefix')) { require_once __DIR__ . '/database_functions.php'; }
+
 // Internal services shared by the separately guarded CLI and browser installers.
 require_once __DIR__ . '/runtime_functions.php';
 // The in-app updater loads this file (the NEW release's copy) inside a request that already
@@ -128,13 +130,14 @@ function pl_install_schema_state(?array $receipts, array $checksums, int $tableC
 /** @return list<string> */
 function pl_install_tables(): array
 {
-    return DB::queryFirstColumn('SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = DATABASE()');
+    return array_map(static fn(string $name): string => 'pl_' . substr($name, strlen(pl_database_prefix())),
+        array_values(array_filter(DB::queryFirstColumn('SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = DATABASE()'), 'pl_database_owns')));
 }
 
 /** @return list<string> */
 function pl_install_receipt_columns(): array
 {
-    return DB::queryFirstColumn('SELECT COLUMN_NAME FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = %s', 'pl_schema_migrations');
+    return DB::queryFirstColumn('SELECT COLUMN_NAME FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = %s', pl_database_table('pl_schema_migrations'));
 }
 
 /**
@@ -175,6 +178,7 @@ function pl_install_migration_versions(): array
 function pl_install_database_check(): array
 {
     pl_database_require_supported();
+    pl_database_assert_namespace();
     $checksums = [];
     foreach (glob(dirname(__DIR__, 2) . '/install/migrations/[0-9]*.php') ?: [] as $file) {
         $checksum = hash_file('sha256', $file);
@@ -212,11 +216,13 @@ function pl_migrate(?int $limit = null, ?float $seconds = null): array
         throw new InvalidArgumentException('Migration time budget must be positive.');
     }
     $startedAt = microtime(true);
+    // Serialize namespace claims across this database, including overlapping-prefix attempts.
     $lock = 'phpledger:migrate:' . substr(hash('sha256', (string) DB::queryFirstField('SELECT DATABASE()')), 0, 40);
     if ((int) DB::queryFirstField('SELECT GET_LOCK(%s, 10)', $lock) !== 1) {
         throw new DomainException('Another installer is running. Try again after it finishes.');
     }
     try {
+        pl_database_assert_namespace();
         $preflighted = false;
         if (!in_array('pl_schema_migrations', pl_install_tables(), true)) {
             // An untouched target means every migration is pending, so a server that cannot
@@ -228,7 +234,13 @@ function pl_migrate(?int $limit = null, ?float $seconds = null): array
             // Trigger variables take the database default collation; match the tables' collation so
             // comparisons inside triggers never mix collations. Hosting panels often default to another one.
             // The dialect hook translates the collation name for this server.
-            DB::query('ALTER DATABASE %b CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci', (string) DB::queryFirstField('SELECT DATABASE()'));
+            $otherTables = array_filter(DB::queryFirstColumn('SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()'), static fn(string $name): bool => !pl_database_owns($name));
+            $dialect = pl_database_dialect(DB::get());
+            $currentCollation = (string) DB::queryFirstField('SELECT DEFAULT_COLLATION_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = DATABASE()');
+            if ($otherTables !== [] && $currentCollation !== ($dialect['collation'] ?? 'utf8mb4_0900_ai_ci')) {
+                throw new DomainException('A shared MariaDB database must already use the required Unicode collation; ask the operator to configure it before installation.');
+            }
+            if ($otherTables === []) { DB::query('ALTER DATABASE %b CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci', (string) DB::queryFirstField('SELECT DATABASE()')); }
         }
         DB::query("CREATE TABLE IF NOT EXISTS pl_schema_migrations (
             version VARCHAR(100) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,

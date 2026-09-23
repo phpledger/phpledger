@@ -14,6 +14,11 @@ services:
       PL_DB_NAME: phpledger
       PL_DB_USER: phpledger
       PL_DB_PASSWORD: ${PL_DB_PASSWORD:?Set PL_DB_PASSWORD in .env}
+      PL_DB_PREFIX: ${PL_DB_PREFIX:-}
+      PL_DB_SSL_CA: ${PL_DB_SSL_CA:-}
+      PL_DB_SSL_VERIFY: ${PL_DB_SSL_VERIFY:-true}
+      PL_DB_SSL_CERT: ${PL_DB_SSL_CERT:-}
+      PL_DB_SSL_KEY: ${PL_DB_SSL_KEY:-}
       PL_SESSION_SECURE: "0"
       PL_PUBLIC_URL: http://127.0.0.1:${PL_WEB_PORT:-18200}
       PL_ALLOWED_ORIGINS: ${PL_ALLOWED_ORIGINS:-}

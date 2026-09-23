@@ -219,3 +219,10 @@ A published 0.6.0-preview installation has no automatic rollback or backup sched
 ### Encrypted package credentials
 
 When migration 049 is present, package credentials require the matching `secret.key` in the configured private installation directory. Include that file (including a pending rotation checkpoint, if present) in the same maintenance-window backup as the database. Automatic updater recovery includes it. Never copy it into `public/`, send it with a database-only export, or regenerate it to recover existing ciphertext: a lost key requires the matching private-directory backup or manually replacing all credentials. Successful key rotation does not erase keys from retained historical backups. Secret-store rotation is an installation-administrator operation; installed connectors must use the declared plugin API version. This feature supplies storage, not an email/SMS/WhatsApp transport.
+
+
+## 1.3 database namespaces and TLS
+
+Existing installations retain `pl_` and unchanged historical migration checksums. Preserve the private installation directory and configuration; do not switch a running installation's prefix. New snapshots include `db_prefix` and refuse restoration into another namespace. Older snapshots without the field mean `pl_`. Recovery copies `database_functions.php` with the existing platform/MeekroDB runtime before replacing application files. The incoming installer can load the new namespace helper even when an older worker already holds the prior platform helper; this avoids redeclaration and does not reinterpret older migration bytes.
+
+TLS CA/client files must remain readable from the private recovery runtime as well as normal web PHP. Preserve them outside the replaced application payload. Rehearse updates with the actual host's grants, binary-log settings, certificates and namespace. Namespace isolation is not permission isolation; shared credentials still have their database grants. See INSTALL.md for supported engine floors and provider evidence boundaries.

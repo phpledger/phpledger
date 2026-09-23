@@ -16,8 +16,13 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2.33', '8.3.33', '8.4.25']
+        database: ['mysql:8.4']
+        include:
+          - php: '8.3.33'
+            database: 'mysql:8.0'
     env:
       PL_PHP_VERSION: ${{ matrix.php }}
+      PL_TEST_DB_IMAGE: ${{ matrix.database }}
       PL_DB_PASSWORD: ci-local-only
       PL_DB_ROOT_PASSWORD: ci-local-root-only
     steps:

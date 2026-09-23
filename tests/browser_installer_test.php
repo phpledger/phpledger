@@ -21,15 +21,15 @@ if ($serve) {
     $setupKey = 'sample-browser-installer-ui-fixture-key-2026';
 }
 $ownerPassword = 'Sample installer owner passphrase 123!';
-$rootConfig = ['host' => 'db_test', 'port' => 3306, 'database' => 'information_schema', 'user' => 'root', 'password' => 'local-test-root-only'];
-$config = ['host' => 'db_test', 'port' => 3306, 'database' => $fixture, 'user' => $fixture, 'password' => $databasePassword];
+$rootConfig = ['host' => 'db_test', 'port' => 3306, 'database' => 'information_schema', 'user' => 'root', 'password' => 'local-test-root-only', 'db_prefix' => 'web_'];
+$config = ['host' => 'db_test', 'port' => 3306, 'database' => $fixture, 'user' => $fixture, 'password' => $databasePassword, 'db_prefix' => 'web_'];
 $server = null;
 $checks = 0;
 mkdir($temporary, 0700, true);
 putenv('PL_INSTALL_DIRECTORY=' . $temporary . '/installation');
 putenv('PL_INSTALL_CONFIG_PATH=' . $temporary . '/config.local.php');
 putenv('PL_OAUTH_KEY_DIRECTORY=' . $temporary . '/oauth');
-$runtimeConfig = $config + ['public_url' => 'https://books.example.invalid', 'oauth_key_directory' => $temporary . '/oauth', 'installation_directory' => $temporary . '/installation'];
+$runtimeConfig = pl_database_configuration($config) + ['public_url' => 'https://books.example.invalid', 'oauth_key_directory' => $temporary . '/oauth', 'installation_directory' => $temporary . '/installation'];
 
 function installer_assert(bool $condition, string $message): void
 {
@@ -169,13 +169,19 @@ try {
     $input = array_merge($config, ['port' => '3306', 'public_url' => $runtimeConfig['public_url'], 'action' => 'database', 'csrf_token' => $csrf]);
     pl_install_connect($config);
     DB::query('CREATE TABLE unrelated_fixture (id INT PRIMARY KEY)');
+    DB::query('INSERT INTO unrelated_fixture VALUES (42)');
+    DB::query('CREATE TABLE pl_unrecognized (id INT PRIMARY KEY)');
     $denied = installer_http($url, $input, $cookie);
     installer_assert($denied['status'] === 400 && str_contains($denied['body'], 'separate empty database'), 'Unknown existing database was not rejected.');
     installer_assert((int) DB::queryFirstField("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'unrelated_fixture'") === 1, 'Existing table was changed.');
-    DB::query('DROP TABLE unrelated_fixture');
+    DB::query('DROP TABLE pl_unrecognized');
     $response = installer_http($url, $input, $cookie);
-    installer_assert($response['status'] === 200 && str_contains($response['body'], 'Database connected.'), 'Empty target was not accepted for review.');
+    installer_assert($response['status'] === 200 && str_contains($response['body'], 'Database connected.'), 'Empty target namespace was not accepted for review.');
+    installer_assert((int) DB::queryFirstField('SELECT id FROM unrelated_fixture') === 42, 'Neighbor table changed during namespace installation.');
     $state = pl_install_read_state();
+    $prefixTamper = $input; $prefixTamper['db_prefix'] = 'different_';
+    $denied = installer_http($url, $prefixTamper, $cookie);
+    installer_assert($denied['status'] === 400, 'Bound installer accepted another namespace.');
     installer_assert(!str_contains(json_encode($state), $databasePassword), 'Database password was saved in durable setup state.');
     $bad = $input;
     $bad['password'] = 'Sample invalid database password';
@@ -183,7 +189,12 @@ try {
     installer_assert($denied['status'] === 503 && !str_contains($denied['body'], $bad['password']) && !str_contains($denied['body'], 'Stack trace'), 'Connection failure leaked credentials or was accepted.');
     for ($batch = 0; $batch < 40; $batch++) {
         $response = installer_http($url, ['action' => 'migrate', 'csrf_token' => $csrf], $cookie);
-        installer_assert($response['status'] === 200, 'A fresh schema migration batch failed.');
+        if ($response['status'] !== 200) {
+            pl_install_connect($config);
+            pl_migrate(pl_install_migration_batch(count(pl_install_migration_versions())));
+        }
+        preg_match('/class="alert alert-danger"[^>]*><p>(.*?)<\/p>/s', $response['body'], $migrationError);
+        installer_assert($response['status'] === 200, 'A fresh schema migration batch failed: ' . strip_tags($migrationError[1] ?? 'no detail'));
         if ($batch === 0) {
             pl_install_connect($config);
             $firstReceipt = DB::queryFirstRow('SELECT * FROM pl_schema_migrations ORDER BY version LIMIT 1');

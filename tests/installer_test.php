@@ -203,6 +203,7 @@ test('missing autoload and invalid local configuration produce safe installer fa
         $includes . '/functions/runtime_functions.php' => dirname(__DIR__) . '/www/phpledger/includes/functions/runtime_functions.php',
         $includes . '/functions/install_functions.php' => dirname(__DIR__) . '/www/phpledger/includes/functions/install_functions.php',
         $includes . '/functions/database_platform_functions.php' => dirname(__DIR__) . '/www/phpledger/includes/functions/database_platform_functions.php',
+        $includes . '/functions/database_functions.php' => dirname(__DIR__) . '/www/phpledger/includes/functions/database_functions.php',
         $includes . '/functions/installation_state_functions.php' => dirname(__DIR__) . '/www/phpledger/includes/functions/installation_state_functions.php',
         $includes . '/functions/update_functions.php' => dirname(__DIR__) . '/www/phpledger/includes/functions/update_functions.php',
     ];
@@ -249,10 +250,10 @@ test('missing autoload and invalid local configuration produce safe installer fa
 });
 
 test('database platforms: MySQL 8.4 and MariaDB are accepted, other servers refused', function (): void {
-    foreach (['8.4.0', '8.4.6-log', '10.4.32-MariaDB', '5.5.5-10.6.25-MariaDB-ubu2204', '10.11.18-MariaDB-ubu2204', '11.4.10-MariaDB-ubu2404'] as $version) {
+    foreach (['8.0.19', '8.0.39', '8.4.0', '8.4.6-log', '10.4.32-MariaDB', '5.5.5-10.6.25-MariaDB-ubu2204', '10.11.18-MariaDB-ubu2204', '11.4.10-MariaDB-ubu2404'] as $version) {
         assert_true(pl_database_platform($version)['supported'], $version);
     }
-    foreach (['8.0.39', '9.1.0', '10.3.39-MariaDB', '5.7.44', 'unknown'] as $version) {
+    foreach (['8.0.18', '9.1.0', '10.3.39-MariaDB', '5.7.44', 'unknown'] as $version) {
         assert_true(!pl_database_platform($version)['supported'], $version);
     }
     assert_same(['engine' => 'mariadb', 'version' => '10.6.25', 'supported' => true], pl_database_platform('5.5.5-10.6.25-MariaDB'));
@@ -317,7 +318,7 @@ test('a database on this server accepts the account local stacks install, elsewh
     // Issue #84: XAMPP, Laragon and MAMP install root with no password, and refusing
     // that only stopped people from trying PHP Ledger on their own computer.
     $local = ['host' => 'localhost', 'port' => '3306', 'database' => 'phpledger', 'user' => 'root', 'password' => ''];
-    assert_same(['host' => 'localhost', 'port' => 3306, 'database' => 'phpledger', 'user' => 'root', 'password' => ''],
+    assert_same(pl_database_configuration(['host' => 'localhost', 'port' => 3306, 'database' => 'phpledger', 'user' => 'root', 'password' => '']),
         pl_install_database_input($local));
     assert_same('ledger', pl_install_database_input(array_replace($local, ['user' => 'ledger', 'password' => 'a passphrase']))['user']);
     // A database on another server keeps both rules: its credentials cross the network.

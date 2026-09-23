@@ -833,7 +833,7 @@ function pl_plugin_migrate(string $slug, array $manifest): array
     require_once __DIR__ . '/install_functions.php';
     $prefix = pl_plugin_table_prefix($slug);
     $base = pl_plugin_directory() . '/' . $slug . '/migrations';
-    $lock = 'phpledger:plugin:' . substr(hash('sha256', $slug . '|' . (string) DB::queryFirstField('SELECT DATABASE()')), 0, 40);
+    $lock = 'phpledger:plugin:' . substr(hash('sha256', $slug . '|' . (string) DB::queryFirstField('SELECT DATABASE()') . '|' . pl_database_prefix()), 0, 40);
     if ((int) DB::queryFirstField('SELECT GET_LOCK(%s, 10)', $lock) !== 1) {
         throw new DomainException('Another package operation is running. Try again after it finishes.');
     }

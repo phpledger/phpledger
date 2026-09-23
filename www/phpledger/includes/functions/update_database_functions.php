@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+if (!function_exists('pl_database_prefix')) { require_once __DIR__ . '/database_functions.php'; }
 
 /** Recovery uses the same MeekroDB adapter, without loading application bootstrap. */
 function pl_update_database_connect(string $root): void
@@ -16,21 +17,21 @@ function pl_update_database_connect(string $root): void
         $config = array_replace($config, $override);
     }
     if ($config['password'] === '') { throw new RuntimeException('Database credentials are unavailable.'); }
-    DB::$host = $config['host']; DB::$port = (int) $config['port']; DB::$dbName = $config['database'];
-    DB::$user = $config['user']; DB::$password = $config['password']; DB::$encoding = 'utf8mb4'; DB::$nested_transactions = true;
+    if (!function_exists('pl_database_prefix')) { require_once __DIR__ . '/database_functions.php'; }
     // Whichever copy of the platform helpers loaded first stays: this runtime's copy here, the
     // application's when a caller already has it. The new release's install_functions.php does
     // the same, so the migrate and verify phases never redeclare them (issue #90). The runtime
     // copy is the installed release's; database_platform_functions.php documents the one-release
     // compatibility rule that makes that safe.
     if (!function_exists('pl_database_platform')) { require_once __DIR__ . '/database_platform_functions.php'; }
-    pl_database_use_dialect();
+    pl_database_configure($config);
     DB::query("SET time_zone = '+00:00'");
     if (!pl_database_platform(pl_database_server_version())['supported']) { throw new DomainException('Automatic updates require ' . pl_database_requirement() . '.'); }
 }
 
 function pl_update_database_inventory(bool $requireInstalled = true): array
 {
+    pl_database_assert_namespace();
     // Full recovery must never silently omit operator-added database objects.
     if ((int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA = DATABASE()')
         || (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.EVENTS WHERE EVENT_SCHEMA = DATABASE()')) {
@@ -39,12 +40,12 @@ function pl_update_database_inventory(bool $requireInstalled = true): array
     $objects = DB::query('SELECT TABLE_NAME AS name, TABLE_TYPE AS type, ENGINE AS engine FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME');
     $tables = []; $views = [];
     foreach ($objects as $object) {
-        if (!preg_match('/^pl_[a-z0-9_]+$/D', $object['name'])) { throw new DomainException('Automatic updates require a dedicated, uncustomized PHP Ledger database.'); }
+        if (!pl_database_owns($object['name'])) { continue; }
         if ($object['type'] === 'VIEW') { $views[] = $object['name']; }
         elseif ($object['type'] === 'BASE TABLE' && $object['engine'] === 'InnoDB') { $tables[] = $object['name']; }
         else { throw new DomainException('Database contains unsupported objects; automatic recovery is unavailable.'); }
     }
-    if ($requireInstalled && !in_array('pl_schema_migrations', $tables, true)) { throw new DomainException('No installed schema receipts were found.'); }
+    if ($requireInstalled && !in_array(pl_database_table('pl_schema_migrations'), $tables, true)) { throw new DomainException('No installed schema receipts were found.'); }
     return ['tables' => $tables, 'views' => $views];
 }
 
@@ -129,7 +130,7 @@ function pl_update_database_backup(string $directory): ?array
             if (!preg_match('/\b' . preg_quote($privilege, '/') . '\b/', $grants)) { throw new DomainException('The database account lacks required backup/recovery privileges.'); }
         }
     }
-    $manifest = ['schema' => 1, 'database' => (string) DB::queryFirstField('SELECT DATABASE()'), 'tables' => [], 'views' => [], 'triggers' => []];
+    $manifest = ['schema' => 1, 'db_prefix' => pl_database_prefix(), 'database' => (string) DB::queryFirstField('SELECT DATABASE()'), 'tables' => [], 'views' => [], 'triggers' => []];
     // The durable installation marker blocks application writers across requests.
     // Host operators must also stop direct SQL writers, as for any schema update.
         foreach ($inventory['tables'] as $table) {
@@ -147,6 +148,7 @@ function pl_update_database_backup(string $directory): ?array
             pl_update_database_definer_check($definition); $manifest['views'][$view] = $definition;
         }
         foreach (DB::query('SHOW TRIGGERS') as $trigger) {
+            if (!in_array($trigger['Table'], $inventory['tables'], true)) { continue; }
             $definition = DB::queryFirstRow('SHOW CREATE TRIGGER %b', $trigger['Trigger']);
             pl_update_database_definer_check($definition['SQL Original Statement']);
             $manifest['triggers'][$trigger['Trigger']] = ['create' => $definition['SQL Original Statement'], 'sql_mode' => $definition['sql_mode']];
@@ -219,11 +221,12 @@ function pl_update_database_restore(string $directory, array $receipt): bool
 {
     if (!hash_equals($receipt['manifest_sha256'], (string) hash_file('sha256', $directory . '/manifest.json'))) { throw new RuntimeException('Database backup manifest is corrupt.'); }
     $manifest = pl_update_json($directory . '/manifest.json');
+    if (($manifest['db_prefix'] ?? 'pl_') !== pl_database_prefix()) { throw new RuntimeException('Recovery namespace differs from the backup.'); }
     if (!hash_equals($manifest['database'], (string) DB::queryFirstField('SELECT DATABASE()'))) { throw new RuntimeException('Recovery database identity differs from the backup.'); }
     $progressPath = $directory . '/restore.json';
     if (!is_file($progressPath)) {
         foreach ($manifest['tables'] as $table => $entry) {
-            if (!preg_match('/^pl_[a-z0-9_]+$/D', $table) || !hash_equals($entry['sha256'], (string) hash_file('sha256', $directory . '/' . $table . '.jsonl'))) { throw new RuntimeException('Database backup data is corrupt.'); }
+            if (!pl_database_owns($table) || !hash_equals($entry['sha256'], (string) hash_file('sha256', $directory . '/' . $table . '.jsonl'))) { throw new RuntimeException('Database backup data is corrupt.'); }
         }
         $objects = pl_update_database_inventory(false);
         pl_update_checkpoint($progressPath, ['phase' => 'drop_views', 'index' => 0, 'offset' => 0, 'objects' => $objects]);
@@ -245,7 +248,7 @@ function pl_update_database_restore(string $directory, array $receipt): bool
                 $names = array_keys($manifest['tables']);
                 if ($progress['index'] < count($names)) {
                     $name = $names[$progress['index']];
-                    if (!DB::queryFirstField('SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s', $name)) { DB::query($manifest['tables'][$name]['create']); }
+                    if (!DB::queryFirstField('SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s', $name)) { pl_database_restore_definition($manifest['tables'][$name]['create']); }
                     $progress['index']++;
                 } else { $progress['phase'] = 'rows'; $progress['index'] = 0; }
                 break;
@@ -279,7 +282,7 @@ function pl_update_database_restore(string $directory, array $receipt): bool
                 if ($before === 0) { $progress['phase'] = 'triggers'; $progress['index'] = 0; break; }
                 foreach ($progress['views'] as $name => $sql) {
                     try {
-                        if (!DB::queryFirstField('SELECT COUNT(*) FROM information_schema.VIEWS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s', $name)) { DB::query($sql); }
+                        if (!DB::queryFirstField('SELECT COUNT(*) FROM information_schema.VIEWS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s', $name)) { pl_database_restore_definition($sql); }
                         unset($progress['views'][$name]); break;
                     } catch (Throwable $error) { /* Try an independent view first. */ }
                 }
@@ -290,7 +293,7 @@ function pl_update_database_restore(string $directory, array $receipt): bool
                 if ($progress['index'] < count($names)) {
                     $name = $names[$progress['index']]; $entry = $manifest['triggers'][$name];
                     DB::query('DROP TRIGGER IF EXISTS %b', $name);
-                    DB::query('SET SESSION sql_mode = %s', $entry['sql_mode']); DB::query($entry['create']); $progress['index']++;
+                    DB::query('SET SESSION sql_mode = %s', $entry['sql_mode']); pl_database_restore_definition($entry['create']); $progress['index']++;
                 } else { $progress['phase'] = 'verify'; }
                 break;
             case 'verify':

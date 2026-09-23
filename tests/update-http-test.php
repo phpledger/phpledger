@@ -10,7 +10,7 @@ $fixture = sys_get_temp_dir() . '/phpledger-update-http-' . bin2hex(random_bytes
 $root = $fixture . '/app'; $private = $fixture . '/private';
 mkdir($root . '/www/phpledger/public', 0700, true); mkdir($private, 0700, true);
 $repository = dirname(__DIR__);
-foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'update_channel_functions.php'] as $name) {
+foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'database_functions.php', 'update_channel_functions.php'] as $name) {
     pl_update_write($root . '/www/phpledger/includes/functions/' . $name, (string) file_get_contents($repository . '/www/phpledger/includes/functions/' . $name));
 }
 $loader = (string) file_get_contents($repository . '/www/phpledger/public/maintenance.php');

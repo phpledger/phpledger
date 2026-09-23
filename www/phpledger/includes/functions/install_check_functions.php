@@ -346,8 +346,8 @@ function pl_install_completion_lines(string $username, array $schema): array
 {
     $lines = [];
     try {
-        $objects = (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()');
-        $triggers = (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_schema = DATABASE()');
+        $objects = count(pl_install_tables());
+        $triggers = count(array_filter(DB::queryFirstColumn('SELECT EVENT_OBJECT_TABLE FROM information_schema.triggers WHERE trigger_schema = DATABASE()'), 'pl_database_owns'));
         $lines[] = $objects . ' tables and views built';
         $lines[] = $triggers . ' protective database rules active';
     } catch (Throwable $error) {
@@ -382,11 +382,11 @@ function pl_install_self_checks(array $schema): array
                 . ($platform['supported'] ? '' : ', which is not supported. PHP Ledger needs ' . pl_database_requirement() . '.'));
         // Posted entries are kept immutable by database triggers, so their presence is
         // the one guarantee worth proving on the owner's own server.
-        $triggers = (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_schema = DATABASE()');
+        $triggers = count(array_filter(DB::queryFirstColumn('SELECT EVENT_OBJECT_TABLE FROM information_schema.triggers WHERE trigger_schema = DATABASE()'), 'pl_database_owns'));
         $checks[] = pl_install_check_row('Posted entries protected', $triggers > 0 ? PL_CHECK_PASS : PL_CHECK_FAIL,
             $triggers > 0 ? $triggers . ' database rules are active, so a posted entry cannot be edited away'
                 : 'no protective database rules are active. Do not keep books on this copy; ask your host about trigger privileges.');
-        $views = (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.views WHERE table_schema = DATABASE()');
+        $views = count(array_filter(DB::queryFirstColumn('SELECT TABLE_NAME FROM information_schema.views WHERE table_schema = DATABASE()'), 'pl_database_owns'));
         $checks[] = pl_install_check_row('Report sources', $views > 0 ? PL_CHECK_PASS : PL_CHECK_WARN,
             $views > 0 ? $views . ' report views are readable by this account' : 'no report views were found');
         $zone = (string) DB::queryFirstField('SELECT @@session.time_zone');

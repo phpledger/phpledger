@@ -31,7 +31,7 @@ try {
     // and a bootstrap that defers to the repository's real bootstrap for the fresh runtime probe.
     $functions = 'www/phpledger/includes/functions/';
     $tree = [];
-    foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'update_channel_functions.php', 'install_functions.php', 'runtime_functions.php'] as $name) {
+    foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'database_functions.php', 'update_channel_functions.php', 'install_functions.php', 'runtime_functions.php'] as $name) {
         $tree[$functions . $name] = (string) file_get_contents($repository . '/' . $functions . $name);
     }
     foreach (glob($repository . '/www/phpledger/install/migrations/[0-9]*.php') ?: [] as $file) {
@@ -43,6 +43,18 @@ try {
     $tree['www/phpledger/includes/bootstrap.php'] = '<?php require ' . var_export($repository . '/www/phpledger/includes/bootstrap.php', true) . ';';
     $tree['vendor/autoload.php'] = '<?php // sample';
     $tree['vendor/sergeytsalkov/meekrodb/db.class.php'] = (string) file_get_contents($repository . '/vendor/sergeytsalkov/meekrodb/db.class.php');
+    $currentTree = $tree;
+    // Optional preserved previous-release worker: prove it can load the incoming installer
+    // without the newly added namespace helper having existed in its recovery runtime.
+    $legacyRuntime = getenv('PL_TEST_LEGACY_DATABASE_RUNTIME');
+    if (is_string($legacyRuntime) && $legacyRuntime !== '') {
+        foreach (['update_functions.php', 'update_database_functions.php', 'update_web_functions.php', 'update_probe_functions.php', 'database_platform_functions.php', 'update_channel_functions.php'] as $name) {
+            $bytes = file_get_contents($legacyRuntime . '/' . $name);
+            if ($bytes === false) { throw new RuntimeException('Legacy worker fixture file missing.'); }
+            $tree[$functions . $name] = $bytes;
+        }
+        unset($tree[$functions . 'database_functions.php']);
+    }
     foreach ($tree as $path => $bytes) { pl_update_write($root . '/' . $path, $bytes); }
     $manifest = ['version' => '1.1.2', 'files' => array_map(static fn(string $path): array => ['path' => $path], array_keys($tree))];
     pl_update_checkpoint($root . '/PACKAGE-MANIFEST.json', $manifest);
@@ -52,9 +64,9 @@ try {
     if (!$key) { throw new RuntimeException('Sample signing fixture unavailable.'); }
     pl_update_write($private . '/publisher.pem', openssl_pkey_get_details($key)['key']);
     // The next release: the same helpers and migrations, a changed entry point and manifest.
-    $release = $tree;
+    $release = $currentTree;
     $release['www/phpledger/public/index.php'] = '<?php echo "updated";';
-    $release['PACKAGE-MANIFEST.json'] = json_encode(['version' => '1.1.3', 'files' => $manifest['files']], JSON_THROW_ON_ERROR);
+    $release['PACKAGE-MANIFEST.json'] = json_encode(['version' => '1.1.3', 'files' => array_map(static fn(string $path): array => ['path'=>$path], array_keys($release))], JSON_THROW_ON_ERROR);
     $archive = $fixture . '/release.zip'; $zip = new ZipArchive(); $zip->open($archive, ZipArchive::CREATE); $inventory = [];
     foreach ($release as $path => $data) { $zip->addFromString('phpledger/' . $path, $data); $inventory[] = ['path' => $path, 'bytes' => strlen($data), 'sha256' => hash('sha256', $data)]; }
     $zip->close();

@@ -1151,6 +1151,10 @@
       "destination": "www/phpledger/includes/functions/database_platform_functions.php"
     },
     {
+      "source": "www/phpledger/includes/functions/database_functions.php",
+      "destination": "www/phpledger/includes/functions/database_functions.php"
+    },
+    {
       "source": "www/phpledger/includes/functions/install_exposure_functions.php",
       "destination": "www/phpledger/includes/functions/install_exposure_functions.php"
     },

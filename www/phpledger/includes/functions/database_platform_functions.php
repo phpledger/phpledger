@@ -38,14 +38,14 @@ function pl_database_platform(string $version): array
     $number = $match[1] . '.' . $match[2] . '.' . $match[3];
     $supported = $engine === 'mariadb'
         ? version_compare($number, PL_MARIADB_MINIMUM, '>=')
-        : $match[1] . '.' . $match[2] === '8.4';
+        : ($match[1] . '.' . $match[2] === '8.4' || ($match[1] . '.' . $match[2] === '8.0' && version_compare($number, '8.0.19', '>=')));
     return ['engine' => $engine, 'version' => $number, 'supported' => $supported];
 }
 
 function pl_database_requirement(): string
 {
     [$major, $minor] = explode('.', PL_MARIADB_MINIMUM);
-    return 'MySQL 8.4 LTS or MariaDB ' . $major . '.' . $minor . ' or newer';
+    return 'MySQL 8.0.19+ (8.4 LTS recommended) or MariaDB ' . $major . '.' . $minor . ' or newer';
 }
 
 /** The connected server's version from its handshake; no query is sent. */
