@@ -1,6 +1,12 @@
 # Shared Claude and Codex state
 
-## Active scope, 23 September 2026: complete and publish 1.3.0
+## Completed release, 23 September 2026: 1.3.0 public and verified
+
+Release v1.3.0 is published at immutable application source `9a4d2872545e232d5c94933e701e5c5ae8cd1de1`. Signed ZIP, media kit, both GHCR/Docker Hub architectures and latest tags, eleven signed sample repositories, Wiki/About, website, shared installer demo and private installation-notice receiver are public and verified. See [publication receipt](docs/repository/PUBLICATION-2026-09-23-1.3.0.md) and its JSON companion for exact hashes, CI/upgrade/browser evidence and assurance boundaries.
+
+The hosted demo uses the unchanged official application image, with hosting-only initializer fix `070488f7` and trusted-proxy HTTPS fix `75b77ccf`. The failed initial launch was rolled back before the successful isolated r2 launch; old and failed-attempt volumes/networks remain retained. The web service has a separate immutable Apache Compose override; inspect its actual labels/mounts before future deployment. Never replay the first-attempt or retry operator against the now-changed baseline. A scheduled reset at 03:00 UTC and two existing-session invalidations passed; the final check left a fresh installer at 03:10 UTC. All eight original main-checkout dirty files remain byte-identical to the pre-integration backup. Release work is in the isolated `codex/release-1.3.0` checkout and remote master; the original main checkout was not broadly reset or overwritten.
+
+## Release authorization and coordination history
 
 Owner explicitly authorized finishing 1.3.0 and releasing its demo and website. Coordinator owns `codex/release-1.3.0`; scope, migration reservations and publication gates are in [the 1.3 plan](docs/strategy/RELEASE-PLAN-1.3.md). Financial lanes reserve 050–052 scheduler/recurring/loans, 053/055 payroll/employee integration and 054 year-end. Shared registration and releases are serialized by coordinator. No lane may publish or deploy independently. Preserve main checkout changes and original worktree backups. This active plan supersedes the prior task's local-only boundary for these explicitly requested release actions, not for unrelated projects or campaigns.
 

@@ -1,0 +1,353 @@
+{
+  "version": "1.3.0",
+  "application_source": "9a4d2872545e232d5c94933e701e5c5ae8cd1de1",
+  "release_url": "https://github.com/phpledger/phpledger/releases/tag/v1.3.0",
+  "published_at": "2026-09-23T02:03:09Z",
+  "assets_sha256": {
+    "phpledger-1.3.0.update.json": "e6808a8bc20cbc5c6543d559b4005bc761b443fafde23f0a16bf17622d97f9ff",
+    "phpledger-1.3.0.zip": "f2103a58bf3202f8e82bd974114b713b086b0e68825c5111442110bc87b97e12",
+    "phpledger-1.3.0.zip.sha256": "8c406c7fcc4945d485ce10d3419474c8c0993c91514ea8dd842ef4f8b91eed5b",
+    "phpledger-1.3.0-media-kit.zip": "2b66042d9b219a18f55a647baf27c174eea6742c9580d527122d1df27c2d4bcf",
+    "phpledger-1.3.0-media-kit.zip.sha256": "2ae8dd1de1b102a1c4eaac82b4960f14423e20f304fd6563b76873df7d22d306"
+  },
+  "publisher_spki_sha256": "4e58a5f46b0538c9b37aaadbfced9a2d8ad2f7d413bc168a67b1b94feaa78e78",
+  "ci": {
+    "run": 35807952814,
+    "jobs": 9,
+    "result": "success",
+    "tests_per_engine_job": 658,
+    "engine_jobs": 8,
+    "failures": 0,
+    "reproducible_release_run": 35807952923,
+    "local_ci_reproduction": "members"
+  },
+  "exact_artifact_gates": [
+    "fresh_install",
+    "published_1_2_1_cli_upgrade",
+    "official_signed_http_update",
+    "official_signed_post_migration_recovery",
+    "published_1_2_1_container_upgrade"
+  ],
+  "ui": {
+    "separate_screen_http_checks": 46,
+    "i18n_tests": 16,
+    "package_tests": 13,
+    "form_responsive_states": 9,
+    "website_final_responsive_states": 15,
+    "media_reviewed_screenshots": 37
+  },
+  "wiki_about": {
+    "wiki_commit": "29467e17bff2429f7252f2d38019cf559664ded4",
+    "description": "Open-source, self-hosted double-entry accounting for small businesses. PHP 8.2+, MySQL and MariaDB. Browser installer, cash POS, invoicing, inventory, payroll accounting and scheduled drafts. Signed ZIP updates and official Docker images.",
+    "homepage": "https://phpledger.com/",
+    "topics": [
+      "accounting",
+      "accounting-software",
+      "bookkeeping",
+      "cash-register",
+      "docker",
+      "double-entry",
+      "double-entry-accounting",
+      "finance",
+      "general-ledger",
+      "ledger",
+      "mysql",
+      "open-source",
+      "pakistan",
+      "php",
+      "php8",
+      "point-of-sale",
+      "pos",
+      "self-hosted",
+      "selfhosted",
+      "small-business"
+    ],
+    "topics_review": "unchanged",
+    "wiki_pages": 27
+  },
+  "samples": [
+    {
+      "repository": "phpledger/sample-distributor",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-jewelry-studio",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-light-manufacturing",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-membership-club",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-pharmacy",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-restaurant",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-retail-shop",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-seasonal-business",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-service-agency",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-service-workshop",
+      "anonymous_assets_verified": 3
+    },
+    {
+      "repository": "phpledger/sample-trader",
+      "anonymous_assets_verified": 3
+    }
+  ],
+  "publication_status": "assets_wiki_samples_registries_published; host_cutover_pending",
+  "remaining_assurance": [
+    "Independent accounting/security review",
+    "Native review of draft Arabic and Urdu",
+    "Real-business month-end pilots",
+    "Provider catalogue installation/acceptance checks"
+  ],
+  "migrations_applied_from_1_2_1": 14,
+  "schema_changed": true,
+  "raw_secrets_exposed": false,
+  "registries": {
+    "workflow": "https://github.com/phpledger/phpledger/actions/runs/35808808018",
+    "source": "9a4d2872545e232d5c94933e701e5c5ae8cd1de1",
+    "zip_sha256": "f2103a58bf3202f8e82bd974114b713b086b0e68825c5111442110bc87b97e12",
+    "registries": [
+      {
+        "repository": "ghcr.io/phpledger/phpledger",
+        "tag": "1.3.0",
+        "index_digest": "sha256:5277187a140c459c852f6b1cb1b7649a1754c189ebaef426d289c94c2d890d73",
+        "platforms": {
+          "amd64": "sha256:82af4cc738ae9df85073c652f467afc11ffe22428e70e1370de4545ae1378105",
+          "arm64": "sha256:0dcbc1cde6b52d0b8efe727de27f05a481887efb555b7ab86bfdaa96078748b4"
+        },
+        "verified": [
+          {
+            "platform": "linux/amd64",
+            "digest": "sha256:82af4cc738ae9df85073c652f467afc11ffe22428e70e1370de4545ae1378105",
+            "managed_files": 1648,
+            "manifest_matches_signed_zip": true,
+            "container_started": false
+          },
+          {
+            "platform": "linux/arm64",
+            "digest": "sha256:0dcbc1cde6b52d0b8efe727de27f05a481887efb555b7ab86bfdaa96078748b4",
+            "managed_files": 1648,
+            "manifest_matches_signed_zip": true,
+            "container_started": false
+          }
+        ]
+      },
+      {
+        "repository": "docker.io/phpledger/phpledger",
+        "tag": "1.3.0",
+        "index_digest": "sha256:5277187a140c459c852f6b1cb1b7649a1754c189ebaef426d289c94c2d890d73",
+        "platforms": {
+          "amd64": "sha256:82af4cc738ae9df85073c652f467afc11ffe22428e70e1370de4545ae1378105",
+          "arm64": "sha256:0dcbc1cde6b52d0b8efe727de27f05a481887efb555b7ab86bfdaa96078748b4"
+        },
+        "verified": [
+          {
+            "platform": "linux/amd64",
+            "digest": "sha256:82af4cc738ae9df85073c652f467afc11ffe22428e70e1370de4545ae1378105",
+            "managed_files": 1648,
+            "manifest_matches_signed_zip": true,
+            "container_started": false
+          },
+          {
+            "platform": "linux/arm64",
+            "digest": "sha256:0dcbc1cde6b52d0b8efe727de27f05a481887efb555b7ab86bfdaa96078748b4",
+            "managed_files": 1648,
+            "manifest_matches_signed_zip": true,
+            "container_started": false
+          }
+        ]
+      }
+    ]
+  },
+  "website_source": "e5e81eac8727d25e852427f19113650ca4921fcc",
+  "website_archive_sha256": "8a5ec0cad7102cf93ea97913cf626fc30e45754add53a890fe5998426278dd59",
+  "local_demo_actual_hourly_reset": {
+    "reset_at": 1790128804,
+    "expires_at": 1790132400,
+    "http_status": 200,
+    "installer_ready": true,
+    "expires_header": "2026-09-23T03:00:00+00:00",
+    "source": "9a4d2872545e232d5c94933e701e5c5ae8cd1de1"
+  },
+  "tag_signature": "annotated Git tag; no local Git signing key configured; release ZIP authenticated by official RSA-signed update envelope",
+  "hosting": {
+    "status": "published_and_verified",
+    "demo_first_attempt": {
+      "result": "rolled_back",
+      "failure": "Sourced mode-0644 MySQL initializer leaked nounset into entrypoint; reproduced locally",
+      "rollback_verified_at": "2026-09-23T02:40:15Z",
+      "restored_version": "1.1.0",
+      "public_health_status": 200,
+      "old_volumes_and_network_preserved": true,
+      "failed_attempt_resources_preserved": true
+    },
+    "initializer_fix_commit": "070488f7acf6589bd3a346237a614d696e887f4b",
+    "initializer_fresh_sourced_mode_regression": "passed",
+    "website_live": "1.3.0_reviewed_source",
+    "notice_candidates": "active_and_verified",
+    "demo_runtime": {
+      "reset_at": 1790132400,
+      "expires_at": 1790136000,
+      "first_initialization_complete": true,
+      "db_restart_count": 0,
+      "readonly_signed_samples": true,
+      "application_network_internal": true,
+      "proxy_loopback_only": true,
+      "old_and_failed_resources_preserved": true,
+      "public_status": 200,
+      "public_expires_header": "2026-09-23T04:00:00+00:00",
+      "checked_at": "2026-09-23T03:00:22.811590+00:00"
+    },
+    "demo_https": {
+      "ok": true,
+      "web_only_recreated": true,
+      "db_scheduler_ids_preserved": true,
+      "image_environment_other_mounts_unchanged": true,
+      "config_sha256": "644d742492b8c06d3b04955c08306dd9a7f16d3311d3c20db9810612a5b2aba6"
+    },
+    "demo_https_source": "75b77ccf48418a8f3496c2e6c70e9ce4e2b020d7",
+    "session_reset": {
+      "reset_at": 1790132923,
+      "expires_at": 1790136000,
+      "reset_complete": true,
+      "fresh_installer": true,
+      "false_http_warning_absent": true,
+      "status": 200,
+      "expires_header": "2026-09-23T04:00:00+00:00",
+      "checked_at": "2026-09-23T03:08:43.683066+00:00"
+    },
+    "final_clean_reset": {
+      "reset_at": 1790133036,
+      "expires_at": 1790136000,
+      "reset_complete": true,
+      "fresh_installer": true,
+      "false_http_warning_absent": true,
+      "status": 200,
+      "expires_header": "2026-09-23T04:00:00+00:00",
+      "checked_at": "2026-09-23T03:10:37.100732+00:00"
+    },
+    "notice": {
+      "fictional_notice_deleted": true,
+      "maintenance_prune_ran": true,
+      "receiver_internal_network": true,
+      "maintenance_network_none": true,
+      "gateway_loopback_only": true,
+      "containers_read_only_and_capabilities_dropped": true,
+      "public_get_status": 405,
+      "public_post_status": 200,
+      "no_session_cookie": true
+    },
+    "website": {
+      "checked_at": "2026-09-23T03:09:36.135284+00:00",
+      "source_commit": "e5e81eac8727d25e852427f19113650ca4921fcc",
+      "manifest_files_verified": 352,
+      "tls_certificate_validation": true,
+      "official_signature": true,
+      "sample_signatures": 11,
+      "release_zip_sha256": "f2103a58bf3202f8e82bd974114b713b086b0e68825c5111442110bc87b97e12",
+      "image": "ghcr.io/phpledger/phpledger@sha256:5277187a140c459c852f6b1cb1b7649a1754c189ebaef426d289c94c2d890d73",
+      "mutations": false,
+      "routing_exceptions_verified": [
+        {
+          "requested": "/404.html",
+          "final_url": "https://phpledger.com/404.html",
+          "status": 404,
+          "sha256": "6721ad707b143b30227f372b9036aee347ed041f0b834877378fd02c4f677d20",
+          "matches_manifest_paths": [
+            "www/website/public/404.html"
+          ]
+        },
+        {
+          "requested": "/credits.html",
+          "final_url": "https://phpledger.com/credits/",
+          "status": 200,
+          "sha256": "34de0ae6831c16c4efdc3c86e8af85764c69e9e4b264efd9a36b29b2ed963f52",
+          "matches_manifest_paths": [
+            "www/website/public/credits/index.html"
+          ]
+        },
+        {
+          "requested": "/support/",
+          "final_url": "https://phpledger.com/pricing/",
+          "status": 200,
+          "sha256": "10b610636f1a82b38d26c0643d2544bf50578e90bc4a1fd9923f7b28e1a426d9",
+          "matches_manifest_paths": [
+            "www/website/public/pricing/index.html"
+          ]
+        }
+      ],
+      "unresolved_mismatches": [],
+      "raw_sweep_exceptions": [
+        {
+          "url": "/404.html",
+          "error": "HTTP Error 404: Not Found"
+        },
+        {
+          "url": "/credits.html",
+          "error": "hash mismatch"
+        },
+        {
+          "url": "/support/",
+          "error": "hash mismatch"
+        }
+      ]
+    },
+    "live_browser_receipt_sha256": "dcd1f31fb9380464ed1e419a3bead4f4a8590334b9cc7e5435b4969a4d1aec99",
+    "live_browser": {
+      "installer_onboarding_runs": 2,
+      "final_installer_preflight_checks": 14,
+      "responsive_route_states": 9,
+      "replacement_installer_screenshots": 9,
+      "verified_samples": 11,
+      "independent_second_visitor_login": true,
+      "observed_old_session_invalidations": 2,
+      "left_at_fresh_installer": true
+    }
+  },
+  "status": "published_and_public_acceptance_passed",
+  "completed_at": "2026-09-23T03:13:00+00:00",
+  "registry_latest": {
+    "ghcr.io/phpledger/phpledger:latest": "5277187a140c459c852f6b1cb1b7649a1754c189ebaef426d289c94c2d890d73",
+    "docker.io/phpledger/phpledger:latest": "5277187a140c459c852f6b1cb1b7649a1754c189ebaef426d289c94c2d890d73"
+  },
+  "preservation": {
+    "original_main_dirty_files": 8,
+    "byte_identical_to_backup": true,
+    "original_demo_volumes_network_retained": true,
+    "failed_first_attempt_resources_retained": true
+  },
+  "review_boundaries": {
+    "migrations_in_release": "through 056; 14 applied from 1.2.1",
+    "hosting_followup_migrations": false,
+    "raw_secrets_exposed": false,
+    "external_calls": true,
+    "live_changed": true,
+    "campaigns_sent": false,
+    "google_drive_documents": [],
+    "separate_assurance_work": [
+      "independent accounting and security review",
+      "native Arabic and Urdu review",
+      "managed-provider acceptance",
+      "real-business month-end pilots"
+    ]
+  }
+}
