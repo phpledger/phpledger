@@ -1,0 +1,67 @@
+name: phpledger-notices
+services:
+  receiver:
+    image: ${PL_NOTICE_IMAGE:-phpledger-notice-receiver:local}
+    build:
+      context: .
+      dockerfile: docker/installation-notice.Dockerfile
+      args:
+        NOTICE_BASE_IMAGE: ${PL_NOTICE_BASE_IMAGE:-ghcr.io/phpledger/phpledger:1.2.1}
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - notice_records:/var/lib/phpledger-notices
+    tmpfs:
+      - /tmp:uid=33,gid=33,mode=700
+      - /var/run/apache2:uid=33,gid=33,mode=700
+      - /var/lock/apache2:uid=33,gid=33,mode=700
+    networks:
+      private:
+        ipv4_address: 10.219.68.3
+    restart: unless-stopped
+    init: true
+  maintenance:
+    image: ${PL_NOTICE_IMAGE:-phpledger-notice-receiver:local}
+    entrypoint: [/opt/installation-service/maintenance.sh]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - notice_records:/var/lib/phpledger-notices
+    tmpfs:
+      - /tmp:uid=33,gid=33,mode=700
+    network_mode: none
+    depends_on: [receiver]
+    restart: unless-stopped
+    init: true
+  gateway:
+    image: nginx:1.28-alpine
+    user: "101:101"
+    ports:
+      - "127.0.0.1:${PL_NOTICE_PORT:-18302}:8080"
+    volumes:
+      - ./docker/installation-notice-proxy.conf:/etc/nginx/nginx.conf:ro
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:uid=101,gid=101,mode=700
+      - /var/cache/nginx:uid=101,gid=101,mode=700
+      - /var/run:uid=101,gid=101,mode=700
+    networks:
+      private:
+        ipv4_address: 10.219.68.2
+      edge: {}
+    depends_on: [receiver]
+    restart: unless-stopped
+    init: true
+volumes:
+  notice_records:
+networks:
+  private:
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.219.68.0/24
+  edge: {}
