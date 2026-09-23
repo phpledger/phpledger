@@ -263,7 +263,6 @@ function pl_install_step_label(string $version): string
         '006_core_accounts_journals' => 'Building the chart of accounts and journals',
         '006_opening_cutover' => 'Preparing opening balances',
         '007_period_administration' => 'Adding accounting periods',
-        '047_period_close' => 'Adding period close and cash counts',
         '008_bank_reconciliation' => 'Adding bank reconciliation',
         '009_bank_draft_cancellation' => 'Allowing bank drafts to be cancelled',
         '010_module_lifecycle' => 'Setting up modules',
