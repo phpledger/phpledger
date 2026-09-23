@@ -1,0 +1,47 @@
+{
+  "type": "sample",
+  "slug": "sample-seasonal-business",
+  "version": "1.1.0",
+  "contract": 1,
+  "name": "Sunrise Garden Services",
+  "description": "Seasonal business. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-seasonal-business/",
+  "requires": {
+    "core": "1.0.0"
+  },
+  "sample": {
+    "id": "seasonal-business",
+    "version": "1.1.0",
+    "name": "Sunrise Garden Services",
+    "business": "Seasonal business",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "released_demo_only",
+    "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+    "scenario": {
+      "id": "seasonal-cash-cycle",
+      "title": "Compare a seasonal cash cycle",
+      "goal": "Compare monthly receipts across a seasonal service year while keeping operating costs, prepayments and settlements traceable.",
+      "steps": [
+        "Compare low-season and peak-season monthly receipt summaries.",
+        "Trace recurring operating costs and insurance release through the general ledger.",
+        "Review the cross-year customer collection and supplier payment.",
+        "Use the open 2026 drafts to test a new seasonal entry without changing history."
+      ],
+      "checks": [
+        "The receipt curve is a sample teaching pattern, not a forecast or business benchmark.",
+        "No workforce scheduling, weather model, contract pipeline or seasonal tax treatment is implemented.",
+        "Profit and cash are reviewed through the existing statements and account movements."
+      ]
+    },
+    "file": "seasonal-business-1.1.0.json",
+    "sha256": "6292e9da6eb1b5880f73943fd8a542c33a282695e169cf842872aa2ebb0803f2"
+  },
+  "files": {
+    "pack.json": "6292e9da6eb1b5880f73943fd8a542c33a282695e169cf842872aa2ebb0803f2",
+    "structure.json": "9c485ea52762e668937d59b284e8a6fd03d073345d6b6cf966ea0a5ffc888213"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "type": "sample",
+  "slug": "sample-light-manufacturing",
+  "version": "1.1.0",
+  "contract": 1,
+  "name": "Maple Bench Works",
+  "description": "Light manufacturing. Light-manufacturing bookkeeping example; bills of material, production planning, work orders and recipes are not implemented.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-light-manufacturing/",
+  "requires": {
+    "core": "1.0.0",
+    "inventory": "1.0.0",
+    "purchasing": "1.0.0"
+  },
+  "sample": {
+    "id": "light-manufacturing",
+    "version": "1.1.0",
+    "name": "Maple Bench Works",
+    "business": "Light manufacturing",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "preview_only",
+    "capability_note": "Light-manufacturing bookkeeping example; bills of material, production planning, work orders and recipes are not implemented.",
+    "scenario": {
+      "id": "workshop-conversion",
+      "title": "Review a simple materials-to-sales example",
+      "goal": "Use a light-manufacturing bookkeeping example to inspect material purchases, finished-goods movement, sales and operating costs.",
+      "steps": [
+        "Review the sample material and finished-goods balances at the start of the example.",
+        "Trace purchases and stock issues to their ledger accounts.",
+        "Review the finished-goods sale, customer settlement and any returned quantity.",
+        "Compare the period result and closing stock with the stated fixture checkpoints."
+      ],
+      "checks": [
+        "This does not implement bills of material, production orders, work-in-progress or overhead absorption.",
+        "The conversion amounts are fixed teaching data, not a production-costing policy.",
+        "The pack is a bookkeeping preview; production costing and conversion controls are outside the current module."
+      ]
+    },
+    "file": "light-manufacturing-1.1.0.json",
+    "sha256": "b68b85e3bad1c27d0bd7c9c06ecbe8fd723809327e77f1ebf20d04d580ffd4f4"
+  },
+  "files": {
+    "pack.json": "b68b85e3bad1c27d0bd7c9c06ecbe8fd723809327e77f1ebf20d04d580ffd4f4",
+    "structure.json": "5d3d0172bdae275de3d94ea7a21db34400f60eefdb5fbc22364b52bc7c439d69"
+  }
+}

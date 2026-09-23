@@ -2,12 +2,13 @@
 
 > PHP Ledger is open-source, self-hosted double-entry accounting software for small businesses. It brings invoices, bills, payments, stock, reconciliation and reports together with reviewed payroll accruals, loan schedules and period/year-end workflows. Run it on PHP 8.2+ with MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+. Use the browser installer, your own hosting and publisher-verified releases. Independent review and real-business acceptance remain separate gates.
 
-Current stable release: 1.3.0. PHP 8.2+ (8.3 recommended), MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
+Current stable release: 1.4.0. PHP 8.2+ (8.3 recommended), MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
 
 New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-adoption 0.1.0 through 0.1.5 previews retain MIT; dependencies and archived code keep their own terms.
 
 ## Implemented scope
 
+- Administrator-selected warning or strict cash/bank balance controls, linked payer/payee selection, separate receipt and expense workspaces, and contextual accounting help.
 - Company-scoped books, confidential user permissions, exact-money central posting, reviewed drafts, immutable journals and traceable dated reversals.
 - Core invoices and bills, partial payments, credits, advances, refunds, historical ageing and control-account reconciliation.
 - Account statements, trial balance, profit and loss, balance sheet, bank reconciliation and reviewed opening cutover.
@@ -99,6 +100,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [1.1.2](https://phpledger.com/news/1-1-2/): PHP Ledger 1.1.2 corrects the 1.1.1 record (it carried migration 034), counts POS cash in whole minor units and restores signed update metadata.
 - [1.1.3](https://phpledger.com/news/1-1-3/): PHP Ledger 1.1.3 fixes the in-app updater. An installation on 1.1.2 can install it from /maintenance.php; older ones use the manual procedure.
 - [1.3.0](https://phpledger.com/news/1-3-0/): Try the real installer, explore payroll and loan drafts, review year end, and install optional sample packages in PHP Ledger 1.3.0. See the scope and limits.
+- [1.4.0](https://phpledger.com/news/1-4-0/): Choose warning or strict balance controls, select linked payers and payees, and explore fictional company histories in PHP Ledger 1.4.0.
 - [Point of sale](https://phpledger.com/point-of-sale/): An optional cash POS for small counters: cart, cash and change, printable receipt and one balanced journal. No stock, tax or card payments at the counter yet.
 - [Pricing and licence](https://phpledger.com/pricing/): PHP Ledger is free under AGPL-3.0-or-later. A commercial licence and paid installation, training and pilot services are available on request; no hidden prices.
 - [Privacy](https://phpledger.com/privacy/): How PHP Ledger handles shared demo sessions, optional installation notices, private registration and operational logs.

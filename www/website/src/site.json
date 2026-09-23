@@ -31,19 +31,18 @@
   },
   "indexNowKey": "240b73d781977f499ab7c75318b9a14f",
   "release": {
-    "version": "1.3.0",
-    "tag": "v1.3.0",
+    "version": "1.4.0",
+    "tag": "v1.4.0",
     "date": "2026-09-23",
     "dateLabel": "23 September 2026",
-    "url": "https://github.com/phpledger/phpledger/releases/tag/v1.3.0",
-    "zipUrl": "https://github.com/phpledger/phpledger/releases/download/v1.3.0/phpledger-1.3.0.zip",
-    "shaUrl": "https://github.com/phpledger/phpledger/releases/download/v1.3.0/phpledger-1.3.0.zip.sha256",
-    "sha256": "f2103a58bf3202f8e82bd974114b713b086b0e68825c5111442110bc87b97e12",
-    "bytes": 3521783,
-    "bytesLabel": "3,521,783",
-    "sizeLabel": "3.52 MB",
-    "license": "https://github.com/phpledger/phpledger/blob/master/LICENSE",
-    "mediaKitUrl": "https://github.com/phpledger/phpledger/releases/download/v1.3.0/phpledger-1.3.0-media-kit.zip"
+    "url": "https://github.com/phpledger/phpledger/releases/tag/v1.4.0",
+    "zipUrl": "https://github.com/phpledger/phpledger/releases/download/v1.4.0/phpledger-1.4.0.zip",
+    "shaUrl": "https://github.com/phpledger/phpledger/releases/download/v1.4.0/phpledger-1.4.0.zip.sha256",
+    "sha256": "53c7fc584bd47723a6f6008a8a951db9b3947dae956484c8bf3b889ce2fad4d2",
+    "bytes": 3566753,
+    "bytesLabel": "3,566,753",
+    "sizeLabel": "3.57 MB",
+    "license": "https://github.com/phpledger/phpledger/blob/master/LICENSE"
   },
   "requirements": "PHP 8.2+ (8.3 recommended), MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates",
   "nav": [
@@ -86,6 +85,7 @@
   "screenshot": "/assets/screens/v1.0.0/home-1440.webp",
   "ogDefault": "/assets/og/workspace-1.0.0.png",
   "capabilities": [
+    "Administrator-selected warning or strict cash/bank balance controls, linked payer/payee selection, separate receipt and expense workspaces, and contextual accounting help.",
     "Company-scoped books, confidential user permissions, exact-money central posting, reviewed drafts, immutable journals and traceable dated reversals.",
     "Core invoices and bills, partial payments, credits, advances, refunds, historical ageing and control-account reconciliation.",
     "Account statements, trial balance, profit and loss, balance sheet, bank reconciliation and reviewed opening cutover.",

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-distributor",
+  "version": "1.1.0",
+  "archive_bytes": 21474,
+  "archive_sha256": "86d2f9c7f8dc022c55a56acacc77a2abdec6b475caceb26a62148f856c981127",
+  "manifest_sha256": "a78e0f84ca9d8dba7ac66fcc59a56eadbb80846763d8f5b2432694165b5a1c81",
+  "files": {
+    "pack.json": "70163a74f0b77de93bcfb4f1e5382bfdeacf67e8873d59ad7269bcf7f6204e25",
+    "structure.json": "d2e688144f058d26cc9820b171af78f8d9a73e5e65e7d49f434f69fb9a1cbe52"
+  }
+}

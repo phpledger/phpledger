@@ -1,0 +1,47 @@
+{
+  "type": "sample",
+  "slug": "sample-membership-club",
+  "version": "1.1.0",
+  "contract": 1,
+  "name": "Riverside Community Club",
+  "description": "Membership club. Membership-income bookkeeping example; membership administration, renewals, charity status and dues compliance are not implemented.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-membership-club/",
+  "requires": {
+    "core": "1.0.0"
+  },
+  "sample": {
+    "id": "membership-club",
+    "version": "1.1.0",
+    "name": "Riverside Community Club",
+    "business": "Membership club",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "preview_only",
+    "capability_note": "Membership-income bookkeeping example; membership administration, renewals, charity status and dues compliance are not implemented.",
+    "scenario": {
+      "id": "membership-dues",
+      "title": "Separate membership income from cash timing",
+      "goal": "Follow a fictional club prepayment, recognition schedule, invoice, payment and expense bill.",
+      "steps": [
+        "Review the opening receivable and payable detail without reposting opening balances.",
+        "Trace a membership prepayment into deferred revenue.",
+        "Inspect the monthly recognition entry and compare it with the cash receipt.",
+        "Review the supplier bill, payment and the club's period result."
+      ],
+      "checks": [
+        "Deferred revenue is not recognised before the stated coverage period.",
+        "The club scenario does not claim charity, nonprofit, member administration or renewal compliance.",
+        "Opening AR/AP detail remains evidence reconciled to the opening control journal."
+      ]
+    },
+    "file": "membership-club-1.1.0.json",
+    "sha256": "7e5551dd96a087e40b8d56af0a56c6103f8a8200f5001f8046125101c014b041"
+  },
+  "files": {
+    "pack.json": "7e5551dd96a087e40b8d56af0a56c6103f8a8200f5001f8046125101c014b041",
+    "structure.json": "a3e1604d930665d467a7014ec51c652b6812970e4f9485e7a4f7ce5277cb4369"
+  }
+}

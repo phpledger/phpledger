@@ -5622,6 +5622,88 @@
         }
       ]
     },
+    "news/1-4-0/index.html": {
+      "path": "/news/1-4-0/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "PHP Ledger 1.4.0: choose cash controls and follow the people behind each payment",
+      "descriptionLength": 136,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 21434,
+        "eager": 336128,
+        "total": 424833
+      },
+      "budgets": {
+        "eager": null,
+        "total": null
+      },
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "news/1-4-0/index.html",
+          "bytes": 21434
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
     "news/index.html": {
       "path": "/news/",
       "redirectStub": false,
@@ -5631,9 +5713,9 @@
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 28667,
-        "eager": 343361,
-        "total": 432066
+        "html": 29175,
+        "eager": 343869,
+        "total": 432574
       },
       "budgets": {
         "eager": 650000,
@@ -5666,7 +5748,7 @@
         },
         {
           "file": "news/index.html",
-          "bytes": 28667
+          "bytes": 29175
         }
       ],
       "lazyAssets": [
@@ -8446,7 +8528,7 @@
   "errors": [],
   "warnings": [],
   "summary": {
-    "pages": 100,
+    "pages": 101,
     "redirectStubs": 2,
     "errors": 0,
     "warnings": 0

@@ -6,7 +6,7 @@ id = "phpledger"
 name = "PHP Ledger"
 description.en = "Double-entry accounting that runs on your own PHP hosting"
 
-version = "1.3.0~ynh1"
+version = "1.4.0~ynh1"
 
 maintainers = []
 
@@ -49,8 +49,8 @@ ram.runtime = "50M"
 [resources]
 
     [resources.sources.main]
-    url = "https://github.com/phpledger/phpledger/releases/download/v1.3.0/phpledger-1.3.0.zip"
-    sha256 = "f2103a58bf3202f8e82bd974114b713b086b0e68825c5111442110bc87b97e12"
+    url = "https://github.com/phpledger/phpledger/releases/download/v1.4.0/phpledger-1.4.0.zip"
+    sha256 = "53c7fc584bd47723a6f6008a8a951db9b3947dae956484c8bf3b889ce2fad4d2"
     autoupdate.strategy = "latest_github_release"
     autoupdate.asset = "^phpledger-.*\\.zip$"
 

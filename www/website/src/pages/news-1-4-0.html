@@ -1,0 +1,21 @@
+<!-- {"path":"/news/1-4-0/","nav":"news","title":"PHP Ledger 1.4.0: choose cash controls and follow the people behind each payment","description":"Choose warning or strict balance controls, select linked payers and payees, and explore fictional company histories in PHP Ledger 1.4.0.","ogImage":"/assets/og/news.png","ogImageAlt":"PHP Ledger release news and project updates.","ogType":"article","bodyClass":"page-article","jsonld":["organization","breadcrumb","article"],"breadcrumb":"1.4.0","article":{"headline":"PHP Ledger 1.4.0: cash controls, parties and company stories","datePublished":"2026-09-23","dateModified":"2026-09-23","section":"Releases"},"lastmod":"2026-09-23"} -->
+<article class="container article section">
+<p><a href="/news/">Release news</a> · <time datetime="2026-09-23">23 September 2026</time></p>
+<h1>PHP Ledger 1.4.0: cash controls, parties and company stories</h1>
+<p class="lead">Choose how your books handle cash shortfalls, connect each receipt or expense to a payer or payee, and follow fictional businesses through their accounting decisions.</p>
+<div class="actions"><a class="button" href="/demo/">Try the shared demo</a><a class="button button--secondary" href="/download/">Download 1.4.0</a></div>
+<h2>An administrator chooses the balance policy</h2>
+<p>Admin → Accounting policies offers Warning only and Strict. Warning only is the default for new and upgraded books: it permits recording a payment despite a shortfall, while the receipt or expense preview explains the recorded balance. Strict blocks payments that create or worsen physical-cash deficits or exceed a bank account’s explicitly recorded overdraft facility.</p>
+<p>Strict mode uses posted entries, accounting dates and later affected daily balances. Draft receipts provide no money and draft expenses reserve none. Concurrent postings, backdated entries and linked corrections pass through the same central control. Existing deficits are preserved for investigation; enabling the setting does not rewrite history.</p>
+<p>A book balance cannot predict bank clearance, holds or unpresented payments. A separate loan or unused credit line does not become bank funding. Record what actually happened and reconcile the account.</p>
+<h2>Keep the payer and payee with the transaction</h2>
+<p>Receipts and Expenses have separate workspaces. Search the company’s active parties in Received from or Paid to, or explicitly create a party without losing the transaction inputs. The document retains the party identity and historical name. This link does not automatically allocate an invoice or recognize debt; use the settlement and advance workflows for those purposes.</p>
+<h2>Explore eleven fictional companies</h2>
+<p><a href="/sample-companies/">Meet the sample companies</a> through original profiles and logos. Cedar Studio includes monthly chapters for 2024–2025 and a separate 2026 practice chapter. Chapters explain decisions, accounting treatment and records to inspect in your own sample company. The other ten expanded monthly journeys are clearly marked unfinished.</p>
+<p>Corrected sample packages use structured account codes and explicit headings. Their zero-balance structure imports contain no transactions. Known unfunded practice events remain visible and unposted; no funding or credit facility has been invented to hide them.</p>
+<h2>Help beside the decision</h2>
+<p>Page headers and ambiguous fields provide compact contextual help with keyboard access, mobile presentation and readable no-JavaScript fallback. Report help and account expansion operate independently.</p>
+<h2>Upgrade and review</h2>
+<p>Four additive migrations preserve historical entries while adding party links, money-account classification, bank facility fields and the warning-default policy. Back up the installation and follow the matching upgrade guide. The release uses publisher-signed ZIP updates and the same verified archive for container images. No media kit accompanies this release by project-owner decision.</p>
+<p>Technical checks do not replace independent accounting or security review, native-language acceptance or real-business pilots. Use fictional information in the shared demo; it resets hourly.</p>
+</article>

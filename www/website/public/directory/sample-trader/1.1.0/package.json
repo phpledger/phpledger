@@ -1,0 +1,50 @@
+{
+  "type": "sample",
+  "slug": "sample-trader",
+  "version": "1.1.0",
+  "contract": 1,
+  "name": "Harbour Trade",
+  "description": "Wholesale / trader. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-trader/",
+  "requires": {
+    "core": "1.0.0",
+    "inventory": "1.0.0",
+    "purchasing": "1.0.0",
+    "trading-documents": "1.0.0"
+  },
+  "sample": {
+    "id": "trader",
+    "version": "1.1.0",
+    "name": "Harbour Trade",
+    "business": "Wholesale / trader",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "preview_only",
+    "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+    "scenario": {
+      "id": "trade-pricing",
+      "title": "Review a trade sale and settlement",
+      "goal": "Follow stock purchase, customer credit sale, partial collection, return and till-to-bank transfer.",
+      "steps": [
+        "Receive the boxed supply purchase at its recorded unit cost.",
+        "Post the trade-customer invoice and inspect the stock issue and receivable.",
+        "Apply the named customer receipt, then review the remaining balance and return credit.",
+        "Compare the cash transfer with the cash-on-hand and bank accounts."
+      ],
+      "checks": [
+        "A return is linked to the source invoice and does not create a second sale.",
+        "Customer and supplier balances remain in their respective control accounts.",
+        "The pack uses one stock location and does not claim pricing-list or sales-order functionality."
+      ]
+    },
+    "file": "trader-1.1.0.json",
+    "sha256": "b39ac5e2b83594ee47e54c52ed64cd58ef22112734ce14bb6a60340892a714d3"
+  },
+  "files": {
+    "pack.json": "b39ac5e2b83594ee47e54c52ed64cd58ef22112734ce14bb6a60340892a714d3",
+    "structure.json": "b18287d398481b6bbc6999f6e345420aaa4f46a4f5d79bad77b44b52f92a52da"
+  }
+}

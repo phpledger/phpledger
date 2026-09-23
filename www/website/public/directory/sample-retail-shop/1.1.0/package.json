@@ -1,0 +1,50 @@
+{
+  "type": "sample",
+  "slug": "sample-retail-shop",
+  "version": "1.1.0",
+  "contract": 1,
+  "name": "Willow Corner Shop",
+  "description": "Retail shop. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-retail-shop/",
+  "requires": {
+    "core": "1.0.0",
+    "inventory": "1.0.0",
+    "pos-showcase": "1.0.0",
+    "trading-documents": "1.0.0"
+  },
+  "sample": {
+    "id": "retail-shop",
+    "version": "1.1.0",
+    "name": "Willow Corner Shop",
+    "business": "Retail shop",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "released_demo_only",
+    "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+    "scenario": {
+      "id": "register-close",
+      "title": "Check a sale, return and counted till",
+      "goal": "Compare a small retail sale, return, till deposit, stock balance and customer settlement.",
+      "steps": [
+        "Review the opening till, bank, receivable, payable and stock evidence.",
+        "Trace the stationery cash sale and its cost of goods sold.",
+        "Review the customer invoice, receipt and linked return credit.",
+        "Compare the counted till transfer with the cash and bank account movements."
+      ],
+      "checks": [
+        "A credit-note return does not create a second sale or cash receipt.",
+        "SKU identity survives the sale, return and stock reports.",
+        "Barcode scanning and register sessions remain future UI features."
+      ]
+    },
+    "file": "retail-shop-1.1.0.json",
+    "sha256": "300748da05a356dda7792e186a8b9ee41dba2a4bff03cc3b7d471a03014cbb52"
+  },
+  "files": {
+    "pack.json": "300748da05a356dda7792e186a8b9ee41dba2a4bff03cc3b7d471a03014cbb52",
+    "structure.json": "6496d62b120f28f2fe970d192d81cd17bb67eed304b57a611ddc73a5235dcc05"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-trader",
+  "version": "1.1.0",
+  "archive_bytes": 20513,
+  "archive_sha256": "5f081a68ac539cf94f17434d70551d181475f8204cfcc32efd5545b89ff53499",
+  "manifest_sha256": "e2c2785f34a01d53cbcafb62a36b178865b0bd3ff1944171d6884fef6a55b2de",
+  "files": {
+    "pack.json": "b39ac5e2b83594ee47e54c52ed64cd58ef22112734ce14bb6a60340892a714d3",
+    "structure.json": "b18287d398481b6bbc6999f6e345420aaa4f46a4f5d79bad77b44b52f92a52da"
+  }
+}

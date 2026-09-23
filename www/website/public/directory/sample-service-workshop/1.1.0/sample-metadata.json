@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-service-workshop",
+  "version": "1.1.0",
+  "archive_bytes": 21564,
+  "archive_sha256": "f81e3dca7e3245bdae7101f8ed88ac68a5db7c37317073f4e677c32d3f392d5a",
+  "manifest_sha256": "230de0acd51b9ee17b07f6ee859d4f17d0d08ea3f49bdfd6a89eccbd9dbfdbc1",
+  "files": {
+    "pack.json": "be970b701570a7b6f0e72a4bad2ab84a3e1864395fa910af694e421cd10f5aa9",
+    "structure.json": "37e904e3b01b6ba7ea20dd5e1d8ea6b2e8ca46a5ea74357855ebf4843d49c5fb"
+  }
+}

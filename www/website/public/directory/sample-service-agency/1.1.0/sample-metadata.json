@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-service-agency",
+  "version": "1.1.0",
+  "archive_bytes": 25263,
+  "archive_sha256": "9b90ec7a832209a0affec72e5e6c9ea481e0025666234544d766d84e25762ece",
+  "manifest_sha256": "bfbba781e64a05de18e6ff53dd7c7d45ed55296a6885c965954fb213edcc9878",
+  "files": {
+    "pack.json": "ac6bdf94ab46884fda066c2cc8a055c3d46cfe02dbb4c3730b9d0ed7231cec33",
+    "structure.json": "b67662ab74b2d0b23e20a39584e9ca5fc1eb26e49afaed0cecf976d1b94d644c"
+  }
+}

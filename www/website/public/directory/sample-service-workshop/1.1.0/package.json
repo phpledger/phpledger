@@ -1,0 +1,49 @@
+{
+  "type": "sample",
+  "slug": "sample-service-workshop",
+  "version": "1.1.0",
+  "contract": 1,
+  "name": "Wheel & Spoke Workshop",
+  "description": "Service workshop. Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-service-workshop/",
+  "requires": {
+    "core": "1.0.0",
+    "inventory": "1.0.0",
+    "purchasing": "1.0.0"
+  },
+  "sample": {
+    "id": "service-workshop",
+    "version": "1.1.0",
+    "name": "Wheel & Spoke Workshop",
+    "business": "Service workshop",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "preview_only",
+    "capability_note": "Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.",
+    "scenario": {
+      "id": "job-card",
+      "title": "Keep customer property separate from workshop stock",
+      "goal": "Follow parts, labour, customer-owned property and settlement examples without treating a job card as a posted module.",
+      "steps": [
+        "Review the opening workshop stock and the separate customer-owned bicycle reference.",
+        "Trace a parts purchase and a labour/service sale through the ledger.",
+        "Review the customer receipt, supplier payment and returned part.",
+        "Confirm that customer-owned property does not enter the inventory valuation."
+      ],
+      "checks": [
+        "Customer-owned property is excluded from stock balances and valuation.",
+        "The pack does not implement job cards, custody, scheduling or work-in-progress costing.",
+        "Parts and service income remain distinguishable in the teaching scenario."
+      ]
+    },
+    "file": "service-workshop-1.1.0.json",
+    "sha256": "be970b701570a7b6f0e72a4bad2ab84a3e1864395fa910af694e421cd10f5aa9"
+  },
+  "files": {
+    "pack.json": "be970b701570a7b6f0e72a4bad2ab84a3e1864395fa910af694e421cd10f5aa9",
+    "structure.json": "37e904e3b01b6ba7ea20dd5e1d8ea6b2e8ca46a5ea74357855ebf4843d49c5fb"
+  }
+}

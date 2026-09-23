@@ -1,0 +1,47 @@
+{
+  "type": "sample",
+  "slug": "sample-service-agency",
+  "version": "1.1.0",
+  "contract": 1,
+  "name": "Cedar Studio",
+  "description": "Professional services / agency. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-service-agency/",
+  "requires": {
+    "core": "1.0.0"
+  },
+  "sample": {
+    "id": "service-agency",
+    "version": "1.1.0",
+    "name": "Cedar Studio",
+    "business": "Professional services / agency",
+    "source_count": 111,
+    "journal_count": 109,
+    "draft_count": 3,
+    "status": "released_demo_only",
+    "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+    "scenario": {
+      "id": "agency-month-end",
+      "title": "Review project income and operating costs",
+      "goal": "Follow a professional-services month from client receipts and cash sales to staff, rent, insurance and a corrected expense.",
+      "steps": [
+        "Trace a monthly client receipt and separate cash activity in the bank and till accounts.",
+        "Review recurring staff, rent, utilities and insurance entries in the month-end journal.",
+        "Follow the year-end customer collection without recording income twice.",
+        "Review the mistaken cost, linked reversal and corrected replacement."
+      ],
+      "checks": [
+        "Staff entries are illustrative support schedules, not payroll, withholding or employment compliance.",
+        "Client work is represented by general-ledger examples, not project management or time billing.",
+        "The open 2026 drafts are separate practice records and do not alter closed history."
+      ]
+    },
+    "file": "service-agency-1.1.0.json",
+    "sha256": "ac6bdf94ab46884fda066c2cc8a055c3d46cfe02dbb4c3730b9d0ed7231cec33"
+  },
+  "files": {
+    "pack.json": "ac6bdf94ab46884fda066c2cc8a055c3d46cfe02dbb4c3730b9d0ed7231cec33",
+    "structure.json": "b67662ab74b2d0b23e20a39584e9ca5fc1eb26e49afaed0cecf976d1b94d644c"
+  }
+}

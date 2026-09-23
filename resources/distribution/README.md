@@ -267,11 +267,11 @@ compose file is a strong check, and it is not the same thing.
   So Coolify is two pull requests, not one.
 
 
-## 1.4.0 source preparation (not published)
+## 1.4.0 release metadata
 
-The production Compose default and unpinned catalogue candidate version fields now target 1.4.0. These are source manifests only; the image tag and wrapper packages cannot be used until the exact 1.4.0 ZIP and official images are published and pulled. Keep 1.3.0 archive URLs, checksums and the Umbrel image digest/version together until the matching 1.4.0 archive hash and multi-architecture digest are verified. The YunoHost archive pin, Installatron version directory, Softaculous installed-size measurement, Cloudron version history and provider submissions also need exact-artifact review. No provider acceptance or live deployment is implied by these candidate values.
+The production Compose default and active catalogue candidate versions target the published 1.4.0 release. Umbrel pairs version 1.4.0 with the immutable official multi-architecture image `ghcr.io/phpledger/phpledger@sha256:a170945385c9cd2dc604d1a2c6889ad7af02b64cbd8b0c3d6bb49c9afcf2edf9`. YunoHost's release URL and SHA-256 match the anonymously verified application ZIP; Softaculous records 1,695 archive files and 9,116,480 uncompressed bytes. Installatron has a new 1.4.0 candidate directory, with historical directories retained. These source manifests do not establish provider acceptance or platform lifecycle certification. Cloudron's separate wrapper image/history and all provider submissions remain separate work. See the 1.4.0 publication receipt for registry payload verification and exact artifact hashes.
 
-## 1.3.0 candidate metadata and remaining artifact pins
+## Historical 1.3.0 candidate metadata and remaining artifact pins
 
 Unpinned active image/default versions target 1.3.0. The production Compose default is pinned to 1.3.0; operators may explicitly choose another published tag. This is source preparation, not provider publication or acceptance.
 

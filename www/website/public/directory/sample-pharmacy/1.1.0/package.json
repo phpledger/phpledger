@@ -1,0 +1,50 @@
+{
+  "type": "sample",
+  "slug": "sample-pharmacy",
+  "version": "1.1.0",
+  "contract": 1,
+  "name": "Meadow Training Pharmacy",
+  "description": "Non-medicinal training inventory. Non-medicinal training products only; no medicines, dispensing, patient records, expiry controls or pharmacy compliance are implemented.",
+  "author": "PHP Ledger",
+  "licence": "CC0-1.0",
+  "homepage": "https://phpledger.com/directory/sample-pharmacy/",
+  "requires": {
+    "core": "1.0.0",
+    "inventory": "1.0.0",
+    "pos-showcase": "1.0.0",
+    "trading-documents": "1.0.0"
+  },
+  "sample": {
+    "id": "pharmacy",
+    "version": "1.1.0",
+    "name": "Meadow Training Pharmacy",
+    "business": "Non-medicinal training inventory",
+    "source_count": 85,
+    "journal_count": 83,
+    "draft_count": 3,
+    "status": "preview_only",
+    "capability_note": "Non-medicinal training products only; no medicines, dispensing, patient records, expiry controls or pharmacy compliance are implemented.",
+    "scenario": {
+      "id": "lot-expiry",
+      "title": "Review a lot-tracked training stock example",
+      "goal": "Trace non-medicinal training stock through lot identity, expiry metadata, sale, return and supplier settlement.",
+      "steps": [
+        "Review the training items, lot identifiers and stated expiry dates.",
+        "Trace the purchase and receipt into the stock and payable accounts.",
+        "Review the sale, returned quantity and linked customer credit.",
+        "Check the supplier payment and the remaining lot quantity/value."
+      ],
+      "checks": [
+        "All products are non-medicinal sample training items.",
+        "No dispensing, patient, prescription, controlled-substance or pharmacy compliance workflow is implemented.",
+        "Expiry metadata is illustrative fixture data, not a regulatory control."
+      ]
+    },
+    "file": "pharmacy-1.1.0.json",
+    "sha256": "898c24a6b00af0f48048b3390810e408b8439852d36d23320e2db9404f49ab41"
+  },
+  "files": {
+    "pack.json": "898c24a6b00af0f48048b3390810e408b8439852d36d23320e2db9404f49ab41",
+    "structure.json": "19bc39271cfdf3a545008d0da0353b1955561044eebbc727f804165b4bc948c8"
+  }
+}

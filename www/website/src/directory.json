@@ -4,7 +4,7 @@
     {
       "type": "sample",
       "slug": "sample-service-agency",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Cedar Studio",
       "description": "Professional services / agency. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
       "author": "PHP Ledger",
@@ -16,7 +16,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-service-agency",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Cedar Studio",
         "description": "Professional services / agency. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -28,11 +28,11 @@
         },
         "sample": {
           "id": "service-agency",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Cedar Studio",
           "business": "Professional services / agency",
-          "source_count": 87,
-          "journal_count": 85,
+          "source_count": 111,
+          "journal_count": 109,
           "draft_count": 3,
           "status": "released_demo_only",
           "capability_note": "This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -52,32 +52,32 @@
               "The open 2026 drafts are separate practice records and do not alter closed history."
             ]
           },
-          "file": "service-agency-1.0.0.json",
-          "sha256": "9ddeb21d5b2e4c7d1b63e6e2c44d87a86173baabed6951bc4f4c6baab2e30269"
+          "file": "service-agency-1.1.0.json",
+          "sha256": "ac6bdf94ab46884fda066c2cc8a055c3d46cfe02dbb4c3730b9d0ed7231cec33"
         },
         "files": {
-          "pack.json": "9ddeb21d5b2e4c7d1b63e6e2c44d87a86173baabed6951bc4f4c6baab2e30269",
-          "structure.json": "cbe80799638056001c59e1101ac8a5bc1c20928525bbb206afb1a2e1a54d05a0"
+          "pack.json": "ac6bdf94ab46884fda066c2cc8a055c3d46cfe02dbb4c3730b9d0ed7231cec33",
+          "structure.json": "b67662ab74b2d0b23e20a39584e9ca5fc1eb26e49afaed0cecf976d1b94d644c"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-service-agency",
-        "version": "1.0.0",
-        "archive_bytes": 16461,
-        "archive_sha256": "cdcd6b272dc779cfe18588562ed498782b77122cc0780345cc1801b4f7f46986",
-        "manifest_sha256": "2fa7193a6bae61db32fde0ff6ebebd3b14ed69cb1d69da52aa96a7a1d0d86fd8",
+        "version": "1.1.0",
+        "archive_bytes": 25263,
+        "archive_sha256": "9b90ec7a832209a0affec72e5e6c9ea481e0025666234544d766d84e25762ece",
+        "manifest_sha256": "bfbba781e64a05de18e6ff53dd7c7d45ed55296a6885c965954fb213edcc9878",
         "files": {
-          "pack.json": "9ddeb21d5b2e4c7d1b63e6e2c44d87a86173baabed6951bc4f4c6baab2e30269",
-          "structure.json": "cbe80799638056001c59e1101ac8a5bc1c20928525bbb206afb1a2e1a54d05a0"
+          "pack.json": "ac6bdf94ab46884fda066c2cc8a055c3d46cfe02dbb4c3730b9d0ed7231cec33",
+          "structure.json": "b67662ab74b2d0b23e20a39584e9ca5fc1eb26e49afaed0cecf976d1b94d644c"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-retail-shop",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Willow Corner Shop",
       "description": "Retail shop. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
       "author": "PHP Ledger",
@@ -92,7 +92,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-retail-shop",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Willow Corner Shop",
         "description": "Retail shop. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -107,7 +107,7 @@
         },
         "sample": {
           "id": "retail-shop",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Willow Corner Shop",
           "business": "Retail shop",
           "source_count": 85,
@@ -131,32 +131,32 @@
               "Barcode scanning and register sessions remain future UI features."
             ]
           },
-          "file": "retail-shop-1.0.0.json",
-          "sha256": "c02858466fcdf3f0f29eeff625781da6896ce88387bc7ff9fe01151adf2037b3"
+          "file": "retail-shop-1.1.0.json",
+          "sha256": "300748da05a356dda7792e186a8b9ee41dba2a4bff03cc3b7d471a03014cbb52"
         },
         "files": {
-          "pack.json": "c02858466fcdf3f0f29eeff625781da6896ce88387bc7ff9fe01151adf2037b3",
-          "structure.json": "92b3340973a403405acf7e9475c9fa4e50158f4eaf32896a26e10e4b9b47957e"
+          "pack.json": "300748da05a356dda7792e186a8b9ee41dba2a4bff03cc3b7d471a03014cbb52",
+          "structure.json": "6496d62b120f28f2fe970d192d81cd17bb67eed304b57a611ddc73a5235dcc05"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-retail-shop",
-        "version": "1.0.0",
-        "archive_bytes": 18037,
-        "archive_sha256": "99bd765ec104d2eaebf355222edb7d648830d12e6763816afed11bb3c7a0e596",
-        "manifest_sha256": "164d8a6a974cd5aeee9791f8e45642f1dfab0fb0703c51fbf48ace6d53efd5c0",
+        "version": "1.1.0",
+        "archive_bytes": 21257,
+        "archive_sha256": "d454dcdb482bad325bc7c50cd5add8d1924fa20c4a80e464a591ced37fc61954",
+        "manifest_sha256": "2460674d00f6776171890184b8f66793adb47e2e6e233f4281beee57f237431e",
         "files": {
-          "pack.json": "c02858466fcdf3f0f29eeff625781da6896ce88387bc7ff9fe01151adf2037b3",
-          "structure.json": "92b3340973a403405acf7e9475c9fa4e50158f4eaf32896a26e10e4b9b47957e"
+          "pack.json": "300748da05a356dda7792e186a8b9ee41dba2a4bff03cc3b7d471a03014cbb52",
+          "structure.json": "6496d62b120f28f2fe970d192d81cd17bb67eed304b57a611ddc73a5235dcc05"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-seasonal-business",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Sunrise Garden Services",
       "description": "Seasonal business. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
       "author": "PHP Ledger",
@@ -168,7 +168,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-seasonal-business",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Sunrise Garden Services",
         "description": "Seasonal business. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -180,7 +180,7 @@
         },
         "sample": {
           "id": "seasonal-business",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Sunrise Garden Services",
           "business": "Seasonal business",
           "source_count": 85,
@@ -204,32 +204,32 @@
               "Profit and cash are reviewed through the existing statements and account movements."
             ]
           },
-          "file": "seasonal-business-1.0.0.json",
-          "sha256": "0651cb9099abd22345b1b2c4efb9cc1d6ad5a482f6e31f92051e930129319817"
+          "file": "seasonal-business-1.1.0.json",
+          "sha256": "6292e9da6eb1b5880f73943fd8a542c33a282695e169cf842872aa2ebb0803f2"
         },
         "files": {
-          "pack.json": "0651cb9099abd22345b1b2c4efb9cc1d6ad5a482f6e31f92051e930129319817",
-          "structure.json": "4f78d8bf7c2b6ad2505b9c766ba3f172356fd50266c064cc59f917ffe75077a1"
+          "pack.json": "6292e9da6eb1b5880f73943fd8a542c33a282695e169cf842872aa2ebb0803f2",
+          "structure.json": "9c485ea52762e668937d59b284e8a6fd03d073345d6b6cf966ea0a5ffc888213"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-seasonal-business",
-        "version": "1.0.0",
-        "archive_bytes": 16289,
-        "archive_sha256": "23e4be308fcc129a5405366ec3c4bb93669ae82e5047884291412e6fb321ee8b",
-        "manifest_sha256": "6b28ae55fa69bb293cfe68a26ff734f9a4f123878762b372c7eee82fc35a61ac",
+        "version": "1.1.0",
+        "archive_bytes": 18201,
+        "archive_sha256": "76ccbedbbafec9639ea68f45a272aae1f0ea1879692153eb3be6cd4ddc4431e5",
+        "manifest_sha256": "2fb97e74f4be149dc07d7c9e0134d160ad5850ee18d992face7704fb91c4c11d",
         "files": {
-          "pack.json": "0651cb9099abd22345b1b2c4efb9cc1d6ad5a482f6e31f92051e930129319817",
-          "structure.json": "4f78d8bf7c2b6ad2505b9c766ba3f172356fd50266c064cc59f917ffe75077a1"
+          "pack.json": "6292e9da6eb1b5880f73943fd8a542c33a282695e169cf842872aa2ebb0803f2",
+          "structure.json": "9c485ea52762e668937d59b284e8a6fd03d073345d6b6cf966ea0a5ffc888213"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-distributor",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Harbor Supply Company",
       "description": "Distribution. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
       "author": "PHP Ledger",
@@ -245,7 +245,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-distributor",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Harbor Supply Company",
         "description": "Distribution. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -261,7 +261,7 @@
         },
         "sample": {
           "id": "distributor",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Harbor Supply Company",
           "business": "Distribution",
           "source_count": 85,
@@ -285,32 +285,32 @@
               "Customer and supplier settlement remains separate from operational delivery status."
             ]
           },
-          "file": "distributor-1.0.0.json",
-          "sha256": "fe250c50fc9e42d2948d21fefd9d1897b6373107d6a2bdbbafa92ee8767f02c7"
+          "file": "distributor-1.1.0.json",
+          "sha256": "70163a74f0b77de93bcfb4f1e5382bfdeacf67e8873d59ad7269bcf7f6204e25"
         },
         "files": {
-          "pack.json": "fe250c50fc9e42d2948d21fefd9d1897b6373107d6a2bdbbafa92ee8767f02c7",
-          "structure.json": "53c438f0b246fa3908223e1ff0acb348bdbb2899c631269cc63229bc33b3a13c"
+          "pack.json": "70163a74f0b77de93bcfb4f1e5382bfdeacf67e8873d59ad7269bcf7f6204e25",
+          "structure.json": "d2e688144f058d26cc9820b171af78f8d9a73e5e65e7d49f434f69fb9a1cbe52"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-distributor",
-        "version": "1.0.0",
-        "archive_bytes": 19088,
-        "archive_sha256": "4fe769cfdfa14dea65d75f5e4605bd8d055e3915d6c9056d8288aeceef2dac1f",
-        "manifest_sha256": "2efa0735d450ae347c0f07fcd5aaa7fc17410b6d5d329b259720aacaf38b8f0e",
+        "version": "1.1.0",
+        "archive_bytes": 21474,
+        "archive_sha256": "86d2f9c7f8dc022c55a56acacc77a2abdec6b475caceb26a62148f856c981127",
+        "manifest_sha256": "a78e0f84ca9d8dba7ac66fcc59a56eadbb80846763d8f5b2432694165b5a1c81",
         "files": {
-          "pack.json": "fe250c50fc9e42d2948d21fefd9d1897b6373107d6a2bdbbafa92ee8767f02c7",
-          "structure.json": "53c438f0b246fa3908223e1ff0acb348bdbb2899c631269cc63229bc33b3a13c"
+          "pack.json": "70163a74f0b77de93bcfb4f1e5382bfdeacf67e8873d59ad7269bcf7f6204e25",
+          "structure.json": "d2e688144f058d26cc9820b171af78f8d9a73e5e65e7d49f434f69fb9a1cbe52"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-trader",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Harbour Trade",
       "description": "Wholesale / trader. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
       "author": "PHP Ledger",
@@ -325,7 +325,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-trader",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Harbour Trade",
         "description": "Wholesale / trader. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
@@ -340,7 +340,7 @@
         },
         "sample": {
           "id": "trader",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Harbour Trade",
           "business": "Wholesale / trader",
           "source_count": 85,
@@ -364,32 +364,32 @@
               "The pack uses one stock location and does not claim pricing-list or sales-order functionality."
             ]
           },
-          "file": "trader-1.0.0.json",
-          "sha256": "44c1c517a83ae2f67c9cf34e6b4d021934a226051a1b4288f1e689244edd4b72"
+          "file": "trader-1.1.0.json",
+          "sha256": "b39ac5e2b83594ee47e54c52ed64cd58ef22112734ce14bb6a60340892a714d3"
         },
         "files": {
-          "pack.json": "44c1c517a83ae2f67c9cf34e6b4d021934a226051a1b4288f1e689244edd4b72",
-          "structure.json": "5526e20a641bffbef2e13081f02ce3649e83973c96a9744d94c419b47e7cbdda"
+          "pack.json": "b39ac5e2b83594ee47e54c52ed64cd58ef22112734ce14bb6a60340892a714d3",
+          "structure.json": "b18287d398481b6bbc6999f6e345420aaa4f46a4f5d79bad77b44b52f92a52da"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-trader",
-        "version": "1.0.0",
-        "archive_bytes": 18191,
-        "archive_sha256": "925ebb77497673745c638d024b57fe95fc7a08ed30df776598bf45c2e27f41f9",
-        "manifest_sha256": "c8f3f8efe1e6db7503073d23dc1e2d0c0a468da9975ec1d68229344e2551984a",
+        "version": "1.1.0",
+        "archive_bytes": 20513,
+        "archive_sha256": "5f081a68ac539cf94f17434d70551d181475f8204cfcc32efd5545b89ff53499",
+        "manifest_sha256": "e2c2785f34a01d53cbcafb62a36b178865b0bd3ff1944171d6884fef6a55b2de",
         "files": {
-          "pack.json": "44c1c517a83ae2f67c9cf34e6b4d021934a226051a1b4288f1e689244edd4b72",
-          "structure.json": "5526e20a641bffbef2e13081f02ce3649e83973c96a9744d94c419b47e7cbdda"
+          "pack.json": "b39ac5e2b83594ee47e54c52ed64cd58ef22112734ce14bb6a60340892a714d3",
+          "structure.json": "b18287d398481b6bbc6999f6e345420aaa4f46a4f5d79bad77b44b52f92a52da"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-restaurant",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Cedar Table",
       "description": "Restaurant / cafe. Restaurant and catering bookkeeping example; tables, recipes, kitchen production and service operations are not implemented.",
       "author": "PHP Ledger",
@@ -403,7 +403,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-restaurant",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Cedar Table",
         "description": "Restaurant / cafe. Restaurant and catering bookkeeping example; tables, recipes, kitchen production and service operations are not implemented.",
@@ -417,7 +417,7 @@
         },
         "sample": {
           "id": "restaurant",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Cedar Table",
           "business": "Restaurant / cafe",
           "source_count": 85,
@@ -441,32 +441,32 @@
               "Inventory and cash totals reconcile to the posted ledger events."
             ]
           },
-          "file": "restaurant-1.0.0.json",
-          "sha256": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664"
+          "file": "restaurant-1.1.0.json",
+          "sha256": "d07e565615ec83fb4e58dd4c48467658154849676fdeff50927545375fb13665"
         },
         "files": {
-          "pack.json": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664",
-          "structure.json": "155018b38193729d87d373a7513aa59a241b2315c1a31fd45893a57964d78c6f"
+          "pack.json": "d07e565615ec83fb4e58dd4c48467658154849676fdeff50927545375fb13665",
+          "structure.json": "12434b10d524e87c997d59211a121c37af874a2840cbeed4f6ba091282c283bd"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-restaurant",
-        "version": "1.0.0",
-        "archive_bytes": 18050,
-        "archive_sha256": "2fcaf62dfc1e90d8825fcf08ed4bab3ee3f28dc30562e34042f3ef6687e443b1",
-        "manifest_sha256": "28f58acfb85e1088606edbdcd18a6023798ea4331c7b01322dec381b193a9855",
+        "version": "1.1.0",
+        "archive_bytes": 20278,
+        "archive_sha256": "67e686c29bac14b226835c73e6a1427a3e94d6761256ba944d8af32066d4a816",
+        "manifest_sha256": "eaddc1786320981fa4ac35526bc2c7b34e6bd5ba6b5ddc0197b2e821d558bc38",
         "files": {
-          "pack.json": "0aef519ed551f28239eeda778d57f9aeff5af635e8bc4aca5b08104237179664",
-          "structure.json": "155018b38193729d87d373a7513aa59a241b2315c1a31fd45893a57964d78c6f"
+          "pack.json": "d07e565615ec83fb4e58dd4c48467658154849676fdeff50927545375fb13665",
+          "structure.json": "12434b10d524e87c997d59211a121c37af874a2840cbeed4f6ba091282c283bd"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-membership-club",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Riverside Community Club",
       "description": "Membership club. Membership-income bookkeeping example; membership administration, renewals, charity status and dues compliance are not implemented.",
       "author": "PHP Ledger",
@@ -478,7 +478,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-membership-club",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Riverside Community Club",
         "description": "Membership club. Membership-income bookkeeping example; membership administration, renewals, charity status and dues compliance are not implemented.",
@@ -490,7 +490,7 @@
         },
         "sample": {
           "id": "membership-club",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Riverside Community Club",
           "business": "Membership club",
           "source_count": 85,
@@ -514,32 +514,32 @@
               "Opening AR/AP detail remains evidence reconciled to the opening control journal."
             ]
           },
-          "file": "membership-club-1.0.0.json",
-          "sha256": "59608630a1042db50a9d61d487a0db260388a719831de94b79566bc84aee4c47"
+          "file": "membership-club-1.1.0.json",
+          "sha256": "7e5551dd96a087e40b8d56af0a56c6103f8a8200f5001f8046125101c014b041"
         },
         "files": {
-          "pack.json": "59608630a1042db50a9d61d487a0db260388a719831de94b79566bc84aee4c47",
-          "structure.json": "2b9d27af7e4a7cd3efac234fc159e61783d95015ad2c792168c0e3aafaca2a48"
+          "pack.json": "7e5551dd96a087e40b8d56af0a56c6103f8a8200f5001f8046125101c014b041",
+          "structure.json": "a3e1604d930665d467a7014ec51c652b6812970e4f9485e7a4f7ce5277cb4369"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-membership-club",
-        "version": "1.0.0",
-        "archive_bytes": 17100,
-        "archive_sha256": "798477e066a89ed2b22d50ec5c0301ba0f31640b500e3abfbe2989524df44f02",
-        "manifest_sha256": "3a7c0cbbf2a2d971406b1df258df294222a0be524f946c5aacdcb12ef0f1d860",
+        "version": "1.1.0",
+        "archive_bytes": 19345,
+        "archive_sha256": "3c5c6ed9f66aa972184271542eaf41e3dee6caab603c2a20b308b46dd5f03720",
+        "manifest_sha256": "ab456ccdf753b4968ace8d686e383d76205336b2e0e57e4d55ccd172c1105ca4",
         "files": {
-          "pack.json": "59608630a1042db50a9d61d487a0db260388a719831de94b79566bc84aee4c47",
-          "structure.json": "2b9d27af7e4a7cd3efac234fc159e61783d95015ad2c792168c0e3aafaca2a48"
+          "pack.json": "7e5551dd96a087e40b8d56af0a56c6103f8a8200f5001f8046125101c014b041",
+          "structure.json": "a3e1604d930665d467a7014ec51c652b6812970e4f9485e7a4f7ce5277cb4369"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-pharmacy",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Meadow Training Pharmacy",
       "description": "Non-medicinal training inventory. Non-medicinal training products only; no medicines, dispensing, patient records, expiry controls or pharmacy compliance are implemented.",
       "author": "PHP Ledger",
@@ -554,7 +554,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-pharmacy",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Meadow Training Pharmacy",
         "description": "Non-medicinal training inventory. Non-medicinal training products only; no medicines, dispensing, patient records, expiry controls or pharmacy compliance are implemented.",
@@ -569,7 +569,7 @@
         },
         "sample": {
           "id": "pharmacy",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Meadow Training Pharmacy",
           "business": "Non-medicinal training inventory",
           "source_count": 85,
@@ -593,32 +593,32 @@
               "Expiry metadata is illustrative fixture data, not a regulatory control."
             ]
           },
-          "file": "pharmacy-1.0.0.json",
-          "sha256": "235b95787c529afd428c99e85a72c31eb387bef9763346aa5e49278e3163f95e"
+          "file": "pharmacy-1.1.0.json",
+          "sha256": "898c24a6b00af0f48048b3390810e408b8439852d36d23320e2db9404f49ab41"
         },
         "files": {
-          "pack.json": "235b95787c529afd428c99e85a72c31eb387bef9763346aa5e49278e3163f95e",
-          "structure.json": "9511910af8facbe58312eb58101c88b6ee59ff4e87c5a3a827d06163a5d9d557"
+          "pack.json": "898c24a6b00af0f48048b3390810e408b8439852d36d23320e2db9404f49ab41",
+          "structure.json": "19bc39271cfdf3a545008d0da0353b1955561044eebbc727f804165b4bc948c8"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-pharmacy",
-        "version": "1.0.0",
-        "archive_bytes": 18263,
-        "archive_sha256": "625f0d178a3b8a0006d8d1649433905d77673b80b8e2314909ee147198a7ba83",
-        "manifest_sha256": "fd90671dab07252f31f0598354ddc58368052c4eca266c53ef3f722acfed468a",
+        "version": "1.1.0",
+        "archive_bytes": 20612,
+        "archive_sha256": "709c25794988a4ceadbdb4a164da8bf6d1492b3a3e7615b4613f1fc2dabc1295",
+        "manifest_sha256": "02a25e40d3d6c9427594c423f3723390cee40ecab107589fb69678a4f08d6210",
         "files": {
-          "pack.json": "235b95787c529afd428c99e85a72c31eb387bef9763346aa5e49278e3163f95e",
-          "structure.json": "9511910af8facbe58312eb58101c88b6ee59ff4e87c5a3a827d06163a5d9d557"
+          "pack.json": "898c24a6b00af0f48048b3390810e408b8439852d36d23320e2db9404f49ab41",
+          "structure.json": "19bc39271cfdf3a545008d0da0353b1955561044eebbc727f804165b4bc948c8"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-jewelry-studio",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Lantern Finch Jewelry Studio",
       "description": "Jewelry studio. Jewelry bookkeeping example; precious-metal, gemstone, job-costing and commodity accounting are not implemented.",
       "author": "PHP Ledger",
@@ -632,7 +632,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-jewelry-studio",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Lantern Finch Jewelry Studio",
         "description": "Jewelry studio. Jewelry bookkeeping example; precious-metal, gemstone, job-costing and commodity accounting are not implemented.",
@@ -646,7 +646,7 @@
         },
         "sample": {
           "id": "jewelry-studio",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Lantern Finch Jewelry Studio",
           "business": "Jewelry studio",
           "source_count": 85,
@@ -670,32 +670,32 @@
               "The pack is a bookkeeping preview; specialist treatment and runtime replay are outside this candidate contract."
             ]
           },
-          "file": "jewelry-studio-1.0.0.json",
-          "sha256": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538"
+          "file": "jewelry-studio-1.1.0.json",
+          "sha256": "89747c66fc7f979fab676b47b28ba0d26a323f4edea2dcf45ffff9cf8d30d092"
         },
         "files": {
-          "pack.json": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538",
-          "structure.json": "43e68ecf255653bb3c0910d68595396af26a84aa61708c70820f40b4e897a049"
+          "pack.json": "89747c66fc7f979fab676b47b28ba0d26a323f4edea2dcf45ffff9cf8d30d092",
+          "structure.json": "59c3a6eb3dc421a02ab356a71932d56f911ccd9ef3652663530723eaef0bf9c1"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-jewelry-studio",
-        "version": "1.0.0",
-        "archive_bytes": 17124,
-        "archive_sha256": "523339c638d14416f9a026cb481a5a232c43db9d08eef86601a536ba92569828",
-        "manifest_sha256": "4c0abebd3b9318a0b0d43aa38c5c8ea74e11609c3b8eb8bf27df4f8af42ad1d9",
+        "version": "1.1.0",
+        "archive_bytes": 19246,
+        "archive_sha256": "69764a77779a992203b8dc4e48c35e7c09506ec30ac7e924f7bd90697b9c13d8",
+        "manifest_sha256": "5e19fbddb76e8abd3c13e14af095f863aebecd196bd18f08a5dc45715230453f",
         "files": {
-          "pack.json": "f6a50cc6b6cfa5e9b85c884fa49fa8358596eecb1742850b8e44328953b3d538",
-          "structure.json": "43e68ecf255653bb3c0910d68595396af26a84aa61708c70820f40b4e897a049"
+          "pack.json": "89747c66fc7f979fab676b47b28ba0d26a323f4edea2dcf45ffff9cf8d30d092",
+          "structure.json": "59c3a6eb3dc421a02ab356a71932d56f911ccd9ef3652663530723eaef0bf9c1"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-light-manufacturing",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Maple Bench Works",
       "description": "Light manufacturing. Light-manufacturing bookkeeping example; bills of material, production planning, work orders and recipes are not implemented.",
       "author": "PHP Ledger",
@@ -709,7 +709,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-light-manufacturing",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Maple Bench Works",
         "description": "Light manufacturing. Light-manufacturing bookkeeping example; bills of material, production planning, work orders and recipes are not implemented.",
@@ -723,7 +723,7 @@
         },
         "sample": {
           "id": "light-manufacturing",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Maple Bench Works",
           "business": "Light manufacturing",
           "source_count": 85,
@@ -747,32 +747,32 @@
               "The pack is a bookkeeping preview; production costing and conversion controls are outside the current module."
             ]
           },
-          "file": "light-manufacturing-1.0.0.json",
-          "sha256": "9c63c622878ecf3e69a89f392ba3b673635ba951bd9e3757a2ce31aa80111b26"
+          "file": "light-manufacturing-1.1.0.json",
+          "sha256": "b68b85e3bad1c27d0bd7c9c06ecbe8fd723809327e77f1ebf20d04d580ffd4f4"
         },
         "files": {
-          "pack.json": "9c63c622878ecf3e69a89f392ba3b673635ba951bd9e3757a2ce31aa80111b26",
-          "structure.json": "9324c0c3f277e4f432d0b780036f331a0ffc0f9dc65c91388626e9083d0059a5"
+          "pack.json": "b68b85e3bad1c27d0bd7c9c06ecbe8fd723809327e77f1ebf20d04d580ffd4f4",
+          "structure.json": "5d3d0172bdae275de3d94ea7a21db34400f60eefdb5fbc22364b52bc7c439d69"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-light-manufacturing",
-        "version": "1.0.0",
-        "archive_bytes": 17194,
-        "archive_sha256": "75ba9ee5202483f32823689b917135badcfe8afd87e1cecb6c4e99c59d968934",
-        "manifest_sha256": "bdb918a780f307a19b89710c563762f2d6ba6c655f9b5429b7b0866bdf03f4f4",
+        "version": "1.1.0",
+        "archive_bytes": 19555,
+        "archive_sha256": "bd63e3146fefe037e10475aba2ec3b853fea9a37cca2c23579fc325aa6f1c946",
+        "manifest_sha256": "7a55f29eb665715c5d762e065170aa498c88bf4cead879c718e36976c2332793",
         "files": {
-          "pack.json": "9c63c622878ecf3e69a89f392ba3b673635ba951bd9e3757a2ce31aa80111b26",
-          "structure.json": "9324c0c3f277e4f432d0b780036f331a0ffc0f9dc65c91388626e9083d0059a5"
+          "pack.json": "b68b85e3bad1c27d0bd7c9c06ecbe8fd723809327e77f1ebf20d04d580ffd4f4",
+          "structure.json": "5d3d0172bdae275de3d94ea7a21db34400f60eefdb5fbc22364b52bc7c439d69"
         }
       }
     },
     {
       "type": "sample",
       "slug": "sample-service-workshop",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "name": "Wheel & Spoke Workshop",
       "description": "Service workshop. Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.",
       "author": "PHP Ledger",
@@ -786,7 +786,7 @@
       "manifest": {
         "type": "sample",
         "slug": "sample-service-workshop",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "contract": 1,
         "name": "Wheel & Spoke Workshop",
         "description": "Service workshop. Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.",
@@ -800,7 +800,7 @@
         },
         "sample": {
           "id": "service-workshop",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "name": "Wheel & Spoke Workshop",
           "business": "Service workshop",
           "source_count": 85,
@@ -824,25 +824,25 @@
               "Parts and service income remain distinguishable in the teaching scenario."
             ]
           },
-          "file": "service-workshop-1.0.0.json",
-          "sha256": "8d8aa2dd5c4ea227ac29d8597cccc51711ffc9ac165a6846d75e82abfeeb6d2f"
+          "file": "service-workshop-1.1.0.json",
+          "sha256": "be970b701570a7b6f0e72a4bad2ab84a3e1864395fa910af694e421cd10f5aa9"
         },
         "files": {
-          "pack.json": "8d8aa2dd5c4ea227ac29d8597cccc51711ffc9ac165a6846d75e82abfeeb6d2f",
-          "structure.json": "548b3e8c6a30b929a2980f3d57e8e8795dc23ca780578d6777a7086e867ad0ed"
+          "pack.json": "be970b701570a7b6f0e72a4bad2ab84a3e1864395fa910af694e421cd10f5aa9",
+          "structure.json": "37e904e3b01b6ba7ea20dd5e1d8ea6b2e8ca46a5ea74357855ebf4843d49c5fb"
         }
       },
       "inventory": {
         "schema": 1,
         "type": "sample",
         "slug": "sample-service-workshop",
-        "version": "1.0.0",
-        "archive_bytes": 18930,
-        "archive_sha256": "17a89cfbe6c4a394fd4c3d7148dc2188c468801d6963b56c016abe5d47bc1716",
-        "manifest_sha256": "6af21193283765a95fb947ef48a081b14b8ce69d4f44be80e7a67ae3bd6b16b7",
+        "version": "1.1.0",
+        "archive_bytes": 21564,
+        "archive_sha256": "f81e3dca7e3245bdae7101f8ed88ac68a5db7c37317073f4e677c32d3f392d5a",
+        "manifest_sha256": "230de0acd51b9ee17b07f6ee859d4f17d0d08ea3f49bdfd6a89eccbd9dbfdbc1",
         "files": {
-          "pack.json": "8d8aa2dd5c4ea227ac29d8597cccc51711ffc9ac165a6846d75e82abfeeb6d2f",
-          "structure.json": "548b3e8c6a30b929a2980f3d57e8e8795dc23ca780578d6777a7086e867ad0ed"
+          "pack.json": "be970b701570a7b6f0e72a4bad2ab84a3e1864395fa910af694e421cd10f5aa9",
+          "structure.json": "37e904e3b01b6ba7ea20dd5e1d8ea6b2e8ca46a5ea74357855ebf4843d49c5fb"
         }
       }
     }

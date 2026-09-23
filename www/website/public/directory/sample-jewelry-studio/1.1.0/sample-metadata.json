@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "type": "sample",
+  "slug": "sample-jewelry-studio",
+  "version": "1.1.0",
+  "archive_bytes": 19246,
+  "archive_sha256": "69764a77779a992203b8dc4e48c35e7c09506ec30ac7e924f7bd90697b9c13d8",
+  "manifest_sha256": "5e19fbddb76e8abd3c13e14af095f863aebecd196bd18f08a5dc45715230453f",
+  "files": {
+    "pack.json": "89747c66fc7f979fab676b47b28ba0d26a323f4edea2dcf45ffff9cf8d30d092",
+    "structure.json": "59c3a6eb3dc421a02ab356a71932d56f911ccd9ef3652663530723eaef0bf9c1"
+  }
+}
