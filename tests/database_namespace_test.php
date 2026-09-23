@@ -15,6 +15,8 @@ test('namespace lexer preserves SQL literals, comments and identifiers', functio
 });
 
 test('TLS configuration fails closed for invalid input and namespace mismatch', function (): void {
+    foreach (['pl_fiscal_','pl_accounts_','pl_custom_'] as $prefix) { assert_throws(fn()=>pl_database_prefix($prefix),InvalidArgumentException::class,'reserved'); }
+    assert_same('pl_',pl_database_prefix('pl_'));
     assert_throws(fn() => pl_database_configuration(['db_ssl_ca' => '/missing-ca-file']), InvalidArgumentException::class);
     assert_throws(fn() => pl_database_configuration(['db_ssl_cert' => '/missing-cert-file']), InvalidArgumentException::class);
     assert_throws(fn() => pl_database_configuration(['db_ssl_verify' => 'perhaps']), InvalidArgumentException::class);

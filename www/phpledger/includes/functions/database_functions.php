@@ -12,6 +12,9 @@ function pl_database_prefix(?string $prefix = null): string
     if (!preg_match('/^[a-z][a-z0-9_]{0,15}_$/D', $prefix)) {
         throw new InvalidArgumentException('Database prefix must be 2–17 lowercase letters, digits or underscores, starting with a letter and ending with an underscore.');
     }
+    if ($prefix !== 'pl_' && str_starts_with($prefix,'pl_')) {
+        throw new InvalidArgumentException('The pl_ prefix is reserved; choose a distinct prefix such as accounts_.');
+    }
     return $prefix;
 }
 

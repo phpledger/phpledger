@@ -181,6 +181,14 @@ Forwarded IP headers are accepted only from explicitly configured trusted proxie
 
 ## Table namespaces and cloud database TLS
 
+The `pl_` stem is reserved: use exactly `pl_` or a distinct prefix that does not start with it.
+
+## Optional installation notice
+
+The browser installer explains its default anonymous notice and offers a separate unchecked named registration. Neither is required to use the software. Updates and privacy shows the last accepted payload and lets an installation administrator disable either choice. Scripted/container installation sends only the anonymous notice; set `PL_INSTALL_NOTICE=0` before completing setup to opt out. Local/test/shared-demo environments never send notices. Only explicit installation/settings/update-check actions contact the project, never a page view. A service failure leaves installation usable. See https://phpledger.com/privacy/ for the exact fields, retention and removal route.
+
+### Namespace configuration
+
 Each installation chooses `PL_DB_PREFIX` (private configuration: `db_prefix`), default `pl_`. The ordinary installer offers this field. Use 2–17 lowercase letters, digits or underscores, starting with a letter and ending with an underscore (`^[a-z][a-z0-9_]{0,15}_$`). For example, `accounts_` and `training_` can share one database. Prefixes cannot overlap, and an occupied namespace cannot be claimed by a fresh installer. Tables, views, guard triggers, constraints, migration receipts, ORM records and recovery snapshots use the same resolver. Historical migration files retain their original checksums.
 
 Keep the original prefix for the lifetime of an installation. Its private installed marker and installer database identity bind the namespace; editing configuration to select another prefix is refused. This is not a table-renaming tool. Existing installations with no prefix setting retain `pl_`. Recovery snapshots bind both database and prefix, and restore preserves neighboring namespaces. Cross-namespace foreign keys, views and triggers prevent automatic recovery. Stored routines/events still require operator-led recovery. A shared MariaDB database must already have the compatible Unicode default collation: the installer will not alter a populated neighbor's database defaults. Prefixes do not provide security isolation: an account granted the whole database can read its neighbors. Prefer separate databases and accounts for security boundaries.
