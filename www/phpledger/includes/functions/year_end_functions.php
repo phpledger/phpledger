@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** No cached negative: the installer may apply 054 in this same process. */
 function pl_year_end_available(): bool
 {
-    return (int) DB::queryFirstField("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='pl_fiscal_years'") === 1;
+    return (int) DB::queryFirstField('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name=%s',pl_database_table('pl_fiscal_years')) === 1;
 }
 
 function pl_year_end_require(int $actor, int $company, bool $write = false): void

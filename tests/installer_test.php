@@ -38,7 +38,8 @@ test('shared installer ignores submitted database credentials and requires its f
         $config = pl_install_database_input(['database' => 'another_database', 'host' => 'untrusted.example',
             'user' => 'root', 'password' => 'submitted-password', 'port' => '1234']);
         assert_same(['host' => 'demo-db', 'port' => 3306, 'database' => 'phpledger_demo',
-            'user' => 'demo_test_identity', 'password' => 'synthetic-database-password'], $config);
+            'user' => 'demo_test_identity', 'password' => 'synthetic-database-password',
+            'db_prefix'=>'pl_','db_ssl_ca'=>'','db_ssl_cert'=>'','db_ssl_key'=>'','db_ssl_verify'=>true], $config);
         assert_true(pl_shared_demo_account()['password'] !== $config['password']);
         putenv('PL_DB_NAME=another_database');
         assert_throws(static fn () => pl_install_database_input([]), DomainException::class);

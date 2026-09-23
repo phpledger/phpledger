@@ -29,7 +29,7 @@ function pl_shared_demo_database(): array
         throw new DomainException('The shared demonstration database is not configured.');
     }
     return ['host' => $host, 'port' => (int) $port, 'database' => 'phpledger_demo',
-        'user' => $user, 'password' => $password];
+        'user' => $user, 'password' => $password, 'db_prefix'=>'pl_'];
 }
 
 function pl_shared_demo_public_url(): string
