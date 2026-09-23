@@ -21,4 +21,3 @@ document.addEventListener('click', event => {
         if (!help.contains(event.target)) help.open = false;
     });
 });
-
