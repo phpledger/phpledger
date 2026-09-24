@@ -1,10 +1,16 @@
 # Foundation validation
 
-## 1.4.1 local candidate — 24 September 2026
+## 1.4.1 public release and live verification — 24 September 2026
 
-The patch is implemented locally from baseline `f325d02d` on `codex/release-1.4.1`. It is not published or deployed. The [exact-artifact gate record](repository/RELEASE-1.4.1-GATES.md) and [issue audit](repository/RELEASE-1.4.1-ISSUES.md) distinguish validated behavior from publication and remaining assurance.
+The [published v1.4.1 release and host receipt](repository/PUBLICATION-2026-09-24-1.4.1.md) pins application source `9e101439`, the 3,576,250-byte signed ZIP (SHA-256 `3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b`), website/demo cutover and their bounded acceptance. Public read-only verification passed 415 website paths, the signed ZIP and eleven signed sample packages. Live browser work completed the Cedar sample import with 119 posted journals and three drafts after reload; the installer reported 61 current migration checksums and six passed checks. The published image also passed a separate disposable Docker first-install/restart check, and corrected `tools/verify-demo.ps1` passed cleanly on that image in an isolated database. The [issue register](repository/RELEASE-1.4.1-ISSUES.md) records the six 1.4.1 issue closures, earlier #104 closure and deferred issues.
 
-| Check | Current evidence or remaining gate |
+**R14-02 is narrowed, not fully closed.** At 320, 360 and 390 px, the cash warning/detail body and Edit draft/Post expense actions fit, and the document has no horizontal overflow. The workspace header's New expense action reaches x=423.531 at each width and clips past the viewport; the ignored `.cache/release-1.4.1-operator/live-expense-detail-390.png` is the specific screenshot. A focused header fix and repeat browser check remain. The next hosted hourly reset has not been observed; the successful local reset does not establish scheduled live behavior. Independent accounting/security, real-device and comprehensive accessibility review remain separate from this technical release proof.
+
+## Historical 1.4.1 local candidate — 24 September 2026
+
+At the local candidate checkpoint, the patch was implemented from baseline `f325d02d` on `codex/release-1.4.1` and had not yet been published or deployed. The [exact-artifact gate record](repository/RELEASE-1.4.1-GATES.md) and [issue audit](repository/RELEASE-1.4.1-ISSUES.md) preserve that local evidence separately from the later public result above.
+
+| Check | Evidence at the local checkpoint |
 |---|---|
 | Employee DOB and invoice/bill account guards | Targeted MySQL employee tests 11/11 and AR/AP tests 75/75 passed. Browser failure recovery retains invalid display input without silently submitting an old date. Both full combined runs include the additional scoped recovery regression. |
 | Shared dates and required fields | Date component 58/58 passed. Application matrix covered employee, invoice, payroll, recurring, receipt and expense forms at 1440/768/320/360/390 pixels. Initial findings were corrected; focused recovery 22/22 and markers/navigation 61/61 passed. |
@@ -12,7 +18,7 @@ The patch is implemented locally from baseline `f325d02d` on `codex/release-1.4.
 | Combined validation | Full composer check passed on MySQL and MariaDB: 699 tests / 0 failures each, PHP lint 416 / 0, PHPStan clean and sample validators passed. Focused onboarding passed 125 / 0. |
 | Distribution and upgrade | Exact signed ZIP fresh installs and populated 1.4.0 upgrades passed on MySQL and MariaDB, including repeat packaged upgrade execution, unchanged history/balances and all 61 migration receipts. Byte-identical reproduction and 13 package-builder tests passed. No new migration or schema change. |
 | Website and resources | Both resource generators passed check mode. Local website build/content check: 102 pages, zero errors/warnings. Release/download pages passed three browser widths. Wiki draft prepared and About reviewed unchanged. |
-| Publication | Separate authorization required. Signed archive, checksum and website metadata prepared locally; no patch upload, website/demo cutover claimed. Already-shipped #104 was closed with evidence; newly fixed issues await publication. No media kit for this patch. |
+| Publication | Separate authorization was still required at this checkpoint. Signed archive, checksum and website metadata were prepared locally; no patch upload or website/demo cutover was claimed then. Already-shipped #104 had closed; newly fixed issues awaited publication. No media kit was required for this patch. |
 
 Historical validation records below retain their original scope and do not establish acceptance of this candidate. Independent accounting/security review, native translation review, provider acceptance and real-business pilots remain separate assurance work.
 
