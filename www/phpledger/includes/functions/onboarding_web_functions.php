@@ -216,7 +216,7 @@ function pl_onboarding_book_counts(array $company): array
 {
     return [
         'journals' => (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE company_id=%i AND book_id=%i', (int) $company['id'], (int) $company['book_id']),
-        'drafts' => (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_documents WHERE company_id=%i AND book_id=%i AND status='draft'", (int) $company['id'], (int) $company['book_id'])
+        'drafts' => (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_documents WHERE company_id=%i AND book_id=%i AND journal_id IS NULL", (int) $company['id'], (int) $company['book_id'])
             + (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_ar_documents WHERE company_id=%i AND book_id=%i AND status='draft'", (int) $company['id'], (int) $company['book_id'])
             + (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_general_drafts WHERE company_id=%i AND book_id=%i AND journal_id IS NULL", (int) $company['id'], (int) $company['book_id']),
     ];

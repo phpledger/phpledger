@@ -431,6 +431,10 @@ test('ready manifest reports actual scoped history after full import and resumed
     assert_same(['journals' => 0, 'drafts' => 1], pl_onboarding_book_counts($otherCompany));
     pl_post_general_draft($other['actor_id'], $other['company_id'], $other['book_id'], $general['id'], $general['revision']);
     assert_same(['journals' => 1, 'drafts' => 0], pl_onboarding_book_counts($otherCompany));
+    $receiptDraft = pl_save_document($other['actor_id'], $other['company_id'], $other['book_id'], document_input($other, 'receipt'));
+    assert_same(['journals' => 1, 'drafts' => 1], pl_onboarding_book_counts($otherCompany));
+    pl_post_document($other['actor_id'], $other['company_id'], $other['book_id'], $receiptDraft['id'], $receiptDraft['revision']);
+    assert_same(['journals' => 2, 'drafts' => 0], pl_onboarding_book_counts($otherCompany));
     $company['is_sample'] = false; // Returning to a previously completed real-company setup is also truthful.
     assert_same($lines, pl_onboarding_manifest($company, null, []));
 });
