@@ -343,3 +343,12 @@ Issue104 closed with evidence for the already-published1.4.0 workflow; newly fix
 ## 2026-09-24 — Authorized 1.4.1 publication
 
 Owner explicitly approved publication/deployment of the verified candidate. Coordinator owns GitHub tag/release, exact signed assets, image verification, website/demo cutover and issue closures after public acceptance. Host-audit worker is read-only; metadata worker owns publication wording and local Wiki drafts. Accepted archive/source remain unchanged (9e101439, SHA3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b). Preserve main installation-guide work and all paused lanes. No credential rotation or stakeholder campaign is included.
+
+
+## 2026-09-24 — 1.4.1 published and live; update feed corrected
+
+Owner-authorized release published from immutable app source 9e101439e8798815dfa5892d37924bac9d1f9a1e; accepted ZIP SHA256 3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b. Website source db8fe43e and blue-green demo cutover passed; both image registries/platforms match all 1,697 payload files. Image index 94599d3e498f9eb22ea5caa10453276cc01811128b4d32da1617569ab91c623f. Public415paths, signed updates/archive and11signedsamples passed; 11 retained containers/25 configuration files preserved. Installer61/61 and6checks, Cedar119journals/3drafts plusreload passed. Guide source/Wiki published; fresh Docker install/restart passed. Issues71/100/102/105/106/107 closed with evidence;104 previously closed;95 clarified and92-98 remainopen.
+
+The GitHub-to-website publication gap temporarily left Check updates advertising1.4.0; feed now1.4.1 and code-level detection from localDocker confirms1.4.0=>1.4.1,1.4.1=>none. Userlocalcontainer changedfrom1.4.0to1.4.1 independently; this task did not restart or upgrade it.
+
+Remaining: R14-02 workspaceheaderNewexpense clipped320/360/390 (cashwarning/detailactionsfit); carriedinto nextmaintenanceworklist. Hosted03:00UTCscheduledresetnotobserved; localcleanresetcheckpassed. Independentreviews/tencompanyjourneysremainseparate. Unchanged create-phpledger0.1.0 npmworkflowrefusedduplicatepublish; no newnpmversion. No migration/schema, credentialrotation or stakeholdercampaign; no rawsecretsexposed. Exactreceipt in releaseworktree docs/repository/PUBLICATION-2026-09-24-1.4.1.md/.json. Main dirtyplanning/featurelanespreserved; only append-onlycoordination and1.5followupnote added.
