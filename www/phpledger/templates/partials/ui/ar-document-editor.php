@@ -15,6 +15,7 @@ foreach (array_values($v['lines']??[[]]) ?: [[]] as $index=>$unused) {
     foreach (['description'=>pl_t('Description'),'quantity'=>pl_t('Quantity'),'unit_price'=>pl_t('Unit price')] as $field=>$text) { $fields['lines.'.$index.'.'.$field]=['commercial-'.$index.'-'.$field,pl_t('{field}, line {line}', ['field'=>$text,'line'=>$index+1])]; }
 }
 ?>
+<?php pl_ui_required_legend(); ?>
 <div class="py-5"><section class="rounded-panel border border-border bg-surface">
 <?php pl_ui_document_header($correct?pl_t('Correct {number}', ['number' => $document['number']]):($document?$document['number']:pl_t('New {type}', ['type' => $label])),$correct?'posted':'draft',static function () use ($correct,$path,$postingPreview,$filters): void { ?>
 <a class="btn btn-ghost" href="<?= pl_e(pl_workflow_url($path,$filters)) ?>"><?= pl_e(pl_t('Cancel')) ?></a>

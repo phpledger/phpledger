@@ -229,12 +229,23 @@ function pl_ar_event(int $actorId, int $companyId, int $bookId, int $documentId,
     DB::insert('pl_ar_document_events', ['document_id'=>$documentId,'company_id'=>$companyId,'book_id'=>$bookId,'from_status'=>$from,'to_status'=>$to,'actor_id'=>$actorId,'reason'=>$reason]);
 }
 
+/** Shared picker and service policy; leaf status comes from the central chart rules. */
+function pl_ar_line_account_eligible(array $account, bool $receivable): bool
+{
+    return (bool) $account['is_active'] && (bool) $account['is_postable']
+        && ($receivable ? $account['type'] === 'income' : in_array($account['type'], ['expense','asset','liability'], true))
+        && !in_array($account['role'], ['cash_bank','receivables','payables'], true);
+}
+
 /** Validation shared by browser forms and internal module callers. */
 function pl_ar_validate_source(int $actorId, int $companyId, int $bookId, array $data): void
 {
     foreach ($data['lines'] as $line) {
-        if ($line['account_id'] !== null && !DB::queryFirstField('SELECT id FROM pl_accounts WHERE id=%i AND company_id=%i AND book_id=%i AND is_active=1 FOR SHARE', $line['account_id'], $companyId, $bookId)) {
-            throw new DomainException('Each line account must be active in this book.');
+        if ($line['account_id'] !== null) {
+            $account = pl_get_account($actorId, $companyId, $bookId, $line['account_id']);
+            if (!pl_ar_line_account_eligible($account, in_array($data['kind'], ['invoice','customer_credit'], true))) {
+                throw new DomainException('Choose an active postable income line account for sales, or an expense, asset or clearing account for bills.');
+            }
         }
         if ($line['product_id'] !== null) { pl_get_inventory_product($actorId, $companyId, $bookId, $line['product_id']); }
     }
@@ -524,9 +535,8 @@ function pl_ar_posting_plan(int $actorId, int $companyId, int $bookId, array $do
         }
         $accountId = $sourceLine['account_id'] ?? $offsetAccountId;
         if ($accountId === null) { throw new DomainException('Choose a posting account for every document line.'); }
-        $account = DB::queryFirstRow('SELECT * FROM pl_accounts WHERE id=%i AND company_id=%i AND book_id=%i AND is_active=1 FOR SHARE', $accountId, $companyId, $bookId);
-        if (!$account || ($receivable ? $account['type'] !== 'income' : !in_array($account['type'], ['expense','asset','liability'], true))
-            || in_array($account['role'], ['cash_bank','receivables','payables'], true)) { throw new DomainException('Choose an income line account for sales, or an expense, asset or clearing account for bills.'); }
+        $account = pl_get_account($actorId, $companyId, $bookId, (int) $accountId);
+        if (!pl_ar_line_account_eligible($account, $receivable)) { throw new DomainException('Choose an active postable income line account for sales, or an expense, asset or clearing account for bills.'); }
         $sourceLine['account_id'] = (int) $accountId;
         // B37 discount posting. "net" leaves the discount out of the ledger entirely; "gross"
         // recognises the undiscounted amount and shows the reduction as contra-income, so the

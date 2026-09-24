@@ -40,7 +40,9 @@ PHP Ledger helps small businesses keep their books, follow money owed by custome
 
 **Start here:** [Try the demo](https://phpledger.com/demo/) · [Download the latest release](https://github.com/phpledger/phpledger/releases/latest) · [Installation guide](resources/release/INSTALL.md) · [Wiki](https://github.com/phpledger/phpledger/wiki)
 
-**PHP Ledger 1.4.0** adds administrator-controlled cash and bank shortfall policies, linked payer/payee selection, contextual help and fictional-company learning stories. See the [release downloads and notes](https://github.com/phpledger/phpledger/releases/tag/v1.4.0).
+**PHP Ledger 1.4.1 is a local patch candidate, not yet published.** It prepares consistent date entry, employee date-of-birth and invoice/bill account validation, clearer required fields, and fixes to sample completion, navigation and phone layouts. Combined validation and exact-package installation/upgrade gates remain pending. See the [1.4.1 plan](docs/strategy/RELEASE-PLAN-1.4.1.md) and [candidate notes](resources/release/RELEASE-NOTES.md).
+
+The published **1.4.0** release adds administrator-controlled cash and bank shortfall policies, linked payer/payee selection, contextual help and fictional-company learning stories. See its [release downloads and notes](https://github.com/phpledger/phpledger/releases/tag/v1.4.0).
 
 ## What you can do
 

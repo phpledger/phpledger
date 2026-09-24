@@ -211,6 +211,17 @@ function pl_onboarding_source_view(array $input): array
  *
  * @return list<string>
  */
+/** Current scoped totals, including resumed setup after later activity. */
+function pl_onboarding_book_counts(array $company): array
+{
+    return [
+        'journals' => (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE company_id=%i AND book_id=%i', (int) $company['id'], (int) $company['book_id']),
+        'drafts' => (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_documents WHERE company_id=%i AND book_id=%i AND status='draft'", (int) $company['id'], (int) $company['book_id'])
+            + (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_ar_documents WHERE company_id=%i AND book_id=%i AND status='draft'", (int) $company['id'], (int) $company['book_id'])
+            + (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_general_drafts WHERE company_id=%i AND book_id=%i AND status='draft'", (int) $company['id'], (int) $company['book_id']),
+    ];
+}
+
 function pl_onboarding_manifest(array $company, ?array $receipt, array $packages): array
 {
     $lines = [];
@@ -223,7 +234,7 @@ function pl_onboarding_manifest(array $company, ?array $receipt, array $packages
             $lines[] = pl_t('Modules active: {modules}', ['modules' => implode(', ', array_map('pl_module_label', $created['modules']))]);
         }
         if ((int) $created['parties'] > 0 || (int) $created['products'] > 0) {
-            $lines[] = pl_t('{parties} customer and supplier records and {products} products, all at zero', [
+            $lines[] = pl_t('{parties} customer and supplier records and {products} products, imported at zero', [
                 'parties' => (int) $created['parties'], 'products' => (int) $created['products']]);
         }
         if ($created['number_series'] !== []) {
@@ -242,9 +253,12 @@ function pl_onboarding_manifest(array $company, ?array $receipt, array $packages
         };
     }
     $lines[] = pl_t('Financial year ends {date}', ['date' => pl_fiscal_year_end_label((string) $company['fiscal_year_end'])]);
-    $lines[] = $company['setup_status'] === 'opening_required'
-        ? pl_t('Opening balances and unpaid documents are still to be brought over')
-        : pl_t('Zero transactions: these books start empty');
+    $counts = pl_onboarding_book_counts($company);
+    $lines[] = $counts['journals'] > 0 || $counts['drafts'] > 0
+        ? pl_t('{journals} posted journals and {drafts} open drafts are recorded in these books.', $counts)
+        : ($company['setup_status'] === 'opening_required'
+            ? pl_t('Opening balances and unpaid documents are still to be brought over')
+            : pl_t('Zero transactions: these books start empty'));
     return $lines;
 }
 

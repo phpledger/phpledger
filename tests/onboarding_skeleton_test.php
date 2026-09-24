@@ -410,3 +410,22 @@ test('all five wizard stages answer over HTTP, and walking them creates the busi
     $receipt = pl_company_sample_import($ownerId, $companyId, (int) $created['book_id']);
     assert_true($receipt !== null && $receipt['sample_id'] === 'retail-shop', 'The wizard walk recorded no skeleton receipt.');
 });
+
+
+test('ready manifest reports actual scoped history after full import and resumed setup', function (): void {
+    $f = ledger_fixture();
+    $company = pl_company_context($f['actor_id'], $f['company_id']);
+    assert_true(in_array('Zero transactions: these books start empty', pl_onboarding_manifest($company, null, []), true));
+    pl_post_journal($f['actor_id'], $f['company_id'], $f['book_id'], ledger_payload($f));
+    $company['is_sample'] = true;
+    $lines = pl_onboarding_manifest($company, null, []);
+    assert_true(in_array('1 posted journals and 0 open drafts are recorded in these books.', $lines, true));
+    assert_true(!in_array('Zero transactions: these books start empty', $lines, true));
+    $other = ledger_fixture();
+    assert_same(['journals' => 0, 'drafts' => 0], pl_onboarding_book_counts(pl_company_context($other['actor_id'], $other['company_id'])));
+    $ar = ar_ap_fixture();
+    pl_save_ar_document($ar['actor_id'], $ar['company_id'], $ar['book_id'], ar_ap_input($ar));
+    assert_same(['journals' => 0, 'drafts' => 1], pl_onboarding_book_counts(pl_company_context($ar['actor_id'], $ar['company_id'])));
+    $company['is_sample'] = false; // Returning to a previously completed real-company setup is also truthful.
+    assert_same($lines, pl_onboarding_manifest($company, null, []));
+});

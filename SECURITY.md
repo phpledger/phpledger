@@ -23,6 +23,8 @@ Out of scope:
 
 Please do not post exploit details, screenshots of real data or credentials anywhere public.
 
+If an operational credential is exposed, follow the [credential incident procedure](docs/CREDENTIALS.md). Revoke it at its provider even if a copy in GitHub Actions, a chat, or a screenshot was deleted. For a publisher signing-key incident, also follow the separate [release signing rotation procedure](docs/RELEASE-SIGNING.md).
+
 ## What to include
 
 - The affected component and its exact version, tag or commit.

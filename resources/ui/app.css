@@ -1916,3 +1916,19 @@ a {
     .print-signoff, .print-totals { page-break-inside: avoid; }
   }
 }
+
+/* 1.4.1: keep financial warnings and actions readable on narrow screens. */
+[data-cash-preview] { display: block; min-inline-size: 0; overflow-wrap: anywhere; }
+[data-cash-preview] > p + p { margin-block-start: .65rem; }
+.required-marker { color: var(--danger); font-weight: 600; }
+@media (max-width: 480px) {
+  .transaction-detail.split-view-detail { max-block-size: none; padding: .75rem; }
+  .transaction-detail .detail-heading { flex-direction: column; align-items: flex-start; gap: .75rem; }
+  .transaction-detail .detail-heading > *, .transaction-detail dd { min-inline-size: 0; overflow-wrap: anywhere; }
+  .transaction-detail .detail-amount { max-inline-size: 100%; white-space: normal; }
+  .transaction-detail .record-details { grid-template-columns: minmax(0, 1fr); }
+  .transaction-detail .btn, .doc-actions .btn { white-space: normal; height: auto; min-height: 2.25rem; }
+  .view-editor .doc-body { padding: .75rem; }
+  .view-editor .party-picker > .flex { flex-wrap: wrap; }
+  .view-editor .party-picker input { min-inline-size: 0; max-inline-size: 100%; }
+}

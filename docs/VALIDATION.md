@@ -1,5 +1,20 @@
 # Foundation validation
 
+## 1.4.1 local candidate — 24 September 2026
+
+The patch is being integrated from baseline `f325d02d` in the isolated `codex/release-1.4.1` worktree. It is not published or deployed. The [implementation plan](strategy/RELEASE-PLAN-1.4.1.md) and [issue acceptance audit](repository/RELEASE-1.4.1-ISSUES.md) distinguish implementation from acceptance and issue closure.
+
+| Check | Current evidence or remaining gate |
+|---|---|
+| Employee DOB and invoice/bill account guards | Implemented locally; targeted service regressions and employee HTTP recovery checks added. Six changed PHP files passed native `php -l`; scoped diff checks passed. Database-backed suites have not yet been claimed as passed. |
+| Shared dates and required-field presentation | Integration and component/browser acceptance pending, including keyboard behavior, DD/MM/YYYY display with ISO submission, invalid dates, native fallback and dynamic form rows. |
+| Sample completion, navigation and phone layouts | Local corrections in progress; verify full-history versus structure-only counts, receipt/expense selection and representative responsive forms/reports. |
+| Combined validation | Pending coordinator evidence: PHP lint, PHPStan, relevant browser/HTTP checks and full `composer check` on disposable MySQL/MariaDB. |
+| Distribution and upgrade | Pending exact-package fresh installation, populated 1.4.0 upgrade with unchanged migration receipts, artifact checksums and package verification. No new migrations or schema changes are planned. |
+| Publication | Not authorized by local implementation approval. No patch upload, signed public update, website/demo cutover or issue closure is claimed. Patch releases carry no media kit. |
+
+Historical validation records below retain their original scope and do not establish acceptance of this candidate. Independent accounting/security review, native translation review, provider acceptance and real-business pilots remain separate assurance work.
+
 ## 1.1.3 publication — 20 September 2026
 
 Stable patch published 2026-09-20T20:40:01Z from tag `v1.1.3` (`521dbc3`, merge of `fix/issue-90-updater-migrate` into `master`). Fixes issue #90: `install_functions.php` and `update_database_functions.php` now keep whichever copy of the platform helpers is already loaded, with a documented one-release compatibility rule at the top of `database_platform_functions.php`; a new `tests/update-migrate-test.php` runs the real migrate and verify phases under the copied recovery runtime and is registered in CI. Later commits `319cf5f`, `00ce9ce` and `63bcb39` corrected upgrade-path wording across README, wiki and website. Machine-readable receipt: [STABLE-1.1.3-PUBLICATION.json](repository/STABLE-1.1.3-PUBLICATION.json); narrative: [PUBLICATION-2026-09-20-1.1.3.md](repository/PUBLICATION-2026-09-20-1.1.3.md).

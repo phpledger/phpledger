@@ -95,6 +95,39 @@ test('employee access excludes ordinary roles, permits separate reads, and preve
     assert_throws(fn () => pl_save_employee($writer, $f['company_id'], employee_input(), $row['id'], 1), DomainException::class);
 });
 
+test('employee birth date is optional and must not follow today or employment on create and edit', function (): void {
+    $f = employee_fixture();
+    $today = gmdate('Y-m-d');
+    $tomorrow = gmdate('Y-m-d', strtotime('+1 day'));
+    $save = fn(array $data, ?int $id = null, ?int $revision = null): array => pl_save_employee($f['actor_id'], $f['company_id'], employee_input($data), $id, $revision);
+    assert_same(null, $save([])['date_of_birth']);
+    assert_same('2000-02-29', $save(['date_of_birth' => '2000-02-29'])['date_of_birth']);
+    assert_same($today, $save(['date_of_birth' => $today, 'hire_date' => $today])['date_of_birth']);
+    $row = $save(['date_of_birth' => '1990-01-01']);
+    $before = DB::queryFirstRow('SELECT * FROM pl_employees WHERE id=%i', $row['id']);
+    $audits = DB::queryFirstField('SELECT COUNT(*) FROM pl_employee_audit WHERE company_id=%i', $f['company_id']);
+    foreach ([['date_of_birth' => $tomorrow, 'hire_date' => $tomorrow], ['date_of_birth' => '2026-01-02'], ['date_of_birth' => '2001-02-29']] as $bad) {
+        assert_throws(fn () => $save($bad), DomainException::class);
+        assert_throws(fn () => $save($bad, $row['id'], $row['revision']), DomainException::class);
+    }
+    assert_same($before, DB::queryFirstRow('SELECT * FROM pl_employees WHERE id=%i', $row['id']));
+    assert_same($audits, DB::queryFirstField('SELECT COUNT(*) FROM pl_employee_audit WHERE company_id=%i', $f['company_id']));
+    assert_same(null, $save(['date_of_birth' => ''], $row['id'], $row['revision'])['date_of_birth']);
+});
+
+test('employee legacy birth dates remain readable and unchanged until an explicit validated edit', function (): void {
+    $f = employee_fixture();
+    $row = pl_save_employee($f['actor_id'], $f['company_id'], employee_input());
+    // Represent a record accepted before the date rule; reads never repair stored history.
+    DB::update('pl_employees', ['date_of_birth' => '2026-01-02'], 'id=%i', $row['id']);
+    assert_same('2026-01-02', pl_get_employee($f['actor_id'], $f['company_id'], $row['id'])['date_of_birth']);
+    assert_same('2026-01-02', pl_list_employees($f['actor_id'], $f['company_id'])[0]['date_of_birth']);
+    assert_throws(fn () => pl_save_employee($f['actor_id'], $f['company_id'], employee_input(['date_of_birth' => '2026-01-02']), $row['id'], 1), DomainException::class, 'hire date');
+    assert_same('2026-01-02', DB::queryFirstField('SELECT date_of_birth FROM pl_employees WHERE id=%i', $row['id']));
+    $edited = pl_save_employee($f['actor_id'], $f['company_id'], employee_input(['date_of_birth' => '1990-01-01']), $row['id'], 1);
+    assert_same('1990-01-01', $edited['date_of_birth']);
+});
+
 test('employee company scope includes reads writes ownership links and same-company personnel uniqueness', function (): void {
     $f = employee_fixture(); $other = employee_fixture();
     $row = pl_save_employee($f['actor_id'], $f['company_id'], employee_input(['personnel_number' => 'EMP-1']));
@@ -202,11 +235,21 @@ test('employee HTTP screen renders, validates CSRF and company scope, saves safe
             + ['company_id' => $f['company_id'], 'book_id' => $f['book_id'], 'csrf' => $csrf($html)];
         [$status] = $request('/employees', array_replace($data, ['csrf' => 'bad']));
         assert_same(403, $status);
-        $request('/employees', array_replace($data, ['company_id' => $f['company_id'] + 999999]));
+        $request('/employees', array_replace($data, ['company_id' => $f['company_id'] + 999999, '_date_display' => ['date_of_birth' => '12/03/1987']]));
         assert_same([], pl_list_employees($f['actor_id'], $f['company_id']));
         [$status, $html] = $request('/employees');
         assert_same(422, $status, 'The redirected scope error must be displayed.');
         assert_true(!str_contains($html, '777.12') && !str_contains($html, '&lt;script&gt;Sample'), 'A wrong-company form must never replay private data under the current company.');
+        assert_true(!str_contains($html, '12/03/1987') && !str_contains($html, '12\/03\/1987'), 'Wrong-company date recovery must not enter the page configuration.');
+        $data['csrf'] = $csrf($html);
+        foreach ([gmdate('Y-m-d', strtotime('+1 day')) => 'future', '2026-01-02' => 'hire date'] as $birthDate => $message) {
+            $request('/employees', array_replace($data, ['date_of_birth' => $birthDate, 'csrf' => $csrf($html)]));
+            [$status, $html] = $request('/employees');
+            assert_same(422, $status);
+            assert_true(str_contains($html, $message));
+            assert_true(str_contains($html, 'value="' . $birthDate . '"'), 'Invalid birth date is retained for correction.');
+            assert_same([], pl_list_employees($f['actor_id'], $f['company_id']));
+        }
         $data['csrf'] = $csrf($html);
         [$status] = $request('/employees', $data);
         assert_true(in_array($status, [302, 303], true));
@@ -218,6 +261,11 @@ test('employee HTTP screen renders, validates CSRF and company scope, saves safe
         assert_true(!str_contains($html, '<script>Sample</script>'));
         assert_true(str_contains($html, '777.1200'));
         assert_true(str_contains($html, 'Register #' . $rows[0]['id']));
+        $request('/employees', array_replace($data, ['id' => $rows[0]['id'], 'revision' => 1, 'date_of_birth' => '2026-01-02', 'csrf' => $csrf($html)]));
+        [$status, $html] = $request('/employees');
+        assert_same(422, $status);
+        assert_true(str_contains($html, 'hire date'));
+        assert_same(1, pl_get_employee($f['actor_id'], $f['company_id'], $rows[0]['id'])['revision']);
         $edit = array_replace($data, ['id' => $rows[0]['id'], 'revision' => $rows[0]['revision'], 'basic_salary' => 'invalid', 'csrf' => $csrf($html)]);
         $request('/employees', $edit);
         [$status, $html] = $request('/employees');
@@ -243,13 +291,14 @@ test('employee HTTP screen renders, validates CSRF and company scope, saves safe
         assert_true(str_contains($linkHtml,'employee bank details'),'Bank matching limitation is visible. '.substr((string)file_get_contents($log),-1200));
         [$status]=$request('/employees/links',['action'=>'trade','employee_id'=>$rows[0]['id'],'revision'=>3,'company_id'=>$f['company_id'],'book_id'=>$f['book_id'],'csrf'=>'bad']);assert_same(403,$status);
         // A valid-scope failure can also become stale if context changes before its redirect.
-        $request('/employees', array_replace($edit, ['revision' => 2, 'csrf' => $csrf($html)]));
+        $request('/employees', array_replace($edit, ['revision' => 2, 'csrf' => $csrf($html), '_date_display' => ['date_of_birth' => '12/03/1987']]));
         $other = pl_create_company($f['actor_id'], 'Sample second employee company', 'USD', '2026-01-01');
         [, $companies] = $request('/companies');
         $request('/company/select', ['company_id' => $other['company_id'], 'csrf' => $csrf($companies)]);
         [$status, $html] = $request('/employees');
         assert_same(422, $status);
         assert_true(!str_contains($html, '&lt;script&gt;Sample') && !str_contains($html, 'value="invalid"'), 'Cross-company recovery must discard a previously valid-scope failed form.');
+        assert_true(!str_contains($html, '12/03/1987') && !str_contains($html, '12\/03\/1987'), 'Context changes must discard private date recovery from the page configuration.');
         $cookie = '';
         $login($readerEmail, 'Sample-reader-password-123');
         [$status, $html] = $request('/employees?id=' . $rows[0]['id']);

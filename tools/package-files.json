@@ -1929,6 +1929,14 @@
     {
       "source": "www/phpledger/install/migrations/060_cash_balance_policy.php",
       "destination": "www/phpledger/install/migrations/060_cash_balance_policy.php"
+    },
+    {
+      "source": "www/phpledger/public/assets/date-picker.js",
+      "destination": "www/phpledger/public/assets/date-picker.js"
+    },
+    {
+      "source": "www/phpledger/public/assets/date-picker.css",
+      "destination": "www/phpledger/public/assets/date-picker.css"
     }
   ]
 }

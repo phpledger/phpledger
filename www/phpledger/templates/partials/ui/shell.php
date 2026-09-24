@@ -2,10 +2,9 @@
 declare(strict_types=1);
 $visibility = pl_company_visibility((int)$user['id'], (int)$company['id']);
 $moduleVisible = static fn (string $id): bool => pl_module_available((int)$user['id'], (int)$company['id'], (int)$company['book_id'], $id);
-$transactionWorkspace = $view === 'editor' ? ($input['kind'] ?? '') : ($filters['kind'] ?? $returnFilters['kind'] ?? $_GET['kind'] ?? '');
+$transactionWorkspace = $transactionWorkspace ?? ($_GET['kind'] ?? '');
 $navGroups = [
     'Daily work' => [
-        ['/transactions', pl_t('Receipts & expenses'), 'receipt', ($transactionWorkspace === '' || $view === 'transaction-chooser') ? ['transactions','transaction-chooser'] : [], true],
         ['/transactions?kind=receipt', pl_t('Receipts'), 'receipt', $transactionWorkspace === 'receipt' ? ['transactions','editor'] : [], true],
         ['/transactions?kind=expense', pl_t('Expenses'), 'receipt', $transactionWorkspace === 'expense' ? ['transactions','editor'] : [], true],
         ['/counter', pl_t('Counter sale'), 'cash-register', ['counter','counter-receipt'], $visibility['show_ar'] && $moduleVisible('inventory')],

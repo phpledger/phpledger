@@ -19,6 +19,56 @@ function ar_ap_payment(array $f, string $amount, string $date): array
     return ['bank_account_id'=>$f['accounts']['1000'],'gain_account_id'=>$f['accounts']['4000'],'loss_account_id'=>$f['accounts']['5000'],'amount_fc'=>$amount,'date'=>$date,'description'=>'Sample allocated bank payment','idempotency_key'=>bin2hex(random_bytes(16))];
 }
 
+test('AR AP line pickers and services reject headings parents inactive foreign and wrong-role accounts', function (): void {
+    require_once dirname(__DIR__) . '/www/phpledger/includes/functions/starter_web_functions.php';
+    $f = ar_ap_fixture(); $other = ar_ap_fixture();
+    $make = static fn(string $code, string $type, bool $active = true): array => pl_save_account($f['actor_id'], $f['company_id'], $f['book_id'], [
+        'code'=>$code,'name'=>'Sample eligibility '.$code,'type'=>$type,'role'=>null,'is_active'=>$active,'reason'=>'Line account regression.','creation_key'=>bin2hex(random_bytes(16))]);
+    foreach (['invoice'=>['4','income','4000'], 'bill'=>['5','expense','5000']] as $kind => [$class,$type,$default]) {
+        $heading = $make($class.'-800-00000-00', $type);
+        $parent = $make($class.'-800-00101-00', $type);
+        $child = $make($class.'-800-00101-01', $type, false);
+        $leaf = $make($class.'-800-00102-00', $type);
+        $inactive = $make($class.'-800-00103-00', $type, false);
+        $accounts = pl_starter_accounts($f['actor_id'], $f['company_id'], $f['book_id']);
+        $allIds = array_map('intval', array_column($accounts, 'id'));
+        assert_true(in_array($heading['id'], $allIds, true), 'General account lists retain headings.');
+        $options = pl_starter_options(array_filter($accounts, static fn(array $a):bool=>pl_ar_line_account_eligible($a, $kind==='invoice')));
+        assert_true(isset($options[$leaf['id']]), 'Eligible leaves remain selectable.');
+        $classHeading = (int) DB::queryFirstField('SELECT id FROM pl_accounts WHERE book_id=%i AND code=%s', $f['book_id'], $class.'-000-00000-00');
+        $badIds = [$classHeading, $heading['id'], $parent['id'], $child['id'], $inactive['id'], $other['accounts'][$default], $f['accounts']['1000'], $f['accounts'][$kind==='invoice'?'5000':'4000']];
+        foreach ($badIds as $accountId) {
+            assert_true(!isset($options[$accountId]), 'Ineligible account is absent from line options.');
+            $input = ar_ap_input($f, $kind); $input['lines'][0]['account_id'] = $accountId;
+            assert_throws(fn()=>pl_save_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$input), DomainException::class);
+            assert_throws(fn()=>pl_preview_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$input), DomainException::class);
+        }
+        assert_same(0, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_ar_documents WHERE book_id=%i', $f['book_id']));
+        assert_same(0, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE book_id=%i', $f['book_id']));
+    }
+});
+
+test('AR AP stale draft accounts are rechecked before preview edit and posting without losing the draft', function (): void {
+    foreach (['invoice'=>'4', 'bill'=>'5'] as $kind=>$class) {
+        $f=ar_ap_fixture(); $type=$kind==='invoice'?'income':'expense';
+        $make=static fn(string $code):array=>pl_save_account($f['actor_id'],$f['company_id'],$f['book_id'],[
+            'code'=>$code,'name'=>'Sample stale account','type'=>$type,'role'=>null,'is_active'=>true,'reason'=>'Stale draft regression.','creation_key'=>bin2hex(random_bytes(16))]);
+        $parent=$make($class.'-800-00101-00'); $input=ar_ap_input($f,$kind); $input['lines'][0]['account_id']=$parent['id'];
+        $draft=pl_save_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$input);
+        pl_preview_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$input,$draft['id'],1);
+        $child=$make($class.'-800-00101-01');
+        assert_throws(fn()=>pl_save_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$input,$draft['id'],1),DomainException::class,'postable');
+        assert_throws(fn()=>pl_preview_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$input,$draft['id'],1),DomainException::class,'postable');
+        assert_throws(fn()=>pl_post_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$draft['id'],1),DomainException::class,'postable');
+        $retained=pl_get_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$draft['id']);
+        assert_same(1,$retained['revision']); assert_same('draft',$retained['status']); assert_same($parent['id'],$retained['lines'][0]['account_id']);
+        $input['lines'][0]['account_id']=$child['id'];
+        $repaired=pl_save_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$input,$draft['id'],1);
+        $posted=pl_post_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$repaired['id'],2);
+        assert_true($posted['journal_id']!==null);
+    }
+});
+
 test('AR AP exact draft lines round once and prohibit quote kinds', function (): void {
     assert_same('0.0001',pl_ar_line_amount('0.0001','0.5'));
     assert_same('3.7035',pl_ar_line_amount('3','1.2345'));
@@ -111,8 +161,11 @@ test('AR AP posting rejects changed review closed periods invalid roles and fore
     assert_throws(fn()=>pl_post_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$d['id'],1),DomainException::class,'open accounting period');
     DB::update('pl_periods',['status'=>'open'],'id=%i',$f['period_id']);
     $other=ar_ap_fixture(); assert_throws(fn()=>pl_get_ar_document($other['actor_id'],$other['company_id'],$other['book_id'],$d['id']),DomainException::class);
-    $input['lines'][0]['account_id']=$f['accounts']['1000']; $d=pl_save_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$input,$d['id'],1);
-    assert_throws(fn()=>pl_post_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$d['id'],2),DomainException::class,'income line account');
+    $input['lines'][0]['account_id']=$f['accounts']['1000'];
+    assert_throws(fn()=>pl_save_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$input,$d['id'],1),DomainException::class,'income line account');
+    // A valid saved draft can become stale when its account is retired before posting.
+    DB::update('pl_accounts',['is_active'=>0],'id=%i',$f['accounts']['4000']);
+    assert_throws(fn()=>pl_post_ar_document($f['actor_id'],$f['company_id'],$f['book_id'],$d['id'],1),DomainException::class,'active postable');
     assert_same(0,(int)DB::queryFirstField('SELECT COUNT(*) FROM pl_open_items WHERE book_id=%i',$f['book_id']));
 });
 

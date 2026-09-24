@@ -60,9 +60,7 @@ $startLabels = [
 <div class="bench-body"><div class="done-body">
     <div>
         <h1 class="bench-heading size-lg" id="onboarding-title"><?= pl_e(pl_t('{business} is ready.', ['business' => (string) $created['name']])) ?></h1>
-        <p class="bench-sub"><?= pl_e($receipt === null
-            ? pl_t('You are signed in as its owner. Nothing has been posted to these books yet.')
-            : pl_t('Created from the {sample} structure, with none of its transactions. You are signed in as its owner.', ['sample' => (string) $receipt['sample_id']])) ?></p>
+        <p class="bench-sub"><?php if ($created['is_sample']): ?><?= pl_e(pl_t('This sample company includes fictional history. The recorded totals are shown below.')) ?><?php elseif ($receipt !== null): ?><?= pl_e(pl_t('Created from the {sample} structure, with none of its transactions. You are signed in as its owner.', ['sample' => (string) $receipt['sample_id']])) ?><?php else: ?><?= pl_e(pl_t('You are signed in as its owner. The current book totals are shown below.')) ?><?php endif; ?></p>
     </div>
     <ul class="manifest-card reveal">
     <?php foreach ($manifest as $line): ?>

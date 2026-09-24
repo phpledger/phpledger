@@ -291,7 +291,13 @@ function pl_notice(string $message): void
 function pl_form_failure(string $path, array $input, string $message, int $status = 422): never
 {
     unset($input['password'], $input['csrf']);
-    $_SESSION['form_failure'] = ['path' => $path, 'input' => $input, 'message' => $message, 'status' => $status === 200 ? 200 : 422];
+    $dateRecovery = [];
+    foreach (array_slice($input !== [] && is_array($_POST['_date_display'] ?? null) ? $_POST['_date_display'] : [], 0, 200, true) as $name => $value) {
+        if (is_string($name) && strlen($name) <= 200 && is_string($value)) { $dateRecovery[$name] = mb_substr($value, 0, 40); }
+    }
+    $_SESSION['form_failure'] = ['path' => $path, 'input' => $input, 'message' => $message, 'status' => $status === 200 ? 200 : 422,
+        'date_recovery' => $dateRecovery, 'date_action' => (string) (parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: ''),
+        'date_identity' => array_intersect_key($_POST, ['action' => true, 'id' => true])];
     pl_redirect($path);
 }
 

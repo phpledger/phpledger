@@ -1,5 +1,16 @@
 # Experience and design direction
 
+## 1.4.1 patch contract — 24 September 2026
+
+The local 1.4.1 candidate repairs the current interface without replacing the established layout or accounting workflows. Its [implementation plan](strategy/RELEASE-PLAN-1.4.1.md) controls acceptance; browser, accessibility and publication evidence are still pending.
+
+- Dates use a shared progressive calendar and DD/MM/YYYY display/entry, retaining canonical ISO submission and server-side date checks. Keyboard users must be able to open, navigate, choose and dismiss the calendar; native date inputs remain the no-JavaScript fallback.
+- Required input labels and assistive descriptions follow the existing required attributes. Optional DOB and other optional business fields stay optional. Validation errors retain entered values and identify corrections.
+- Invoice/bill line choices show active eligible leaves. Unavailable saved selections stay visible as needing correction, while the server rejects them for draft save, preview and posting. Chart/report headings remain available outside posting selectors.
+- Onboarding completion distinguishes fictional sample history from a structure-only company and reports actual scoped totals. Navigation provides separate Receipts and Expenses destinations. Phone layouts must keep form controls, actions and report scrolling usable without page-level horizontal overflow.
+
+These are targeted repairs, not completed mobile or accessibility acceptance for every application screen. Validate representative desktop, tablet and phone workflows, including JavaScript-disabled forms, before recording the patch as accepted.
+
 ## 1.0.0 status
 
 The published 1.0.0 interface implements the owner-approved Claude-calm direction: warm light canvas, navy #0C2052, blue #4656E8, local Inter and token-based components. It supersedes Review Console and the pending P0.4 shell alternatives. Desktop/tablet are primary; dark mode and mobile refinement are deferred. Full visual/accessibility acceptance remains open; see design/redesign-0.5/AUDIT-CLOSURE.md.

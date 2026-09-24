@@ -57,9 +57,19 @@ function pl_ui_table(array $headings, callable $rows, string $caption): void
     echo '</tr></thead><tbody>'; $rows(); echo '</tbody></table></div>';
 }
 
-function pl_ui_field(string $id, string $label, callable $control, string $hint = '', string $error = ''): void
+function pl_ui_required_marker(): string
 {
-    echo '<div class="field' . ($error !== '' ? ' field-error' : '') . '"><label class="field-label" for="' . pl_e($id) . '">' . pl_e($label) . '</label>';
+    return ' <span class="field-required" aria-hidden="true">*</span><span class="sr-only"> ' . pl_e(pl_t('Required')) . '</span>';
+}
+
+function pl_ui_required_legend(): void
+{
+    echo '<p class="field-hint"><span class="field-required" aria-hidden="true">*</span> ' . pl_e(pl_t('Required fields')) . '</p>';
+}
+
+function pl_ui_field(string $id, string $label, callable $control, string $hint = '', string $error = '', bool $required = false): void
+{
+    echo '<div class="field' . ($error !== '' ? ' field-error' : '') . '"><label class="field-label" for="' . pl_e($id) . '">' . pl_e($label) . ($required ? pl_ui_required_marker() : '') . '</label>';
     $control();
     if ($hint !== '') { echo '<p class="field-hint" id="' . pl_e($id) . '-hint">' . pl_e($hint) . '</p>'; }
     if ($error !== '') { echo '<p class="field-error-text" id="' . pl_e($id) . '-error">' . pl_e($error) . '</p>'; }

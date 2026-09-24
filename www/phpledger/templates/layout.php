@@ -19,6 +19,27 @@ $workspace = $user !== null && $company !== null && !in_array($view, ['oauth-con
     <script src="<?= pl_e(pl_url('/assets/help.js', ['v' => pl_app_version()])) ?>" defer></script>
     <script src="<?= pl_e(pl_url('/assets/party-picker.js', ['v' => pl_app_version()])) ?>" defer></script>
     <script src="<?= pl_e(pl_url('/assets/app.js', ['v' => pl_app_version()])) ?>" defer></script>
+    <link rel="stylesheet" href="<?= pl_e(pl_url('/assets/date-picker.css', ['v' => pl_app_version()])) ?>">
+    <?php $dateRecovery = !empty($form['input']) ? $form : [];
+    if ($company !== null && (pl_web_id($dateRecovery['input'] ?? [], 'company_id') !== (int) $company['id'] || pl_web_id($dateRecovery['input'] ?? [], 'book_id') !== (int) $company['book_id'])) { $dateRecovery = []; } ?>
+    <script type="application/json" id="pl-date-picker-config"><?= json_encode([
+        'labels' => [
+            'chooseDate' => pl_t('Choose date'), 'close' => pl_t('Close calendar'),
+            'previous' => pl_t('Previous'), 'next' => pl_t('Next'),
+            'chooseYear' => pl_t('Choose year'), 'chooseMonth' => pl_t('Choose month'),
+            'today' => pl_t('Today'), 'clear' => pl_t('Clear date'),
+            'invalidDate' => pl_t('Enter a real date in DD/MM/YYYY format.'),
+            'outOfRange' => pl_t('Choose a date within the allowed range.'),
+            'months' => array_map('pl_t', ['January','February','March','April','May','June','July','August','September','October','November','December']),
+            'weekdays' => array_map('pl_t', ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']),
+        ],
+        'recovery' => $dateRecovery['date_recovery'] ?? [],
+        'recoveryAction' => $dateRecovery['date_action'] ?? '',
+        'recoveryIdentity' => $dateRecovery['date_identity'] ?? [],
+        'iconUrl' => pl_url('/assets/icons/calendar.svg'),
+    ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?></script>
+    <script src="<?= pl_e(pl_url('/assets/date-picker.js', ['v' => pl_app_version()])) ?>" defer></script>
+
 
 
 </head>
@@ -26,9 +47,9 @@ $workspace = $user !== null && $company !== null && !in_array($view, ['oauth-con
 <a class="skip-link" href="#main"><?= pl_e(pl_t('Skip to content')) ?></a>
 <?php if ($workspace):
     // Keep navigation iteration variables out of the view's extracted data.
-    (static function (array $user, array $company, string $view, string $title): void {
+    (static function (array $user, array $company, string $view, string $title, string $transactionWorkspace): void {
         require __DIR__ . '/partials/ui/shell.php';
-    })($user, $company, $view === 'settlement' ? (($direction ?? '') === 'receivable' ? 'ar' : 'ap') : $view, $title);
+    })($user, $company, $view === 'settlement' ? (($direction ?? '') === 'receivable' ? 'ar' : 'ap') : $view, $title, (string) ($input['kind'] ?? $document['kind'] ?? $filters['kind'] ?? $returnFilters['kind'] ?? $_GET['kind'] ?? ''));
 ?>
 <div class="shell-strips">
 <?php require __DIR__ . '/partials/ui/context-strips.php'; ?>

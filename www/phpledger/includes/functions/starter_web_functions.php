@@ -25,7 +25,13 @@ function pl_starter_options(array $rows,string $label='name'): array
 function pl_starter_accounts(int $actorId,int $companyId,int $bookId): array
 {
     pl_require_company_access($actorId,$companyId); pl_ledger_book($companyId,$bookId);
-    return DB::query('SELECT a.id,a.code,a.name,a.type,a.role,EXISTS(SELECT 1 FROM pl_open_item_accounts o WHERE o.account_id=a.id) AS open_item_managed FROM pl_accounts a WHERE a.company_id=%i AND a.book_id=%i AND a.is_active=1 ORDER BY a.code',$companyId,$bookId);
+    // Include inactive children when deriving leaf status: retiring a child does not
+    // make its parent postable. Keep headings in this general list for nonposting uses.
+    $rows=DB::query('SELECT a.id,a.code,a.name,a.type,a.role,a.is_active,EXISTS(SELECT 1 FROM pl_open_item_accounts o WHERE o.account_id=a.id) AS open_item_managed FROM pl_accounts a WHERE a.company_id=%i AND a.book_id=%i ORDER BY a.code',$companyId,$bookId);
+    $postable=pl_account_code_postable_map(array_column($rows,'code'));
+    foreach ($rows as &$row) { $row['is_postable']=$postable[$row['code']]; }
+    unset($row);
+    return array_values(array_filter($rows,static fn(array $row):bool=>(bool)$row['is_active']));
 }
 
 function pl_starter_parties(int $actorId,int $companyId,int $bookId): array
@@ -39,7 +45,7 @@ function pl_starter_field(string $label,string $name,mixed $value='',string $typ
     static $sequence=0; $id=$id !== '' ? $id : 'starter-field-'.++$sequence;
     pl_ui_field($id, $label, static function () use ($id, $name, $type, $value, $required, $error): void {
         echo '<input class="input" id="'.pl_e($id).'" name="'.pl_e($name).'" type="'.pl_e($type).'" value="'.pl_e((string)($value??'')).'"'.pl_ui_error_attributes($id,$error).($required?' required':'').($type==='text'?' maxlength="500"':'').'>';
-    }, '', $error);
+    }, '', $error, $required);
 }
 
 function pl_starter_select(string $label,string $name,array $options,mixed $value='',bool $required=true,string $error='',string $id=''): void
@@ -50,7 +56,7 @@ function pl_starter_select(string $label,string $name,array $options,mixed $valu
         if (!in_array($value,['',null,0,'0'],true) && !array_key_exists((string)$value,$options)) { echo '<option value="'.pl_e((string)$value).'" selected>Unavailable selection — choose another</option>'; }
         foreach ($options as $key=>$text) { echo '<option value="'.pl_e((string)$key).'"'.((string)$value===(string)$key?' selected':'').'>'.pl_e((string)$text).'</option>'; }
         echo '</select>';
-    }, '', $error);
+    }, '', $error, $required);
 }
 
 function pl_starter_hidden(string $name,mixed $value): void

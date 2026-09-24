@@ -205,6 +205,12 @@ function pl_save_employee(int $actorId, int $companyId, array $input, ?int $id =
     if (!isset(pl_employment_statuses()[$status])) { throw new DomainException('Choose an employment status.'); }
 
     $hireDate = pl_ledger_date(pl_ledger_text($input['hire_date'] ?? null, 'Hire date', 10));
+    if ($dob !== null && $dob > gmdate('Y-m-d')) {
+        throw new DomainException('Date of birth cannot be in the future.');
+    }
+    if ($dob !== null && $dob > $hireDate) {
+        throw new DomainException('Date of birth cannot be after the hire date.');
+    }
     $effectiveRaw = pl_ledger_text($input['status_effective_date'] ?? '', 'Status effective date', 10, false);
     $effectiveDate = $effectiveRaw === '' ? $hireDate : pl_ledger_date($effectiveRaw);
     if ($effectiveDate < $hireDate) { throw new DomainException('Status cannot take effect before employment begins.'); }

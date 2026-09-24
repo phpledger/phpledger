@@ -2,7 +2,7 @@
 
 Country-neutral, open-source bookkeeping for small businesses, built with PHP and MySQL. Project-owned code uses AGPL-3.0-or-later; a commercial licence is available. Self-hosting is free without licence keys or licensing-server calls. Published pre-adoption 0.1.0 through 0.1.5 previews retain MIT. See [Licensing policy](docs/LICENSING-POLICY.md).
 
-**1.0.0: first stable release.** This is the supported production scope described in RELEASE-NOTES.md, with its disclosed limits: independent accounting review, independent security review, supervised pilots and unfamiliar-operator installation observation have not been performed. It is not a completed ERP or a country-certified accounting product.
+**1.4.1: local patch candidate, not yet published.** The candidate covers date entry, employee date-of-birth validation, eligible invoice/bill line accounts, required-field presentation, sample completion wording, navigation and phone layout corrections. See RELEASE-NOTES.md for scope and pending gates. There are no new migrations or schema changes, and this patch carries no media kit. Independent accounting/security review, real-business pilots and unfamiliar-operator observation remain separate assurance work. It is not a completed ERP or a country-certified accounting product.
 
 The package itself carries a short `README.txt`; this longer overview is kept in the repository.
 
@@ -18,7 +18,7 @@ The interface uses compiled local CSS and server-side paged lists. No Node insta
 
 The package needs PHP **8.2+ (8.3 recommended)**, MySQL **8.4** and HTTPS. Production Composer dependencies are included. Use hosting-panel preparation and guarded browser setup at `/install`, or the retained CLI setup path. Automatic updates additionally require PHP ZIP, private backup space and verified schema/file permissions. Keep the supplied directory layout: only `www/phpledger/public` is the web document root. Do not serve the package root.
 
-## Included in 1.0.0
+## Historical first-stable scope: 1.0.0
 
 - Protected browser installation at `/install`: host ownership proof with a private setup key, the existing migration chain, private configuration and OAuth key provisioning, first-account creation and onboarding. Setup locks after completion.
 - Operator-initiated signed updates and recovery through the independent `/maintenance.php` entry: a private `operator.key`, a pinned publisher public key, explicit stable/preview channels, automatic complete matched backups (code, configuration, keys, database) and automatic matched restoration with financial-total verification on failure. `tools/resume-update.php` advances recovery from the CLI when shell access is available.

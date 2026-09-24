@@ -4,6 +4,21 @@ Each release's exact source revision is recorded in its `PACKAGE-MANIFEST.json` 
 
 PHP Ledger 1.0.0 was the first supported stable release of the restarted application. It preserves the lightweight BixiSoft PHP/MeekroDB structure while separating accounting functions, server permissions, templates and the public front controller. Read "Supported scope and limits" and "Assurance status" below before deployment; the dated preview sections further down record the historical, superseded scope of each earlier development release.
 
+## 1.4.1 candidate: date entry and workflow corrections
+
+**Local implementation candidate, 24 September 2026; not published or deployed.** Combined tests, responsive browser acceptance and exact-package installation/upgrade checks must complete before release. The application version identifies the candidate; it is not evidence of publication.
+
+- **Date entry:** the patch targets consistent DD/MM/YYYY entry with a keyboard-accessible calendar enhancement across application date fields. Forms retain ISO `YYYY-MM-DD` submission and the existing server validation. Native date fields remain usable when JavaScript is unavailable. Calendar, keyboard and responsive behavior require browser acceptance before this item is considered complete.
+- **Employee date of birth (#105):** the field remains optional. Shared create/edit validation rejects a date after today or after the hire date. Existing records are not automatically rewritten; an explicit edit must satisfy the rule. Invalid submissions retain entered values for correction.
+- **Invoice and bill line accounts (#106):** selectors exclude inactive accounts, class/group headings and accounts with children. Existing income versus expense/asset/clearing eligibility remains in force. The shared service rejects forged, foreign-company and stale selections before saving or previewing, and rechecks at posting. General account lists used outside posting retain headings.
+- **Required fields (#107):** shared form presentation is being aligned with the existing required attributes so visible labels and assistive descriptions identify required inputs. This does not make optional business fields mandatory.
+- **Workflow presentation:** sample completion uses actual scoped book counts and distinguishes fictional history from structure-only setup; receipt and expense navigation is simplified; phone form/report layouts are being corrected. These are bounded repairs to existing workflows.
+- **Credential guidance (#102):** operator documentation describes provider revocation, secure replacement, artifact/access review and private incident records for exposed operational credentials. Documentation does not rotate credentials or change live infrastructure.
+
+No new migrations, schema changes, accounting calculations or public API contracts are introduced. This patch carries **no media kit**, in accordance with the patch-release policy. Existing cash-policy choices, permissions and immutable posted history retain their established behavior.
+
+Issues #71, #100 and #104 are acceptance candidates only: prior implementation or a local check does not close them. Record matching acceptance evidence and publication before changing their release status. See the repository's 1.4.1 implementation plan and issue acceptance audit. The later sequence remains 1.5 maintenance, 1.6 maintenance, then the deferred 1.7 feature delivery; Academy remains 2.0 or later.
+
 ## 1.4.0: cash choices, linked parties and guided practice
 
 This release adds an administrator-selectable cash and bank shortfall policy per book. Existing and new books start in warning-only mode: posting can proceed after a shortfall warning. An administrator with accounting-policy permission may choose strict mode, which rejects postings that create or worsen a physical-cash shortfall or exceed an explicitly configured bank overdraft limit. A bank facility is not treated as cash, and the policy choice is audited. The posting service reads the current choice when a transaction is posted; a preview is guidance, not a reservation of funds.
