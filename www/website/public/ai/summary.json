@@ -7,7 +7,7 @@
   "requirements": "PHP 8.2+ (8.3 recommended), MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates",
   "repository": "https://github.com/phpledger/phpledger",
   "release": "https://github.com/phpledger/phpledger/releases/tag/v1.4.1",
-  "packageSha256": "29e3f33265f23a64bccc5dfeca4b8f512467fa9c7e6306e4096c7d5ff85f2b96",
+  "packageSha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
   "demo": {
     "url": "https://phpledger.com/demo/",
     "warning": "Fictional sample data only; private sample companies reset hourly."

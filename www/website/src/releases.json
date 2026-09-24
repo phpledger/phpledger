@@ -7,7 +7,7 @@
       "published_at": "2026-09-24",
       "notes": "https://github.com/phpledger/phpledger/releases/tag/v1.4.1",
       "zip": "https://github.com/phpledger/phpledger/releases/download/v1.4.1/phpledger-1.4.1.zip",
-      "sha256": "29e3f33265f23a64bccc5dfeca4b8f512467fa9c7e6306e4096c7d5ff85f2b96",
+      "sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
       "update_json": "https://phpledger.com/releases/1.4.1.update.json",
       "min_php": "8.2.0",
       "databases": [

@@ -21,12 +21,12 @@ GRANT SELECT, INSERT, UPDATE ON phpledger_demo.* TO 'ledger_demo_test'@'%';
     # The reset guard accepts a person a visitor's own sample created inside it (1.2.0 samples
     # seed a second person so the capability system is visible). Prove it still refuses anyone
     # else, before the reset that has to succeed with that person present.
-    $mysql = 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot'
+    $mysql = 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot phpledger_demo'
     "INSERT INTO phpledger_demo.pl_users (email, display_name, password_hash) VALUES ('stranger.none@example.invalid', 'Stranger', 'x');" | & docker compose exec -T db_test sh -lc $mysql
     & docker compose @options -e PL_DB_USER=root -e PL_DB_PASSWORD=local-test-root-only -e PL_DEMO_RESET_MODE=1 test php tools/demo-reset.php --now
     if ($LASTEXITCODE -eq 0) { throw 'The reset accepted a person with no company membership.' }
     "INSERT INTO phpledger_demo.pl_companies (name, currency, start_date, fiscal_year_end, created_by, functional_currency, presentation_currency, is_sample) SELECT 'Company no visitor holds', 'USD', '2026-01-01', '12-31', u.id, 'USD', 'USD', 1 FROM phpledger_demo.pl_users u WHERE u.email = 'stranger.none@example.invalid';" | & docker compose exec -T db_test sh -lc $mysql
-    "INSERT INTO phpledger_demo.pl_company_members (company_id, user_id, role) SELECT c.id, u.id, 'owner' FROM phpledger_demo.pl_companies c, phpledger_demo.pl_users u WHERE c.name = 'Company no visitor holds' AND u.email = 'stranger.none@example.invalid';" | & docker compose exec -T db_test sh -lc $mysql
+    "INSERT INTO phpledger_demo.pl_company_members (company_id, user_id, role_id) SELECT c.id, u.id, r.id FROM phpledger_demo.pl_companies c, phpledger_demo.pl_users u, phpledger_demo.pl_roles r WHERE r.company_id IS NULL AND r.is_system = 1 AND r.slug = 'owner' AND c.name = 'Company no visitor holds' AND u.email = 'stranger.none@example.invalid';" | & docker compose exec -T db_test sh -lc $mysql
     & docker compose @options -e PL_DB_USER=root -e PL_DB_PASSWORD=local-test-root-only -e PL_DEMO_RESET_MODE=1 test php tools/demo-reset.php --now
     if ($LASTEXITCODE -eq 0) { throw 'The reset accepted a person in a company no isolated visitor holds.' }
     "DELETE m FROM phpledger_demo.pl_company_members m JOIN phpledger_demo.pl_users u ON u.id = m.user_id WHERE u.email = 'stranger.none@example.invalid';" | & docker compose exec -T db_test sh -lc $mysql

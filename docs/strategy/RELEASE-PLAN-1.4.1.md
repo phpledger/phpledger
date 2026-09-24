@@ -27,7 +27,7 @@ Owner-approved local implementation, 24 September 2026. This is a bounded patch 
 
 ## Later work stays separate
 
-The owner has preserved **1.5 maintenance → 1.6 maintenance → 1.7 deferred feature delivery**, with Academy foundations and guided practice at **2.0 or later**. The expanded setup/chart, feature-choice enforcement, Freelancer/country-profile, FX/inventory-cost-method and database-parity scope remains outside 1.4.1. This patch does not resume the paused feature lanes or rewrite their existing plans.
+The owner has preserved **1.5 maintenance → 1.6 stabilization → 1.7 deferred feature delivery**, with Academy foundations and guided practice at **2.0 or later**. The expanded setup/chart, feature-choice enforcement, Freelancer/country-profile, FX/inventory-cost-method and database-parity scope remains outside 1.4.1. This patch does not resume the paused feature lanes or rewrite their existing plans.
 
 ## Evidence at preparation time
 

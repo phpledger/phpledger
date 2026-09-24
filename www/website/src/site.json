@@ -38,9 +38,9 @@
     "url": "https://github.com/phpledger/phpledger/releases/tag/v1.4.1",
     "zipUrl": "https://github.com/phpledger/phpledger/releases/download/v1.4.1/phpledger-1.4.1.zip",
     "shaUrl": "https://github.com/phpledger/phpledger/releases/download/v1.4.1/phpledger-1.4.1.zip.sha256",
-    "sha256": "29e3f33265f23a64bccc5dfeca4b8f512467fa9c7e6306e4096c7d5ff85f2b96",
-    "bytes": 3576237,
-    "bytesLabel": "3,576,237",
+    "sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
+    "bytes": 3576250,
+    "bytesLabel": "3,576,250",
     "sizeLabel": "3.58 MB",
     "license": "https://github.com/phpledger/phpledger/blob/master/LICENSE"
   },
