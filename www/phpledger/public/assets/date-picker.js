@@ -208,7 +208,14 @@
             let focusValue;
             if (view === 'days') {
                 status.textContent = labels.months[shown.month - 1] + ' ' + shown.year;
-                labels.weekdays.forEach(day => body.append(element('span', 'pl-date-weekday', day)));
+                labels.weekdays.forEach((day, index) => {
+                    let short = day;
+                    try { short = new Intl.DateTimeFormat(document.documentElement.lang || 'en', { weekday: 'short', timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, 7 + index))); } catch { /* Keep the translated fallback. */ }
+                    const heading = element('span', 'pl-date-weekday', short);
+                    heading.title = day;
+                    heading.setAttribute('aria-label', day);
+                    body.append(heading);
+                });
                 const first = new Date(0); first.setUTCFullYear(shown.year, shown.month - 1, 1);
                 for (let index = 0; index < first.getUTCDay(); index++) body.append(element('span'));
                 for (let day = 1; day <= days(shown.year, shown.month); day++) {
