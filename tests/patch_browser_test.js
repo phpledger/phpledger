@@ -26,9 +26,10 @@ function check(name, pass, details) { evidence.checks.push({ name, pass: !!pass,
         const select = page.locator('form').filter({ has: page.locator('input[name=company_id][value="' + company + '"]') });
         if (await select.count() !== 1) throw new Error('Authorized sample company unavailable.');
         await select.getByRole('button').click();
-        for (const width of [1440, 768, 320, 360, 390]) {
+        for (const width of process.env.PL_PATCH_RECOVERY_ONLY ? [] : [1440, 768, 320, 360, 390]) {
             await page.setViewportSize({ width, height: 900 });
-            for (const [route, heading] of [['/employees', 'Employees'], ['/ar?new=1', 'New Invoice'], ['/payroll', 'Payroll'], ['/recurring', 'Recurring'], ['/receipts/new', 'Receipt'], ['/expenses/new', 'Expense']]) {
+            const routes = process.env.PL_PATCH_MARKERS_ONLY ? [['/receipts/new', 'Receipt'], ['/expenses/new', 'Expense']] : [['/employees', 'Employees'], ['/ar?new=1', 'New Invoice'], ['/payroll', 'Payroll'], ['/recurring', 'Recurring'], ['/receipts/new', 'Receipt'], ['/expenses/new', 'Expense']];
+            for (const [route, heading] of routes) {
                 const response = await page.goto(base + route);
                 await page.locator('h1').first().waitFor();
                 await page.waitForFunction(() => [...document.querySelectorAll('input[type=date]:not(:disabled):not([readonly])')].length === 0);
@@ -49,12 +50,13 @@ function check(name, pass, details) { evidence.checks.push({ name, pass: !!pass,
                 if (route.startsWith('/receipts') || route.startsWith('/expenses')) check(route + ' selected sidebar ' + width, state.activeNav.length === 1 && state.activeNav[0] === (route.startsWith('/receipts') ? 'Receipts' : 'Expenses'), state.activeNav);
                 if (state.scroll > width + 1 || state.missingRequiredLabels.length) await page.screenshot({ path: path.join(output, 'patch-browser-' + route.split('?')[0].replaceAll('/', '-') + '-' + width + '.png'), fullPage: true });
             }
-            for (const label of ['Receipt', 'Expense']) {
+            for (const label of process.env.PL_PATCH_MARKERS_ONLY ? [] : ['Receipt', 'Expense']) {
                 await page.goto(base + '/home');
                 await page.getByRole('navigation', { name: 'Quick actions', exact: true }).getByRole('link', { name: label, exact: true }).click();
                 check('Home ' + label + ' quick action ' + width, (await page.locator('h1').first().textContent()).toLowerCase().includes(label.toLowerCase()) && page.url().endsWith('/' + label.toLowerCase() + 's/new'));
             }
         }
+        if (!process.env.PL_PATCH_MARKERS_ONLY) {
         await page.goto(base + '/employees');
         const hire = page.locator('#employee-hire-date + .pl-date-display');
         await hire.fill('29/02/2024');
@@ -69,7 +71,7 @@ function check(name, pass, details) { evidence.checks.push({ name, pass: !!pass,
         check('invalid edit clears ISO', await page.locator('#employee-hire-date').inputValue() === '');
         await page.locator('#employee-form form').evaluate(form => { form.noValidate = true; });
         await page.locator('#employee-form').getByRole('button', { name: 'Add employee', exact: true }).click();
-        check('server rejects invalid employee date', await page.locator('[data-form-error]').count() > 0);
+        check('server rejects invalid employee date', await page.getByRole('alert').count() > 0);
         check('server raw date recovery restores exact text', await page.locator('#employee-hire-date + .pl-date-display').inputValue() === '31/02/2024');
         check('server recovery retains cleared canonical date', await page.locator('#employee-hire-date').inputValue() === '');
         check('server recovery preserves name', await page.locator('#employee-name').inputValue() === 'Sample rejected patch recovery');
@@ -83,12 +85,14 @@ function check(name, pass, details) { evidence.checks.push({ name, pass: !!pass,
             check(route + ' noJS native dates', await native.locator('input[type=date]').count() > 0 && await native.locator('.pl-date-display').count() === 0);
             check(route + ' noJS required inputs', await native.locator('input[required],select[required]').count() > 0);
         }
+        }
         check('no JavaScript runtime exceptions', evidence.errors.length === 0, evidence.errors);
     } catch (error) { evidence.errors.push(error.stack); check('acceptance runner completed', false, error.message); }
     finally {
         evidence.passed = evidence.checks.filter(item => item.pass).length;
         evidence.failed = evidence.checks.filter(item => !item.pass).length;
-        fs.writeFileSync(path.join(output, 'patch-browser-results.json'), JSON.stringify(evidence, null, 2) + '\n');
+        const resultName = process.env.PL_PATCH_RECOVERY_ONLY ? 'patch-browser-recovery-results.json' : process.env.PL_PATCH_MARKERS_ONLY ? 'patch-browser-markers-results.json' : 'patch-browser-results.json';
+        fs.writeFileSync(path.join(output, resultName), JSON.stringify(evidence, null, 2) + '\n');
         console.log(JSON.stringify({ passed: evidence.passed, failed: evidence.failed, errors: evidence.errors, findings: evidence.checks.filter(item => !item.pass) }, null, 2));
         await browser.close();
         process.exitCode = evidence.failed ? 1 : 0;

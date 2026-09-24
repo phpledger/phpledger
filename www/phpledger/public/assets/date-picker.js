@@ -292,6 +292,7 @@
     }
     if (config.recoveryAction && config.recovery) {
         const candidates = Array.from(document.forms).filter(form => {
+            if ((form.getAttribute('method') || 'get').toLowerCase() !== 'post') return false;
             try {
                 if (new URL(form.getAttribute('action') || document.URL, document.baseURI).pathname !== config.recoveryAction) return false;
             } catch { return false; }
