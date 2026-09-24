@@ -4,7 +4,7 @@
   "published_at_utc": "2026-09-24T01:59:42Z",
   "application_tag": "v1.4.1",
   "application_source_commit": "9e101439e8798815dfa5892d37924bac9d1f9a1e",
-  "repository_source_commit": "97f45387a6b556809bbd20bb1bc07037bd8029c6",
+  "repository_source_commit": "fa83ca64bdedb35941fb5facd51a7d026b1661eb",
   "comparison_base": "8fface957e1bac2a7292b8125dc57170c24b6ebf",
   "changed_paths": [
     "AGENTS_SYNC.MD",
@@ -22,6 +22,8 @@
     "docs/repository/INSTALL-GUIDES-2026-09-24.md",
     "docs/repository/PUBLICATION-2026-09-23-1.4.0.json",
     "docs/repository/PUBLICATION-2026-09-23-1.4.0.md",
+    "docs/repository/PUBLICATION-2026-09-24-1.4.1.json",
+    "docs/repository/PUBLICATION-2026-09-24-1.4.1.md",
     "docs/repository/RELEASE-1.4.0-DEPLOY-PLAN.md",
     "docs/repository/RELEASE-1.4.0-GATES.json",
     "docs/repository/RELEASE-1.4.0-GATES.md",
@@ -360,7 +362,7 @@
     "Observe actual 03:00 UTC scheduled reset",
     "Fix 320/360/390 px New expense workspace header clipping in follow-up; R14-02 remains open"
   ],
-  "changed_paths_count": 241,
+  "changed_paths_count": 243,
   "changed_paths_scope": "git diff --name-only v1.4.0^{commit}..97f45387a6b556809bbd20bb1bc07037bd8029c6; excludes this publication receipt and later work",
   "guide_links": {
     "verified_http_200": 4,
@@ -491,5 +493,10 @@
     "evidence": ".cache/release-1.4.1-operator/issue71-verifier/receipt.json"
   },
   "scheduled_reset_observed": false,
-  "live_rollback_performed": false
+  "live_rollback_performed": false,
+  "preserved_main_append_only_paths": [
+    "AGENTS_SYNC.MD",
+    "AGENT_MESSAGES.MD",
+    "docs/strategy/RELEASE-PLAN-1.5.md"
+  ]
 }

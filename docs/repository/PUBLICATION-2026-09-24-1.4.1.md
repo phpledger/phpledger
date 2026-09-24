@@ -1,6 +1,6 @@
 # PHP Ledger 1.4.1 publication receipt — 24 September 2026
 
-**Live 1.4.1 release verified with a documented phone-header gap; the actual scheduled reset remains unobserved.** This records the public release and its bounded live acceptance, not a blanket usability certificate. The application tag `v1.4.1` resolves to the accepted runtime source `9e101439e8798815dfa5892d37924bac9d1f9a1e`. Repository `master` includes subsequent documentation, installation guides, distribution metadata and website preparation through `97f45387a6b556809bbd20bb1bc07037bd8029c6`; those changes do not alter the accepted application ZIP. The JSON companion identifies changed paths and evidence files.
+**Live 1.4.1 release verified with a documented phone-header gap; the actual scheduled reset remains unobserved.** This records the public release and its bounded live acceptance, not a blanket usability certificate. The application tag `v1.4.1` resolves to the accepted runtime source `9e101439e8798815dfa5892d37924bac9d1f9a1e`. Repository `master` includes subsequent documentation, installation guides, distribution metadata and website preparation through `97f45387a6b556809bbd20bb1bc07037bd8029c6`; those changes do not alter the accepted application ZIP. The JSON companion inventories all 243 changed paths, including this receipt, and identifies evidence files. The preserved main checkout received only appended coordination records and the 1.5 maintenance follow-up note; its unrelated dirty work was not integrated.
 
 ## Published application and registry evidence
 
