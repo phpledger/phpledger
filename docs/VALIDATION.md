@@ -6,13 +6,13 @@ The patch is implemented locally from baseline `f325d02d` on `codex/release-1.4.
 
 | Check | Current evidence or remaining gate |
 |---|---|
-| Employee DOB and invoice/bill account guards | Targeted MySQL employee tests 11/11 and AR/AP tests 75/75 passed. Browser failure recovery retains invalid display input without silently submitting an old date. Full combined reruns include the additional scoped recovery regression. |
+| Employee DOB and invoice/bill account guards | Targeted MySQL employee tests 11/11 and AR/AP tests 75/75 passed. Browser failure recovery retains invalid display input without silently submitting an old date. Both full combined runs include the additional scoped recovery regression. |
 | Shared dates and required fields | Date component 58/58 passed. Application matrix covered employee, invoice, payroll, recurring, receipt and expense forms at 1440/768/320/360/390 pixels. Initial findings were corrected; focused recovery 22/22 and markers/navigation 61/61 passed. |
-| Sample completion, navigation and phone layouts | Actual journal/draft counts replace the empty-books claim. Separate workspaces and selected states passed scoped browser checks. Full-suite and demo results are recorded in the gate receipt when complete. |
-| Combined validation | Changed-file syntax checks and PHPStan passed; full MySQL/MariaDB application suites are running. No passing combined result is claimed until their completion. |
+| Sample completion, navigation and phone layouts | Actual journal/draft counts replace the empty-books claim. Separate workspaces and selected states passed scoped browser checks. Cedar full import and resumed completion showed the actual 119 journals / 3 drafts; isolated demo and full-suite checks passed. |
+| Combined validation | Full composer check passed on MySQL and MariaDB: 699 tests / 0 failures each, PHP lint 416 / 0, PHPStan clean and sample validators passed. Focused onboarding passed 125 / 0. |
 | Distribution and upgrade | Exact signed ZIP fresh installs and populated 1.4.0 upgrades passed on MySQL and MariaDB, including repeat packaged upgrade execution, unchanged history/balances and all 61 migration receipts. Byte-identical reproduction and 13 package-builder tests passed. No new migration or schema change. |
 | Website and resources | Both resource generators passed check mode. Local website build/content check: 102 pages, zero errors/warnings. Release/download pages passed three browser widths. Wiki draft prepared and About reviewed unchanged. |
-| Publication | Separate authorization required. Signed archive, checksum and website metadata prepared locally; no patch upload, website/demo cutover or issue closure claimed. No media kit for this patch. |
+| Publication | Separate authorization required. Signed archive, checksum and website metadata prepared locally; no patch upload, website/demo cutover claimed. Already-shipped #104 was closed with evidence; newly fixed issues await publication. No media kit for this patch. |
 
 Historical validation records below retain their original scope and do not establish acceptance of this candidate. Independent accounting/security review, native translation review, provider acceptance and real-business pilots remain separate assurance work.
 

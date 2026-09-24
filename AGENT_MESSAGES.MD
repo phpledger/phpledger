@@ -1985,3 +1985,12 @@ Final checks verified 413 public paths, 44 sample preloads, exact app manifest/s
 ## 2026-09-24 - 1.4.1 patch implementation ownership
 
 Owner authorized local implementation of the approved 1.4.1 plan. Baseline f325d02d in isolated .cache/release-1.4.1 (codex/release-1.4.1). Date-selector worker owns new date-picker assets and component tests; validation worker owns employee and AR/AP service/template validation and tests; documentation worker owns credential incident guidance and issue acceptance audit. Coordinator owns integration, required-field presentation, sample completion, navigation, phone layout, release metadata, validation and exact-package gates. No migrations planned. Preserve main dirty planning and paused 1.5 feature lanes. Publication/deployment needs separate release authorization; newly fixed issues remain open until published.
+
+
+## 2026-09-24 — 1.4.1 local implementation and accepted artifact
+
+Completed in isolated `.cache/release-1.4.1`, branch `codex/release-1.4.1`; packaged runtime `9e101439e8798815dfa5892d37924bac9d1f9a1e`. Shared DD/MM/YYYY calendars, DOB/account validation, required indicators, actual setup counts, receipt/expense navigation, phone detail/warnings and credential procedures are implemented. Final full checks passed 699/0 on MySQL and MariaDB, PHP lint 416/0 and PHPStan clean. Focused onboarding125/0; date component58/0; all11 demo packs/396 checkpoints/reset and signed preload resolution passed. Earlier count-query failures were corrected and superseded artifacts are not release candidates.
+
+Accepted ZIP only: `.cache/release-1.4.1/.cache/release-1.4.1-accepted/phpledger-1.4.1.zip`, SHA256 `3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b`, 3,576,250 bytes. Exact fresh install and populated1.4.0 upgrade passed both engines; all61 migration files/receipts and historical rows/balances unchanged. No new migration/schema. Signed metadata and website/Wiki preparation are local. About reviewed unchanged. No media kit.
+
+Issue104 closed with evidence for the already-published1.4.0 workflow; newly fixed issues remain open until1.4.1 publication. Publication/deployment not performed and requires separate authorization. Disposable test containers/networks and browser/static preview processes removed; logs/artifacts retained. Main installation-guide work, dirty planning and paused feature lanes preserved. Exact changed-file inventory, checks, references, boundaries and remaining independent-review gaps: isolated `docs/repository/RELEASE-1.4.1-GATES.md` and `.json`.

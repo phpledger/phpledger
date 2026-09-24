@@ -1,0 +1,2367 @@
+{
+  "status": "local_implementation_complete_publication_pending",
+  "baseline": "f325d02d",
+  "application_source": "9e101439e8798815dfa5892d37924bac9d1f9a1e",
+  "prepared_source": "064568a8 plus final validation-only documentation and coordination commit",
+  "archive": {
+    "path": ".cache/release-1.4.1-accepted/phpledger-1.4.1.zip",
+    "sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
+    "bytes": 3576250
+  },
+  "changed_files": [
+    {
+      "path": "AGENTS_SYNC.MD",
+      "sha256": "2475c0b282e1b4f5a8748c81dd0b43e240d18fbbcbd958843fe4d73c7595dd15"
+    },
+    {
+      "path": "AGENT_MESSAGES.MD",
+      "sha256": "ea3b848e4c9da35af0a08749095f77182cd53b5187735fd1b90502c42e90688f"
+    },
+    {
+      "path": "README.md",
+      "sha256": "0514d545ea7ba23a58cdaa9224202a263334bf7d2d656ce6fcd159ea90193f0d"
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "cb3cfd1ba889b465725cbd1fdd989cd74d6bc541ebee8f36d62191dca8d698a4"
+    },
+    {
+      "path": "docs/CREDENTIALS.md",
+      "sha256": "bb0d9519a5bb132fb4fc6209ae6d1cfa17a4168763827c838578dcd8ec18f8ec"
+    },
+    {
+      "path": "docs/DESIGN.md",
+      "sha256": "a4de07f56584bdb8ad4bf04aa4ff9e651ddb56d5e831551e548bfd3fabf70f7e"
+    },
+    {
+      "path": "docs/RELEASE-PROTOCOL.md",
+      "sha256": "4c81c19cbe4440260c55e137e42deaa52112a88e3eb33da12f12efbd36f7a4c7"
+    },
+    {
+      "path": "docs/VALIDATION.md",
+      "sha256": "263db3fbde5f22d85c87f88eb3216c40575cbbcc1afde7665fb047ac7af4026c"
+    },
+    {
+      "path": "docs/design/website/qa/static-checks.json",
+      "sha256": "6a9a6b895fbc8bc77a696fdcdbfa143903dfa5b6626e66c28c99f3e63075a2bb"
+    },
+    {
+      "path": "docs/repository/RELEASE-1.4.1-GATES.json",
+      "sha256": null
+    },
+    {
+      "path": "docs/repository/RELEASE-1.4.1-GATES.md",
+      "sha256": "af7f25e8bb04608a99d2ba37173c691a16e328c70744af8fe976d9f7b1909972"
+    },
+    {
+      "path": "docs/repository/RELEASE-1.4.1-ISSUES.md",
+      "sha256": "11573a5d3484e499ca80196a65f02ebcc82024368f0e8624b6ca7628fb827417"
+    },
+    {
+      "path": "docs/strategy/RELEASE-PLAN-1.4.1.md",
+      "sha256": "09fcac0c5b59104b81677464e82bf9121537f8f5a40cc3e0df13c2efd6e63f35"
+    },
+    {
+      "path": "resources/lang/ar.php",
+      "sha256": "54a42cb88409759ddbc5251d5d6e7e0d0d9c62b74c9d202892439e41934e5973"
+    },
+    {
+      "path": "resources/lang/ur.php",
+      "sha256": "05b90107f33fb139b93cdb1f6c075e5469cd6d06887f3c31b7cbb51b9556b92d"
+    },
+    {
+      "path": "resources/release/README.md",
+      "sha256": "495ede9d81866a28ab9d979d7b9947d4141da380416c1541197069d0a92e9563"
+    },
+    {
+      "path": "resources/release/RELEASE-NOTES.md",
+      "sha256": "0a15c4a67697f8d71b4e9a62b6a4eaba507b4282ffdd522d0c001c85d54157da"
+    },
+    {
+      "path": "resources/release/UPGRADE.md",
+      "sha256": "efdd4122a396c9e651d5cb595dbfb0c1dbc43da0abc210ccd2298191601d51e6"
+    },
+    {
+      "path": "resources/ui/app.css",
+      "sha256": "ec32dcb07f14d8b25019fb4ac88f1e034607d2b5da742abe3e94987469de5f1f"
+    },
+    {
+      "path": "tests/ar_ap_test.php",
+      "sha256": "5de0562b93d1e9b899070b53619bcda084a4d06c17e06b46949540e965868080"
+    },
+    {
+      "path": "tests/date-picker-browser.js",
+      "sha256": "a854745f450c272e319daafa4ad302fef6003f5725122a34ced9b7fa197eb6d5"
+    },
+    {
+      "path": "tests/employee_test.php",
+      "sha256": "4f24dcf8d878b012f9c5f0a1f35fbf1f4db60ba3bf19608e844df7a18230b2c8"
+    },
+    {
+      "path": "tests/onboarding_skeleton_test.php",
+      "sha256": "6891df3b6727448c4dc2a324e762076d9af50ae60ab4d97edec8eee58c577b5d"
+    },
+    {
+      "path": "tests/patch-upgrade-test.php",
+      "sha256": "b357d326bb59f57f6540989b27447eb7309d440511a4ab201d10a10c46192b1b"
+    },
+    {
+      "path": "tests/patch_browser_test.js",
+      "sha256": "80c16686be4ab32454ae723c598636a28aea82bf5248df0396dc0a7d473ff57a"
+    },
+    {
+      "path": "tools/package-files.json",
+      "sha256": "bf71ad9b8b2bc07073972f769b483b2398c96239e0b7a87b9f1efedbb66b44cd"
+    },
+    {
+      "path": "tools/verify-demo.ps1",
+      "sha256": "655e20c1e0a25665a6aa21a2f18a1af0cb2bd1843908e8b23e6596dfb34e3704"
+    },
+    {
+      "path": "tools/verify-patch-release.py",
+      "sha256": "10326c8fa1fc546e923e1bdbadd7d4ce9386da44efd8119623bd878a2d7f882f"
+    },
+    {
+      "path": "www/phpledger/VERSION",
+      "sha256": "7d072b48526b023950e4c48db01e8c273554a6401119f5691e7589ba9bc65d9d"
+    },
+    {
+      "path": "www/phpledger/includes/functions/ar_ap_functions.php",
+      "sha256": "69691d1e241aac2da7f0d4c9042b2c5a89e5bfb6f48c62ae1c494dbe7d0de8ab"
+    },
+    {
+      "path": "www/phpledger/includes/functions/employee_functions.php",
+      "sha256": "f44945fe42d129fb9264034a04645deb3e22d931af137c15589049c8f74915a3"
+    },
+    {
+      "path": "www/phpledger/includes/functions/onboarding_web_functions.php",
+      "sha256": "442115d576d51e972b5f7196932de047eb75df950710b9d01b0ea9510384da4b"
+    },
+    {
+      "path": "www/phpledger/includes/functions/starter_web_functions.php",
+      "sha256": "db4c785fd2865211b0918075e9ff8f91f436843a12abbe1e634b0d422d0e5f8e"
+    },
+    {
+      "path": "www/phpledger/includes/functions/web_functions.php",
+      "sha256": "667a0fb162c62919877bca8aa4fc1423c946237be621fb5bc448ccc194df2905"
+    },
+    {
+      "path": "www/phpledger/public/assets/app.css",
+      "sha256": "0fe82dab3dbf7a35e61c931555bce1fec92c5dc83dd994d40fe122e180f96b8d"
+    },
+    {
+      "path": "www/phpledger/public/assets/date-picker.css",
+      "sha256": "67900c9ef0fc24d6db0580dea70fd8be59f66a71cceecfd49c8f6ba89aee1d88"
+    },
+    {
+      "path": "www/phpledger/public/assets/date-picker.js",
+      "sha256": "795b3f264ea35aa0f3fdcfe8a246734279eb32530bf213eea91c31451da0fb93"
+    },
+    {
+      "path": "www/phpledger/templates/layout.php",
+      "sha256": "e4b3fab93dcd58252d9adb840f4bc8d518fcb6e681efb7559d48ebec3a0691c3"
+    },
+    {
+      "path": "www/phpledger/templates/partials/ui/ar-document-editor.php",
+      "sha256": "5be1b82d4f5b779ed3beada3abb31839e47f369dca7bdee676dbcd8ca62d7425"
+    },
+    {
+      "path": "www/phpledger/templates/partials/ui/components.php",
+      "sha256": "39bd2ad3a0ed691da33c21ec7ff95b5122c812673d5de8c7fd81cf85e6826629"
+    },
+    {
+      "path": "www/phpledger/templates/partials/ui/shell.php",
+      "sha256": "108840647ee5c6e3c847686d114328f36f61af07f8414a6080068b791706f862"
+    },
+    {
+      "path": "www/phpledger/templates/views/ar-ap.php",
+      "sha256": "a90df740b64fdf30b8c2794b383012a171b6718c915a88e095a1a7617868f307"
+    },
+    {
+      "path": "www/phpledger/templates/views/editor.php",
+      "sha256": "86e1c2d7bea114bdcaea1752f5ff4744ecc4ed5c2ff48bb24d8e280c43ff202f"
+    },
+    {
+      "path": "www/phpledger/templates/views/employees.php",
+      "sha256": "fd28efc2833776bbb5a6cb3ee7983ea7ea53055772c5680080888c93028954d3"
+    },
+    {
+      "path": "www/phpledger/templates/views/onboarding.php",
+      "sha256": "090b869ace4e27c39be2b900b5221b9d3e8e989c2126a37115e016c91bf1d527"
+    },
+    {
+      "path": "www/phpledger/templates/views/payroll.php",
+      "sha256": "c8defc0a594a4aaf6e343c18ab2b0357e2a2ab6ce9f0a276d3127828a6d7bb5f"
+    },
+    {
+      "path": "www/phpledger/templates/views/scheduling.php",
+      "sha256": "082f5dc40061660f8ed9ee92316520cc4e05b05bab69589af8de6c06103bfa68"
+    },
+    {
+      "path": "www/phpledger/templates/views/transactions.php",
+      "sha256": "f1b27fdba138654e18090b632d9c2f6d3f198a8cc2c21eee6a3493b8e33a3904"
+    },
+    {
+      "path": "www/website/public/.well-known/ai.txt",
+      "sha256": "a7dc9a93cf829dd553db184607d5c7cffdcc156a3ee4405400f5ee21ab89f9bf"
+    },
+    {
+      "path": "www/website/public/404.html",
+      "sha256": "a6afb015c14bab435791213d7edad09f3e655d532674f5bfde9b668cb0719780"
+    },
+    {
+      "path": "www/website/public/about/index.html",
+      "sha256": "aa76d33e5578d77de042933c8748af182e626d316ded25d208fd041cedabf805"
+    },
+    {
+      "path": "www/website/public/ai/summary.json",
+      "sha256": "a7beeecf99c78d2c789da55bf12d8518a21c3886ac34d36ca68a601515a7ca72"
+    },
+    {
+      "path": "www/website/public/community/index.html",
+      "sha256": "e63e73882037d04ffbf89f378864cc1c73737086003136f0d17e796150b6c6ac"
+    },
+    {
+      "path": "www/website/public/compare/akaunting-alternative/index.html",
+      "sha256": "2d03a4e4e3d360efa0a6fdc1d258ebe75ed328665a0e2dac2a1b7b71ee71170f"
+    },
+    {
+      "path": "www/website/public/compare/bigcapital-alternative/index.html",
+      "sha256": "e3bae37452574df516c644c642fd6218440e140d43a70640ef6178246bc3f2b4"
+    },
+    {
+      "path": "www/website/public/compare/dolibarr-alternative/index.html",
+      "sha256": "b79cced57350b39d069e4c6ff2aec0486f85eb55350d14c519600f4b811dc2c0"
+    },
+    {
+      "path": "www/website/public/compare/erpnext-alternative/index.html",
+      "sha256": "fa6fc7dbe4d07bf12e5d618312c24ddd74cb800a9371c6683601a9d8ae7ad39d"
+    },
+    {
+      "path": "www/website/public/compare/frontaccounting-alternative/index.html",
+      "sha256": "f0c13f9b496cc7ddfd4b7683d4e55887b29f81b220b194fc5057cb782893928d"
+    },
+    {
+      "path": "www/website/public/compare/index.html",
+      "sha256": "d567219de71c712aef5956fedd1e00971e7434ffa0e812d8fb6232040f576df9"
+    },
+    {
+      "path": "www/website/public/compare/open-source-accounting-software/index.html",
+      "sha256": "659158f5a6c2f8be373b100b0760cedb759187420d91a351ed44f5f900de62be"
+    },
+    {
+      "path": "www/website/public/credits/index.html",
+      "sha256": "b7147d7b091c167e4fbfe7736a1abe00ed03252e7bbf91e9bad137dfba701483"
+    },
+    {
+      "path": "www/website/public/directory/index.html",
+      "sha256": "a388938e974357a0f109eed383f77adc6cbc3c5f50fb84ab14c9d28ac638004a"
+    },
+    {
+      "path": "www/website/public/directory/sample-distributor/index.html",
+      "sha256": "b83022aa9bcbd3cba97c7d6045b4396db147346024b08e7cd1f98775bddb8b8c"
+    },
+    {
+      "path": "www/website/public/directory/sample-jewelry-studio/index.html",
+      "sha256": "c25c6f0a4ec701c325eaed35fdb8e4acc938cda02cf8363a1947bdaf7a1d11bc"
+    },
+    {
+      "path": "www/website/public/directory/sample-light-manufacturing/index.html",
+      "sha256": "00c0d4fe83a443152fead479cb26c9e56e56964c4df9c97aa058fd2f96147f18"
+    },
+    {
+      "path": "www/website/public/directory/sample-membership-club/index.html",
+      "sha256": "1e1793e7907213c8349b9ea309c675442259aab4c78a4d66f04f63d3f7704916"
+    },
+    {
+      "path": "www/website/public/directory/sample-pharmacy/index.html",
+      "sha256": "3c217a224b279120d507f77366bc4197a1a01d12d5c9e94d9439ea74f0e6f19a"
+    },
+    {
+      "path": "www/website/public/directory/sample-restaurant/index.html",
+      "sha256": "2ef372c677a99cbe96aea162486811385b51aa162727a0e5beebe0e07af9c366"
+    },
+    {
+      "path": "www/website/public/directory/sample-retail-shop/index.html",
+      "sha256": "1af0f4940476f40474c80103fc66dc65d85862bcdca421d25d11b4e9dfcf0b83"
+    },
+    {
+      "path": "www/website/public/directory/sample-seasonal-business/index.html",
+      "sha256": "22e01823b817d38c86ca3eb8dcfdafc3aad5cc9ce9964b0dac4bcb0719eecbbe"
+    },
+    {
+      "path": "www/website/public/directory/sample-service-agency/index.html",
+      "sha256": "35af7c58423607ab9d5b2d40577d27ebb42cdc4cace4c308d853761bd09e7eea"
+    },
+    {
+      "path": "www/website/public/directory/sample-service-workshop/index.html",
+      "sha256": "be609d0b7d7b0eb6a80ddaa6cb9cb0242054ed55a4dab7c2552b3638437894a6"
+    },
+    {
+      "path": "www/website/public/directory/sample-trader/index.html",
+      "sha256": "4fd80836a1c0d1701278040c5e2355d0356a65d1e0d09cbaa664296596a3dd17"
+    },
+    {
+      "path": "www/website/public/download/index.html",
+      "sha256": "2807bfdd6b8fe23d8076cfdd55975e6b666c26423624b1fc3373654faf20feaa"
+    },
+    {
+      "path": "www/website/public/for/accountants/index.html",
+      "sha256": "854d090c818761c09e1ef6e500c4033334eedd4b6cdbffb57826101ac9e4a461"
+    },
+    {
+      "path": "www/website/public/for/analysts/index.html",
+      "sha256": "8f61e0c6e10cab46a646ecc520b06f42830d0c57603882e1950933d957d8ccae"
+    },
+    {
+      "path": "www/website/public/for/index.html",
+      "sha256": "2bb99b64713e0ad3212886076fa5a96a3625b0a31b9200532d6ddd4892af9f04"
+    },
+    {
+      "path": "www/website/public/for/small-businesses/index.html",
+      "sha256": "b742d01b60147e9d7146b50730ae15a88f9fe2d440696bb58ce7f3bab5f7454d"
+    },
+    {
+      "path": "www/website/public/for/software-houses/index.html",
+      "sha256": "a7562c06537fefa92d7ded2b3a841e318c9e01fdd4523b3fbf5f36dc06135d23"
+    },
+    {
+      "path": "www/website/public/glossary/index.html",
+      "sha256": "45983afe8a51ca1e4e2ac6907f56d80712fe6916334c161dca5d440e21caf134"
+    },
+    {
+      "path": "www/website/public/guides/bank-reconciliation-walkthrough/index.html",
+      "sha256": "5023d2d1e2ac3d3459c709959e011bebcf9450655c67b403a1b517f811724938"
+    },
+    {
+      "path": "www/website/public/guides/correcting-a-posted-entry/index.html",
+      "sha256": "f46f32a2d158ff690ff15b238c22247a82c38c891562c7e03a37dd6597afed23"
+    },
+    {
+      "path": "www/website/public/guides/daily-cash-check/index.html",
+      "sha256": "7c220ec5e601b8d9fa5e6929399eeec42493f2c7b89284cebb3df43b5b5e9d9b"
+    },
+    {
+      "path": "www/website/public/guides/first-week-on-the-books/index.html",
+      "sha256": "9975ec8af58f5ff7312e7b93fc6defe0826c0252e5866a3aad0458a8e522eecb"
+    },
+    {
+      "path": "www/website/public/guides/index.html",
+      "sha256": "41303b6801af1c69f72eda482ca54118899e362119459b21efc21c93acef8494"
+    },
+    {
+      "path": "www/website/public/guides/monthly-closing/index.html",
+      "sha256": "346d6b7813f6637ee12d37bbc63a027cc3425e1e15dc6f7c0fe66942a42cac3a"
+    },
+    {
+      "path": "www/website/public/guides/opening-balances-cutover/index.html",
+      "sha256": "69969e7c02cd154d32cf8f825cf9fd5c527ec212d7ae7e2aa2de3024abf12f61"
+    },
+    {
+      "path": "www/website/public/guides/quarterly-yearly-review/index.html",
+      "sha256": "4743c49a4d1454000b92b9b7e1937d08f23fe411ecce1b189e0e540948bc60e2"
+    },
+    {
+      "path": "www/website/public/guides/retail-two-year-statements/index.html",
+      "sha256": "80926f5976a7f2970da1c5551e4dd6b40f4fc0e3bfb14e52bd5838d3f7f7bc0c"
+    },
+    {
+      "path": "www/website/public/index.html",
+      "sha256": "a2fe431f2cc4d86a80314ddbdc86eeea921c92adb9af4ab23b1f33b0692c4f21"
+    },
+    {
+      "path": "www/website/public/learn/bank-reconciliation/index.html",
+      "sha256": "1b2f1d7161c5f41cb7026dbb2db0dd499e5327bf69ee2f52dc6187ae6c6fdb41"
+    },
+    {
+      "path": "www/website/public/learn/cash-vs-accrual/index.html",
+      "sha256": "4fbd9a7c462247c05e5a5eccda73c9254eb1a0d892836ce82c47cfe6ee8f4e91"
+    },
+    {
+      "path": "www/website/public/learn/chart-of-accounts/index.html",
+      "sha256": "fc37dad71af55e2176f6fff7b59576bcfaba4f914117ee6c2b0dd872b4c1aaa5"
+    },
+    {
+      "path": "www/website/public/learn/correcting-mistakes-reversal-vs-edit/index.html",
+      "sha256": "9376a2a6cfe147b608a81c3ed0c92287b4380013212d4f8d01ca13af9606dfab"
+    },
+    {
+      "path": "www/website/public/learn/debits-and-credits/index.html",
+      "sha256": "d84d863e8143367a0febfda2365d3cdf41308758c1f96656422fea4002acf053"
+    },
+    {
+      "path": "www/website/public/learn/double-entry-bookkeeping/index.html",
+      "sha256": "c4bf90bb99ff0a4218f57ad47f43e392906bbb25589cb9a2b18b2987ba8e2d30"
+    },
+    {
+      "path": "www/website/public/learn/index.html",
+      "sha256": "5198cb71ee239cdd003e3f821ff77e52e14f1c83583ce5d0c8881dfc3d4b6d28"
+    },
+    {
+      "path": "www/website/public/learn/journal-entry/index.html",
+      "sha256": "d1babd678233f61fd75c25003666c1853e9360d51c7233d97ca4289b8eafbbf9"
+    },
+    {
+      "path": "www/website/public/learn/opening-balances-and-cutover/index.html",
+      "sha256": "996f0bd4e98d16bd6701ca5186cd4166ad7f0fb5111896713deeb1547779f2fd"
+    },
+    {
+      "path": "www/website/public/learn/profit-and-loss-vs-balance-sheet/index.html",
+      "sha256": "6229d6ef0a6cb7f6871a65acd59d1d5e4d538542ee9f66e25e9d7178157fbe40"
+    },
+    {
+      "path": "www/website/public/learn/trial-balance/index.html",
+      "sha256": "829b4f9a5259a0c09c427416a4ea12c07e79208b2eca9813454061aec99a8e9f"
+    },
+    {
+      "path": "www/website/public/llms.txt",
+      "sha256": "8171ab08dc75cf2d0cb50807c4c108d078acc3d1520185ec4ca75b8fd6140272"
+    },
+    {
+      "path": "www/website/public/news/0-1-0-preview/index.html",
+      "sha256": "99a6ccf4a8bda3074a912ca6a4b1813e1476adcc840246b92a411c466a4f8da7"
+    },
+    {
+      "path": "www/website/public/news/0-1-3-preview/index.html",
+      "sha256": "5a2d6b5da298c20ffc831252b00898c23def59bf8ded64f7d82b64f293fc7fbb"
+    },
+    {
+      "path": "www/website/public/news/0-1-4-preview/index.html",
+      "sha256": "021b337a8cf0c0f4a88bc03136a91b77752337266f23d4ac00f71ca8644a8aea"
+    },
+    {
+      "path": "www/website/public/news/0-1-5-preview/index.html",
+      "sha256": "fae3070a7560b8155e4ff103c18fc0481348cbd5328a78e8354bde372488e525"
+    },
+    {
+      "path": "www/website/public/news/0-1-6-preview/index.html",
+      "sha256": "0193a0e5355ac4092af5b89fca5c0650719a37533a4975639aa2c4a5769a42b9"
+    },
+    {
+      "path": "www/website/public/news/0-2-1-preview/index.html",
+      "sha256": "05a9bcd3838855cb5e1eee1f46a67db64018e96c724662a92044abd2281ff9d6"
+    },
+    {
+      "path": "www/website/public/news/0-3-0-preview/index.html",
+      "sha256": "d343b1eaed69e1f9ce8151e45eec040abbaa60ac865851d813696330250be4dc"
+    },
+    {
+      "path": "www/website/public/news/0-4-0-preview/index.html",
+      "sha256": "dab784273a6f9e85ad85486a7d6ced669eca0f8d4cc4b63d64e4cfc33e41b4b1"
+    },
+    {
+      "path": "www/website/public/news/0-5-0-preview/index.html",
+      "sha256": "9922a822754a197f45b9d438de0ecdc246800ad0f04abff7d424e35f9bbbbde7"
+    },
+    {
+      "path": "www/website/public/news/0-6-0-preview/index.html",
+      "sha256": "8dd8ae1205dee3b86d31a8d9b89d6405de8e12505b191466cc856b9b36df9465"
+    },
+    {
+      "path": "www/website/public/news/1-0-0/index.html",
+      "sha256": "2e00dfe071f9a5384708760d78c2f5621905fef8454a89a6351b5254c8367855"
+    },
+    {
+      "path": "www/website/public/news/1-1-0/index.html",
+      "sha256": "566ac1ea097f08a2966f0a4a11f74fe6bb59cd8f31eec6315c27bb4f5fb07cdd"
+    },
+    {
+      "path": "www/website/public/news/1-1-1/index.html",
+      "sha256": "c2f5c5ae4fdf26a00947f85d93e8a78676e16b8bf4aa6d4cca69b9f8d2436aab"
+    },
+    {
+      "path": "www/website/public/news/1-1-2/index.html",
+      "sha256": "034370c14bbd1ad786edb4f88348972a5a498868a0e94fd1b3c744d2abc4dc40"
+    },
+    {
+      "path": "www/website/public/news/1-1-3/index.html",
+      "sha256": "5d3cd019e8b78846d8a98842d035a69ed83e1c6ff31f26f6f1a4501b477291f5"
+    },
+    {
+      "path": "www/website/public/news/1-3-0/index.html",
+      "sha256": "5cb01971cfc5b38facb0e054b5e0a1db999d9538adcdf6b01a9a47fe9f163c80"
+    },
+    {
+      "path": "www/website/public/news/1-4-0/index.html",
+      "sha256": "9a77ee88ff91bdce0b28e32549b44a729d8f2c23da07f12e526d81a6e999f653"
+    },
+    {
+      "path": "www/website/public/news/1-4-1/index.html",
+      "sha256": "1cab167f8836def49331b4a4f354619501a264801ab22430ad1bce4573b310d9"
+    },
+    {
+      "path": "www/website/public/news/feed.xml",
+      "sha256": "74ef655ebfec347abbf47e52786d62afec83ee3437432e18c6575de943a03354"
+    },
+    {
+      "path": "www/website/public/news/index.html",
+      "sha256": "67d61526e183e05028f754cc68a0b799cbe14b6796930e8e0eab669439d79045"
+    },
+    {
+      "path": "www/website/public/point-of-sale/index.html",
+      "sha256": "291a1b57efacf8ca4c2ea18a22c44d3dbfdc08c2048cfbb894db8ed7aab5420c"
+    },
+    {
+      "path": "www/website/public/pricing/index.html",
+      "sha256": "75e3546b9f5842924f980ef453cda1a0e089bf449abfb332b637d7477fece2d6"
+    },
+    {
+      "path": "www/website/public/privacy/index.html",
+      "sha256": "a2625e1ec8b32551da71ed629c812abf42ceec9e751d49e76fc1556b2eedec83"
+    },
+    {
+      "path": "www/website/public/product/index.html",
+      "sha256": "9a43f1a5e7dabef364b929195b930794068699d33deaa929191de3a1c883f2bb"
+    },
+    {
+      "path": "www/website/public/releases/1.4.1.update.json",
+      "sha256": "33cc98e06b52b74a92d8bd13319fd1f30837338fa904d0aa8e730bc43b5b7123"
+    },
+    {
+      "path": "www/website/public/releases/index.json",
+      "sha256": "060b66c87a9a3a9c009399d40ea09539e3cea30181d8e41e89ff80b4dc6d8aaf"
+    },
+    {
+      "path": "www/website/public/research/fbr-digital-invoicing/index.html",
+      "sha256": "e4f63098f848840c81675805197c559fb12a90e587a9d3ed63706ab455fda848"
+    },
+    {
+      "path": "www/website/public/research/index.html",
+      "sha256": "de72b8f022e2d47b094d0d9a4ec934b54e92ab00ea57312dae254bd826e7a91d"
+    },
+    {
+      "path": "www/website/public/research/open-source-accounting-landscape/index.html",
+      "sha256": "b2eba317ad5def0119715d23788a1b879ec46f2948a157020c468d16fd532fec"
+    },
+    {
+      "path": "www/website/public/research/pakistan-sme-bookkeeping/index.html",
+      "sha256": "0ce9b3f540c14e3bffa0267f529d75c1f9ea9bf0f0ee91fdad3b4352dd01a5a0"
+    },
+    {
+      "path": "www/website/public/research/php-hosting-availability-2026/index.html",
+      "sha256": "d7c8cf823b7aa6f510ed715e2dd53fb08dd4b40f9478c8ced8238327f874f062"
+    },
+    {
+      "path": "www/website/public/roadmap/index.html",
+      "sha256": "2f73094fe0bd2b1056e8d3779524f493be953c1df42dd885e65bb9610b1a798b"
+    },
+    {
+      "path": "www/website/public/sample-companies/distributor/index.html",
+      "sha256": "ed4bc75dc7b854782f71036375b0382a3b0003892c481a10e05840997bd9af98"
+    },
+    {
+      "path": "www/website/public/sample-companies/index.html",
+      "sha256": "d6870c69b8e714270efee7e118df0cbabb7a4367cd8d96eaf43e0bab631fec41"
+    },
+    {
+      "path": "www/website/public/sample-companies/jewelry-studio/index.html",
+      "sha256": "42cca9c2ad641ebc54f70952603bb6a6c22e8b482ba7443e45e5288ef507d07d"
+    },
+    {
+      "path": "www/website/public/sample-companies/light-manufacturing/index.html",
+      "sha256": "ea6f9582d0e13be233b1132197218b7ac08b4ef12ee12409641519f6084d0cda"
+    },
+    {
+      "path": "www/website/public/sample-companies/membership-club/index.html",
+      "sha256": "549d4211c588fbea995dd17d68ed20fcf22f61a0f7ac39dad9d73b6c540fe8ae"
+    },
+    {
+      "path": "www/website/public/sample-companies/pharmacy/index.html",
+      "sha256": "a2736ac5d6d7ad3469ec17a2de36c553018495c1012bb7f2bb394b7f96e6adf4"
+    },
+    {
+      "path": "www/website/public/sample-companies/restaurant/index.html",
+      "sha256": "bd608bc07e2393a6d7e316aa46f5ff9fa54fc21400f22a6072b1dce682f0317c"
+    },
+    {
+      "path": "www/website/public/sample-companies/retail-shop/index.html",
+      "sha256": "189ce09a2932da2b1d988d04970b8be4213c89681205ae34310038bd790c2981"
+    },
+    {
+      "path": "www/website/public/sample-companies/seasonal-business/index.html",
+      "sha256": "2f600b43ce79515a4564bbbe4dfbe6b449fb24260926cfe614d8115f789c8de2"
+    },
+    {
+      "path": "www/website/public/sample-companies/service-agency/index.html",
+      "sha256": "3a57739c85134d5810550eb97695a60262c9a8a87f8e32e784ff9b92a7edb192"
+    },
+    {
+      "path": "www/website/public/sample-companies/service-workshop/index.html",
+      "sha256": "af6bc0c819f783180f793957688930a12b561f386a79f383fa038d554fecbe9f"
+    },
+    {
+      "path": "www/website/public/sample-companies/trader/index.html",
+      "sha256": "f4c31f258ebe5baded7a78da65ac09ec34f91cae90a735a8f3b8b58b76494d7c"
+    },
+    {
+      "path": "www/website/public/self-hosting/backup-and-restore/index.html",
+      "sha256": "e8da19180ab86fa7f7176593ddf05e42cfe0014f30b8731ceb6e2d983dfb6da8"
+    },
+    {
+      "path": "www/website/public/self-hosting/docker/index.html",
+      "sha256": "32bab0282d274900c027e69e5cebd8d899aa380959d66e98c83572c70b9a5566"
+    },
+    {
+      "path": "www/website/public/self-hosting/index.html",
+      "sha256": "778efb1db699f795d16e9f6543435e106dd50105acb877a3ff421daf971079cd"
+    },
+    {
+      "path": "www/website/public/self-hosting/php-version-compatibility/index.html",
+      "sha256": "ca8a850c336283f024687a4faab99295566bc1d77699cd9b26750bff36167a0c"
+    },
+    {
+      "path": "www/website/public/self-hosting/requirements/index.html",
+      "sha256": "956652eeac1a9bce1ef727a3c7b569952778d747a3b39149b8cbd95a44fadfc4"
+    },
+    {
+      "path": "www/website/public/self-hosting/shared-hosting-cpanel/index.html",
+      "sha256": "721cfeb4ff90eecd688dc806db7a01a446885a499708f7f23bbb381840bdceea"
+    },
+    {
+      "path": "www/website/public/self-hosting/vps-install/index.html",
+      "sha256": "e4ff770edadaccef4d94eaeda67b4ac30d8b6eb7bbedc5a2085f4e3ecaefe5ea"
+    },
+    {
+      "path": "www/website/public/sitemap.xml",
+      "sha256": "2832c85760ea52486e921be1945e06f8853a0e107fd20df530eac20bd7fbde0d"
+    },
+    {
+      "path": "www/website/public/terms/index.html",
+      "sha256": "7ae5e17c2e0ef888374d25beb7169e895f60469a2c0ae682a609fc3f70b291ad"
+    },
+    {
+      "path": "www/website/src/pages/news-1-4-1.html",
+      "sha256": "3a673cd7d210fb598d441298e9bf6620fb0d50a5638fc3d1e169ffb44c9227c4"
+    },
+    {
+      "path": "www/website/src/pages/news.html",
+      "sha256": "54059adfc44292fa16451bed22182ad628aa85ce3970468ae5f9c777cfcbfa8b"
+    },
+    {
+      "path": "www/website/src/releases.json",
+      "sha256": "93a10282d906fbfd6df54a2776781ed6f1f100bbc696e2fd23667e0e2474686d"
+    },
+    {
+      "path": "www/website/src/site.json",
+      "sha256": "e2052b6dbaa306f10ee6c887bcdffc643a76456cef7314f797bb3cfc61fabe16"
+    },
+    {
+      "path": "www/website/src/static/releases/1.4.1.update.json",
+      "sha256": "33cc98e06b52b74a92d8bd13319fd1f30837338fa904d0aa8e730bc43b5b7123"
+    }
+  ],
+  "migrations_added": 0,
+  "schema_changed": false,
+  "secrets_exposed": false,
+  "production_changed": false,
+  "external_calls": [
+    "GitHub read-only issue/repository/wiki references",
+    "Public provider documentation read-only",
+    "Authorized issue #104 evidence comment and closure; no release publication"
+  ],
+  "publication_authorized": false,
+  "remaining": [
+    "Separate release authorization, publication and deployed acceptance",
+    "Image build/provenance and final demo digest configuration at publication",
+    "Independent accounting/security and comprehensive accessibility/native-language/real-device review",
+    "Ten non-Cedar enriched company journeys (deferred)"
+  ],
+  "notes": [
+    "Application archive is pinned to application_source; later commits contain docs, website and verification-tool updates only.",
+    "Inventory excludes its own recursive hash; includes the final markdown receipt.",
+    "Main checkout coordination/patch plan and later worklist cross-references are separate preserved planning updates."
+  ],
+  "validation_receipts": {
+    "patch-browser-final.json": {
+      "status": "passed_after_targeted_corrections",
+      "company": 103,
+      "tested_widths": [
+        1440,
+        768,
+        320,
+        360,
+        390
+      ],
+      "matrix": {
+        "file": "patch-browser-results.json",
+        "passed": 183,
+        "failed": 9,
+        "resolved_by": [
+          "patch-browser-recovery-results.json",
+          "patch-browser-markers-results.json"
+        ]
+      },
+      "recovery": {
+        "file": "patch-browser-recovery-results.json",
+        "passed": 22,
+        "failed": 0
+      },
+      "markers": {
+        "file": "patch-browser-markers-results.json",
+        "passed": 61,
+        "failed": 0
+      },
+      "unresolved_findings": [],
+      "routes": [
+        "/employees",
+        "/ar?new=1",
+        "/payroll",
+        "/recurring",
+        "/receipts/new",
+        "/expenses/new",
+        "/home"
+      ],
+      "limitations": [
+        "Local sample fixture only; exact packaged build and live deployment require separate acceptance.",
+        "No successful employee or financial write performed; only invalid hire-date submissions."
+      ],
+      "schema_changed": false,
+      "external_calls": false,
+      "production_changed": false
+    },
+    "patch-browser-recovery-results.json": {
+      "base": "http://127.0.0.1:18441",
+      "company": 103,
+      "checks": [
+        {
+          "name": "typed date submits ISO",
+          "pass": true
+        },
+        {
+          "name": "keyboard date selection crosses month",
+          "pass": true
+        },
+        {
+          "name": "keyboard focus returns to visible field",
+          "pass": true
+        },
+        {
+          "name": "invalid edit clears ISO",
+          "pass": true
+        },
+        {
+          "name": "server rejects invalid employee date",
+          "pass": true
+        },
+        {
+          "name": "server raw date recovery restores exact text",
+          "pass": true
+        },
+        {
+          "name": "server recovery retains cleared canonical date",
+          "pass": true
+        },
+        {
+          "name": "server recovery preserves name",
+          "pass": true
+        },
+        {
+          "name": "rejected employee remains a create form",
+          "pass": true
+        },
+        {
+          "name": "/employees noJS HTTP",
+          "pass": true
+        },
+        {
+          "name": "/employees noJS native dates",
+          "pass": true
+        },
+        {
+          "name": "/employees noJS required inputs",
+          "pass": true
+        },
+        {
+          "name": "/ar?new=1 noJS HTTP",
+          "pass": true
+        },
+        {
+          "name": "/ar?new=1 noJS native dates",
+          "pass": true
+        },
+        {
+          "name": "/ar?new=1 noJS required inputs",
+          "pass": true
+        },
+        {
+          "name": "/payroll noJS HTTP",
+          "pass": true
+        },
+        {
+          "name": "/payroll noJS native dates",
+          "pass": true
+        },
+        {
+          "name": "/payroll noJS required inputs",
+          "pass": true
+        },
+        {
+          "name": "/recurring noJS HTTP",
+          "pass": true
+        },
+        {
+          "name": "/recurring noJS native dates",
+          "pass": true
+        },
+        {
+          "name": "/recurring noJS required inputs",
+          "pass": true
+        },
+        {
+          "name": "no JavaScript runtime exceptions",
+          "pass": true,
+          "details": []
+        }
+      ],
+      "screens": [],
+      "errors": [],
+      "passed": 22,
+      "failed": 0
+    },
+    "patch-browser-markers-results.json": {
+      "base": "http://127.0.0.1:18441",
+      "company": 103,
+      "checks": [
+        {
+          "name": "/receipts/new HTTP 1440",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new heading 1440",
+          "pass": true,
+          "details": "New receipt"
+        },
+        {
+          "name": "/receipts/new page width 1440",
+          "pass": true,
+          "details": {
+            "scroll": 1440,
+            "width": 1440
+          }
+        },
+        {
+          "name": "/receipts/new required labels 1440",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/receipts/new fixture scope 1440",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new selected sidebar 1440",
+          "pass": true,
+          "details": [
+            "Receipts"
+          ]
+        },
+        {
+          "name": "/expenses/new HTTP 1440",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new heading 1440",
+          "pass": true,
+          "details": "New expense"
+        },
+        {
+          "name": "/expenses/new page width 1440",
+          "pass": true,
+          "details": {
+            "scroll": 1440,
+            "width": 1440
+          }
+        },
+        {
+          "name": "/expenses/new required labels 1440",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/expenses/new fixture scope 1440",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new selected sidebar 1440",
+          "pass": true,
+          "details": [
+            "Expenses"
+          ]
+        },
+        {
+          "name": "/receipts/new HTTP 768",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new heading 768",
+          "pass": true,
+          "details": "New receipt"
+        },
+        {
+          "name": "/receipts/new page width 768",
+          "pass": true,
+          "details": {
+            "scroll": 768,
+            "width": 768
+          }
+        },
+        {
+          "name": "/receipts/new required labels 768",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/receipts/new fixture scope 768",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new selected sidebar 768",
+          "pass": true,
+          "details": [
+            "Receipts"
+          ]
+        },
+        {
+          "name": "/expenses/new HTTP 768",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new heading 768",
+          "pass": true,
+          "details": "New expense"
+        },
+        {
+          "name": "/expenses/new page width 768",
+          "pass": true,
+          "details": {
+            "scroll": 768,
+            "width": 768
+          }
+        },
+        {
+          "name": "/expenses/new required labels 768",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/expenses/new fixture scope 768",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new selected sidebar 768",
+          "pass": true,
+          "details": [
+            "Expenses"
+          ]
+        },
+        {
+          "name": "/receipts/new HTTP 320",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new heading 320",
+          "pass": true,
+          "details": "New receipt"
+        },
+        {
+          "name": "/receipts/new page width 320",
+          "pass": true,
+          "details": {
+            "scroll": 320,
+            "width": 320
+          }
+        },
+        {
+          "name": "/receipts/new required labels 320",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/receipts/new fixture scope 320",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new selected sidebar 320",
+          "pass": true,
+          "details": [
+            "Receipts"
+          ]
+        },
+        {
+          "name": "/expenses/new HTTP 320",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new heading 320",
+          "pass": true,
+          "details": "New expense"
+        },
+        {
+          "name": "/expenses/new page width 320",
+          "pass": true,
+          "details": {
+            "scroll": 320,
+            "width": 320
+          }
+        },
+        {
+          "name": "/expenses/new required labels 320",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/expenses/new fixture scope 320",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new selected sidebar 320",
+          "pass": true,
+          "details": [
+            "Expenses"
+          ]
+        },
+        {
+          "name": "/receipts/new HTTP 360",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new heading 360",
+          "pass": true,
+          "details": "New receipt"
+        },
+        {
+          "name": "/receipts/new page width 360",
+          "pass": true,
+          "details": {
+            "scroll": 360,
+            "width": 360
+          }
+        },
+        {
+          "name": "/receipts/new required labels 360",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/receipts/new fixture scope 360",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new selected sidebar 360",
+          "pass": true,
+          "details": [
+            "Receipts"
+          ]
+        },
+        {
+          "name": "/expenses/new HTTP 360",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new heading 360",
+          "pass": true,
+          "details": "New expense"
+        },
+        {
+          "name": "/expenses/new page width 360",
+          "pass": true,
+          "details": {
+            "scroll": 360,
+            "width": 360
+          }
+        },
+        {
+          "name": "/expenses/new required labels 360",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/expenses/new fixture scope 360",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new selected sidebar 360",
+          "pass": true,
+          "details": [
+            "Expenses"
+          ]
+        },
+        {
+          "name": "/receipts/new HTTP 390",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new heading 390",
+          "pass": true,
+          "details": "New receipt"
+        },
+        {
+          "name": "/receipts/new page width 390",
+          "pass": true,
+          "details": {
+            "scroll": 390,
+            "width": 390
+          }
+        },
+        {
+          "name": "/receipts/new required labels 390",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/receipts/new fixture scope 390",
+          "pass": true
+        },
+        {
+          "name": "/receipts/new selected sidebar 390",
+          "pass": true,
+          "details": [
+            "Receipts"
+          ]
+        },
+        {
+          "name": "/expenses/new HTTP 390",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new heading 390",
+          "pass": true,
+          "details": "New expense"
+        },
+        {
+          "name": "/expenses/new page width 390",
+          "pass": true,
+          "details": {
+            "scroll": 390,
+            "width": 390
+          }
+        },
+        {
+          "name": "/expenses/new required labels 390",
+          "pass": true,
+          "details": []
+        },
+        {
+          "name": "/expenses/new fixture scope 390",
+          "pass": true
+        },
+        {
+          "name": "/expenses/new selected sidebar 390",
+          "pass": true,
+          "details": [
+            "Expenses"
+          ]
+        },
+        {
+          "name": "no JavaScript runtime exceptions",
+          "pass": true,
+          "details": []
+        }
+      ],
+      "screens": [
+        {
+          "route": "/receipts/new",
+          "width": 1440,
+          "status": 200,
+          "heading": "New receipt",
+          "scroll": 1440,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Receipts"
+          ],
+          "scope": [
+            "103"
+          ]
+        },
+        {
+          "route": "/expenses/new",
+          "width": 1440,
+          "status": 200,
+          "heading": "New expense",
+          "scroll": 1440,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Expenses"
+          ],
+          "scope": [
+            "103"
+          ]
+        },
+        {
+          "route": "/receipts/new",
+          "width": 768,
+          "status": 200,
+          "heading": "New receipt",
+          "scroll": 768,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Receipts"
+          ],
+          "scope": [
+            "103"
+          ]
+        },
+        {
+          "route": "/expenses/new",
+          "width": 768,
+          "status": 200,
+          "heading": "New expense",
+          "scroll": 768,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Expenses"
+          ],
+          "scope": [
+            "103"
+          ]
+        },
+        {
+          "route": "/receipts/new",
+          "width": 320,
+          "status": 200,
+          "heading": "New receipt",
+          "scroll": 320,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Receipts"
+          ],
+          "scope": [
+            "103"
+          ]
+        },
+        {
+          "route": "/expenses/new",
+          "width": 320,
+          "status": 200,
+          "heading": "New expense",
+          "scroll": 320,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Expenses"
+          ],
+          "scope": [
+            "103"
+          ]
+        },
+        {
+          "route": "/receipts/new",
+          "width": 360,
+          "status": 200,
+          "heading": "New receipt",
+          "scroll": 360,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Receipts"
+          ],
+          "scope": [
+            "103"
+          ]
+        },
+        {
+          "route": "/expenses/new",
+          "width": 360,
+          "status": 200,
+          "heading": "New expense",
+          "scroll": 360,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Expenses"
+          ],
+          "scope": [
+            "103"
+          ]
+        },
+        {
+          "route": "/receipts/new",
+          "width": 390,
+          "status": 200,
+          "heading": "New receipt",
+          "scroll": 390,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Receipts"
+          ],
+          "scope": [
+            "103"
+          ]
+        },
+        {
+          "route": "/expenses/new",
+          "width": 390,
+          "status": 200,
+          "heading": "New expense",
+          "scroll": 390,
+          "dateFields": 1,
+          "requiredCount": 5,
+          "missingRequiredLabels": [],
+          "activeNav": [
+            "Expenses"
+          ],
+          "scope": [
+            "103"
+          ]
+        }
+      ],
+      "errors": [],
+      "passed": 61,
+      "failed": 0
+    },
+    "patch-104-browser-results.json": {
+      "base": "http://127.0.0.1:18441",
+      "company": 103,
+      "checks": [
+        {
+          "name": "Home receipt 1440",
+          "pass": true,
+          "details": {
+            "url": "/receipts/new",
+            "title": "New receipt",
+            "kind": "receipt",
+            "category": "Income category * Required",
+            "intro": "Record money received into your cash or bank account.",
+            "alert": "",
+            "scroll": 1440,
+            "width": 1440
+          }
+        },
+        {
+          "name": "Home expense 1440",
+          "pass": true,
+          "details": {
+            "url": "/expenses/new",
+            "title": "New expense",
+            "kind": "expense",
+            "category": "Expense category * Required",
+            "intro": "Record money paid from your cash or bank account.",
+            "alert": "",
+            "scroll": 1440,
+            "width": 1440
+          }
+        },
+        {
+          "name": "Home receipt 768",
+          "pass": true,
+          "details": {
+            "url": "/receipts/new",
+            "title": "New receipt",
+            "kind": "receipt",
+            "category": "Income category * Required",
+            "intro": "Record money received into your cash or bank account.",
+            "alert": "",
+            "scroll": 768,
+            "width": 768
+          }
+        },
+        {
+          "name": "Home expense 768",
+          "pass": true,
+          "details": {
+            "url": "/expenses/new",
+            "title": "New expense",
+            "kind": "expense",
+            "category": "Expense category * Required",
+            "intro": "Record money paid from your cash or bank account.",
+            "alert": "",
+            "scroll": 768,
+            "width": 768
+          }
+        },
+        {
+          "name": "Home receipt 390",
+          "pass": true,
+          "details": {
+            "url": "/receipts/new",
+            "title": "New receipt",
+            "kind": "receipt",
+            "category": "Income category * Required",
+            "intro": "Record money received into your cash or bank account.",
+            "alert": "",
+            "scroll": 390,
+            "width": 390
+          }
+        },
+        {
+          "name": "Home expense 390",
+          "pass": true,
+          "details": {
+            "url": "/expenses/new",
+            "title": "New expense",
+            "kind": "expense",
+            "category": "Expense category * Required",
+            "intro": "Record money paid from your cash or bank account.",
+            "alert": "",
+            "scroll": 390,
+            "width": 390
+          }
+        },
+        {
+          "name": "Home receipt 360",
+          "pass": true,
+          "details": {
+            "url": "/receipts/new",
+            "title": "New receipt",
+            "kind": "receipt",
+            "category": "Income category * Required",
+            "intro": "Record money received into your cash or bank account.",
+            "alert": "",
+            "scroll": 360,
+            "width": 360
+          }
+        },
+        {
+          "name": "Home expense 360",
+          "pass": true,
+          "details": {
+            "url": "/expenses/new",
+            "title": "New expense",
+            "kind": "expense",
+            "category": "Expense category * Required",
+            "intro": "Record money paid from your cash or bank account.",
+            "alert": "",
+            "scroll": 360,
+            "width": 360
+          }
+        },
+        {
+          "name": "Home receipt 320",
+          "pass": true,
+          "details": {
+            "url": "/receipts/new",
+            "title": "New receipt",
+            "kind": "receipt",
+            "category": "Income category * Required",
+            "intro": "Record money received into your cash or bank account.",
+            "alert": "",
+            "scroll": 320,
+            "width": 320
+          }
+        },
+        {
+          "name": "Home expense 320",
+          "pass": true,
+          "details": {
+            "url": "/expenses/new",
+            "title": "New expense",
+            "kind": "expense",
+            "category": "Expense category * Required",
+            "intro": "Record money paid from your cash or bank account.",
+            "alert": "",
+            "scroll": 320,
+            "width": 320
+          }
+        },
+        {
+          "name": "legacy receipt 303",
+          "pass": true,
+          "details": {
+            "status": 303,
+            "location": "/receipts/new?return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D="
+          }
+        },
+        {
+          "name": "legacy receipt canonical context",
+          "pass": true,
+          "details": {
+            "url": "/receipts/new?return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "title": "New receipt",
+            "kind": "receipt",
+            "category": "Income category * Required",
+            "intro": "Record money received into your cash or bank account.",
+            "alert": "",
+            "scroll": 320,
+            "width": 320
+          }
+        },
+        {
+          "name": "legacy expense 303",
+          "pass": true,
+          "details": {
+            "status": 303,
+            "location": "/expenses/new?return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D="
+          }
+        },
+        {
+          "name": "legacy expense canonical context",
+          "pass": true,
+          "details": {
+            "url": "/expenses/new?return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "title": "New expense",
+            "kind": "expense",
+            "category": "Expense category * Required",
+            "intro": "Record money paid from your cash or bank account.",
+            "alert": "",
+            "scroll": 320,
+            "width": 320
+          }
+        },
+        {
+          "name": "invalid receipt recovery",
+          "pass": true,
+          "details": {
+            "url": "/receipts/new",
+            "title": "New receipt",
+            "kind": "receipt",
+            "category": "Income category * Required",
+            "intro": "Record money received into your cash or bank account.",
+            "alert": "Your draft has not been changed.Choose who the money was paid to or received from, or explicitly create a party.Your submitted values are kept below.",
+            "scroll": 320,
+            "width": 320,
+            "retained": "invalid-amount"
+          }
+        },
+        {
+          "name": "invalid expense recovery",
+          "pass": true,
+          "details": {
+            "url": "/expenses/new",
+            "title": "New expense",
+            "kind": "expense",
+            "category": "Expense category * Required",
+            "intro": "Record money paid from your cash or bank account.",
+            "alert": "Your draft has not been changed.Choose who the money was paid to or received from, or explicitly create a party.Your submitted values are kept below.",
+            "scroll": 320,
+            "width": 320,
+            "retained": "invalid-amount"
+          }
+        },
+        {
+          "name": "save receipt draft",
+          "pass": true,
+          "details": {
+            "url": "/transactions?id=771&page=1&per_page=25&sort=date&dir=desc&status=draft&kind=receipt"
+          }
+        },
+        {
+          "name": "edit receipt context",
+          "pass": true,
+          "details": {
+            "url": "/receipts/edit?id=771",
+            "title": "REC-000771 \u00b7 Edit draft",
+            "kind": "receipt",
+            "category": "Income category * Required",
+            "intro": "Record money received into your cash or bank account.",
+            "alert": "",
+            "scroll": 320,
+            "width": 320
+          }
+        },
+        {
+          "name": "legacy edit receipt 303",
+          "pass": true,
+          "details": {
+            "status": 303,
+            "location": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D="
+          }
+        },
+        {
+          "name": "edit receipt width 390",
+          "pass": true,
+          "details": {
+            "width": 390,
+            "scroll": 390
+          }
+        },
+        {
+          "name": "edit receipt width 360",
+          "pass": true,
+          "details": {
+            "width": 360,
+            "scroll": 360
+          }
+        },
+        {
+          "name": "edit receipt width 320",
+          "pass": true,
+          "details": {
+            "width": 320,
+            "scroll": 320
+          }
+        },
+        {
+          "name": "save expense draft",
+          "pass": true,
+          "details": {
+            "url": "/transactions?id=772&page=1&per_page=25&sort=date&dir=desc&status=draft&kind=expense"
+          }
+        },
+        {
+          "name": "edit expense context",
+          "pass": true,
+          "details": {
+            "url": "/expenses/edit?id=772",
+            "title": "EXP-000772 \u00b7 Edit draft",
+            "kind": "expense",
+            "category": "Expense category * Required",
+            "intro": "Record money paid from your cash or bank account.",
+            "alert": "",
+            "scroll": 320,
+            "width": 320
+          }
+        },
+        {
+          "name": "legacy edit expense 303",
+          "pass": true,
+          "details": {
+            "status": 303,
+            "location": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D="
+          }
+        },
+        {
+          "name": "edit expense width 390",
+          "pass": true,
+          "details": {
+            "width": 390,
+            "scroll": 390
+          }
+        },
+        {
+          "name": "edit expense width 360",
+          "pass": true,
+          "details": {
+            "width": 360,
+            "scroll": 360
+          }
+        },
+        {
+          "name": "edit expense width 320",
+          "pass": true,
+          "details": {
+            "width": 320,
+            "scroll": 320
+          }
+        },
+        {
+          "name": "no JS errors",
+          "pass": true,
+          "details": []
+        }
+      ],
+      "errors": [],
+      "drafts": [
+        {
+          "kind": "receipt",
+          "id": 771,
+          "sample": true
+        },
+        {
+          "kind": "expense",
+          "id": 772,
+          "sample": true
+        }
+      ],
+      "passed": 29,
+      "failed": 0
+    },
+    "patch-141-detail-results.json": {
+      "company": 103,
+      "sampleDrafts": [
+        {
+          "kind": "receipt",
+          "id": 771,
+          "sample": true
+        },
+        {
+          "kind": "expense",
+          "id": 772,
+          "sample": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "sample expense draft updated without posting",
+          "pass": true,
+          "details": "http://127.0.0.1:18441/transactions?id=772&page=1&per_page=25&sort=date&dir=desc&status=draft&kind=all"
+        },
+        {
+          "name": "receipt detail 320 draft and controls",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 320,
+            "scroll": 320,
+            "detailLeft": 24,
+            "detailRight": 296,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 0.00. Projected book balance: USD 0.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 244,
+            "previewWidth": 244,
+            "edit": "Edit draft",
+            "editHref": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post receipt",
+            "actionsScroll": 246,
+            "actionsWidth": 246,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "receipt detail 320 confined layout",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 320,
+            "scroll": 320,
+            "detailLeft": 24,
+            "detailRight": 296,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 0.00. Projected book balance: USD 0.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 244,
+            "previewWidth": 244,
+            "edit": "Edit draft",
+            "editHref": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post receipt",
+            "actionsScroll": 246,
+            "actionsWidth": 246,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "receipt detail 320 balance and policy",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 320,
+            "scroll": 320,
+            "detailLeft": 24,
+            "detailRight": 296,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 0.00. Projected book balance: USD 0.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 244,
+            "previewWidth": 244,
+            "edit": "Edit draft",
+            "editHref": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post receipt",
+            "actionsScroll": 246,
+            "actionsWidth": 246,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "receipt detail 360 draft and controls",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 360,
+            "scroll": 360,
+            "detailLeft": 24,
+            "detailRight": 336,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 0.00. Projected book balance: USD 0.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 284,
+            "previewWidth": 284,
+            "edit": "Edit draft",
+            "editHref": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post receipt",
+            "actionsScroll": 286,
+            "actionsWidth": 286,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "receipt detail 360 confined layout",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 360,
+            "scroll": 360,
+            "detailLeft": 24,
+            "detailRight": 336,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 0.00. Projected book balance: USD 0.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 284,
+            "previewWidth": 284,
+            "edit": "Edit draft",
+            "editHref": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post receipt",
+            "actionsScroll": 286,
+            "actionsWidth": 286,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "receipt detail 360 balance and policy",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 360,
+            "scroll": 360,
+            "detailLeft": 24,
+            "detailRight": 336,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 0.00. Projected book balance: USD 0.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 284,
+            "previewWidth": 284,
+            "edit": "Edit draft",
+            "editHref": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post receipt",
+            "actionsScroll": 286,
+            "actionsWidth": 286,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "receipt detail 390 draft and controls",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 390,
+            "scroll": 390,
+            "detailLeft": 24,
+            "detailRight": 366,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 0.00. Projected book balance: USD 0.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 314,
+            "previewWidth": 314,
+            "edit": "Edit draft",
+            "editHref": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post receipt",
+            "actionsScroll": 316,
+            "actionsWidth": 316,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "receipt detail 390 confined layout",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 390,
+            "scroll": 390,
+            "detailLeft": 24,
+            "detailRight": 366,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 0.00. Projected book balance: USD 0.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 314,
+            "previewWidth": 314,
+            "edit": "Edit draft",
+            "editHref": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post receipt",
+            "actionsScroll": 316,
+            "actionsWidth": 316,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "receipt detail 390 balance and policy",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 390,
+            "scroll": 390,
+            "detailLeft": 24,
+            "detailRight": 366,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 0.00. Projected book balance: USD 0.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 314,
+            "previewWidth": 314,
+            "edit": "Edit draft",
+            "editHref": "/receipts/edit?id=771&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post receipt",
+            "actionsScroll": 316,
+            "actionsWidth": 316,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 320 draft and controls",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 320,
+            "scroll": 320,
+            "detailLeft": 24,
+            "detailRight": 296,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 244,
+            "previewWidth": 244,
+            "edit": "Edit draft",
+            "editHref": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post expense",
+            "actionsScroll": 246,
+            "actionsWidth": 246,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 320 confined layout",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 320,
+            "scroll": 320,
+            "detailLeft": 24,
+            "detailRight": 296,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 244,
+            "previewWidth": 244,
+            "edit": "Edit draft",
+            "editHref": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post expense",
+            "actionsScroll": 246,
+            "actionsWidth": 246,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 320 balance and policy",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 320,
+            "scroll": 320,
+            "detailLeft": 24,
+            "detailRight": 296,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 244,
+            "previewWidth": 244,
+            "edit": "Edit draft",
+            "editHref": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post expense",
+            "actionsScroll": 246,
+            "actionsWidth": 246,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 320 shortfall guidance",
+          "pass": true,
+          "details": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked."
+        },
+        {
+          "name": "expense detail 360 draft and controls",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 360,
+            "scroll": 360,
+            "detailLeft": 24,
+            "detailRight": 336,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 284,
+            "previewWidth": 284,
+            "edit": "Edit draft",
+            "editHref": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post expense",
+            "actionsScroll": 286,
+            "actionsWidth": 286,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 360 confined layout",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 360,
+            "scroll": 360,
+            "detailLeft": 24,
+            "detailRight": 336,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 284,
+            "previewWidth": 284,
+            "edit": "Edit draft",
+            "editHref": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post expense",
+            "actionsScroll": 286,
+            "actionsWidth": 286,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 360 balance and policy",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 360,
+            "scroll": 360,
+            "detailLeft": 24,
+            "detailRight": 336,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 284,
+            "previewWidth": 284,
+            "edit": "Edit draft",
+            "editHref": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post expense",
+            "actionsScroll": 286,
+            "actionsWidth": 286,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 360 shortfall guidance",
+          "pass": true,
+          "details": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked."
+        },
+        {
+          "name": "expense detail 390 draft and controls",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 390,
+            "scroll": 390,
+            "detailLeft": 24,
+            "detailRight": 366,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 314,
+            "previewWidth": 314,
+            "edit": "Edit draft",
+            "editHref": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post expense",
+            "actionsScroll": 316,
+            "actionsWidth": 316,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 390 confined layout",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 390,
+            "scroll": 390,
+            "detailLeft": 24,
+            "detailRight": 366,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 314,
+            "previewWidth": 314,
+            "edit": "Edit draft",
+            "editHref": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post expense",
+            "actionsScroll": 316,
+            "actionsWidth": 316,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 390 balance and policy",
+          "pass": true,
+          "details": {
+            "status": "Draft",
+            "width": 390,
+            "scroll": 390,
+            "detailLeft": 24,
+            "detailRight": 366,
+            "preview": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked.",
+            "previewScroll": 314,
+            "previewWidth": 314,
+            "edit": "Edit draft",
+            "editHref": "/expenses/edit?id=772&return_filters%5Bpage%5D=1&return_filters%5Bper_page%5D=25&return_filters%5Bq%5D=&return_filters%5Bsort%5D=date&return_filters%5Bdir%5D=desc&return_filters%5Bstatus%5D=draft&return_filters%5Bkind%5D=all&return_filters%5Bfrom%5D=&return_filters%5Bto%5D=",
+            "post": "Post expense",
+            "actionsScroll": 316,
+            "actionsWidth": 316,
+            "postedBook": "Posting adds this transaction to reports. A saved draft does not change your books."
+          }
+        },
+        {
+          "name": "expense detail 390 shortfall guidance",
+          "pass": true,
+          "details": "Posted book balance as of 2026-09-24: USD 0.00. Proposed payment: USD 999,999.00. Projected book balance: USD -999,999.00.                        Cash shortfall policy: Warning.Warning only: this book permits posting despite cash or bank balance warnings. Classify this account as physical cash or bank in the chart of accounts so its balance can be checked."
+        },
+        {
+          "name": "no JS errors",
+          "pass": true,
+          "details": []
+        }
+      ],
+      "errors": [],
+      "passed": 23,
+      "failed": 0
+    },
+    "demo-141.json": {
+      "verified_at": "2026-09-24T01:19:22.275617+00:00",
+      "passed": true,
+      "mode": "source fallback isolated demo; not shared installer hosting",
+      "restricted_account": "ledger_demo_test",
+      "database": "phpledger_demo",
+      "network": "pl141-demo-network",
+      "source_mounts_readonly": true,
+      "source_commit": "556425c13b2e0830b526a0b509a8c08d0bcc247c",
+      "source_demo_packs": 11,
+      "historical_checkpoints": 396,
+      "visitor_count_before_reset": 13,
+      "visitor_count_after_reset": 0,
+      "twenty_additional_posted_records_per_pack": true,
+      "restricted_smoke_passed": true,
+      "reset_rejects_unaffiliated_user": true,
+      "reset_rejects_user_in_unheld_company": true,
+      "reset_generation_changed": true,
+      "fixture_adaptations": [
+        "Ignored wrapper adds role_id from global owner role to stale tools/verify-demo.ps1 membership INSERT.",
+        "Fixture cleanup failed without default database; ignored continuation adds USE phpledger_demo. No application or tracked script changes."
+      ],
+      "cleanup": true
+    },
+    "signed-preload-proof.json": {
+      "verified_at": "2026-09-24T01:22:28+00:00",
+      "passed": true,
+      "preloaded_files": 44,
+      "package_count": 11,
+      "repository_fallback": false,
+      "preload_directory_readonly": true,
+      "official_publisher_spki_sha256": "4e58a5f46b0538c9b37aaadbfced9a2d8ad2f7d413bc168a67b1b94feaa78e78",
+      "network": "none",
+      "database_calls": false,
+      "resolver": "pl_sample_package_read(slug,false): signed data validation; installed dependency registry not queried",
+      "onboarding_links": [
+        "/packages",
+        "https://phpledger.com/directory/"
+      ],
+      "packages": [
+        {
+          "slug": "sample-distributor",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "a78e0f84ca9d8dba7ac66fcc59a56eadbb80846763d8f5b2432694165b5a1c81",
+          "content_sha256": {
+            "pack.json": "70163a74f0b77de93bcfb4f1e5382bfdeacf67e8873d59ad7269bcf7f6204e25",
+            "structure.json": "d2e688144f058d26cc9820b171af78f8d9a73e5e65e7d49f434f69fb9a1cbe52"
+          },
+          "source_count": 85
+        },
+        {
+          "slug": "sample-jewelry-studio",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "5e19fbddb76e8abd3c13e14af095f863aebecd196bd18f08a5dc45715230453f",
+          "content_sha256": {
+            "pack.json": "89747c66fc7f979fab676b47b28ba0d26a323f4edea2dcf45ffff9cf8d30d092",
+            "structure.json": "59c3a6eb3dc421a02ab356a71932d56f911ccd9ef3652663530723eaef0bf9c1"
+          },
+          "source_count": 85
+        },
+        {
+          "slug": "sample-light-manufacturing",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "7a55f29eb665715c5d762e065170aa498c88bf4cead879c718e36976c2332793",
+          "content_sha256": {
+            "pack.json": "b68b85e3bad1c27d0bd7c9c06ecbe8fd723809327e77f1ebf20d04d580ffd4f4",
+            "structure.json": "5d3d0172bdae275de3d94ea7a21db34400f60eefdb5fbc22364b52bc7c439d69"
+          },
+          "source_count": 85
+        },
+        {
+          "slug": "sample-membership-club",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "ab456ccdf753b4968ace8d686e383d76205336b2e0e57e4d55ccd172c1105ca4",
+          "content_sha256": {
+            "pack.json": "7e5551dd96a087e40b8d56af0a56c6103f8a8200f5001f8046125101c014b041",
+            "structure.json": "a3e1604d930665d467a7014ec51c652b6812970e4f9485e7a4f7ce5277cb4369"
+          },
+          "source_count": 85
+        },
+        {
+          "slug": "sample-pharmacy",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "02a25e40d3d6c9427594c423f3723390cee40ecab107589fb69678a4f08d6210",
+          "content_sha256": {
+            "pack.json": "898c24a6b00af0f48048b3390810e408b8439852d36d23320e2db9404f49ab41",
+            "structure.json": "19bc39271cfdf3a545008d0da0353b1955561044eebbc727f804165b4bc948c8"
+          },
+          "source_count": 85
+        },
+        {
+          "slug": "sample-restaurant",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "eaddc1786320981fa4ac35526bc2c7b34e6bd5ba6b5ddc0197b2e821d558bc38",
+          "content_sha256": {
+            "pack.json": "d07e565615ec83fb4e58dd4c48467658154849676fdeff50927545375fb13665",
+            "structure.json": "12434b10d524e87c997d59211a121c37af874a2840cbeed4f6ba091282c283bd"
+          },
+          "source_count": 85
+        },
+        {
+          "slug": "sample-retail-shop",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "2460674d00f6776171890184b8f66793adb47e2e6e233f4281beee57f237431e",
+          "content_sha256": {
+            "pack.json": "300748da05a356dda7792e186a8b9ee41dba2a4bff03cc3b7d471a03014cbb52",
+            "structure.json": "6496d62b120f28f2fe970d192d81cd17bb67eed304b57a611ddc73a5235dcc05"
+          },
+          "source_count": 85
+        },
+        {
+          "slug": "sample-seasonal-business",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "2fb97e74f4be149dc07d7c9e0134d160ad5850ee18d992face7704fb91c4c11d",
+          "content_sha256": {
+            "pack.json": "6292e9da6eb1b5880f73943fd8a542c33a282695e169cf842872aa2ebb0803f2",
+            "structure.json": "9c485ea52762e668937d59b284e8a6fd03d073345d6b6cf966ea0a5ffc888213"
+          },
+          "source_count": 85
+        },
+        {
+          "slug": "sample-service-agency",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "bfbba781e64a05de18e6ff53dd7c7d45ed55296a6885c965954fb213edcc9878",
+          "content_sha256": {
+            "pack.json": "ac6bdf94ab46884fda066c2cc8a055c3d46cfe02dbb4c3730b9d0ed7231cec33",
+            "structure.json": "b67662ab74b2d0b23e20a39584e9ca5fc1eb26e49afaed0cecf976d1b94d644c"
+          },
+          "source_count": 111
+        },
+        {
+          "slug": "sample-service-workshop",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "230de0acd51b9ee17b07f6ee859d4f17d0d08ea3f49bdfd6a89eccbd9dbfdbc1",
+          "content_sha256": {
+            "pack.json": "be970b701570a7b6f0e72a4bad2ab84a3e1864395fa910af694e421cd10f5aa9",
+            "structure.json": "37e904e3b01b6ba7ea20dd5e1d8ea6b2e8ca46a5ea74357855ebf4843d49c5fb"
+          },
+          "source_count": 85
+        },
+        {
+          "slug": "sample-trader",
+          "version": "1.1.0",
+          "trust": "verified",
+          "manifest_sha256": "e2c2785f34a01d53cbcafb62a36b178865b0bd3ff1944171d6884fef6a55b2de",
+          "content_sha256": {
+            "pack.json": "b39ac5e2b83594ee47e54c52ed64cd58ef22112734ce14bb6a60340892a714d3",
+            "structure.json": "b18287d398481b6bbc6999f6e345420aaa4f46a4f5d79bad77b44b52f92a52da"
+          },
+          "source_count": 85
+        }
+      ],
+      "source_preload_tar": "C:\\phpledger\\.cache\\cash-policy-live\\.cache\\release-1.4-operator\\staging-r3\\samples.tar",
+      "source_preload_tar_sha256": "da32a907db9ea9d9cacec59f5240a94995f2dd24a635ed239894ad5fe2a3b677",
+      "bundled_module_contract_versions_match": true
+    },
+    "reproduction-accepted.json": {
+      "verified_at": "2026-09-24T01:43:01.796236+00:00",
+      "source_commit": "9e101439e8798815dfa5892d37924bac9d1f9a1e",
+      "snapshot_clean": true,
+      "accepted_archive": "C:\\phpledger\\.cache\\release-1.4.1\\.cache\\release-1.4.1-accepted\\phpledger-1.4.1.zip",
+      "reproduced_archive": "C:\\phpledger\\.cache\\release-1.4.1\\.cache\\release-1.4.1-accepted-repro\\phpledger-1.4.1.zip",
+      "archive_bytes": 3576250,
+      "archive_sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
+      "reproduction_sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
+      "byte_identical": true,
+      "static_artifact_gates": {
+        "baseline_sha256": "53c7fc584bd47723a6f6008a8a951db9b3947dae956484c8bf3b889ce2fad4d2",
+        "candidate_sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
+        "candidate_source_commit": "9e101439e8798815dfa5892d37924bac9d1f9a1e",
+        "candidate_members": 1697,
+        "unchanged_migration_files": 61,
+        "packaged_upgrade_php": true,
+        "demo_packs_absent": true,
+        "neutral_starter_present": true
+      },
+      "signing_performed": false,
+      "database_calls": false,
+      "network_calls": false,
+      "tracked_edits": false,
+      "prior_final_archive_preserved_at_original_path": true,
+      "prior_final_sha256": "8a549baf02d51a74d2e0375edf5facc0dc869b4a0594dc45ff013f0a690f68d6",
+      "supersedes": "reproduction-final.json from9922afe0; old artifacts retained"
+    }
+  },
+  "exact_package_gates": {
+    "baseline_sha256": "53c7fc584bd47723a6f6008a8a951db9b3947dae956484c8bf3b889ce2fad4d2",
+    "candidate_sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
+    "candidate_source_commit": "9e101439e8798815dfa5892d37924bac9d1f9a1e",
+    "migration_files": 61,
+    "candidate_members": 1697,
+    "results": [
+      {
+        "engine": "mysql",
+        "host": "pl141-mysql",
+        "steps": [
+          "fresh_61_migrations_first_post",
+          "populated_1_4_0_seed",
+          "packaged_upgrade_1_no_op",
+          "packaged_upgrade_2_no_op",
+          "historical_rows_and_balances_unchanged"
+        ]
+      },
+      {
+        "engine": "maria",
+        "host": "pl141-maria",
+        "steps": [
+          "fresh_61_migrations_first_post",
+          "populated_1_4_0_seed",
+          "packaged_upgrade_1_no_op",
+          "packaged_upgrade_2_no_op",
+          "historical_rows_and_balances_unchanged"
+        ]
+      }
+    ],
+    "production_changed": false
+  },
+  "closed_issues": [
+    104
+  ],
+  "signing": {
+    "archive_sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
+    "source_commit": "9e101439e8798815dfa5892d37924bac9d1f9a1e",
+    "publisher_spki_sha256": "4e58a5f46b0538c9b37aaadbfced9a2d8ad2f7d413bc168a67b1b94feaa78e78",
+    "metadata_sha256": "33cc98e06b52b74a92d8bd13319fd1f30837338fa904d0aa8e730bc43b5b7123",
+    "files": 1697,
+    "published": false
+  },
+  "onboarding_browser": {
+    "status": 200,
+    "posted_journals": 119,
+    "open_drafts": 3,
+    "reload_stable": true,
+    "log": ".cache/validation/onboarding-full-browser-final.log",
+    "screenshot": ".cache/validation/onboarding-full-ready.png"
+  },
+  "superseded_candidates": [
+    "556425c13b2e0830b526a0b509a8c08d0bcc247c",
+    "9922afe03d932e83fec1db2085f37914b27a2370"
+  ],
+  "focused_onboarding": {
+    "tests": 125,
+    "failures": 0
+  },
+  "full_checks": {
+    "mysql": {
+      "tests": 699,
+      "failures": 0,
+      "exit_code": 0,
+      "php_lint_files": 416,
+      "php_lint_failures": 0,
+      "phpstan": "pass",
+      "log": ".cache/validation/mysql-native-final-check.log"
+    },
+    "maria": {
+      "tests": 699,
+      "failures": 0,
+      "exit_code": 0,
+      "php_lint_files": 416,
+      "php_lint_failures": 0,
+      "phpstan": "pass",
+      "log": ".cache/validation/maria-native-final-check.log"
+    }
+  },
+  "cleanup": {
+    "own_containers_removed": true,
+    "own_networks_removed": true,
+    "own_browser_sessions_closed": true,
+    "static_preview_stopped": true,
+    "artifacts_and_logs_retained": true
+  },
+  "main_checkout_append_only_updates": [
+    "AGENTS_SYNC.MD",
+    "AGENT_MESSAGES.MD",
+    "docs/strategy/RELEASE-PLAN-1.4.1.md",
+    "docs/strategy/RELEASE-PLAN-1.5.md",
+    "docs/strategy/RELEASE-PLAN-1.6.md",
+    "docs/strategy/RELEASE-PLAN-1.7.md"
+  ]
+}
