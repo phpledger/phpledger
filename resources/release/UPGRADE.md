@@ -1,12 +1,12 @@
 # Upgrade and recovery — PHP Ledger
 
-## From 1.4.0 to the 1.4.1 candidate
+## From 1.4.0 to 1.4.1
 
-**1.4.1 is local and unpublished.** Do not treat the candidate version or these instructions as an available signed update. The exact archive passed fresh installation and populated 1.4.0 upgrade on MySQL and MariaDB, with all 61 migration receipts and historical records unchanged. Public availability and deployed acceptance remain separate gates.
+The exact 1.4.1 archive passed fresh installation and populated 1.4.0 upgrade on MySQL and MariaDB, with all 61 migration receipts and historical records unchanged. Use the signed release assets from the official release channel and verify the downloaded archive and checksum before applying it.
 
 The patch adds no migrations or schema changes. An installation already current at 1.4.0 retains its existing migration receipts and accounting records. The migration engine must still verify the chain and report a no-op during upgrade; older installations must apply their intervening migrations through the ordinary supported procedure. Historical migration files are unchanged.
 
-Before any authorized upgrade, back up matching application files, private configuration, keys and database together and rehearse against a restored copy. When a signed 1.4.1 package is published, use the ordinary updater or the manual procedure below. Do not substitute a source checkout for the verified release archive.
+Before upgrading, back up matching application files, private configuration, keys and database together and rehearse against a restored copy. Use the ordinary signed updater or the manual procedure below. Do not substitute a source checkout for the verified release archive.
 
 After rehearsal, check date entry and saved ISO dates, optional employee DOB validation, invoice/bill line account choices, and the sample-completion and receipt/expense journeys at the intended screen widths. A draft referencing a retired account or an account that now has children remains readable but requires an eligible leaf before it can be saved again, previewed or posted. Existing employee records are not automatically corrected; explicit edits enforce the DOB rule. Follow the matched recovery procedure if the upgrade fails.
 

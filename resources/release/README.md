@@ -2,7 +2,7 @@
 
 Country-neutral, open-source bookkeeping for small businesses, built with PHP and MySQL. Project-owned code uses AGPL-3.0-or-later; a commercial licence is available. Self-hosting is free without licence keys or licensing-server calls. Published pre-adoption 0.1.0 through 0.1.5 previews retain MIT. See [Licensing policy](docs/LICENSING-POLICY.md).
 
-**1.4.1: local patch candidate, not yet published.** The validated candidate includes date entry, employee date-of-birth validation, eligible invoice/bill line accounts, required-field presentation, sample completion wording, navigation and phone layout corrections. See RELEASE-NOTES.md for scope and remaining publication gates. There are no new migrations or schema changes, and this patch carries no media kit. Independent accounting/security review, real-business pilots and unfamiliar-operator observation remain separate assurance work. It is not a completed ERP or a country-certified accounting product.
+**1.4.1** includes consistent date entry, employee date-of-birth validation, eligible invoice/bill line accounts, required-field presentation, accurate sample completion counts, and navigation and phone layout corrections. The exact archive passed fresh installation and populated 1.4.0 upgrades on MySQL and MariaDB, with 699 full-suite tests passing per engine. See RELEASE-NOTES.md for scope and assurance limits. There are no new migrations or schema changes, and this patch carries no media kit. Independent accounting/security review, real-business pilots and unfamiliar-operator observation remain separate assurance work. It is not a completed ERP or a country-certified accounting product.
 
 The package itself carries a short `README.txt`; this longer overview is kept in the repository.
 

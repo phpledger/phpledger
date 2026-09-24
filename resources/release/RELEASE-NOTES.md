@@ -4,20 +4,20 @@ Each release's exact source revision is recorded in its `PACKAGE-MANIFEST.json` 
 
 PHP Ledger 1.0.0 was the first supported stable release of the restarted application. It preserves the lightweight BixiSoft PHP/MeekroDB structure while separating accounting functions, server permissions, templates and the public front controller. Read "Supported scope and limits" and "Assurance status" below before deployment; the dated preview sections further down record the historical, superseded scope of each earlier development release.
 
-## 1.4.1 candidate: date entry and workflow corrections
+## 1.4.1: date entry and workflow corrections
 
-**Local implementation candidate, 24 September 2026; not published or deployed.** Full MySQL and MariaDB checks passed 699 tests each; focused browser checks and exact-package fresh-install/populated-upgrade gates passed. Publication and deployed verification remain separate. The application version identifies the candidate; it is not evidence of publication.
+The exact 1.4.1 archive passed fresh installation and populated 1.4.0 upgrades on MySQL and MariaDB. Full application checks passed 699 tests with zero failures on each engine; focused browser checks passed on local fixtures. These checks do not establish independent accounting/security review or observed usability on real devices.
 
 - **Date entry:** the patch provides consistent DD/MM/YYYY entry with a keyboard-accessible calendar enhancement across application date fields. Forms retain ISO `YYYY-MM-DD` submission and the existing server validation. Native date fields remain usable when JavaScript is unavailable. Scoped calendar, keyboard and responsive browser checks passed; independent screen-reader and real-device acceptance remain separate.
 - **Employee date of birth (#105):** the field remains optional. Shared create/edit validation rejects a date after today or after the hire date. Existing records are not automatically rewritten; an explicit edit must satisfy the rule. Invalid submissions retain entered values for correction.
 - **Invoice and bill line accounts (#106):** selectors exclude inactive accounts, class/group headings and accounts with children. Existing income versus expense/asset/clearing eligibility remains in force. The shared service rejects forged, foreign-company and stale selections before saving or previewing, and rechecks at posting. General account lists used outside posting retain headings.
-- **Required fields (#107):** shared form presentation is being aligned with the existing required attributes so visible labels and assistive descriptions identify required inputs. This does not make optional business fields mandatory.
-- **Workflow presentation:** sample completion uses actual scoped book counts and distinguishes fictional history from structure-only setup; receipt and expense navigation is simplified; phone form/report layouts are being corrected. These are bounded repairs to existing workflows.
+- **Required fields (#107):** shared form presentation aligns with the existing required attributes so visible labels and assistive descriptions identify required inputs. This does not make optional business fields mandatory.
+- **Workflow presentation:** sample completion uses actual scoped book counts and distinguishes fictional history from structure-only setup; receipt and expense navigation is simplified; phone form/report layouts have been corrected. These are bounded repairs to existing workflows.
 - **Credential guidance (#102):** operator documentation describes provider revocation, secure replacement, artifact/access review and private incident records for exposed operational credentials. Documentation does not rotate credentials or change live infrastructure.
 
 No new migrations, schema changes, accounting calculations or public API contracts are introduced. This patch carries **no media kit**, in accordance with the patch-release policy. Existing cash-policy choices, permissions and immutable posted history retain their established behavior.
 
-Issue #104 is closed with evidence of the already-published 1.4.0 workflow change. Issues #71 and #100 remain open until the patch documentation and verification-tool corrections are published. Record matching acceptance evidence and publication before changing their release status. See the repository's 1.4.1 implementation plan and issue acceptance audit. The later sequence remains 1.5 maintenance, 1.6 stabilization, then the deferred 1.7 feature delivery; Academy remains 2.0 or later.
+Issue #104 is closed with evidence of the 1.4.0 workflow change. The issue acceptance audit tracks #71 and #100, whose status should be updated only after their 1.4.1 publication evidence is recorded. The later sequence remains 1.5 maintenance, 1.6 stabilization, then the deferred 1.7 feature delivery; Academy remains 2.0 or later.
 
 ## 1.4.0: cash choices, linked parties and guided practice
 
