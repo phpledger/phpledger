@@ -64,7 +64,7 @@
         {
           "name": "PL_VERSION",
           "label": "Image tag",
-          "default": "1.4.0",
+          "default": "1.4.1",
           "description": "The published ghcr.io/phpledger/phpledger tag to deploy. Always a concrete version, never latest."
         },
         {

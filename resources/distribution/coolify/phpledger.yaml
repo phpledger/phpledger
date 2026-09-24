@@ -12,7 +12,7 @@
 
 services:
   phpledger:
-    image: ghcr.io/phpledger/phpledger:1.4.0
+    image: ghcr.io/phpledger/phpledger:1.4.1
     restart: unless-stopped
     depends_on:
       db:

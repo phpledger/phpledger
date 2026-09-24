@@ -267,7 +267,11 @@ compose file is a strong check, and it is not the same thing.
   So Coolify is two pull requests, not one.
 
 
-## 1.4.0 release metadata
+## 1.4.1 release metadata
+
+The production Compose default and active catalogue source versions target 1.4.1. The accepted application archive is `phpledger-1.4.1.zip`, 3,576,250 bytes, SHA-256 `3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b`. It contains 1,697 ZIP files including `PACKAGE-MANIFEST.json` (1,696 managed files) and 9,148,297 uncompressed bytes. YunoHost pins its release URL and checksum; Softaculous retains an 11 MiB initial allowance (25 percent above the measured footprint, rounded up). Installatron has a new 1.4.1 version directory while 1.4.0 remains historical. Umbrel pairs version 1.4.1 with the verified immutable multi-architecture GHCR image `ghcr.io/phpledger/phpledger@sha256:94599d3e498f9eb22ea5caa10453276cc01811128b4d32da1617569ab91c623f`. Cloudron's separate wrapper image/history and all provider submissions remain separate work. These source manifests do not establish provider acceptance, platform lifecycle certification or live deployment.
+
+## Historical 1.4.0 release metadata
 
 The production Compose default and active catalogue candidate versions target the published 1.4.0 release. Umbrel pairs version 1.4.0 with the immutable official multi-architecture image `ghcr.io/phpledger/phpledger@sha256:a170945385c9cd2dc604d1a2c6889ad7af02b64cbd8b0c3d6bb49c9afcf2edf9`. YunoHost's release URL and SHA-256 match the anonymously verified application ZIP; Softaculous records 1,695 archive files and 9,116,480 uncompressed bytes. Installatron has a new 1.4.0 candidate directory, with historical directories retained. These source manifests do not establish provider acceptance or platform lifecycle certification. Cloudron's separate wrapper image/history and all provider submissions remain separate work. See the 1.4.0 publication receipt for registry payload verification and exact artifact hashes.
 

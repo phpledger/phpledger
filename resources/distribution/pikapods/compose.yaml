@@ -3,7 +3,7 @@
 # request or vote on their feedback page (see NOTES.md), so this file is the
 # "here is a working deployment" attachment for that request rather than a
 # pull request against a manifest repository. It reproduces
-# compose.production.yaml (repository root) exactly: image pinned to 1.4.0
+# compose.production.yaml (repository root) exactly: image pinned to 1.4.1
 # (never :latest), app on 8080 internally, MySQL 8.4 with
 # --log-bin-trust-function-creators=1, the private volume at
 # /var/lib/phpledger, and the full PL_* environment contract.
@@ -24,7 +24,7 @@
 name: phpledger
 services:
   web:
-    image: ghcr.io/phpledger/phpledger:1.4.0
+    image: ghcr.io/phpledger/phpledger:1.4.1
     restart: unless-stopped
     ports:
       - "${PL_WEB_PORT:-8080}:8080"
