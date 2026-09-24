@@ -18,7 +18,7 @@
         "mariadb:10.11",
         "mariadb:11.4"
       ],
-      "image": null,
+      "image": "ghcr.io/phpledger/phpledger@sha256:94599d3e498f9eb22ea5caa10453276cc01811128b4d32da1617569ab91c623f",
       "min_client": null
     },
     {
