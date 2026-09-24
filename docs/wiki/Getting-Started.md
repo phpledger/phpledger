@@ -4,6 +4,18 @@
 
 Automated test suites, fault-injection update/recovery tests, exact-artifact install/upgrade/recovery checks and developer-operated browser checks back this release. Independent accounting review, independent security review, supervised pilots with a real month-end close, unfamiliar-operator installation observation and restricted shared-host recovery certification have **not** happened; these continue as post-release commitments. See [[Release 1.0.0|Release-1.0.0]], [INSTALL.md](https://github.com/phpledger/phpledger/blob/master/resources/release/INSTALL.md), [UPGRADE.md](https://github.com/phpledger/phpledger/blob/master/resources/release/UPGRADE.md) and [RELEASE-SIGNING.md](https://github.com/phpledger/phpledger/blob/master/docs/RELEASE-SIGNING.md).
 
+## Choose your installation guide
+
+Choose one route and follow its steps through your first account. Each guide includes the fields to enter and the result to expect.
+
+| Where will you use PHP Ledger? | Guide |
+|---|---|
+| Windows with Docker Desktop | [[Install with Docker Desktop|Install-with-Docker-Desktop]] |
+| Windows with XAMPP or WAMP | [[Install with XAMPP or WAMP|Install-on-XAMPP-or-WAMP]] |
+| A website using cPanel or Plesk | [[Install on shared hosting|Install-on-Shared-Hosting]] |
+
+Docker users can download the [desktop setup file](https://github.com/phpledger/phpledger/blob/master/compose.desktop.yaml). For server details, see the [installation reference](https://github.com/phpledger/phpledger/blob/master/resources/release/INSTALL.md).
+
 # Start with the package
 
 Start at [the PHP Ledger website](https://phpledger.com/) or [open the demonstration](https://phpledger.com/demo/).

@@ -34,6 +34,22 @@
 
 ---
 
+## Install PHP Ledger
+
+Choose **one** guide and follow it from start to finish. Each guide shows what to download, what to enter on the setup screen, and how to tell when you are finished.
+
+| Where do you want to use it? | Follow this guide |
+|---|---|
+| On my Windows computer with Docker Desktop | [Install with Docker Desktop](docs/wiki/Install-with-Docker-Desktop.md) — one setup file and one copy-and-paste command |
+| On my Windows computer with XAMPP or WAMP | [Install with XAMPP or WAMP](docs/wiki/Install-on-XAMPP-or-WAMP.md) — put the folder in place and open your browser |
+| On my website using cPanel or Plesk | [Install on shared hosting](docs/wiki/Install-on-Shared-Hosting.md) — upload the folder and use your hosting panel |
+
+**Unsure?** If you already have Docker Desktop, XAMPP or WAMP, use the matching guide. To look around before installing, [try the online demo](https://phpledger.com/demo/) with sample data.
+
+**Using Docker?** Download the [ready-made setup file](compose.desktop.yaml) and follow its guide. It starts both PHP Ledger and the database and keeps your records between restarts. Pulling the application image alone is only part of the setup.
+
+[All installation guides in the Wiki](https://github.com/phpledger/phpledger/wiki/Getting-Started) · [Help if you get stuck](https://github.com/phpledger/phpledger/discussions)
+
 ## Accounting you can host yourself
 
 PHP Ledger helps small businesses keep their books, follow money owed by customers and to suppliers, and trace report balances back to the entries behind them. It is open-source PHP software that runs on infrastructure you control.

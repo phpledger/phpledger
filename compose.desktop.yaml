@@ -1,0 +1,44 @@
+# Local installation with Docker Desktop. Follow docs/wiki/Install-with-Docker-Desktop.md.
+# Keep this file and .env together. The guide generates the passwords for you.
+name: phpledger-desktop
+services:
+  web:
+    image: ghcr.io/phpledger/phpledger:1.4.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PL_WEB_PORT:-18080}:8080"
+    environment:
+      PL_ENV: production
+      PL_DB_HOST: db
+      PL_DB_PORT: 3306
+      PL_DB_NAME: phpledger
+      PL_DB_USER: phpledger
+      PL_DB_PASSWORD: ${PL_DB_PASSWORD:?Follow step 3 of the Docker Desktop guide first}
+      PL_PUBLIC_URL: http://127.0.0.1:${PL_WEB_PORT:-18080}
+      PL_AUTO_MIGRATE: "0"
+      PL_INSTALL_NOTICE: "0"
+    volumes:
+      - private:/var/lib/phpledger
+    depends_on:
+      db:
+        condition: service_healthy
+    init: true
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command: ["--log-bin-trust-function-creators=1"]
+    environment:
+      MYSQL_DATABASE: phpledger
+      MYSQL_USER: phpledger
+      MYSQL_PASSWORD: ${PL_DB_PASSWORD:?Follow step 3 of the Docker Desktop guide first}
+      MYSQL_ROOT_PASSWORD: ${PL_DB_ROOT_PASSWORD:?Follow step 3 of the Docker Desktop guide first}
+    volumes:
+      - data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root --password=\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+volumes:
+  data:
+  private:

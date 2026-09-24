@@ -1,5 +1,15 @@
 # Container image
 
+**Installing on your Windows computer?** Follow the [Docker Desktop walkthrough](wiki/Install-with-Docker-Desktop.md) with the ready-made [desktop setup file](../compose.desktop.yaml). It takes you through the first account without Git, Node, Composer or a source build. The recipe selects the 1.4.1 image; its first-install check is recorded separately after image publication.
+
+| Setup file | Use |
+|---|---|
+| [compose.desktop.yaml](../compose.desktop.yaml) | Local Docker Desktop installation with a database, persistent records and loopback-only access. |
+| [compose.production.yaml](../compose.production.yaml) | Server deployment reference; configure passwords, HTTPS and network access. |
+| [compose.yaml](../compose.yaml) | Source development and tests; follow [DEVELOPMENT.md](DEVELOPMENT.md). |
+
+Pulling the application image alone does not supply its database or persistent storage. The desktop recipe starts both services.
+
 The 1.3 release publishes official images to **ghcr.io/phpledger/phpledger** and **phpledger/phpledger** on Docker Hub. The owner restored both channels for this release; earlier GHCR-only policy remains historical. Both images must be built from the same verified release ZIP. Use the publication receipt for the exact available tags and digests; this guide does not itself prove a registry push. See the [release protocol](RELEASE-PROTOCOL.md).
 
 The image is built from the published release ZIP, never from the working tree (`docker/release/Dockerfile`): it is the same file set the ZIP and Composer channels install, repackaged, not a separately built application (release protocol principle 2). It runs a single `php:8.3-apache` base as a non-root process on port 8080.

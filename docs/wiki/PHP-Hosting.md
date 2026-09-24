@@ -1,5 +1,7 @@
 # PHP and hosting compatibility
 
+**Installing for the first time?** Follow the [[XAMPP/WAMP|Install-on-XAMPP-or-WAMP]] or [[shared-hosting|Install-on-Shared-Hosting]] walkthrough. This page provides the technical compatibility reference.
+
 **Minimum PHP 8.2; PHP 8.3 recommended for deployment.** Use a current security patch and the same version/extensions for web requests, the browser installer and command-line installation. The current Docker default is 8.3.33; CI covers 8.2/8.3/8.4 without raising the minimum.
 
 1.1.0 installs like WordPress: upload the `phpledger` folder anywhere inside the website and open it; the browser installer starts by itself, without a setup key when the database is on the same server. Apache or LiteSpeed (most shared hosting) is needed for this layout because it relies on `.htaccess`; pointing the document root at `www/phpledger/public` works on any server. CLI installation (`preflight.php`, `migrate.php`, `create-admin.php`) remains available. The PHP **zip** extension is needed for automatic updates.

@@ -4,6 +4,12 @@
 - [[Product overview|Product-Overview]]
 - [[Getting started|Getting-Started]]
 
+**Install PHP Ledger**
+
+- [[Docker Desktop|Install-with-Docker-Desktop]]
+- [[XAMPP or WAMP|Install-on-XAMPP-or-WAMP]]
+- [[Shared hosting|Install-on-Shared-Hosting]]
+
 **The product**
 
 - [[Accounting and reports|Accounting-and-Reports]]

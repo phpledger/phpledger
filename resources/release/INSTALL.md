@@ -1,5 +1,7 @@
 # Install PHP Ledger
 
+**Installing for the first time?** Start with the step-by-step [Docker Desktop](https://github.com/phpledger/phpledger/wiki/Install-with-Docker-Desktop), [XAMPP/WAMP](https://github.com/phpledger/phpledger/wiki/Install-on-XAMPP-or-WAMP) or [shared-hosting guide](https://github.com/phpledger/phpledger/wiki/Install-on-Shared-Hosting). This page is the detailed reference for server administrators.
+
 > Minimum PHP 8.2; PHP 8.3 is recommended for deployment. Use a current security patch and run preflight with the same PHP version/extensions as web requests. The package includes compatible production dependencies; do not bypass Composer platform checks.
 
 This guide installs PHP Ledger into an **empty installation namespace**. A dedicated database remains recommended. The short `README.txt` inside the package covers the usual upload-and-open installation; this guide adds the details. For any existing database, first read [UPGRADE.md](UPGRADE.md). Never run SQL dumps from the historical application against this database.
