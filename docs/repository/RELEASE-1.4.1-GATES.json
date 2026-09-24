@@ -2,7 +2,7 @@
   "status": "local_implementation_complete_publication_pending",
   "baseline": "f325d02d",
   "application_source": "9e101439e8798815dfa5892d37924bac9d1f9a1e",
-  "prepared_source": "064568a8 plus final validation-only documentation and coordination commit",
+  "prepared_source": "Validated runtime 9e101439; later documentation and website commits on codex/release-1.4.1",
   "archive": {
     "path": ".cache/release-1.4.1-accepted/phpledger-1.4.1.zip",
     "sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
@@ -71,15 +71,15 @@
     },
     {
       "path": "resources/release/README.md",
-      "sha256": "495ede9d81866a28ab9d979d7b9947d4141da380416c1541197069d0a92e9563"
+      "sha256": "06e9861731e573d3f2e0d2b82e8c7af830ffb8227d96288d51122f362134c2c1"
     },
     {
       "path": "resources/release/RELEASE-NOTES.md",
-      "sha256": "0a15c4a67697f8d71b4e9a62b6a4eaba507b4282ffdd522d0c001c85d54157da"
+      "sha256": "25b6f03e07f9eb51d58627bf0067efb11f4c6c27efcca201cbc525c3cdee89e6"
     },
     {
       "path": "resources/release/UPGRADE.md",
-      "sha256": "efdd4122a396c9e651d5cb595dbfb0c1dbc43da0abc210ccd2298191601d51e6"
+      "sha256": "b4071bf1bcf949792635fac64ee0a1f2f50bf04ed8377716b7bb82b52aa9c6ce"
     },
     {
       "path": "resources/ui/app.css",
@@ -2363,5 +2363,6 @@
     "docs/strategy/RELEASE-PLAN-1.5.md",
     "docs/strategy/RELEASE-PLAN-1.6.md",
     "docs/strategy/RELEASE-PLAN-1.7.md"
-  ]
+  ],
+  "evidence_base_commit": "85ba682f0dcc02511d1da17c813769f1458f71b1"
 }

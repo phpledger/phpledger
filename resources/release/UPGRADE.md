@@ -2,7 +2,7 @@
 
 ## From 1.4.0 to the 1.4.1 candidate
 
-**1.4.1 is local and unpublished.** Do not treat the candidate version or these instructions as an available signed update. Exact-package fresh-install and populated-upgrade evidence remains a release gate.
+**1.4.1 is local and unpublished.** Do not treat the candidate version or these instructions as an available signed update. The exact archive passed fresh installation and populated 1.4.0 upgrade on MySQL and MariaDB, with all 61 migration receipts and historical records unchanged. Public availability and deployed acceptance remain separate gates.
 
 The patch adds no migrations or schema changes. An installation already current at 1.4.0 retains its existing migration receipts and accounting records. The migration engine must still verify the chain and report a no-op during upgrade; older installations must apply their intervening migrations through the ordinary supported procedure. Historical migration files are unchanged.
 
