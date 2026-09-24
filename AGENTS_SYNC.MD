@@ -338,3 +338,8 @@ Completed in isolated `.cache/release-1.4.1`, branch `codex/release-1.4.1`; pack
 Accepted ZIP only: `.cache/release-1.4.1/.cache/release-1.4.1-accepted/phpledger-1.4.1.zip`, SHA256 `3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b`, 3,576,250 bytes. Exact fresh install and populated1.4.0 upgrade passed both engines; all61 migration files/receipts and historical rows/balances unchanged. No new migration/schema. Signed metadata and website/Wiki preparation are local. About reviewed unchanged. No media kit.
 
 Issue104 closed with evidence for the already-published1.4.0 workflow; newly fixed issues remain open until1.4.1 publication. Publication/deployment not performed and requires separate authorization. Disposable test containers/networks and browser/static preview processes removed; logs/artifacts retained. Main installation-guide work, dirty planning and paused feature lanes preserved. Exact changed-file inventory, checks, references, boundaries and remaining independent-review gaps: isolated `docs/repository/RELEASE-1.4.1-GATES.md` and `.json`.
+
+
+## 2026-09-24 — Authorized 1.4.1 publication
+
+Owner explicitly approved publication/deployment of the verified candidate. Coordinator owns GitHub tag/release, exact signed assets, image verification, website/demo cutover and issue closures after public acceptance. Host-audit worker is read-only; metadata worker owns publication wording and local Wiki drafts. Accepted archive/source remain unchanged (9e101439, SHA3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b). Preserve main installation-guide work and all paused lanes. No credential rotation or stakeholder campaign is included.
