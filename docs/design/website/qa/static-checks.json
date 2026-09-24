@@ -5704,18 +5704,100 @@
         }
       ]
     },
+    "news/1-4-1/index.html": {
+      "path": "/news/1-4-1/",
+      "redirectStub": false,
+      "indexable": true,
+      "title": "PHP Ledger 1.4.1: consistent dates and clearer forms",
+      "descriptionLength": 140,
+      "images": 6,
+      "lazyImages": 4,
+      "bytes": {
+        "html": 19750,
+        "eager": 334444,
+        "total": 423149
+      },
+      "budgets": {
+        "eager": null,
+        "total": null
+      },
+      "eagerAssets": [
+        {
+          "file": "assets/brand/phpledger-horizontal.webp",
+          "bytes": 5720
+        },
+        {
+          "file": "assets/fonts/inter-latin.woff2",
+          "bytes": 156032
+        },
+        {
+          "file": "assets/fonts/manrope.woff2",
+          "bytes": 53784
+        },
+        {
+          "file": "assets/fonts/poppins-400.woff2",
+          "bytes": 51440
+        },
+        {
+          "file": "assets/site.css",
+          "bytes": 39721
+        },
+        {
+          "file": "assets/site.js",
+          "bytes": 7997
+        },
+        {
+          "file": "news/1-4-1/index.html",
+          "bytes": 19750
+        }
+      ],
+      "lazyAssets": [
+        {
+          "file": "assets/brand/apple-touch-icon.png",
+          "bytes": 21925
+        },
+        {
+          "file": "assets/brand/icon-192.png",
+          "bytes": 24273
+        },
+        {
+          "file": "assets/partners/agency75.webp",
+          "bytes": 15262
+        },
+        {
+          "file": "assets/partners/bixisoft.webp",
+          "bytes": 4800
+        },
+        {
+          "file": "assets/partners/bixitech.webp",
+          "bytes": 5338
+        },
+        {
+          "file": "assets/partners/brownbag.webp",
+          "bytes": 11226
+        },
+        {
+          "file": "favicon.ico",
+          "bytes": 5309
+        },
+        {
+          "file": "site.webmanifest",
+          "bytes": 572
+        }
+      ]
+    },
     "news/index.html": {
       "path": "/news/",
       "redirectStub": false,
       "indexable": true,
       "title": "Release news and project updates | PHP Ledger",
-      "descriptionLength": 147,
+      "descriptionLength": 115,
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 29175,
-        "eager": 343869,
-        "total": 432574
+        "html": 29496,
+        "eager": 344190,
+        "total": 432895
       },
       "budgets": {
         "eager": 650000,
@@ -5748,7 +5830,7 @@
         },
         {
           "file": "news/index.html",
-          "bytes": 29175
+          "bytes": 29496
         }
       ],
       "lazyAssets": [
@@ -8528,7 +8610,7 @@
   "errors": [],
   "warnings": [],
   "summary": {
-    "pages": 101,
+    "pages": 102,
     "redirectStubs": 2,
     "errors": 0,
     "warnings": 0

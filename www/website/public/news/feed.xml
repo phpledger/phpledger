@@ -7,6 +7,13 @@
 <description>PHP Ledger is open-source, self-hosted double-entry accounting software for small businesses. It brings invoices, bills, payments, stock, reconciliation and reports together with reviewed payroll accruals, loan schedules and period/year-end workflows. Run it on PHP 8.2+ with MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+. Use the browser installer, your own hosting and publisher-verified releases. Independent review and real-business acceptance remain separate gates.</description>
 <language>en-gb</language>
 <item>
+<title>PHP Ledger 1.4.1: consistent dates and clearer forms</title>
+<link>https://phpledger.com/news/1-4-1/</link>
+<guid isPermaLink="true">https://phpledger.com/news/1-4-1/</guid>
+<pubDate>Thu, 24 Sep 2026 00:00:00 GMT</pubDate>
+<description>Type dates in DD/MM/YYYY, choose dates with a shared calendar, and use clearer account, employee and sample setup forms in PHP Ledger 1.4.1.</description>
+</item>
+<item>
 <title>PHP Ledger 1.3.0: from the installer to a reviewed year end</title>
 <link>https://phpledger.com/news/1-3-0/</link>
 <guid isPermaLink="true">https://phpledger.com/news/1-3-0/</guid>

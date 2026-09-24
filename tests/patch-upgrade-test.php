@@ -1,12 +1,14 @@
 <?php
 declare(strict_types=1);
 
-// Exact-archive fixture. Run only through .cache/run-patch-artifact-gates.py.
+// Exact-archive fixture. Run only through tools/verify-patch-release.py.
 [$script, $mode, $package, $receiptPath] = array_pad($argv, 4, '');
 $host = (string) getenv('PL_DB_HOST');
 $databaseName = (string) getenv('PL_DB_NAME');
+$runId = (string) getenv('PL_PATCH_RUN_ID');
 if (PHP_SAPI !== 'cli' || getenv('PL_ENV') !== 'test' || getenv('PL_DB_USER') !== 'root'
     || !preg_match('/^pl141-[a-z0-9-]+$/D', $host)
+    || !preg_match('/^[a-f0-9]{8}$/D', $runId)
     || !in_array($mode, ['seed', 'verify', 'fresh', 'cleanup'], true)
     || !is_file($package . '/PACKAGE-MANIFEST.json') || $receiptPath === '') {
     throw new RuntimeException('Use an explicit pl141 test service, extracted archive and private receipt.');
@@ -31,15 +33,32 @@ function patch_require(bool $condition, string $message): void
 
 function patch_database_name(): string
 {
-    return 'pl141_patch_' . bin2hex(random_bytes(12));
+    global $runId;
+    return 'pl141_patch_' . $runId . '_' . bin2hex(random_bytes(8));
 }
 
 function patch_receipt_database(string $path): string
 {
+    global $runId;
     $receipt = json_decode((string) file_get_contents($path), true, 64, JSON_THROW_ON_ERROR);
     $name = $receipt['database'] ?? '';
-    patch_require(is_string($name) && (bool) preg_match('/^pl141_patch_[a-f0-9]{24}$/D', $name), 'Invalid disposable schema receipt.');
+    patch_require(is_string($name) && (bool) preg_match('/^pl141_patch_' . $runId . '_[a-f0-9]{16}$/D', $name), 'Invalid disposable schema receipt.');
     return $name;
+}
+
+function patch_cleanup_owned(): void
+{
+    global $runId;
+    $owned = [];
+    foreach (DB::queryFirstColumn('SHOW DATABASES') as $name) {
+        if (is_string($name) && preg_match('/^pl141_patch_' . $runId . '_[a-f0-9]{16}$/D', $name)) {
+            $owned[] = $name;
+        }
+    }
+    foreach ($owned as $name) {
+        DB::query('DROP DATABASE %b', $name);
+    }
+    echo 'PASS removed ' . count($owned) . " schema(s) owned by this patch run.\n";
 }
 
 function patch_snapshot(): array
@@ -97,7 +116,7 @@ function patch_seed(): void
             'idempotency_key' => 'patch-original', 'lines' => [
                 ['account_id' => $accounts['5000'], 'debit' => '7', 'credit' => '0'],
                 ['account_id' => $accounts['1000'], 'debit' => '0', 'credit' => '7']]]);
-        $reversal = pl_reverse_journal($actor, $company, $book, $journal['id'], '2026-01-10', 'patch-reversal', 'Sample linked reversal');
+        $reversal = pl_reverse_journal($actor, $company, $book, $journal['id'], '2026-01-09', 'patch-reversal', 'Sample linked reversal');
         patch_require((int) $reversal['reversal_of_id'] === (int) $journal['id'], 'Journal reversal is not linked.');
         $trial = pl_trial_balance($actor, $company, $book);
         patch_require($trial['balanced'], 'Baseline trial balance is not balanced.');
@@ -169,7 +188,5 @@ if ($mode === 'seed') { patch_seed(); }
 elseif ($mode === 'verify') { patch_verify(); }
 elseif ($mode === 'fresh') { patch_fresh(); }
 else {
-    $database = patch_receipt_database($receiptPath);
-    DB::query('DROP DATABASE IF EXISTS %b', $database);
-    echo "PASS disposable patch schema removed.\n";
+    patch_cleanup_owned();
 }

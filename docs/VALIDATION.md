@@ -2,16 +2,17 @@
 
 ## 1.4.1 local candidate — 24 September 2026
 
-The patch is being integrated from baseline `f325d02d` in the isolated `codex/release-1.4.1` worktree. It is not published or deployed. The [implementation plan](strategy/RELEASE-PLAN-1.4.1.md) and [issue acceptance audit](repository/RELEASE-1.4.1-ISSUES.md) distinguish implementation from acceptance and issue closure.
+The patch is implemented locally from baseline `f325d02d` on `codex/release-1.4.1`. It is not published or deployed. The [exact-artifact gate record](repository/RELEASE-1.4.1-GATES.md) and [issue audit](repository/RELEASE-1.4.1-ISSUES.md) distinguish validated behavior from publication and remaining assurance.
 
 | Check | Current evidence or remaining gate |
 |---|---|
-| Employee DOB and invoice/bill account guards | Implemented locally; targeted service regressions and employee HTTP recovery checks added. Six changed PHP files passed native `php -l`; scoped diff checks passed. Database-backed suites have not yet been claimed as passed. |
-| Shared dates and required-field presentation | Integration and component/browser acceptance pending, including keyboard behavior, DD/MM/YYYY display with ISO submission, invalid dates, native fallback and dynamic form rows. |
-| Sample completion, navigation and phone layouts | Local corrections in progress; verify full-history versus structure-only counts, receipt/expense selection and representative responsive forms/reports. |
-| Combined validation | Pending coordinator evidence: PHP lint, PHPStan, relevant browser/HTTP checks and full `composer check` on disposable MySQL/MariaDB. |
-| Distribution and upgrade | Pending exact-package fresh installation, populated 1.4.0 upgrade with unchanged migration receipts, artifact checksums and package verification. No new migrations or schema changes are planned. |
-| Publication | Not authorized by local implementation approval. No patch upload, signed public update, website/demo cutover or issue closure is claimed. Patch releases carry no media kit. |
+| Employee DOB and invoice/bill account guards | Targeted MySQL employee tests 11/11 and AR/AP tests 75/75 passed. Browser failure recovery retains invalid display input without silently submitting an old date. Full combined reruns include the additional scoped recovery regression. |
+| Shared dates and required fields | Date component 58/58 passed. Application matrix covered employee, invoice, payroll, recurring, receipt and expense forms at 1440/768/320/360/390 pixels. Initial findings were corrected; focused recovery 22/22 and markers/navigation 61/61 passed. |
+| Sample completion, navigation and phone layouts | Actual journal/draft counts replace the empty-books claim. Separate workspaces and selected states passed scoped browser checks. Full-suite and demo results are recorded in the gate receipt when complete. |
+| Combined validation | Changed-file syntax checks and PHPStan passed; full MySQL/MariaDB application suites are running. No passing combined result is claimed until their completion. |
+| Distribution and upgrade | Exact signed ZIP fresh installs and populated 1.4.0 upgrades passed on MySQL and MariaDB, including repeat packaged upgrade execution, unchanged history/balances and all 61 migration receipts. Byte-identical reproduction and 13 package-builder tests passed. No new migration or schema change. |
+| Website and resources | Both resource generators passed check mode. Local website build/content check: 102 pages, zero errors/warnings. Release/download pages passed three browser widths. Wiki draft prepared and About reviewed unchanged. |
+| Publication | Separate authorization required. Signed archive, checksum and website metadata prepared locally; no patch upload, website/demo cutover or issue closure claimed. No media kit for this patch. |
 
 Historical validation records below retain their original scope and do not establish acceptance of this candidate. Independent accounting/security review, native translation review, provider acceptance and real-business pilots remain separate assurance work.
 

@@ -2,7 +2,7 @@
 
 > PHP Ledger is open-source, self-hosted double-entry accounting software for small businesses. It brings invoices, bills, payments, stock, reconciliation and reports together with reviewed payroll accruals, loan schedules and period/year-end workflows. Run it on PHP 8.2+ with MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+. Use the browser installer, your own hosting and publisher-verified releases. Independent review and real-business acceptance remain separate gates.
 
-Current stable release: 1.4.0. PHP 8.2+ (8.3 recommended), MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
+Current stable release: 1.4.1. PHP 8.2+ (8.3 recommended), MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates.
 
 New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-adoption 0.1.0 through 0.1.5 previews retain MIT; dependencies and archived code keep their own terms.
 
@@ -83,7 +83,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [How do opening balances and cutover work?](https://phpledger.com/learn/opening-balances-and-cutover/): Plan a reconciled move to a new ledger with opening balances, unpaid-document schedules, a clear cutoff and no duplicate recognition.
 - [Profit and loss versus balance sheet: what is the difference?](https://phpledger.com/learn/profit-and-loss-vs-balance-sheet/): Compare a period’s profit with financial position at a date, using original cash, borrowing and owner-funding examples.
 - [What does a trial balance prove?](https://phpledger.com/learn/trial-balance/): Read a trial balance, check a fictional 1,000.00 example, and distinguish balanced arithmetic from complete and correctly classified books.
-- [News](https://phpledger.com/news/): Follow PHP Ledger releases, including 1.3.0: the installer demo, payroll and year-end workflows, optional sample packages and clear release limits.
+- [News](https://phpledger.com/news/): Follow PHP Ledger releases, including 1.4.1: consistent date selectors, clearer forms and focused workflow repairs.
 - [0.1.0-preview](https://phpledger.com/news/0-1-0-preview/): The first PHP Ledger evaluation package includes company setup, receipts, expenses, balanced journals, reports and a sample cash point of sale.
 - [0.1.3-preview](https://phpledger.com/news/0-1-3-preview/): Evaluate visible running balances, reviewed opening cutover, bank reconciliation, CSV exports and owner-controlled POS modules in PHP Ledger 0.1.3-preview.
 - [0.1.4-preview](https://phpledger.com/news/0-1-4-preview/): Profit & Loss and Balance Sheet panels fit without horizontal scrolling. Account ledgers keep running balances and filters visible on tablets.
@@ -101,6 +101,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [1.1.3](https://phpledger.com/news/1-1-3/): PHP Ledger 1.1.3 fixes the in-app updater. An installation on 1.1.2 can install it from /maintenance.php; older ones use the manual procedure.
 - [1.3.0](https://phpledger.com/news/1-3-0/): Try the real installer, explore payroll and loan drafts, review year end, and install optional sample packages in PHP Ledger 1.3.0. See the scope and limits.
 - [1.4.0](https://phpledger.com/news/1-4-0/): Choose warning or strict balance controls, select linked payers and payees, and explore fictional company histories in PHP Ledger 1.4.0.
+- [1.4.1](https://phpledger.com/news/1-4-1/): Type dates in DD/MM/YYYY, choose dates with a shared calendar, and use clearer account, employee and sample setup forms in PHP Ledger 1.4.1.
 - [Point of sale](https://phpledger.com/point-of-sale/): An optional cash POS for small counters: cart, cash and change, printable receipt and one balanced journal. No stock, tax or card payments at the counter yet.
 - [Pricing and licence](https://phpledger.com/pricing/): PHP Ledger is free under AGPL-3.0-or-later. A commercial licence and paid installation, training and pilot services are available on request; no hidden prices.
 - [Privacy](https://phpledger.com/privacy/): How PHP Ledger handles shared demo sessions, optional installation notices, private registration and operational logs.

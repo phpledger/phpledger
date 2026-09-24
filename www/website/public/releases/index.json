@@ -1,15 +1,15 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-23T00:00:00Z",
+  "generated_at": "2026-09-24T00:00:00Z",
   "channels": {
     "stable": {
-      "version": "1.4.0",
+      "version": "1.4.1",
       "channel": "stable",
-      "published_at": "2026-09-23",
-      "notes": "https://github.com/phpledger/phpledger/releases/tag/v1.4.0",
-      "zip": "https://github.com/phpledger/phpledger/releases/download/v1.4.0/phpledger-1.4.0.zip",
-      "sha256": "53c7fc584bd47723a6f6008a8a951db9b3947dae956484c8bf3b889ce2fad4d2",
-      "update_json": "https://phpledger.com/releases/1.4.0.update.json",
+      "published_at": "2026-09-24",
+      "notes": "https://github.com/phpledger/phpledger/releases/tag/v1.4.1",
+      "zip": "https://github.com/phpledger/phpledger/releases/download/v1.4.1/phpledger-1.4.1.zip",
+      "sha256": "29e3f33265f23a64bccc5dfeca4b8f512467fa9c7e6306e4096c7d5ff85f2b96",
+      "update_json": "https://phpledger.com/releases/1.4.1.update.json",
       "min_php": "8.2.0",
       "databases": [
         "mysql:8.0.19",
@@ -19,12 +19,17 @@
         "mariadb:10.11",
         "mariadb:11.4"
       ],
-      "image": "ghcr.io/phpledger/phpledger@sha256:a170945385c9cd2dc604d1a2c6889ad7af02b64cbd8b0c3d6bb49c9afcf2edf9",
+      "image": null,
       "min_client": null
     },
     "preview": null
   },
   "history": [
+    {
+      "version": "1.4.1",
+      "channel": "stable",
+      "published_at": "2026-09-24"
+    },
     {
       "version": "1.4.0",
       "channel": "stable",

@@ -6,13 +6,13 @@ Owner-approved local implementation, 24 September 2026. This is a bounded patch 
 
 | Work item | Implementation and acceptance boundary |
 |---|---|
-| Shared date selectors | In progress: progressive DD/MM/YYYY entry and keyboard-accessible calendars across date fields; retain ISO submission, native fallback and authoritative server validation. Verify ordinary, dynamically added and invalid form values at desktop/tablet/phone sizes. |
-| Employee DOB, #105 | Implemented locally: optional DOB may not follow today or hire date on create/edit. Existing rows remain unchanged until explicit edit. Service and HTTP regression coverage added; database execution pending. |
-| Invoice/bill line accounts, #106 | Implemented locally: shared active/eligible/postable policy for line choices, draft save, preview and final posting. Derive leaf status using all book codes, including inactive children; leave general nonposting lists intact. Regression coverage added; database execution pending. |
-| Required inputs, #107 | In progress: consistent visible and assistive required indicators using existing field requirements. Preserve optional inputs and retained validation values. |
+| Shared date selectors | Implemented locally: progressive DD/MM/YYYY entry and keyboard-accessible calendars across date fields; retain ISO submission, native fallback and authoritative server validation. Verify ordinary, dynamically added and invalid form values at desktop/tablet/phone sizes. |
+| Employee DOB, #105 | Implemented locally: optional DOB may not follow today or hire date on create/edit. Existing rows remain unchanged until explicit edit. Service and HTTP regression coverage added; targeted database suites passed; full combined gates are recorded separately. |
+| Invoice/bill line accounts, #106 | Implemented locally: shared active/eligible/postable policy for line choices, draft save, preview and final posting. Derive leaf status using all book codes, including inactive children; leave general nonposting lists intact. Regression coverage added; targeted database suites passed; full combined gates are recorded separately. |
+| Required inputs, #107 | Implemented locally: consistent visible and assistive required indicators using existing field requirements. Preserve optional inputs and retained validation values. |
 | Sample completion | Local correction: distinguish full fictional history from structure-only setup and show actual scoped journal/draft counts. Acceptance must cover both paths and revisiting completion after activity. |
 | Receipt/expense navigation | Local correction: remove the duplicate combined navigation destination and retain separate Receipt/Expense workflows and legacy route compatibility. Selection and permissions need browser acceptance. |
-| Phone layouts | In progress: bounded form/report layout fixes, with usable actions and confined report scrolling. No claim of a complete application redesign or universal mobile acceptance. |
+| Phone layouts | Implemented locally: bounded form/report layout fixes, with usable actions and confined report scrolling. No claim of a complete application redesign or universal mobile acceptance. |
 | Credential documentation, #102 | Local guidance in `docs/CREDENTIALS.md`, linked from security/release instructions. Explain provider revocation, secure replacement, artifact/access review and private incident records; make no live rotation or remediation claim. |
 | Prior issues #71, #100, #104 | Acceptance candidates only. Use the [issue audit](../repository/RELEASE-1.4.1-ISSUES.md) to verify each specific requirement and publication boundary; do not close an issue on implementation claims alone. |
 
@@ -31,4 +31,4 @@ The owner has preserved **1.5 maintenance → 1.6 maintenance → 1.7 deferred f
 
 ## Evidence at preparation time
 
-Employee and AR/AP changes passed native PHP syntax checks and scoped diff checks. Regression tests are present, but combined database, browser and exact-package results remain pending coordinator verification. No patch publication, production change or new credential exposure is claimed. See [Validation](../VALIDATION.md) for the current gate ledger; historical release receipts are not evidence that this candidate passed.
+The shared date component, scoped browser recovery/navigation, resource generators, website and exact-package installation/upgrade gates passed. Full application suites and isolated demo verification are in progress. Follow the [exact-artifact gate record](../repository/RELEASE-1.4.1-GATES.md) for final results and outstanding acceptance. No patch publication or production change is claimed. Historical release receipts do not establish this candidate's acceptance.
