@@ -144,7 +144,7 @@ function pl_install_database_input(array $input): array
     }
     return pl_database_configuration(['host' => $host, 'port' => (int) $port, 'database' => $database, 'user' => $user, 'password' => $password,
         'db_prefix' => $get('db_prefix') ?: 'pl_', 'db_ssl_ca' => $get('db_ssl_ca'),
-        'db_ssl_cert' => $get('db_ssl_cert'), 'db_ssl_key' => $get('db_ssl_key'), 'db_ssl_verify' => $input['db_ssl_verify'] ?? true]);
+        'db_ssl_cert' => $get('db_ssl_cert'), 'db_ssl_key' => $get('db_ssl_key'), 'db_ssl_verify' => true]);
 }
 
 function pl_install_database_identity(array $config): string
@@ -322,6 +322,43 @@ function pl_install_verify_runtime(array $config): void
 }
 
 /**
+ * Whether PHP may create the private settings file where it belongs. Decides between writing it
+ * silently after the build and showing the owner the step that places it by hand.
+ */
+function pl_install_config_writable(): bool
+{
+    $path = pl_install_config_path();
+    if (is_file($path)) {
+        return true;
+    }
+    $directory = dirname($path);
+    return is_dir($directory) && is_writable($directory);
+}
+
+/** The runtime identity, verified and complete with its key directory; the caller holds the locks. */
+function pl_install_prepare_runtime(array $runtimeConfig): array
+{
+    $runtimeConfig['oauth_key_directory'] = pl_install_private_path((string) (getenv('PL_OAUTH_KEY_DIRECTORY') ?: ($runtimeConfig['oauth_key_directory'] ?? pl_install_directory() . '/oauth')));
+    $runtimeConfig['installation_directory'] = pl_install_directory();
+    pl_install_verify_runtime($runtimeConfig);
+    pl_install_check_existing_configuration($runtimeConfig);
+    pl_install_oauth_keys((string) $runtimeConfig['oauth_key_directory']);
+    return $runtimeConfig;
+}
+
+/** Publish the private settings file (never over an existing one) and move setup to the account step. */
+function pl_install_publish_configuration(array $runtimeConfig, array &$state): array
+{
+    $runtimeConfig = pl_install_prepare_runtime($runtimeConfig);
+    if (!is_file(pl_install_config_path())) {
+        pl_install_write_private(pl_install_config_path(), pl_install_config_document($runtimeConfig), false);
+    }
+    $state['phase'] = 'account';
+    pl_install_save_state($state);
+    return $runtimeConfig;
+}
+
+/**
  * Complete setup through the existing account service; retries cannot replace an account.
  * The owner chooses a username as well as an email address and may sign in with either.
  */
@@ -430,7 +467,7 @@ function pl_install_http(): never
     // The progress bar's width is the one value that cannot be a class. It is served in a
     // <style> element carrying this nonce, so inline style attributes stay forbidden.
     $styleNonce = rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
-    header("Content-Security-Policy: default-src 'none'; style-src 'self' 'nonce-" . $styleNonce . "'; img-src 'self'; font-src 'self'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+    header("Content-Security-Policy: default-src 'none'; style-src 'self' 'nonce-" . $styleNonce . "'; img-src 'self' blob:; font-src 'self'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
     header('Content-Type: text/html; charset=utf-8');
     $error = '';
     $view = 'locked';
@@ -447,6 +484,7 @@ function pl_install_http(): never
     $requirements = [];
     $databasePorts = [];
     $completion = [];
+    $signIn = [];
     $completed = false;
     try {
         if (!in_array($_SERVER['REQUEST_METHOD'] ?? '', ['GET', 'POST'], true)) {
@@ -514,7 +552,7 @@ function pl_install_http(): never
                 $runtimeConfig = $_SESSION['install_runtime'] ?? null;
                 if (is_array($sessionConfig) && is_array($runtimeConfig)) {
                     $view = match ($state['phase'] ?? '') {
-                        'review' => 'review', 'migrating' => 'migrating', 'configuration' => 'configuration', 'account' => 'account', default => 'database',
+                        'review' => 'migrating', 'migrating' => 'migrating', 'configuration' => 'configuration', 'account' => 'account', default => 'database',
                     };
                 } elseif (empty($_SESSION['install_started'])) {
                     // The first screen says what this will do and shows the checks; nothing is
@@ -592,26 +630,27 @@ function pl_install_http(): never
                             if ($schema['status'] === 'current') {
                                 $state['phase'] = 'configuration';
                                 pl_install_save_state($state);
+                                // The private settings file is written here, without a click, wherever the
+                                // server allows it (owner review, 26 September 2026). A host that refuses
+                                // gets its own step with the instructions for that kind of host.
+                                if (pl_install_config_writable()) {
+                                    $runtimeConfig = pl_install_publish_configuration($runtimeConfig, $state);
+                                    $_SESSION['install_runtime'] = $runtimeConfig;
+                                }
                             }
                         } elseif ($action === 'save_config' || $action === 'download_config') {
                             $runtimeConfig['public_url'] = pl_install_public_url(pl_shared_demo_enabled() ? pl_shared_demo_public_url() : pl_web_text($_POST, 'public_url', (string) ($runtimeConfig['public_url'] ?? '')));
-                            $runtimeConfig['oauth_key_directory'] = pl_install_private_path((string) (getenv('PL_OAUTH_KEY_DIRECTORY') ?: ($runtimeConfig['oauth_key_directory'] ?? pl_install_directory() . '/oauth')));
-                            $runtimeConfig['installation_directory'] = pl_install_directory();
                             $_SESSION['install_runtime'] = $runtimeConfig;
-                            pl_install_verify_runtime($runtimeConfig);
-                            pl_install_check_existing_configuration($runtimeConfig);
-                            pl_install_oauth_keys((string) $runtimeConfig['oauth_key_directory']);
                             if ($action === 'download_config') {
+                                $runtimeConfig = pl_install_prepare_runtime($runtimeConfig);
+                                $_SESSION['install_runtime'] = $runtimeConfig;
                                 header('Content-Type: application/octet-stream');
                                 header('Content-Disposition: attachment; filename="config.local.php"');
                                 echo pl_install_config_document($runtimeConfig);
                                 exit;
                             }
-                            if (!is_file(pl_install_config_path())) {
-                                pl_install_write_private(pl_install_config_path(), pl_install_config_document($runtimeConfig), false);
-                            }
-                            $state['phase'] = 'account';
-                            pl_install_save_state($state);
+                            $runtimeConfig = pl_install_publish_configuration($runtimeConfig, $state);
+                            $_SESSION['install_runtime'] = $runtimeConfig;
                         } else {
                             $password = pl_shared_demo_enabled() ? pl_shared_demo_account()['password'] : (is_string($_POST['password'] ?? null) ? $_POST['password'] : '');
                             if (!pl_shared_demo_enabled() && !hash_equals($password, is_string($_POST['password_confirm'] ?? null) ? $_POST['password_confirm'] : '')) {
@@ -619,15 +658,18 @@ function pl_install_http(): never
                             }
                             require_once __DIR__ . '/branding_functions.php';
                             require_once __DIR__ . '/installation_notice_functions.php';
-                            if (!pl_shared_demo_enabled() && pl_web_text($_POST,'register_installation')==='1') {
-                                if (pl_web_text($_POST,'installation_notice')!=='1') { throw new DomainException('Enable the installation notice to register, or leave both choices off.'); }
-                                pl_install_notice_registration(['name'=>pl_web_text($_POST,'name'),'email'=>pl_web_text($_POST,'email'),'site'=>pl_web_text($_POST,'registration_site'),'company'=>pl_web_text($_POST,'registration_company')]);
-                            }
                             $logo = pl_logo_from_upload($_FILES['logo'] ?? null);
                             $user = pl_install_finish($sessionConfig, $runtimeConfig, pl_web_text($_POST, 'email'), pl_web_text($_POST, 'name'), $password, $state, pl_web_text($_POST, 'username'), $logo);
-                            pl_install_notice_after_setup($_POST);
+                            // The anonymous installation notice is no longer a checkbox on this form (owner
+                            // decision, 26 September 2026, amending B16): it is sent for every installation
+                            // and its failure never affects setup. Name and email registration is a separate,
+                            // later choice under Updates and privacy.
+                            pl_install_notice_after_setup(['installation_notice' => '1']);
+                            $signIn = ['url' => rtrim((string) ($runtimeConfig['public_url'] ?? ''), '/') . '/login',
+                                'username' => pl_shared_demo_enabled() ? pl_shared_demo_account()['username'] : pl_normalize_username(pl_web_text($_POST, 'username')),
+                                'email' => (string) $user['email']];
                             // Itemise what was built before the setup session is cleared.
-                            $completion = pl_install_completion_lines(pl_shared_demo_enabled() ? pl_shared_demo_account()['username'] : pl_web_text($_POST, 'username'), pl_install_database_check());
+                            $completion = pl_install_completion_lines(pl_shared_demo_enabled() ? pl_shared_demo_account()['username'] : pl_normalize_username(pl_web_text($_POST, 'username')), pl_install_database_check());
                             // 1.2 M7 made a sign-in durable: a server-side session row, not just the
                             // cookie, is what pl_current_user_id() accepts. pl_login_session() only
                             // opens that row when pl_session_open() exists, and it lives in
@@ -649,8 +691,7 @@ function pl_install_http(): never
                 }
                 if (!$completed && is_array($sessionConfig) && is_array($runtimeConfig)) {
                     $schema = pl_install_check_target($sessionConfig, $state);
-                    $view = $schema['status'] === 'current' ? (is_file(pl_install_config_path()) ? 'account' : 'configuration')
-                        : (($state['phase'] ?? '') === 'review' ? 'review' : 'migrating');
+                    $view = $schema['status'] === 'current' ? (is_file(pl_install_config_path()) ? 'account' : 'configuration') : 'migrating';
                 }
                 if ($view === 'database') {
                     // Only this screen needs it, and each probe is a bounded loopback connect.

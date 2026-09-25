@@ -39,7 +39,7 @@ Enter the values below and click **Check database**. Expect **Database connected
 
 Click **Install database** and keep the tab open. Click **Continue installation** if asked. At **Database checks**, click **Save private configuration**. If saving fails, expand **My host does not allow PHP to write this file** and follow its instructions; delete the downloaded copy afterward.
 
-At **Create your sign-in account**, enter your name, username, email, and a password of at least 12 characters; confirm it. The notice and registration settings are optional. Click **Finish and create your business**.
+At **Create your sign-in account**, enter your name, username, email, and a password of at least 6 characters (the eye shows what you typed; **Generate a password** fills both boxes). A logo is optional. Click **Finish and create your business**.
 
 **Finished:** the page says **Your installation is complete.** You are signed in. Click **Set up your first business** when ready. Choose **New business** if starting from scratch or **Bring past records** if you already have books, then **Continue**. Keep the installer's private maintenance key with your private backups for recovery or updates; it is separate from your sign-in password.
 

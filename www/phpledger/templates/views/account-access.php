@@ -35,7 +35,7 @@ $accessInput = $form['input'];
             <?php else: ?>
                 <div class="field"><label for="access-sign-in-name"><?= pl_e(pl_t('Your email address or username')) ?></label><input class="input" id="access-sign-in-name" name="sign_in_name" maxlength="254" required value="<?= pl_e(pl_web_text($accessInput, 'sign_in_name')) ?>"></div>
             <?php endif; ?>
-            <div class="field"><label for="access-password"><?= pl_e(pl_t('Password')) ?></label><input class="input" id="access-password" name="password" type="password" autocomplete="new-password" required><p class="field-hint"><?= pl_e(pl_t('Between 12 and 72 characters.')) ?></p></div>
+            <div class="field"><label for="access-password"><?= pl_e(pl_t('Password')) ?></label><input class="input" id="access-password" name="password" type="password" autocomplete="new-password" required><p class="field-hint"><?= pl_e(pl_t('Between 6 and 72 characters; longer is safer.')) ?></p></div>
             <div><button class="btn btn-primary" type="submit"><?= pl_e($mode === 'invitation' ? pl_t('Accept and continue') : pl_t('Set password')) ?></button></div>
         </form>
     </div>

@@ -136,7 +136,7 @@ Keep **every supplied migration**, including earlier applied versions. The runne
 
 ## 5. Alternate CLI path: create the initial user
 
-Choose a unique password between **12 and 72 bytes**. The command accepts it through stdin, not a password argument. This Bash example prompts without echoing the password or putting it in shell history; turn off shell tracing before using it:
+Choose a unique password between **6 and 72 bytes** (longer is safer). The command accepts it through stdin, not a password argument. This Bash example prompts without echoing the password or putting it in shell history; turn off shell tracing before using it:
 
 ```bash
 set +x

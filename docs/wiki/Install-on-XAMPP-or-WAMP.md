@@ -35,7 +35,7 @@ Click **Install database**. Keep the tab open while **Preparing your database** 
 
 ## 6. Create your account
 
-Enter your name, username, email, and a password of at least 12 characters; type it again. The installation notice and registration checkboxes are optional. Click **Finish and create your business**.
+Enter your name, username, email, and a password of at least 6 characters; type it again (the eye shows what you typed; **Generate a password** fills both boxes). A logo is optional. Click **Finish and create your business**.
 
 **Finished:** the page says **Your installation is complete.** You are signed in. Click **Set up your first business** when ready. Choose **New business** if starting from scratch or **Bring past records** if you already have books, then **Continue**. Business setup can be finished later. Keep the installer's private maintenance key with your private backups for recovery or updates; it is separate from your sign-in password.
 

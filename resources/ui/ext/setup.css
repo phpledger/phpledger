@@ -274,3 +274,92 @@
     .bench-tray.is-labelled .tray-slot span { display: none; }
   }
 }
+
+/* Setup as one centred column (owner review of 25-26 September 2026, docs/design/setup-1.4.5).
+   The installer keeps the Workbench pieces it still uses (tray, tiles, rail, progress, manifest)
+   and gains a card, a twelve-column field grid, anchored help, a password eye, a drop zone, the
+   step that places the settings file by hand and the sign-in card. Tokens only; no new colours. */
+@layer components {
+  /* .install-frame.wp-frame beats the foundation's .install-frame rules, which come later in the same layer. */
+  .install-frame.wp-frame { padding: 1rem 1.5rem .875rem; gap: 0; align-items: center; }
+  .wp-shell { inline-size: 100%; max-inline-size: 820px; display: flex; flex-direction: column; gap: .75rem; }
+  .wp-shell.is-wide { max-inline-size: 1120px; }
+  .wp-chrome { min-block-size: 30px; }
+  .wp-chrome .bench-logo { height: 24px; }
+  .wp-step { font-size: 11.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .wp-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: 1rem 1.375rem .9375rem; display: flex; flex-direction: column; gap: .8125rem; }
+  .wp-title-row { display: flex; align-items: center; gap: .375rem; }
+  .wp-title-row .bench-heading { margin: 0; }
+  .wp-head .bench-sub { margin-block-start: .2rem; }
+  .wp-frame .bench-body { gap: .625rem; }
+  .wp-frame .bench-actions { border-block-start: 1px solid var(--border); padding-block-start: .75rem; }
+  .wp-frame .bench-tray.is-labelled .tray-slot { min-inline-size: 5rem; block-size: 22px; }
+  .wp-frame .bench-tray.is-labelled .tray-slot .icon { width: 10px; height: 10px; margin-inline-end: 2px; }
+  .install-frame.wp-frame .field-label::before { content: none; }
+  .wp-frame .field-label .required-marker { margin-inline-start: 1px; }
+  .install-frame.wp-frame .field-hint { font-size: 11.5px; }
+  .wp-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: .625rem .75rem; }
+  .span-12 { grid-column: span 12; } .span-8 { grid-column: span 8; } .span-6 { grid-column: span 6; }
+  .span-4 { grid-column: span 4; } .span-3 { grid-column: span 3; } .span-2 { grid-column: span 2; }
+  .wp-frame .field > .inline-heading { margin-block-end: .25rem; }
+  .wp-frame .help > summary { inline-size: 1.125rem; block-size: 1.125rem; font-size: .625rem; margin-inline-start: .125rem; }
+  .wp-title-row .help > summary, .wp-title-row .page-help .help > summary { inline-size: 1.5rem; block-size: 1.5rem; font-size: .75rem; }
+  .help-bubble .link { font-size: .75rem; }
+  .wp-note { display: flex; align-items: flex-start; gap: .5rem; font-size: 12px; line-height: 1.5; color: var(--brand-navy); background: var(--brand-selected); border: 1px solid color-mix(in oklab, var(--brand-blue) 25%, transparent); border-radius: 8px; padding: .5rem .75rem; margin: 0; }
+  .wp-note .icon { width: 14px; height: 14px; flex: none; margin-block-start: 2px; }
+  .wp-note.is-plain { background: var(--surface-subtle); border-color: var(--border); color: var(--ink-muted); }
+  .wp-note .link { font-size: 12px; }
+  .affix-btn { position: absolute; inset-inline-end: .3125rem; inset-block-start: 50%; transform: translateY(-50%); inline-size: 26px; block-size: 26px; border: 0; background: none; color: var(--ink-faint); cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+  .affix-btn:hover { color: var(--ink); background: var(--surface-subtle); }
+  .affix-btn .icon { width: 16px; height: 16px; }
+  .affix-btn span { display: contents; }
+  .affix-btn [hidden] { display: none; }
+  .pw-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-block-start: .375rem; }
+  .pw-strength { display: inline-flex; align-items: center; gap: .375rem; font-size: 11.5px; color: var(--ink-muted); }
+  .pw-strength .meter { inline-size: 64px; block-size: 5px; border-radius: 999px; background: var(--surface-subtle); border: 1px solid var(--border); overflow: hidden; }
+  .pw-strength .meter-fill { display: block; block-size: 100%; inline-size: 25%; background: var(--danger); }
+  .pw-strength.is-fair .meter-fill { inline-size: 55%; background: var(--warning); }
+  .pw-strength.is-strong .meter-fill { inline-size: 100%; background: var(--success); }
+  .btn-primary.is-ready { background: var(--success); }
+  .btn-primary.is-ready:hover { background: color-mix(in oklab, var(--success) 88%, black); }
+  .wp-details { border: 1px solid var(--border); border-radius: 8px; background: var(--surface-subtle); }
+  .wp-details > summary { cursor: pointer; padding: .5rem .75rem; font-size: 12px; font-weight: 600; color: var(--ink); list-style: none; display: flex; align-items: center; gap: .5rem; }
+  .wp-details > summary::-webkit-details-marker { display: none; }
+  .wp-details > summary .icon { width: 14px; height: 14px; color: var(--ink-faint); transition: transform .12s ease; }
+  .wp-details[open] > summary .icon { transform: rotate(180deg); }
+  .wp-details > summary .optional { margin-inline-start: auto; font-weight: 400; }
+  .wp-details-body { padding: 0 .75rem .625rem; display: flex; flex-direction: column; gap: .5rem; }
+  .wp-details-body .wp-grid { gap: .375rem .75rem; }
+  .dropzone { display: flex; align-items: center; gap: .75rem; border: 1.5px dashed var(--border-strong); border-radius: 8px; padding: .5rem .75rem; background: var(--surface); }
+  .dropzone.is-over { border-color: var(--brand-blue); background: var(--brand-selected); }
+  .dropzone-preview { inline-size: 44px; block-size: 44px; border-radius: 6px; background: var(--surface-subtle); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--ink-faint); flex: none; overflow: hidden; }
+  .dropzone-preview img { max-inline-size: 100%; max-block-size: 100%; }
+  .dropzone-preview .icon { width: 18px; height: 18px; }
+  .dropzone-text { font-size: 12px; color: var(--ink-muted); line-height: 1.45; }
+  .dropzone-text strong { color: var(--ink); font-weight: 600; }
+  .dropzone .btn { margin-inline-start: auto; flex: none; }
+  .build-fact { display: flex; align-items: center; gap: .625rem; font-size: 13px; color: var(--ink); flex-wrap: wrap; }
+  .build-fact .reward-badge { margin: 0; }
+  .build-fact .snip { font-size: 12px; }
+  .build-fact .muted { color: var(--ink-muted); }
+  .wp-frame .progress-wrap { max-inline-size: none; gap: 1rem; flex: none; }
+  .env-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .875rem; margin: 0; }
+  .env-facts div { display: flex; flex-direction: column; gap: 2px; }
+  .env-facts dt { font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); font-weight: 600; }
+  .env-facts dd { margin: 0; font-size: 12.5px; color: var(--ink); overflow-wrap: anywhere; }
+  .env-facts dd .snip { font-size: 11px; }
+  .wp-frame .fix-item { font-size: 12.5px; }
+  .done-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 1rem; align-items: start; }
+  .done-split .manifest-card { inline-size: auto; }
+  .signin-card { background: var(--brand-selected); border: 1px solid color-mix(in oklab, var(--brand-blue) 25%, transparent); border-radius: 12px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: .5rem; }
+  .signin-card h2 { margin: 0; font-size: 13px; color: var(--brand-navy); }
+  .signin-grid { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .3125rem .75rem; margin: 0; font-size: 12.5px; }
+  .signin-grid dt { color: var(--ink-muted); }
+  .signin-grid dd { margin: 0; color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
+  .signin-actions { display: flex; gap: .5rem; flex-wrap: wrap; padding-block-start: .25rem; }
+  .keep-safe { font-size: 11.5px; color: var(--ink-muted); line-height: 1.5; margin: 0; }
+  @media (max-width: 60rem) {
+    .wp-grid > [class*="span-"] { grid-column: span 12; }
+    .done-split, .env-facts { grid-template-columns: minmax(0, 1fr); }
+  }
+}

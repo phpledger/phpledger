@@ -248,6 +248,22 @@ function pl_install_environment(array $server = [], array $databasePorts = []): 
 }
 
 /**
+ * Which kind of host this is, for the instructions that place the private settings file by
+ * hand: a Windows stack (XAMPP, WAMP, Laragon), a container, or a hosting panel. A guess by
+ * evidence, never a gate: the page only chooses which wording to show first.
+ */
+function pl_install_environment_kind(): string
+{
+    if (PHP_OS_FAMILY === 'Windows') {
+        return 'windows';
+    }
+    if ((function_exists('pl_update_mode') && pl_update_mode() === 'container') || is_file('/.dockerenv')) {
+        return 'container';
+    }
+    return 'panel';
+}
+
+/**
  * Plain-language names for the schema steps, so the progress line says what is
  * being built rather than showing a file name. A step added later without an
  * entry here falls back to its own readable name.

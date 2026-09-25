@@ -1871,6 +1871,58 @@
       "destination": "resources/guidance/concepts/transaction-party.php"
     },
     {
+      "source": "resources/guidance/concepts/install-db-host.php",
+      "destination": "resources/guidance/concepts/install-db-host.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-name.php",
+      "destination": "resources/guidance/concepts/install-db-name.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-password.php",
+      "destination": "resources/guidance/concepts/install-db-password.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-port.php",
+      "destination": "resources/guidance/concepts/install-db-port.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-prefix.php",
+      "destination": "resources/guidance/concepts/install-db-prefix.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-tls.php",
+      "destination": "resources/guidance/concepts/install-db-tls.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-user.php",
+      "destination": "resources/guidance/concepts/install-db-user.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-email.php",
+      "destination": "resources/guidance/concepts/install-email.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-logo.php",
+      "destination": "resources/guidance/concepts/install-logo.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-password.php",
+      "destination": "resources/guidance/concepts/install-password.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-settings-file.php",
+      "destination": "resources/guidance/concepts/install-settings-file.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-site-address.php",
+      "destination": "resources/guidance/concepts/install-site-address.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-username.php",
+      "destination": "resources/guidance/concepts/install-username.php"
+    },
+    {
       "source": "resources/sample-structures/accounting-starter-1.1.0.json",
       "destination": "resources/sample-structures/accounting-starter-1.1.0.json"
     },
