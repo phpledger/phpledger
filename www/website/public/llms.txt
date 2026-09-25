@@ -104,7 +104,7 @@ New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-a
 - [1.4.1](https://phpledger.com/news/1-4-1/): Type dates in DD/MM/YYYY, choose dates with a shared calendar, and use clearer account, employee and sample setup forms in PHP Ledger 1.4.1.
 - [Point of sale](https://phpledger.com/point-of-sale/): An optional cash POS for small counters: cart, cash and change, printable receipt and one balanced journal. No stock, tax or card payments at the counter yet.
 - [Pricing and licence](https://phpledger.com/pricing/): PHP Ledger is free under AGPL-3.0-or-later. A commercial licence and paid installation, training and pilot services are available on request; no hidden prices.
-- [Privacy](https://phpledger.com/privacy/): How PHP Ledger handles shared demo sessions, optional installation notices, private registration and operational logs.
+- [Privacy](https://phpledger.com/privacy/): How PHP Ledger handles shared demo sessions, installation notices, private registration and operational logs.
 - [Product](https://phpledger.com/product/): Explore invoices, stock, payroll accruals, loan drafts, employee records and reviewed period/year-end workflows, with explicit limits and source-linked reports.
 - [Research](https://phpledger.com/research/): Read dated research on bookkeeping tools, PHP hosting and electronic invoicing, with primary sources, explicit evidence gaps and product boundaries.
 - [FBR digital invoicing](https://phpledger.com/research/fbr-digital-invoicing/): Understand FBR digital-invoicing evidence and verification gaps. PHP Ledger has manual tax configuration, with no FBR client or built-in country rules.

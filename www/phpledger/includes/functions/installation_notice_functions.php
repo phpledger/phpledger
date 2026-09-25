@@ -6,7 +6,11 @@ require_once __DIR__ . '/update_channel_functions.php';
 
 const PL_INSTALL_NOTICE_URL = 'https://phpledger.com/installations/notice';
 
-/** Existing installations stay silent until their administrator chooses a preference. */
+/**
+ * Every installation sends the anonymous notice (owner decision, 26 September 2026, amending
+ * B16). `enabled` stays in the file for state written by earlier releases and for the settings
+ * screen, but it no longer gates sending; only a shared demo stays silent.
+ */
 function pl_install_notice_state(): array
 {
     return pl_install_read_state('notice.json') + ['format'=>1, 'installation_id'=>'', 'enabled'=>false,
@@ -39,7 +43,9 @@ function pl_install_notice_choose(bool $enabled, ?array $registration): array
 {
     $lock=pl_install_operation_lock('notice.lock');
     try {
-    if (in_array(getenv('PL_ENV'),['demo','demo-install'],true)) { $enabled=false; $registration=null; }
+    // The anonymous notice cannot be switched off; the argument is kept for the callers and
+    // only a shared demo forces it off. Registration is the one remaining choice.
+    $enabled=!in_array(getenv('PL_ENV'),['demo','demo-install'],true);
     if (!$enabled) { $registration=null; }
     $registration=$registration===null?null:pl_install_notice_registration($registration);
     $state=pl_install_notice_state();
@@ -98,10 +104,13 @@ function pl_install_notice_send(string $event='install', ?callable $transport=nu
 {
     $lock=null;
     try {
+        if (in_array(getenv('PL_ENV'),['demo','demo-install'],true)
+            || ($transport===null && getenv('PL_ENV')!=='production' && getenv('PL_ENV')!==false)) { return false; }
+        // An installation that predates the notice, or never saved a preference, still counts:
+        // it receives its random identity here and sends on this event.
+        if (!preg_match('/^[a-f0-9]{32}$/D',(string)pl_install_notice_state()['installation_id'])) { pl_install_notice_choose(true,null); }
         $lock=pl_install_operation_lock('notice.lock');
         $state=pl_install_notice_state();
-        if (!$state['enabled'] || getenv('PL_INSTALL_NOTICE')==='0' || in_array(getenv('PL_ENV'),['demo','demo-install'],true)
-            || ($transport===null && getenv('PL_ENV')!=='production' && getenv('PL_ENV')!==false)) { return false; }
         $payload=pl_install_notice_payload($state,$event,trim((string)file_get_contents(dirname(__DIR__,2).'/VERSION')),
             pl_database_platform(pl_database_server_version()),PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION,PHP_OS_FAMILY,pl_update_mode(),gmdate('c'));
         $state['last_attempt']=gmdate('c');$state['status']='unavailable';
@@ -115,13 +124,14 @@ function pl_install_notice_send(string $event='install', ?callable $transport=nu
     finally { if(is_resource($lock)){flock($lock,LOCK_UN);fclose($lock);} }
 }
 
-/** Called only after the installer's final POST has successfully created its owner. */
-function pl_install_notice_after_setup(array $choice): void
+/**
+ * Called only after the installer's final POST has successfully created its owner. The notice is
+ * always sent; the installer no longer asks. Registration is never taken from the installer.
+ */
+function pl_install_notice_after_setup(array $choice = []): void
 {
     try {
-        $registration=($choice['register_installation']??'')==='1' ? pl_install_notice_registration([
-            'name'=>$choice['name']??'','email'=>$choice['email']??'','site'=>$choice['registration_site']??'', 'company'=>$choice['registration_company']??'']) : null;
-        pl_install_notice_choose(($choice['installation_notice']??'')==='1',$registration);
+        pl_install_notice_choose(true,null);
         pl_install_notice_send();
     } catch (Throwable $error) { /* Installation remains usable even when notice storage is unavailable. */ }
 }

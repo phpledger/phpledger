@@ -6049,13 +6049,13 @@
       "redirectStub": false,
       "indexable": true,
       "title": "Website, demo and installation notice privacy | PHP Ledger",
-      "descriptionLength": 118,
+      "descriptionLength": 109,
       "images": 6,
       "lazyImages": 4,
       "bytes": {
-        "html": 20505,
-        "eager": 335199,
-        "total": 423904
+        "html": 20689,
+        "eager": 335383,
+        "total": 424088
       },
       "budgets": {
         "eager": null,
@@ -6088,7 +6088,7 @@
         },
         {
           "file": "privacy/index.html",
-          "bytes": 20505
+          "bytes": 20689
         }
       ],
       "lazyAssets": [

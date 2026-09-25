@@ -62,7 +62,7 @@ Click **Check database**. You should see **Database connected.** Then:
 1. Click **Install database**. Keep the tab open while setup runs; click **Continue installation** if it asks.
 2. At **Database checks**, click **Save private configuration**.
 3. At **Create your sign-in account**, enter your name, username, email and a password of at least 6 characters. Enter the password again to confirm it (the eye shows what you typed). A logo is optional.
-4. The optional **Tell phpledger.com this copy was installed** box may appear selected. Uncheck it if you do not want it selected. The desktop recipe prevents that notice from being sent; leave the separate name-and-email registration box off unless you want to register.
+4. The account step says in one sentence that this copy tells phpledger.com it was installed (version, PHP and database engine, operating-system family; nothing about your books). There is no box to tick or untick.
 5. Click **Finish and create your business**. The page should say **Your installation is complete.** Click **Set up your first business** when you are ready to enter your business details.
 
 **Finished:** you are signed in with your new account and can open business setup. Choose **New business** if you are starting from scratch, or **Bring past records** if you already have books. Business setup can be finished later.

@@ -16,7 +16,6 @@ services:
       PL_DB_PASSWORD: ${PL_DB_PASSWORD:?Follow step 3 of the Docker Desktop guide first}
       PL_PUBLIC_URL: http://127.0.0.1:${PL_WEB_PORT:-18080}
       PL_AUTO_MIGRATE: "0"
-      PL_INSTALL_NOTICE: "0"
     volumes:
       - private:/var/lib/phpledger
     depends_on:
