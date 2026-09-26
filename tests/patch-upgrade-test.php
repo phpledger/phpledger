@@ -80,10 +80,13 @@ function patch_cleanup_owned(): void
 function patch_snapshot(): array
 {
     // The schema is dedicated to this fixture, so whole-table hashes are scoped to its records.
+    // The migration receipts are compared explicitly in patch_verify() (historical rows identical,
+    // the declared additions after them), so the snapshot holds the accounting and register tables
+    // only; hashing pl_schema_migrations here would refuse every patch that adds a migration.
     $tables = ['pl_users', 'pl_companies', 'pl_company_members', 'pl_books', 'pl_accounts', 'pl_periods',
         'pl_journals', 'pl_journal_lines', 'pl_parties', 'pl_documents', 'pl_ar_documents',
         'pl_ar_document_lines', 'pl_ar_document_actions', 'pl_ar_document_events',
-        'pl_open_items', 'pl_open_item_entries', 'pl_employees', 'pl_employee_audit', 'pl_schema_migrations'];
+        'pl_open_items', 'pl_open_item_entries', 'pl_employees', 'pl_employee_audit'];
     $snapshot = [];
     foreach ($tables as $table) {
         $rows = array_map(static fn(array $row): string => json_encode($row, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),

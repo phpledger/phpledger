@@ -1,0 +1,100 @@
+{
+  "status": "local_implementation_complete_publication_pending",
+  "baseline": "1.4.1 (codex/release-1.4.1, published archive 3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b)",
+  "application_source": "c5b4662748e35db7f0aa0f063dedb1531a675ccb",
+  "prepared_source": "c5b4662748e35db7f0aa0f063dedb1531a675ccb",
+  "archive": {
+    "path": ".cache/release-1.4.5/phpledger-1.4.5.zip",
+    "sha256": "fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c",
+    "bytes": 3635906,
+    "members": 1728
+  },
+  "migrations_added": [
+    "061_company_country"
+  ],
+  "schema_changed": true,
+  "secrets_exposed": false,
+  "production_changed": false,
+  "external_calls": [
+    "public download of the published 1.4.1 archive for the upgrade baseline (verified against the 1.4.1 gate receipt)",
+    "public image pulls (mysql:8.4, mariadb:10.11, php base, ghcr.io/phpledger/phpledger:1.4.1)"
+  ],
+  "publication_authorized": false,
+  "full_checks": {
+    "mysql": {
+      "tests": 708,
+      "failures": 0,
+      "phpstan": "pass"
+    },
+    "maria": {
+      "tests": 708,
+      "failures": 0,
+      "phpstan": "pass",
+      "php_lint_files": 420,
+      "php_lint_failures": 0
+    },
+    "samples": "valid"
+  },
+  "website_check": {
+    "pages": 102,
+    "errors": 0,
+    "warnings": 0
+  },
+  "exact_package_gates": {
+    "baseline_version": "1.4.1",
+    "candidate_version": "1.4.5",
+    "baseline_sha256": "3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b",
+    "candidate_sha256": "fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c",
+    "candidate_source_commit": "c5b4662748e35db7f0aa0f063dedb1531a675ccb",
+    "migration_files": 62,
+    "migrations_added": [
+      "061_company_country"
+    ],
+    "candidate_members": 1728,
+    "results": [
+      {
+        "engine": "mysql",
+        "host": "pl145-mysql",
+        "steps": [
+          "fresh_62_migrations_first_post",
+          "populated_1_4_1_seed",
+          "packaged_upgrade_1_applied_061_company_country",
+          "packaged_upgrade_2_no_op",
+          "historical_rows_and_balances_unchanged"
+        ]
+      },
+      {
+        "engine": "maria",
+        "host": "pl145-maria",
+        "steps": [
+          "fresh_62_migrations_first_post",
+          "populated_1_4_1_seed",
+          "packaged_upgrade_1_applied_061_company_country",
+          "packaged_upgrade_2_no_op",
+          "historical_rows_and_balances_unchanged"
+        ]
+      }
+    ],
+    "production_changed": false
+  },
+  "reproduction": "bytes",
+  "commits": [
+    "c0804987 mockup",
+    "e731a2d6 W1 installer",
+    "c9ffaa9d W2 notice",
+    "6c35ab15 W3 onboarding",
+    "c3353a97 W4 Home",
+    "50ae1169 country column (061)",
+    "8d4b8ab7 W5 shell",
+    "f253f2b4 W6 packages"
+  ],
+  "remaining": [
+    "Separate release authorization, tag, signing, publication and deployed acceptance",
+    "Website feed and site metadata, container image and catalogue updates at publication",
+    "Independent accounting/security and accessibility/native-language review"
+  ],
+  "signing": {
+    "performed": false,
+    "note": "The owner's offline signing step; nothing here holds key material."
+  }
+}
