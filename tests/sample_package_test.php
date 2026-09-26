@@ -93,7 +93,9 @@ test('package administration renders before company selection and protects direc
     try{
         for($i=0;$i<100;$i++){[$status,$html]=$request('/login');if($status!==0){break;}usleep(20000);}
         preg_match('/name="csrf" value="([a-f0-9]+)"/',$html,$m);[$status]=$request('/login',['email'=>$email,'password'=>$password,'csrf'=>$m[1]??'']);assert_true(in_array($status,[302,303],true));
-        [$status,$html]=$request('/packages');assert_same(200,$status,substr((string)file_get_contents($log),-500));assert_true(str_contains($html,'Sample companies'));assert_true(str_contains($html,'Refresh directory'));
+        [$status,$html]=$request('/packages');assert_same(200,$status,substr((string)file_get_contents($log),-500));assert_true(str_contains($html,'Sample companies'));
+        // 1.4.5: the directory is a tab of the same page (B97); the refresh control lives there.
+        [$status,$directory]=$request('/packages?tab=directory');assert_same(200,$status);assert_true(str_contains($directory,'Refresh directory'));assert_true(str_contains($directory,'Browse the sample directory'));
         [$status]=$request('/packages',['action'=>'sample_refresh','csrf'=>'invalid','company_id'=>0,'book_id'=>0]);assert_same(403,$status);
         assert_same(0,(int)DB::queryFirstField('SELECT COUNT(*) FROM pl_company_members WHERE user_id=%i',$actor));
     }finally{proc_terminate($server);proc_close($server);unlink($log);sample_package_test_cleanup($root);}

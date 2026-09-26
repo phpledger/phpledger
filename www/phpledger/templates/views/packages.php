@@ -5,7 +5,7 @@ declare(strict_types=1);
  * packages (B52, onboarding decision 7), read-only without `installation.admin` (B44, onboarding
  * decision 10), and a full-page confirmation before unverified code is installed (decision 9).
  *
- * @var array $company @var array $user @var bool $administers @var array $cards @var array $staged
+ * @var array|null $company @var array $user @var bool $administers @var array $cards @var array $staged
  * @var array|null $review @var array $acknowledgements @var bool $safe_mode @var array $history
  * @var array $form @var array $input
  */
