@@ -93,31 +93,34 @@ function pl_legal_form_default(?string $country): string
     return $profile['default'] === '' ? '' : pl_legal_form_key_prefix($country, $profile) . $profile['default'];
 }
 
-/** 'pk.' for a catalogued country, 'fr.' for any other real country, 'zz.' when no country is chosen. */
+/** 'pk.' for a catalogued country; the neutral list's keys are the canonical family keys themselves. */
 function pl_legal_form_key_prefix(?string $country, array $profile): string
 {
-    $code = is_string($country) && preg_match('/^[A-Za-z]{2}$/D', $country) ? strtoupper($country) : (string) $profile['code'];
-    return strtolower($code) . '.';
+    return $profile['code'] === 'ZZ' ? '' : strtolower((string) $profile['code']) . '.';
 }
 
 /** The catalogue row behind a stored key, with its country; null for a family key or an unknown one. */
 function pl_legal_form_entry(string $form): ?array
 {
+    $countries = pl_legal_form_catalogue()['countries'];
+    // A canonical family key is the neutral list's own entry: the country of registration is a
+    // column on the profile (migration 061), never part of the key.
+    if (isset(pl_legal_forms()[$form])) {
+        foreach ($countries['ZZ']['forms'] as $entry) {
+            if ($entry['key'] === $form) {
+                return $entry + ['country' => 'ZZ'];
+            }
+        }
+        return null;
+    }
     if (!preg_match('/^([a-z]{2})\.([a-z][a-z0-9_]{0,30})$/D', $form, $match)) {
         return null;
     }
-    $countries = pl_legal_form_catalogue()['countries'];
     $code = strtoupper($match[1]);
-    // A country the catalogue does not name keeps its code in front of a neutral form
-    // ('fr.private_limited'), so the country survives without a column of its own.
-    $source = $code;
-    if (!isset($countries[$code])) {
-        if (!function_exists('pl_country_options') || !isset(pl_country_options()[$code])) {
-            return null;
-        }
-        $source = 'ZZ';
+    if (!isset($countries[$code]) || $code === 'ZZ') {
+        return null;
     }
-    foreach ($countries[$source]['forms'] as $entry) {
+    foreach ($countries[$code]['forms'] as $entry) {
         if ($entry['key'] === $match[2]) {
             return $entry + ['country' => $code];
         }
@@ -184,7 +187,7 @@ function pl_legal_form_catalogue_for_script(): array
 {
     $out = [];
     foreach (pl_legal_form_catalogue()['countries'] as $code => $country) {
-        $prefix = strtolower((string) $code) . '.';
+        $prefix = (string) $code === 'ZZ' ? '' : strtolower((string) $code) . '.';
         $forms = [];
         foreach ($country['forms'] as $form) {
             $forms[] = ['key' => $prefix . $form['key'], 'family' => $form['family'], 'name' => $form['name'], 'guide' => pl_legal_form_guide($prefix . $form['key'])];

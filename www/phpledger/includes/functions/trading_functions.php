@@ -180,7 +180,7 @@ function pl_trading_policy_history(int $actorId, int $companyId): array
  */
 function pl_company_profile_fields(): array
 {
-    return ['legal_name', 'legal_form', 'registration_number', 'registration_authority',
+    return ['legal_name', 'legal_form', 'country_code', 'registration_number', 'registration_authority',
         'address_line1', 'address_line2', 'address_line3', 'phone', 'email', 'tax_registrations', 'footer_terms'];
 }
 
@@ -203,6 +203,8 @@ function pl_company_profile(int $actorId, int $companyId): array
     $profile['financial_year_end_day'] = $row && $row['financial_year_end_day'] !== null ? (int) $row['financial_year_end_day'] : null;
     $profile['financial_year_end'] = pl_financial_year_end_label($profile['financial_year_end_month'], $profile['financial_year_end_day']);
     $profile['legal_form_label'] = pl_legal_form_label($profile['legal_form']);
+    // The country of registration (migration 061): a fact printed and shown, never a rule.
+    $profile['country_name'] = $profile['country_code'] === '' ? '' : (pl_country_options()[$profile['country_code']] ?? $profile['country_code']);
     $profile['is_empty'] = $profile['is_empty'] && $profile['incorporation_date'] === null && $profile['financial_year_end_month'] === null;
     return $profile;
 }
@@ -212,12 +214,16 @@ function pl_save_company_profile(int $actorId, int $companyId, array $input): ar
     pl_demo_require_setup_action();
     $reason = pl_ledger_text($input['reason'] ?? null, 'Reason for this change', 500);
     $key = pl_request_key(pl_ledger_text($input['idempotency_key'] ?? null, 'Request key', 128));
-    $limits = ['legal_name' => 200, 'legal_form' => 40, 'registration_number' => 80, 'registration_authority' => 160,
+    $limits = ['legal_name' => 200, 'legal_form' => 40, 'country_code' => 2, 'registration_number' => 80, 'registration_authority' => 160,
         'address_line1' => 200, 'address_line2' => 200, 'address_line3' => 200,
         'phone' => 80, 'email' => 190, 'tax_registrations' => 300, 'footer_terms' => 2000];
     $data = [];
     foreach ($limits as $field => $limit) {
         $data[$field] = pl_ledger_text($input[$field] ?? '', ucfirst(str_replace('_', ' ', $field)), $limit, false);
+    }
+    $data['country_code'] = strtoupper($data['country_code']);
+    if ($data['country_code'] !== '' && !isset(pl_country_options()[$data['country_code']])) {
+        throw new DomainException('Choose a country from the list, or leave it empty.');
     }
     if ($data['email'] !== '' && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
         throw new DomainException('Enter a valid email address for the company profile, or leave it empty.');

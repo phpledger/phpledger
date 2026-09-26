@@ -201,7 +201,7 @@ function pl_home_getting_started(int $actorId, int $companyId, int $bookId, arra
         AND source_type NOT IN ('owner_transaction', 'opening_balance', 'opening_conversion', 'share_event', 'reversal')", $companyId, $bookId);
     $legalForm = (string) $profile['legal_form'];
     $family = pl_legal_form_family($legalForm);
-    $country = pl_legal_form_country($legalForm);
+    $country = (string) $profile['country_code'] !== '' ? (string) $profile['country_code'] : pl_legal_form_country($legalForm);
     $steps = [
         ['id' => 'profile', 'done' => $profileDone, 'facts' => ['legal_name' => (string) $profile['legal_name'], 'registration_number' => (string) $profile['registration_number'],
             'tax_registrations' => (string) $profile['tax_registrations'], 'labels' => pl_legal_form_country_profile($country)['labels']]],

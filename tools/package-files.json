@@ -2047,6 +2047,10 @@
       "destination": "www/phpledger/install/migrations/060_cash_balance_policy.php"
     },
     {
+      "source": "www/phpledger/install/migrations/061_company_country.php",
+      "destination": "www/phpledger/install/migrations/061_company_country.php"
+    },
+    {
       "source": "www/phpledger/public/assets/date-picker.js",
       "destination": "www/phpledger/public/assets/date-picker.js"
     },

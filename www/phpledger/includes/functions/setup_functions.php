@@ -413,7 +413,7 @@ function pl_setup_extras(array $input, array $canonical): array
     $extras = ['country_code' => '', 'legal_form' => '', 'profile' => [], 'owners' => [], 'money_accounts' => [],
         'features' => [], 'account_names' => [], 'cash_policy' => 'warning'];
     $country = strtoupper(pl_ledger_text($input['country_code'] ?? '', 'Country', 2, false));
-    if ($country !== '' && !preg_match('/^[A-Z]{2}$/D', $country)) {
+    if ($country !== '' && !isset(pl_country_options()[$country])) {
         throw new DomainException('Choose a country from the list, or leave it empty.');
     }
     $form = pl_ledger_text($input['legal_form'] ?? '', 'Legal form', 40, false);
@@ -608,9 +608,9 @@ function pl_setup_apply_extras(int $actorId, int $companyId, int $bookId, array 
     $prefix = 'st:' . $requestKey . ':';
 
     // 1. The registration profile: what invoices and receipts print.
-    if ($extras['legal_form'] !== '' || $extras['profile'] !== []) {
+    if ($extras['legal_form'] !== '' || $extras['country_code'] !== '' || $extras['profile'] !== []) {
         $before = pl_company_profile($actorId, $companyId);
-        pl_save_company_profile($actorId, $companyId, $extras['profile'] + ['legal_form' => $extras['legal_form'],
+        pl_save_company_profile($actorId, $companyId, $extras['profile'] + ['legal_form' => $extras['legal_form'], 'country_code' => $extras['country_code'],
             'revision' => (int) $before['revision'], 'reason' => $reason, 'idempotency_key' => $prefix . 'profile']);
     }
 

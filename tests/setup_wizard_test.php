@@ -53,17 +53,16 @@ test('legal forms speak each country\'s own words and resolve to the families th
     assert_same('', pl_legal_form_default('FR'), 'A country outside the catalogue pre-selects nothing.');
     assert_same('', pl_legal_form_default(null));
     assert_same('ZZ', pl_legal_form_country_profile('FR')['code']);
-    // A country the catalogue does not name keeps its code in front of a neutral form.
-    assert_true(isset(pl_legal_forms_for('FR')['fr.private_limited']) && !isset(pl_legal_forms_for('FR')['zz.private_limited']));
-    assert_same('FR', pl_legal_form_country('fr.private_limited'));
-    assert_same('private_limited', pl_legal_form_family('fr.private_limited'));
-    assert_same('Private limited company', pl_legal_form_label('fr.private_limited'));
-    assert_true(pl_legal_form_known('fr.partnership') && !pl_legal_form_known('xx.private_limited'), 'A code that is not a country is refused.');
+    // A country the catalogue does not name uses the neutral list under the canonical family keys;
+    // the country itself is a column on the profile (migration 061).
+    assert_true(isset(pl_legal_forms_for('FR')['private_limited']) && !isset(pl_legal_forms_for('FR')['fr.private_limited']) && !isset(pl_legal_forms_for(null)['zz.private_limited']));
+    assert_same(null, pl_legal_form_country('private_limited'));
+    assert_true(str_contains(pl_legal_form_guide('private_limited'), 'Registered with your registrar'), 'A neutral form has the neutral guide.');
+    assert_true(!pl_legal_form_known('fr.private_limited') && !pl_legal_form_known('zz.private_limited'), 'A country prefix outside the catalogue is not a key.');
     assert_true(pl_legal_form_has_shares('gb.cic') && !pl_legal_form_has_shares('gb.clg'));
     assert_same('SECP registration number (CUIN)', pl_legal_form_country_profile('PK')['labels']['reg_number']);
     $guide = pl_legal_form_guide('pk.pvt_ltd');
     assert_true(str_contains($guide, 'Registered with SECP') && str_contains($guide, 'On invoices: CUIN, NTN, STRN'), 'The guide line is incomplete: ' . $guide);
-    assert_same('', pl_legal_form_guide('private_limited'));
     foreach (pl_legal_form_catalogue()['countries'] as $code => $country) {
         $default = pl_legal_form_default((string) $code);
         assert_true($code === 'ZZ' ? $default === '' : isset(pl_legal_forms_for((string) $code)[$default]), $code . ' defaults to a form it does not list.');
@@ -83,6 +82,13 @@ test('a company profile keeps a legal form in its country\'s words and still kno
         'revision' => $before['revision'], 'reason' => 'Test', 'idempotency_key' => 'wizard-profile-' . bin2hex(random_bytes(6))]);
     assert_same('pk.smc', $profile['legal_form']);
     assert_true(str_contains($profile['legal_form_label'], 'SMC'), 'The profile does not show the local name.');
+    // The country of registration is its own column, uppercased and checked against the registry.
+    $profile = pl_save_company_profile($f['actor_id'], $f['company_id'], ['legal_form' => 'private_limited', 'country_code' => 'fr',
+        'revision' => $profile['revision'], 'reason' => 'Test', 'idempotency_key' => 'wizard-profile-' . bin2hex(random_bytes(6))]);
+    assert_same('FR', $profile['country_code']);
+    assert_same('France', $profile['country_name']);
+    assert_same('Private limited company', $profile['legal_form_label']);
+    assert_throws(fn () => pl_save_company_profile($f['actor_id'], $f['company_id'], ['country_code' => 'XX', 'revision' => $profile['revision'], 'reason' => 'Test', 'idempotency_key' => 'wizard-profile-' . bin2hex(random_bytes(6))]), DomainException::class, 'country');
     assert_true(pl_legal_form_has_shares($profile['legal_form']), 'A single member company issues shares.');
     assert_throws(fn () => pl_save_company_profile($f['actor_id'], $f['company_id'], ['legal_form' => 'xx.made_up', 'revision' => $profile['revision'], 'reason' => 'Test', 'idempotency_key' => 'wizard-profile-' . bin2hex(random_bytes(6))]), DomainException::class);
     // The Company profile screen posts every profile field, so every field it does not show is
@@ -133,6 +139,7 @@ test('setup registers the owners, names the bank and cash accounts, posts the op
     // The profile, the feature and the policy.
     $profile = pl_company_profile($actor, $id);
     assert_same('pk.pvt_ltd', $profile['legal_form']);
+    assert_same('PK', $profile['country_code']);
     assert_same('Wizard (Private) Limited', $profile['legal_name']);
     assert_same('NTN 1234567-8', $profile['tax_registrations']);
     assert_true(pl_module_state($id, 'inventory')['enabled'], 'The chosen feature was not switched on.');
@@ -162,7 +169,7 @@ test('a partnership records the shares as the partners\' ratio, and a caller tha
 test('the starter leaf is claimed once, never keeps its generic name, and a country outside the catalogue is remembered', function (): void {
     $actor = wizard_actor('leaf');
     // Row 0 names the starter leaf by its code, as the Owners stage pre-fills it; row 1 has no code.
-    $company = pl_setup_company($actor, wizard_input(['country_code' => 'FR', 'legal_form' => 'fr.private_limited', 'money_accounts' => [
+    $company = pl_setup_company($actor, wizard_input(['country_code' => 'FR', 'legal_form' => 'private_limited', 'money_accounts' => [
         ['kind' => 'bank', 'code' => '1-100-10001-00', 'name' => 'HBL current', 'custodian' => '', 'opening_amount' => '500,000', 'opening_source' => 'capital_introduced'],
         ['kind' => 'till', 'code' => '', 'name' => 'Shop till', 'custodian' => '', 'opening_amount' => '5000', 'opening_source' => 'capital_introduced'],
     ]]), 'wizard:' . bin2hex(random_bytes(8)));
@@ -173,7 +180,8 @@ test('the starter leaf is claimed once, never keeps its generic name, and a coun
     assert_same('500000.0000', $balances['1-100-10001-00']);
     assert_same('5000.0000', $balances['1-100-10002-00']);
     $profile = pl_company_profile($actor, (int) $company['id']);
-    assert_same('fr.private_limited', $profile['legal_form']);
+    assert_same('private_limited', $profile['legal_form']);
+    assert_same('FR', $profile['country_code'], 'The country of registration was not saved with the profile.');
     assert_same('Private limited company', $profile['legal_form_label']);
     $generic = [['kind' => 'bank', 'code' => '', 'name' => 'Cash and bank', 'custodian' => '', 'opening_amount' => '', 'opening_source' => '']];
     assert_throws(fn () => pl_setup_company($actor, wizard_input(['money_accounts' => $generic]), 'wizard:' . bin2hex(random_bytes(8))), DomainException::class, 'real account');

@@ -6,7 +6,7 @@ $canEditProfile = ($company['role'] ?? '') === 'owner' && !pl_demo_enabled();
 // (owner review, 26 September 2026): the same catalogue and script as business setup. The
 // country is not stored on its own; the legal-form key remembers it.
 $legalForm = pl_web_text($profileInput, 'legal_form', (string) $profile['legal_form']);
-$country = strtoupper(pl_web_text($profileInput, 'country_code', pl_legal_form_country($legalForm) ?? ''));
+$country = strtoupper(pl_web_text($profileInput, 'country_code', (string) $profile['country_code'] !== '' ? (string) $profile['country_code'] : (pl_legal_form_country($legalForm) ?? '')));
 $countryProfile = pl_legal_form_country_profile($country);
 $labels = $countryProfile['labels'];
 $placeholders = $countryProfile['placeholders'];
@@ -54,7 +54,7 @@ $profileFields = [
                 <select class="select" id="country-code" name="country_code"><option value=""><?= pl_e(pl_t('Not stated')) ?></option>
                 <?php foreach (pl_country_options() as $code => $label): ?><option value="<?= pl_e($code) ?>"<?= $country === $code ? ' selected' : '' ?>><?= pl_e($label) ?></option><?php endforeach; ?>
                 </select>
-                <p class="muted"><?= pl_e(pl_t('Chooses the legal-form names and the registration labels below. It is not printed and enables no tax rule.')) ?></p></div>
+                <p class="muted"><?= pl_e(pl_t('Chooses the legal-form names and the registration labels below. It enables no tax rule.')) ?></p></div>
             <div class="field"><label for="legal-form"><?= pl_e(pl_t('Legal form')) ?> <span class="field-chip" data-country-registrar><?= pl_e(pl_legal_form_chip((string) $countryProfile['code'], (string) $countryProfile['name'])) ?></span></label>
                 <select class="select" id="legal-form" name="legal_form"><option value=""><?= pl_e(pl_t('Not stated')) ?></option>
                 <?php foreach ($legalForms as $key => $label): ?><option value="<?= pl_e($key) ?>"<?= $legalForm === $key ? ' selected' : '' ?>><?= pl_e($label) ?></option><?php endforeach; ?>

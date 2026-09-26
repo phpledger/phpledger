@@ -882,13 +882,11 @@ document.querySelectorAll('form[data-legal-forms]').forEach(form => {
     const registrarChip = form.querySelector('[data-country-registrar]');
     const authority = form.querySelector('[data-country-authority]');
     if (!country || !legal) return;
-    // A country outside the catalogue uses the neutral list under its own code ('fr.private_limited').
-    const known = () => !!data[country.value];
-    const profileFor = () => known() ? data[country.value] : data.ZZ;
-    const prefix = () => (country.value ? country.value.toLowerCase() : 'zz') + '.';
-    const rekey = key => known() ? key : prefix() + key.split('.')[1];
-    const currentForms = () => profileFor().forms.map(f => Object.assign({}, f, { key: rekey(f.key) }));
-    const familyOf = key => { const suffix = key.split('.')[1]; const entry = Object.values(data).flatMap(p => p.forms).find(f => f.key === key) || data.ZZ.forms.find(f => f.key.split('.')[1] === suffix); return entry ? entry.family : null; };
+    // A country outside the catalogue uses the neutral list, whose keys are the canonical family
+    // keys; the country itself is saved on the profile.
+    const profileFor = () => data[country.value] || data.ZZ;
+    const currentForms = () => profileFor().forms;
+    const familyOf = key => { const entry = Object.values(data).flatMap(p => p.forms).find(f => f.key === key); return entry ? entry.family : null; };
     const showGuide = () => {
         const entry = currentForms().find(f => f.key === legal.value);
         if (guide) guide.textContent = entry ? entry.guide : guide.getAttribute('data-empty') || '';
@@ -899,7 +897,7 @@ document.querySelectorAll('form[data-legal-forms]').forEach(form => {
         const previousFamily = familyOf(legal.value);
         const keep = legal.querySelector('option[value=""]');
         legal.replaceChildren(...(keep ? [keep] : []), ...forms.map(f => { const o = document.createElement('option'); o.value = f.key; o.textContent = f.name; return o; }));
-        const match = (legal.dataset.touched && previousFamily && forms.find(f => f.family === previousFamily)) || (c.default ? forms.find(f => f.key === rekey(c.default)) : null);
+        const match = (legal.dataset.touched && previousFamily && forms.find(f => f.family === previousFamily)) || (c.default ? forms.find(f => f.key === c.default) : null);
         legal.value = match ? match.key : '';
         if (registrarChip && c.chip) registrarChip.textContent = c.chip;
         // The registrar is a hint, never a value: only what the owner types is saved and printed.
