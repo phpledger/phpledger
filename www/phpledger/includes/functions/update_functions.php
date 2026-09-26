@@ -403,7 +403,8 @@ function pl_update_begin(string $root, string $archive, string $envelope, string
     $directory = pl_update_directory($root);
     if (getenv('PL_ENV') === 'demo') { throw new DomainException('Public demos cannot install updates.'); }
     $installed = pl_update_json($root . '/PACKAGE-MANIFEST.json');
-    $keyPath = getenv('PL_UPDATE_PUBLIC_KEY') ?: $directory . '/publisher.pem';
+    require_once __DIR__ . '/installation_state_functions.php';
+    $keyPath = pl_publisher_key_path($directory);
     if (!is_file($keyPath)) { throw new DomainException('Pin the publisher public key in private host configuration first.'); }
     $metadata = pl_update_verify_metadata($envelope, (string) file_get_contents($keyPath), $channel, (string) ($installed['version'] ?? ''));
     $loader = 'www/phpledger/public/maintenance.php';

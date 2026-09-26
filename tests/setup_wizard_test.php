@@ -207,3 +207,60 @@ test('setup refuses opening money without a source, opening money for past recor
     assert_throws(fn () => pl_setup_company($actor, wizard_input(['legal_form' => 'xx.made_up']), $key), DomainException::class, 'legal form');
     assert_same(0, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_companies WHERE created_by = %i', $actor), 'A refused setup left a business behind.');
 });
+
+test('a partnership gets a capital and a drawings account per partner, the opening capital splits by the ratio, and the balance sheet shows each share', function (): void {
+    $actor = wizard_actor('partner-capital');
+    $company = pl_setup_company($actor, wizard_input(['legal_form' => 'gb.partnership', 'country_code' => 'GB', 'currency' => 'GBP',
+        'owners' => [['name' => 'Ann Partner', 'kind' => 'person', 'role' => 'Partner', 'share' => '50'], ['name' => 'Ben Partner', 'kind' => 'person', 'role' => 'Partner', 'share' => '50']],
+        'money_accounts' => [['kind' => 'bank', 'code' => '', 'name' => 'Barclays current', 'custodian' => '', 'opening_amount' => '50,000', 'opening_source' => 'capital_introduced']],
+        'features' => [], 'account_names' => []]), 'wizard:' . bin2hex(random_bytes(8)));
+    $id = (int) $company['id'];
+    $book = (int) $company['book_id'];
+    $accounts = array_column($company['accounts'], null, 'code');
+    assert_same('Partner capital - Ann Partner', (string) $accounts['3-100-10001-00']['name'], 'The starter\'s Owner equity was not renamed into the first partner\'s capital account.');
+    assert_same('Partner capital - Ben Partner', (string) ($accounts['3-100-10002-00']['name'] ?? ''), 'The second partner has no capital account of their own.');
+    assert_same('Partner drawings - Ann Partner', (string) $accounts['3-900-10001-00']['name']);
+    assert_same('Partner drawings - Ben Partner', (string) ($accounts['3-900-10002-00']['name'] ?? ''));
+    assert_same('core.equity.owner', (string) $accounts['3-100-10001-00']['semantic_key'], 'The renamed leaf lost its semantic key.');
+    $partners = pl_list_owner_partners($actor, $id, $book);
+    assert_same(['Ann Partner', 'Ben Partner'], array_column($partners, 'name'));
+    assert_same(['0.500000', '0.500000'], array_column($partners, 'profit_share'));
+    assert_same(['3-100-10001-00', '3-100-10002-00'], array_column($partners, 'capital_code'));
+    assert_same(2, count(pl_ownership_partner_links($id, $book)), 'The register does not link each owner to their partner record.');
+    $balances = array_column(pl_trial_balance($actor, $id, $book)['accounts'], 'balance', 'code');
+    assert_same('50000.0000', $balances['1-100-10001-00']);
+    assert_same('25000.0000', ltrim((string) $balances['3-100-10001-00'], '-'), 'Ann\'s capital is not half of the 50,000.');
+    assert_same('25000.0000', ltrim((string) $balances['3-100-10002-00'], '-'), 'Ben\'s capital is not half of the 50,000.');
+    assert_same(2, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE company_id = %i', $id), 'One posting per partner.');
+    $sheet = pl_balance_sheet($actor, $id, $book, '2026-07-01');
+    assert_same('50000.0000', $sheet['total_equity']);
+    $shown = array_column(pl_report_tree_rows(pl_report_tree_prune($sheet['trees']['equity'], ['amount'])), 'code');
+    assert_true(in_array('3-100-10001-00', $shown, true) && in_array('3-100-10002-00', $shown, true), 'The balance sheet does not list both partners\' capital.');
+    assert_true(!in_array('3-900-10001-00', $shown, true), 'A drawings account at zero is still listed.');
+    // The arithmetic behind the split, and the refusals.
+    assert_same(['0.333334', '0.333333', '0.333333'], pl_setup_partner_shares([['name' => 'A', 'kind' => 'person', 'role' => '', 'share' => ''], ['name' => 'B', 'kind' => 'person', 'role' => '', 'share' => ''], ['name' => 'C', 'kind' => 'person', 'role' => '', 'share' => '']]));
+    assert_same([0 => '33.3400', 1 => '33.33', 2 => '33.33'], pl_setup_split_amount('100', ['0.333334', '0.333333', '0.333333']));
+    assert_same([0 => '25000.0000', 1 => '25000.00'], pl_setup_split_amount('50000', ['0.500000', '0.500000']));
+    // Shares that total less than 100 percent split the whole amount in proportion; a silent share takes nothing.
+    assert_same([0 => '30000.0000', 1 => '30000.00', 2 => '30000.00'], pl_setup_split_amount('90000', ['0.330000', '0.330000', '0.330000']));
+    assert_same([0 => '6250.0000', 1 => '3750.00'], pl_setup_split_amount('10000', ['0.500000', '0.300000']));
+    assert_same([0 => '0.00', 1 => '1000.0100'], pl_setup_split_amount('1000.01', ['0.000000', '1.000000']));
+    assert_throws(fn () => pl_setup_split_amount('100', ['0.000000', '0.000000']), DomainException::class, 'above zero');
+    assert_throws(fn () => pl_setup_partner_shares([['name' => 'A', 'kind' => 'person', 'role' => '', 'share' => '60'], ['name' => 'B', 'kind' => 'person', 'role' => '', 'share' => '']]), DomainException::class, 'every partner');
+    assert_throws(fn () => pl_setup_partner_shares([['name' => 'A', 'kind' => 'person', 'role' => '', 'share' => '60'], ['name' => 'B', 'kind' => 'person', 'role' => '', 'share' => '50']]), DomainException::class, 'more than 100');
+    // The Features stage sends every account name; the starter's generic "Owner equity" still becomes the
+    // first partner's capital account, while a name the owner chose there is kept.
+    $named = pl_setup_company(wizard_actor('named-partners'), wizard_input(['legal_form' => 'gb.partnership', 'country_code' => 'GB', 'currency' => 'GBP',
+        'owners' => [['name' => 'Cara', 'kind' => 'person', 'role' => 'Partner', 'share' => '50'], ['name' => 'Dev', 'kind' => 'person', 'role' => 'Partner', 'share' => '50']],
+        'money_accounts' => [['kind' => 'bank', 'code' => '', 'name' => 'Monzo current', 'custodian' => '', 'opening_amount' => '', 'opening_source' => '']],
+        'features' => [], 'account_names' => ['3-100-10001-00' => 'Owner equity', '3-900-10001-00' => 'Cara draws']]), 'wizard:' . bin2hex(random_bytes(8)));
+    $namedAccounts = array_column($named['accounts'], 'name', 'code');
+    assert_same('Partner capital - Cara', (string) $namedAccounts['3-100-10001-00'], 'The generic name sent back unchanged blocked the partner rename.');
+    assert_same('Cara draws', (string) $namedAccounts['3-900-10001-00'], 'A name the owner chose on the Features stage was overwritten.');
+    // Partners who enter no shares split equally, and the register says so.
+    $equal = pl_setup_company(wizard_actor('equal-partners'), wizard_input(['legal_form' => 'partnership', 'country_code' => 'PK', 'currency' => 'PKR',
+        'owners' => [['name' => 'Ali', 'kind' => 'person', 'role' => 'Partner', 'share' => ''], ['name' => 'Bilal', 'kind' => 'person', 'role' => 'Partner', 'share' => '']],
+        'money_accounts' => [['kind' => 'bank', 'code' => '', 'name' => 'HBL current', 'custodian' => '', 'opening_amount' => '1000', 'opening_source' => 'capital_introduced']],
+        'features' => [], 'account_names' => []]), 'wizard:' . bin2hex(random_bytes(8)));
+    assert_same(['0.500000', '0.500000'], DB::queryFirstColumn('SELECT profit_share FROM pl_ownership_members WHERE company_id = %i ORDER BY id', (int) $equal['id']));
+});

@@ -415,6 +415,8 @@ function pl_install_finish(array $schemaConfig, array $runtimeConfig, string $em
     if (!is_file($operatorKey)) {
         pl_install_write_private($operatorKey, bin2hex(random_bytes(32)) . "\n", false);
     }
+    // The key this package shipped with is pinned beside it, so updates and sample packages verify from day one.
+    pl_publisher_key_path();
     $receipt = ['format' => 1, 'db_prefix' => pl_database_prefix(), 'database_id' => pl_install_database_identity($runtimeConfig), 'initial_owner_id' => $id,
         'completed_at' => gmdate('c'), 'schema_receipts' => (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_schema_migrations')];
     pl_install_save_state($receipt, 'installed.json');

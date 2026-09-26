@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "source": "resources/demo-packs/catalog.json",
+  "samples": [
+    {
+      "id": "service-agency",
+      "slug": "sample-service-agency",
+      "version": "1.1.0",
+      "name": "Cedar Studio",
+      "business": "Professional services / agency",
+      "story": "Mira and Noel opened a two-person design studio above a former print shop. Mira looks after client projects; Noel keeps the monthly records. They want stable retainers without confusing deposits, earned fees and cash.",
+      "logo": "/assets/sample-companies/service-agency.svg",
+      "description": "Professional services / agency. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "accounts": 33,
+      "parties": 2,
+      "products": 0,
+      "modules": []
+    },
+    {
+      "id": "retail-shop",
+      "slug": "sample-retail-shop",
+      "version": "1.1.0",
+      "name": "Willow Corner Shop",
+      "business": "Retail shop",
+      "story": "Ada turned a neighbourhood kiosk into a small stationery shop. Jon counts the till and checks deliveries. Their story follows stock, customer returns and the difference between a busy counter and a profitable month.",
+      "logo": "/assets/sample-companies/retail-shop.svg",
+      "description": "Retail shop. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "accounts": 32,
+      "parties": 4,
+      "products": 2,
+      "modules": [
+        "inventory",
+        "pos-showcase",
+        "trading-documents"
+      ]
+    },
+    {
+      "id": "seasonal-business",
+      "slug": "sample-seasonal-business",
+      "version": "1.1.0",
+      "name": "Sunrise Garden Services",
+      "business": "Seasonal business",
+      "story": "Leah started with one garden-maintenance round; Owen now schedules the crew. Quiet winters and busy summers make cash planning and equipment upkeep as important as the next planting job.",
+      "logo": "/assets/sample-companies/seasonal-business.svg",
+      "description": "Seasonal business. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "accounts": 28,
+      "parties": 2,
+      "products": 0,
+      "modules": []
+    },
+    {
+      "id": "distributor",
+      "slug": "sample-distributor",
+      "version": "1.1.0",
+      "name": "Harbor Supply Company",
+      "business": "Distribution",
+      "story": "Ravi supplies independent shops while Tessa reconciles route collections. The fictional business teaches distribution bookkeeping without pretending that the sample provides route planning or proof of delivery.",
+      "logo": "/assets/sample-companies/distributor.svg",
+      "description": "Distribution. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "accounts": 32,
+      "parties": 4,
+      "products": 2,
+      "modules": [
+        "inventory",
+        "inventory-locations",
+        "purchasing",
+        "trading-documents"
+      ]
+    },
+    {
+      "id": "trader",
+      "slug": "sample-trader",
+      "version": "1.1.0",
+      "name": "Harbour Trade",
+      "business": "Wholesale / trader",
+      "story": "Elin built a small wholesale desk matching local retailers with suppliers. Sam checks purchase evidence and customer credit. Their books separate stock on hand, supplier obligations and cash collected.",
+      "logo": "/assets/sample-companies/trader.svg",
+      "description": "Wholesale / trader. This sample demonstrates bookkeeping examples only; it is not an implementation of the named industry's operational, regulatory or compliance systems.",
+      "accounts": 32,
+      "parties": 4,
+      "products": 2,
+      "modules": [
+        "inventory",
+        "purchasing",
+        "trading-documents"
+      ]
+    },
+    {
+      "id": "restaurant",
+      "slug": "sample-restaurant",
+      "version": "1.1.0",
+      "name": "Cedar Table",
+      "business": "Restaurant / cafe",
+      "story": "Nia and Ben opened a neighbourhood cafe with a short seasonal menu. Nia buys ingredients and Ben closes the counter. The sample follows bookkeeping only, with kitchen operations deliberately outside its claims.",
+      "logo": "/assets/sample-companies/restaurant.svg",
+      "description": "Restaurant / cafe. Restaurant and catering bookkeeping example; tables, recipes, kitchen production and service operations are not implemented.",
+      "accounts": 33,
+      "parties": 4,
+      "products": 2,
+      "modules": [
+        "inventory",
+        "pos-showcase"
+      ]
+    },
+    {
+      "id": "membership-club",
+      "slug": "sample-membership-club",
+      "version": "1.1.0",
+      "name": "Riverside Community Club",
+      "business": "Membership club",
+      "story": "Iris coordinates a fictional community club and Leo keeps its books. Members fund shared activities, so the example distinguishes earned dues, future-period receipts and the cost of running events.",
+      "logo": "/assets/sample-companies/membership-club.svg",
+      "description": "Membership club. Membership-income bookkeeping example; membership administration, renewals, charity status and dues compliance are not implemented.",
+      "accounts": 28,
+      "parties": 4,
+      "products": 0,
+      "modules": []
+    },
+    {
+      "id": "pharmacy",
+      "slug": "sample-pharmacy",
+      "version": "1.1.0",
+      "name": "Meadow Training Pharmacy",
+      "business": "Non-medicinal training inventory",
+      "story": "Asha and Finn run a training shop using non-medicinal practice goods. Their fictional counter teaches stock and sales records; it contains no patients, dispensing, medicines or claims of pharmacy compliance.",
+      "logo": "/assets/sample-companies/pharmacy.svg",
+      "description": "Non-medicinal training inventory. Non-medicinal training products only; no medicines, dispensing, patient records, expiry controls or pharmacy compliance are implemented.",
+      "accounts": 32,
+      "parties": 4,
+      "products": 2,
+      "modules": [
+        "inventory",
+        "pos-showcase",
+        "trading-documents"
+      ]
+    },
+    {
+      "id": "jewelry-studio",
+      "slug": "sample-jewelry-studio",
+      "version": "1.1.0",
+      "name": "Lantern Finch Jewelry Studio",
+      "business": "Jewelry studio",
+      "story": "Lena designs small collections and Theo maintains the workshop records. Their studio separates owned materials, finished pieces and workmanship; specialist precious-metal controls remain future work.",
+      "logo": "/assets/sample-companies/jewelry-studio.svg",
+      "description": "Jewelry studio. Jewelry bookkeeping example; precious-metal, gemstone, job-costing and commodity accounting are not implemented.",
+      "accounts": 34,
+      "parties": 2,
+      "products": 2,
+      "modules": [
+        "inventory",
+        "trading-documents"
+      ]
+    },
+    {
+      "id": "light-manufacturing",
+      "slug": "sample-light-manufacturing",
+      "version": "1.1.0",
+      "name": "Maple Bench Works",
+      "business": "Light manufacturing",
+      "story": "Maya and Eli make small furniture runs for local interiors. Their fictional records introduce materials and finished goods without claiming to run bills of materials, production orders or factory costing.",
+      "logo": "/assets/sample-companies/light-manufacturing.svg",
+      "description": "Light manufacturing. Light-manufacturing bookkeeping example; bills of material, production planning, work orders and recipes are not implemented.",
+      "accounts": 34,
+      "parties": 2,
+      "products": 2,
+      "modules": [
+        "inventory",
+        "purchasing"
+      ]
+    },
+    {
+      "id": "service-workshop",
+      "slug": "sample-service-workshop",
+      "version": "1.1.0",
+      "name": "Wheel & Spoke Workshop",
+      "business": "Service workshop",
+      "story": "Kit opened a bicycle repair workshop and Robin keeps parts and payments organised. They distinguish parts owned by the workshop from customers' bicycles, which never become the workshop's inventory.",
+      "logo": "/assets/sample-companies/service-workshop.svg",
+      "description": "Service workshop. Workshop bookkeeping example; customer-owned property is not inventory, and job cards, parts custody and workshop scheduling are not implemented.",
+      "accounts": 33,
+      "parties": 4,
+      "products": 3,
+      "modules": [
+        "inventory",
+        "purchasing"
+      ]
+    }
+  ]
+}

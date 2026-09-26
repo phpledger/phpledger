@@ -1995,6 +1995,10 @@
       "destination": "resources/sample-structures/accounting-starter-1.1.0.json"
     },
     {
+      "source": "resources/sample-catalogue.json",
+      "destination": "resources/sample-catalogue.json"
+    },
+    {
       "source": "www/phpledger/public/assets/sample-companies/distributor.svg",
       "destination": "www/phpledger/public/assets/sample-companies/distributor.svg"
     },

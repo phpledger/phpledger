@@ -20,20 +20,32 @@ function pl_ui_report_open_by_default(string $code): bool
 }
 
 /**
+ * Standard statement layout (owner, 26 September 2026): a heading names its group and carries no
+ * amount while it is open; its accounts follow, then one "Total ..." line. A collapsed heading is
+ * the only line of its group, so it shows the group's amount instead. Nothing is stated twice.
+ *
  * @param array<int,array<string,mixed>> $nodes tree from pl_report_tree()
  * @param array<int,array{key:string,label:string}> $columns money columns, in order
- * @param array{caption:string, link?:callable, empty?:string} $options
+ * @param array{caption:string, link?:callable, empty?:string, sections?:bool} $options
+ *   `sections`: the statement already names the class as its section and prints the class total
+ *   below the body, so the class row itself is not repeated inside it.
  */
 function pl_ui_report_tree(array $nodes, array $columns, array $options): void
 {
     echo '<div class="report-tree" role="group" aria-label="' . pl_e($options['caption']) . '">';
-    echo '<div class="report-tree-head"><span>Code</span><span>Account</span>';
+    echo '<div class="report-tree-head"><span>' . pl_e(pl_t('Code')) . '</span><span>' . pl_e(pl_t('Account')) . '</span>';
     foreach ($columns as $column) { echo '<span class="num">' . pl_e($column['label']) . '</span>'; }
     echo '</div>';
     if ($nodes === []) {
         echo '<p class="muted small">' . pl_e($options['empty'] ?? 'No accounts carry a balance in this report.') . '</p>';
     }
-    foreach ($nodes as $node) { pl_ui_report_tree_node($node, $columns, $options); }
+    foreach ($nodes as $node) {
+        if (!empty($options['sections']) && ($node['level'] ?? '') === 'class' && ($node['children'] ?? []) !== []) {
+            foreach ($node['children'] as $child) { pl_ui_report_tree_node($child, $columns, $options); }
+            continue;
+        }
+        pl_ui_report_tree_node($node, $columns, $options);
+    }
     echo '</div>';
 }
 
@@ -46,16 +58,23 @@ function pl_ui_report_tree_node(array $node, array $columns, array $options): vo
         return;
     }
     $open = $level !== 'class' || pl_ui_report_open_by_default((string) $node['code']);
+    $label = (string) ($node['label'] ?? $node['name'] ?? '');
     echo '<div class="report-tree-wrapper">';
     echo '<details class="report-tree-branch report-tree-' . pl_e($level) . '"' . ($open ? ' open' : '') . '>';
     echo '<summary><span class="report-tree-code"><span class="report-tree-chevron" aria-hidden="true">&#9656;</span>'
         . pl_e((string) ($node['short_code'] ?? $node['code'])) . '</span>'
-        . '<span class="report-tree-name">' . pl_e((string) ($node['label'] ?? $node['name'] ?? '')) . '</span>';
+        . '<span class="report-tree-name">' . pl_e($label) . '</span>';
+    // The amount of a collapsed group; the stylesheet hides it while the group is open.
     foreach ($columns as $column) {
-        echo '<span class="num">' . pl_e(pl_money((string) ($node[$column['key']] ?? '0.0000'))) . '</span>';
+        echo '<span class="num report-tree-collapsed-total">' . pl_e(pl_money((string) ($node[$column['key']] ?? '0.0000'))) . '</span>';
     }
     echo '</summary>';
     foreach ($children as $child) { pl_ui_report_tree_node($child, $columns, $options); }
+    echo '<div class="report-tree-row report-tree-subtotal"><span class="report-tree-code"></span><span class="report-tree-name">' . pl_e(pl_t('Total {name}', ['name' => $label])) . '</span>';
+    foreach ($columns as $column) {
+        echo '<span class="num">' . pl_e(pl_money((string) ($node[$column['key']] ?? '0.0000'))) . '</span>';
+    }
+    echo '</div>';
     echo '</details>';
     pl_ui_report_tree_note($node);
     echo '</div>';

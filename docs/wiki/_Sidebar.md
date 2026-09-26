@@ -33,6 +33,7 @@
 - [[Reporting walkthroughs|Reporting-Guides]]
 - [[Read integrations|Integrations]]
 
+- [[1.4.6 release|Release-1.4.6]]
 - [[1.4.5 release|Release-1.4.5]]
 - [[1.3.0 release|Release-1.3.0]]
 - [[1.1.3 release|Release-1.1.3]]

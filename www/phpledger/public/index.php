@@ -723,7 +723,7 @@ try {
         $report = pl_balance_sheet($actorId, $companyId, $bookId, $asOf);
         $depth = pl_report_depth($_GET);
         pl_render('balance-sheet', ['title' => 'Balance sheet', 'user' => $user, 'company' => $company, 'report' => $report, 'asOf' => $asOf,
-            'depth' => $depth, 'trees' => array_map(static fn (array $tree): array => pl_report_tree_limit($tree, $depth), $report['trees'])]);
+            'depth' => $depth, 'trees' => array_map(static fn (array $tree): array => pl_report_tree_limit(pl_report_tree_prune($tree, ['amount']), $depth), $report['trees'])]);
     }
     if ($path === '/reports/profit-loss') {
         $preset = pl_web_text($_GET, 'preset', 'custom');
@@ -733,7 +733,7 @@ try {
         $report = pl_profit_loss($actorId, $companyId, $bookId, $from, $to);
         $depth = pl_report_depth($_GET);
         pl_render('profit-loss', ['title' => 'Profit & loss', 'user' => $user, 'company' => $company, 'report' => $report, 'from' => $from, 'to' => $to, 'preset'=>$preset,
-            'depth' => $depth, 'trees' => array_map(static fn (array $tree): array => pl_report_tree_limit($tree, $depth), $report['trees'])]);
+            'depth' => $depth, 'trees' => array_map(static fn (array $tree): array => pl_report_tree_limit(pl_report_tree_prune($tree, ['amount']), $depth), $report['trees'])]);
     }
     if ($path === '/reports/cash-forecast') {
         $asOf = gmdate('Y-m-d');
@@ -921,7 +921,7 @@ try {
         $report = pl_trial_balance($actorId, $companyId, $bookId, $asOf);
         $depth = pl_report_depth($_GET);
         pl_render('trial-balance', ['title' => 'Trial balance', 'user' => $user, 'company' => $company, 'report' => $report, 'asOf' => $asOf,
-            'depth' => $depth, 'tree' => pl_report_tree_limit($report['tree'], $depth)]);
+            'depth' => $depth, 'tree' => pl_report_tree_limit(pl_report_tree_prune($report['tree'], ['debit', 'credit']), $depth)]);
     }
     if ($path === '/reports/account') {
         $asOf = pl_web_text($_GET, 'as_of', gmdate('Y-m-d'));

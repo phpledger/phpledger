@@ -98,7 +98,8 @@ $badge = static function (string $trust, string $status): void {
     $companyName = (string) ($company['name'] ?? '');
     $registry = pl_module_registry();
     $directoryEntries = [];
-    foreach ($sampleDirectory['packages'] ?? [] as $entry) { if (!isset($samplePackages[(string) ($entry['slug'] ?? '')])) { $directoryEntries[] = $entry; } }
+    $present = array_flip(array_merge(array_keys($samplePackages), $samplePresent ?? []));
+    foreach ($sampleDirectory['packages'] ?? [] as $entry) { if (!isset($present[(string) ($entry['slug'] ?? '')])) { $directoryEntries[] = $entry; } }
     $tabs = [
         'installed' => pl_t('Installed · {count}', ['count' => count($cards)]),
         'samples' => pl_t('Sample companies · {count}', ['count' => count($samplePackages)]),
@@ -246,11 +247,12 @@ $badge = static function (string $trust, string $status): void {
     <?php elseif ($tab === 'directory'): ?>
     <div class="pkg-toolbar"><p class="muted"><?= pl_e(pl_t('Refresh and Install contact phpledger.com; opening this page does not.')) ?> <a class="link" href="https://phpledger.com/directory/" target="_blank" rel="noopener"><?= pl_e(pl_t('Browse the sample directory')) ?></a></p>
         <?php if ($administers && !$sampleReadonly): ?><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field() . pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_refresh"><?php if (($returnTo ?? '') !== ''): ?><input type="hidden" name="return" value="onboarding"><?php endif; ?><button class="btn btn-secondary btn-sm"><?= pl_icon('refresh') ?> <?= pl_e(pl_t('Refresh directory')) ?></button></form><?php endif; ?></div>
-    <?php if ($directoryEntries === []): ?><p class="muted"><?= pl_e(($sampleDirectory['packages'] ?? []) === [] ? pl_t('The directory has not been fetched on this copy yet. Refresh it to list the sample companies phpledger.com publishes.') : pl_t('Every sample the directory lists is already installed.')) ?></p><?php endif; ?>
+    <?php if ($directoryEntries === []): ?><p class="muted"><?= pl_e(pl_t('Every sample the directory lists is already installed.')) ?></p><?php endif; ?>
     <div class="pkg-grid">
     <?php foreach ($directoryEntries as $entry): $logo = $sampleLogo((string) ($entry['slug'] ?? '')); ?>
         <article class="pkg-card"><div class="pkg-card-head"><h3><?php if ($logo !== ''): ?><img src="<?= pl_e($logo) ?>" alt="" width="24" height="24"><?php endif; ?><?= pl_e((string) $entry['name']) ?></h3><span class="pkg-meta"><?= pl_e((string) $entry['version'] . ' · phpledger.com' . ((string) ($entry['licence'] ?? '') !== '' ? ' · ' . (string) $entry['licence'] : '')) ?></span></div>
-            <p class="pkg-desc"><?= pl_e((string) $entry['description']) ?></p>
+            <p class="pkg-desc"><?= pl_e((string) (($entry['story'] ?? '') !== '' ? $entry['story'] : $entry['description'])) ?></p>
+            <?php if ((int) ($entry['accounts'] ?? 0) > 0): ?><p class="pkg-meta"><?= pl_e(pl_t('{accounts} accounts · {parties} contacts', ['accounts' => (int) $entry['accounts'], 'parties' => (int) ($entry['parties'] ?? 0)])) ?></p><?php endif; ?>
             <div class="pkg-foot"><div class="pkg-badges"><?php pl_ui_badge('unpaid', pl_t('Not installed')); pl_ui_badge('info', pl_t('Signed')); ?></div>
                 <?php if ($administers && !$sampleReadonly): ?><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field() . pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_install"><input type="hidden" name="slug" value="<?= pl_e((string) $entry['slug']) ?>"><input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(16))) ?>"><?php if (($returnTo ?? '') !== ''): ?><input type="hidden" name="return" value="onboarding"><?php endif; ?><button class="btn btn-secondary btn-sm"><?= pl_icon('download') ?> <?= pl_e(pl_t('Install')) ?></button></form>
                 <?php else: ?><span class="pkg-meta"><?= pl_e(pl_t('An installation administrator installs samples')) ?></span><?php endif; ?>

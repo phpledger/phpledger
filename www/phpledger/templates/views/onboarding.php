@@ -152,13 +152,14 @@ $formHelp = static function (string $concept, string $placement = 'start'): void
 </fieldset>
 <div data-gallery<?= $structureChosen ? '' : ' hidden' ?>>
 <div class="gallery-head"><h2><?= pl_e(pl_t('Choose the company whose structure you want')) ?></h2>
-<p><?= pl_e(pl_tn('{count} sample company', '{count} sample companies', count($gallery), ['count' => count($gallery)])) ?> · <?= pl_e(pl_tn('{count} installed on this copy', '{count} installed on this copy', count(array_filter($gallery, static fn (array $card): bool => $card['installed'])), ['count' => count(array_filter($gallery, static fn (array $card): bool => $card['installed']))])) ?><?php if ($administers): ?> · <?= pl_e(pl_t('the rest install here in one click as signed data-only packages from phpledger.com')) ?><?php endif; ?> · <a class="link" href="https://phpledger.com/directory/" target="_blank" rel="noopener noreferrer"><?= pl_e(pl_t('browse the directory')) ?></a></p></div>
+<?php $installedCount = count(array_filter($gallery, static fn (array $card): bool => $card['installed'])); $missingCount = count($gallery) - $installedCount; $canInstall = $administers && !pl_sample_packages_readonly() && extension_loaded('curl'); ?>
+<p><?= pl_e(pl_tn('{count} company', '{count} companies', count($gallery), ['count' => count($gallery)])) ?> · <?php if ($missingCount === 0): ?><?= pl_e(pl_t('all installed on this copy')) ?><?php elseif ($canInstall): ?><?= pl_e(pl_t('{count} installed', ['count' => $installedCount])) ?> · <?= pl_e(pl_t('the rest install here in one click as signed data-only packages (CC0) from phpledger.com and bring you straight back')) ?><?php else: ?><?= pl_e(pl_t('{count} installed', ['count' => $installedCount])) ?> · <?= pl_e(pl_t('an installation administrator installs the rest from phpledger.com')) ?><?php endif; ?> · <a class="link" href="https://phpledger.com/directory/" target="_blank" rel="noopener noreferrer"><?= pl_e(pl_t('browse the directory')) ?></a></p>
 <fieldset class="sample-gallery"><legend class="sr-only"><?= pl_e(pl_t('Sample company')) ?></legend>
 <?php foreach ($gallery as $card): $selectable = $card['installed'] && ($startChoice !== 'structure' || $card['skeleton']); ?>
     <label class="sample-card<?= $selectable ? '' : ' is-quiet' ?>"><?php if ($selectable): ?><input type="radio" name="sample_pack" value="<?= pl_e($card['id']) ?>"<?= $field('sample_pack') === $card['id'] ? ' checked' : '' ?>><?php endif; ?>
         <span class="sample-card-top"><?php if ($card['logo'] !== ''): ?><img src="<?= pl_e(pl_url($card['logo'])) ?>" alt="" width="26" height="26"><?php endif; ?><span><span class="sample-card-name"><?= pl_e($card['name']) ?></span><?php if ($card['business'] !== ''): ?><br><span class="sample-card-kind"><?= pl_e($card['business']) ?></span><?php endif; ?></span></span>
         <?php if ($card['story'] !== ''): ?><p class="sample-card-story"><?= pl_e($card['story']) ?></p><?php endif; ?>
-        <?php if ($card['installed'] && $card['skeleton']): ?><p class="sample-card-brings"><?= pl_e(pl_t('{accounts} accounts · {parties} contacts', ['accounts' => $card['accounts'], 'parties' => $card['parties']])) ?></p><?php elseif ($card['installed']): ?><p class="sample-card-brings"><?= pl_e(pl_t('Full sample only')) ?></p><?php endif; ?>
+        <?php if ($card['accounts'] > 0 && (!$card['installed'] || $card['skeleton'])): ?><p class="sample-card-brings"><?= pl_e(pl_t('{accounts} accounts · {parties} contacts', ['accounts' => $card['accounts'], 'parties' => $card['parties']])) ?></p><?php elseif ($card['installed']): ?><p class="sample-card-brings"><?= pl_e(pl_t('Full sample only')) ?></p><?php endif; ?>
         <span class="sample-card-state">
         <?php if ($card['installed']): ?><span class="badge badge-posted"><span class="badge-dot"></span><?= pl_e(pl_t('Installed')) ?></span>
         <?php else: ?><span class="badge badge-unpaid"><?= pl_e(pl_t('On phpledger.com')) ?></span>
@@ -167,7 +168,7 @@ $formHelp = static function (string $concept, string $placement = 'start'): void
         </span></label>
 <?php endforeach; ?>
 </fieldset>
-<?php if ($administers && !pl_sample_packages_readonly()): ?><p class="field-hint"><?= pl_e(pl_t('Install works from here and brings you straight back. Refresh the directory to see newly published samples; refreshing and installing contact phpledger.com, opening this page does not.')) ?> <button class="link" type="submit" form="refresh-directory"><?= pl_e(pl_t('Refresh directory')) ?></button></p><?php endif; ?>
+<?php if ($canInstall): ?><p class="field-hint"><?= pl_e(pl_t('Install works from here and brings you straight back. Refresh the directory to see newly published samples; refreshing and installing contact phpledger.com, opening this page does not.')) ?> <button class="link" type="submit" form="refresh-directory"><?= pl_e(pl_t('Refresh directory')) ?></button></p><?php endif; ?>
 </div>
 </div>
 <div class="bench-actions"><span class="fine-print"><?= pl_e(pl_t('Nothing is created yet.')) ?></span>

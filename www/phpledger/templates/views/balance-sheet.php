@@ -15,14 +15,13 @@ $movements = $report['equity_movements'];
 <div class="flex flex-col gap-3 max-w-[60rem]">
 <?php foreach (['assets'=>'Assets','liabilities'=>'Liabilities','equity'=>'Equity'] as $key=>$label): ?>
 <section class="flex flex-col gap-2" aria-labelledby="bs-<?= pl_e($key) ?>"><h2 class="section-title" id="bs-<?= pl_e($key) ?>"><?= pl_e(pl_t($label)) ?></h2>
-<?php pl_ui_report_tree($trees[$key], $columns, ['caption' => pl_t('{section} in {currency}', ['section' => pl_t($label), 'currency' => $company['currency']]),
+<?php pl_ui_report_tree($trees[$key], $columns, ['caption' => pl_t('{section} in {currency}', ['section' => pl_t($label), 'currency' => $company['currency']]), 'sections' => true,
     'link' => static fn (int $id): string => pl_url('/reports/account', ['id'=>$id,'as_of'=>$asOf,'return_report'=>'balance-sheet']),
     'empty' => pl_t('No {section} accounts carry a balance at this date.', ['section' => strtolower(pl_t($label))])]); ?>
 <table class="stmt-table"><caption class="sr-only"><?= pl_e(pl_t('Total {section}', ['section' => strtolower(pl_t($label))])) ?></caption><tbody>
 <?php if ($key==='equity'): ?>
-<tr class="stmt-row stmt-indent-1"><th scope="row"><?= pl_e(pl_t('Capital introduced to date')) ?></th><td class="num"><?= pl_e(pl_money($movements['total_capital'])) ?></td></tr>
-<tr class="stmt-row stmt-indent-1"><th scope="row"><?= pl_e(pl_t('Less: drawings to date')) ?></th><td class="num"><?= pl_e(pl_money($movements['total_drawings'])) ?></td></tr>
-<tr class="stmt-row stmt-indent-1"><th scope="row"><?= pl_e(pl_t('Owner loans outstanding')) ?><span class="block text-xs font-normal text-ink-muted"><?= pl_e(pl_t('A liability of the business, shown here for the owner\'s own view')) ?></span></th><td class="num"><?= pl_e(pl_money($movements['total_owner_loans'])) ?></td></tr>
+<?php if (bccomp((string) $movements['total_owner_loans'], '0', 4) !== 0): ?><tr class="stmt-row stmt-indent-1"><th scope="row"><?= pl_e(pl_t('Owner loans outstanding')) ?><span class="block text-xs font-normal text-ink-muted"><?= pl_e(pl_t('A liability of the business, shown here for the owner\'s own view')) ?></span></th><td class="num"><?= pl_e(pl_money($movements['total_owner_loans'])) ?></td></tr>
+<?php endif; ?>
 <tr class="stmt-row stmt-indent-1"><th scope="row"><?= pl_e(pl_t('Earned profit to date')) ?><span class="block text-xs font-normal text-ink-muted"><?= pl_e(pl_t('Unclosed income less expenses')) ?></span></th><td class="num"><?= pl_e(pl_money($report['earned_profit'])) ?></td></tr>
 <?php endif; ?>
 <tr class="stmt-row <?= $key==='equity'?'stmt-total':'stmt-subtotal' ?>"><th scope="row"><?= pl_e(pl_t('Total {section}', ['section' => strtolower(pl_t($label))])) ?></th><td class="num"><?= pl_e(pl_money($report['total_'.$key])) ?></td></tr>

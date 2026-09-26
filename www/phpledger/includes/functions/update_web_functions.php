@@ -63,7 +63,8 @@ function pl_update_web(string $root): never
                     if ($download) {
                         require_once __DIR__ . '/update_download_functions.php';
                         $installed = pl_update_json($root . '/PACKAGE-MANIFEST.json');
-                        $keyPath = getenv('PL_UPDATE_PUBLIC_KEY') ?: $directory . '/publisher.pem';
+                        require_once __DIR__ . '/installation_state_functions.php';
+                        $keyPath = pl_publisher_key_path($directory);
                         if (!is_file($keyPath)) { throw new DomainException('Pin the publisher public key in private host configuration first.'); }
                         $verified = pl_update_verify_metadata($envelope, (string) file_get_contents($keyPath), $channel, (string) ($installed['version'] ?? ''));
                         $downloaded = pl_update_download_official($verified, $directory);

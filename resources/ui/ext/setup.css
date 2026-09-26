@@ -394,7 +394,8 @@
   .sample-card-kind { font-size: 10.5px; color: var(--ink-faint); }
   .sample-card-story { margin: 0; font-size: 10.5px; line-height: 1.35; color: var(--ink-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .sample-card-brings { margin: 0; font-size: 10.5px; color: var(--ink-faint); }
-  .sample-card-state { margin-block-start: auto; display: flex; align-items: center; justify-content: space-between; gap: .375rem; padding-block-start: .125rem; }
+  .sample-card-state { margin-block-start: auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .375rem; padding-block-start: .125rem; }
+  .sample-card-state .btn { margin-inline-start: auto; }
   .sample-card-state .badge { font-size: 10px; }
   .sample-card-state .btn { height: 22px; font-size: 10.5px; padding-inline: .4rem; }
   .field-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: var(--brand-navy); background: var(--brand-selected); border-radius: 999px; padding: 1px 7px; margin-inline-start: auto; white-space: nowrap; }

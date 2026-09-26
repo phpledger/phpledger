@@ -23,6 +23,7 @@ function pl_web_packages(int $actorId, int $companyId, int $bookId, array $user,
         throw new DomainException(pl_t('Package administration is unavailable in the public sample.'));
     }
     pl_plugin_bootstrap_initial_owner($actorId);
+    pl_plugin_bootstrap_initial_owner($actorId);
     $administers = pl_user_can($actorId, 0, 'installation.admin');
     if ($method === 'POST') {
         pl_web_packages_post($actorId, $company ?? ['id'=>0,'book_id'=>0]);
@@ -56,7 +57,7 @@ function pl_web_packages(int $actorId, int $companyId, int $bookId, array $user,
         // The demo was refused above, so only the business owner's role decides.
         'canSwitch' => $company !== null && (int) ($company['id'] ?? 0) > 0 && ($company['role'] ?? '') === 'owner',
         'cards' => pl_plugin_cards(),
-        'samplePackages' => pl_sample_installed_packages(), 'sampleDirectory'=>pl_sample_directory_cached(), 'sampleReadonly'=>pl_sample_packages_readonly(),
+        'samplePackages' => pl_sample_installed_packages(), 'sampleDirectory'=>['schema'=>1,'packages'=>array_values(pl_sample_directory_offer())], 'samplePresent'=>array_map(static fn (string $id): string => 'sample-' . $id, array_map('strval', array_keys(pl_demo_pack_catalog()))), 'sampleReadonly'=>pl_sample_packages_readonly(),
         'staged' => $administers ? pl_web_packages_staged() : [],
         'review' => $review,
         'acknowledgements' => pl_plugin_acknowledgements(),

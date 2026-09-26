@@ -151,3 +151,40 @@ test('contra accounts are deductions inside their own section and the trial bala
     assert_same('275.0000', $sheet['total_liabilities_equity']);
     assert_same('-200.0000', tree_node($sheet['trees']['assets'], '1-900-00000-00')['amount']);
 });
+
+test('a statement drops zero lines and states each amount once: a heading without an amount, its accounts, one total', function (): void {
+    require_once dirname(__DIR__) . '/www/phpledger/includes/functions/web_functions.php';
+    require_once dirname(__DIR__) . '/www/phpledger/templates/partials/ui/components.php';
+    require_once dirname(__DIR__) . '/www/phpledger/templates/partials/ui/report-tree.php';
+    $rows = [
+        ['code' => '1-000-00000-00', 'name' => 'Assets', 'type' => 'asset'],
+        ['code' => '1-100-00000-00', 'name' => 'Cash and Cash Equivalents', 'type' => 'asset'],
+        ['code' => '1-110-00000-00', 'name' => 'Trade and Other Receivables', 'type' => 'asset'],
+        ['id' => 1, 'code' => '1-100-10001-00', 'name' => 'Meezan Bank', 'type' => 'asset', 'amount' => '50000.0000'],
+        ['id' => 2, 'code' => '1-110-10001-00', 'name' => 'Accounts receivable', 'type' => 'asset', 'amount' => '0.0000'],
+        ['id' => 3, 'code' => '1-110-10002-00', 'name' => 'Staff advances', 'type' => 'asset', 'amount' => '0.0000'],
+    ];
+    $tree = pl_report_tree($rows, ['amount']);
+    $pruned = pl_report_tree_prune($tree, ['amount']);
+    assert_same(1, count($pruned));
+    assert_same('50000.0000', $pruned[0]['amount'], 'Pruning changed the class total.');
+    assert_same(['1-100-00000-00'], array_column($pruned[0]['children'], 'code'), 'The group whose accounts are all zero was kept.');
+    assert_same([], pl_report_tree_prune(pl_report_tree([$rows[4]], ['amount']), ['amount']), 'A tree of zeros is not empty.');
+    assert_same(2, count($tree[0]['children']), 'Pruning altered the original tree.');
+    ob_start(); pl_ui_report_tree(pl_report_tree_limit($pruned, 4), [['key' => 'amount', 'label' => 'PKR']], ['caption' => 'Assets', 'sections' => true]); $html = (string) ob_get_clean();
+    assert_true(!str_contains($html, '>Assets<'), 'The class row is repeated inside a statement section that already names it.');
+    assert_same(1, substr_count($html, 'report-tree-subtotal'), 'One total line per open group.');
+    assert_true(str_contains($html, 'Total Cash and Cash Equivalents'), 'The group total is not named after the group.');
+    assert_same(1, substr_count($html, 'report-tree-collapsed-total'), 'The heading carries the group amount only for its collapsed state.');
+    $visible = (string) preg_replace('~<span class="num report-tree-collapsed-total">.*?</span>~s', '', $html);
+    assert_same(2, substr_count($visible, '50,000.00'), 'The amount appears on the account and on the total, nowhere else.');
+    assert_true(str_contains($html, 'Meezan Bank') && !str_contains($html, 'Staff advances'), 'Zero accounts are still listed.');
+    // The trial balance keeps its class rows, so each class has its heading and its total too.
+    ob_start(); pl_ui_report_tree(pl_report_tree_limit($pruned, 4), [['key' => 'amount', 'label' => 'PKR']], ['caption' => 'Trial balance']); $trial = (string) ob_get_clean();
+    assert_same(2, substr_count($trial, 'report-tree-subtotal'));
+    assert_true(str_contains($trial, 'Total Assets'));
+    // "Class and group only" collapses each group to one line that carries its amount.
+    ob_start(); pl_ui_report_tree(pl_report_tree_limit($pruned, 2), [['key' => 'amount', 'label' => 'PKR']], ['caption' => 'Assets', 'sections' => true]); $summary = (string) ob_get_clean();
+    assert_same(0, substr_count($summary, 'report-tree-subtotal'));
+    assert_same(1, substr_count($summary, '50,000.00'));
+});

@@ -17,11 +17,22 @@ def digest(data):
 def json_bytes(value):
     return (json.dumps(value, indent=2, ensure_ascii=False) + '\n').encode('utf-8')
 
-def build(output):
+def snapshot_entry(entry, manifest, pack_data, structure_data):
+    """What a copy shows for this company before it has fetched or installed anything."""
+    story = pack_data.get('learning_story') or {}
+    logo = (story.get('logo') or {}).get('path', '')
+    return {'id': entry['id'], 'slug': manifest['slug'], 'version': manifest['version'], 'name': entry['name'],
+            'business': entry['business'], 'story': story.get('origin', ''), 'logo': logo,
+            'description': manifest['description'], 'accounts': len(structure_data['accounts']),
+            'parties': len(structure_data['parties']), 'products': len(structure_data['products']),
+            'modules': list(structure_data['modules'])}
+
+def build(output, catalogue_path=None):
     output.mkdir(parents=True, exist_ok=True)
     catalogue = json.loads(raw(ROOT / 'resources/demo-packs/catalog.json'))
     modules = {m['id']: m for p in (ROOT / 'resources/modules').glob('*.json') if (m := json.loads(raw(p)))}
     directory = {'schema': 1, 'packages': []}
+    snapshot = {'schema': 1, 'source': 'resources/demo-packs/catalog.json', 'samples': []}
     for entry in catalogue:
         slug = 'sample-' + entry['id']
         version = entry['version']
@@ -79,15 +90,26 @@ Submit corrections through pull requests with the source changes, changed hashes
 '''
         (repository / 'README.md').write_text(readme, encoding='utf-8', newline='\n')
         directory['packages'].append({**{key: manifest[key] for key in ['type', 'slug', 'version', 'name', 'description', 'author', 'licence', 'homepage', 'requires']}, 'manifest': manifest, 'inventory': inventory})
+        snapshot['samples'].append(snapshot_entry(entry, manifest, json.loads(pack), data))
+        if not (ROOT / 'www/phpledger/public/assets/sample-companies' / f"{entry['id']}.svg").is_file():
+            raise ValueError(f'{slug}: the application ships no logo for this company')
     (output / 'index.json').write_bytes(json_bytes(directory))
+    (output / 'sample-catalogue.json').write_bytes(json_bytes(snapshot))
+    if catalogue_path is not None:
+        # The bundled snapshot the Start stage and the Packages Directory tab read on every copy
+        # (approved frame o1-start.html, 1.4.6): the same eleven companies, whether or not this
+        # copy has ever contacted phpledger.com.
+        catalogue_path.parent.mkdir(parents=True, exist_ok=True)
+        catalogue_path.write_bytes(json_bytes(snapshot))
     return len(directory['packages'])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=ROOT / '.cache/sample-packages')
     parser.add_argument('--directory-source', type=Path, help='Write reviewed website directory build input')
+    parser.add_argument('--catalogue', type=Path, help='Write the bundled catalogue snapshot the application ships (resources/sample-catalogue.json)')
     args = parser.parse_args()
-    print(f'Built {build(args.output.resolve())} deterministic data-only sample packages and unsigned inventories.')
+    print(f'Built {build(args.output.resolve(), args.catalogue)} deterministic data-only sample packages and unsigned inventories.')
     if args.directory_source:
         args.directory_source.parent.mkdir(parents=True, exist_ok=True)
         args.directory_source.write_bytes((args.output.resolve() / 'index.json').read_bytes())

@@ -591,6 +591,95 @@ function pl_setup_next_account_code(int $companyId, int $bookId, string $group):
 }
 
 /**
+ * A partnership's profit-sharing ratios from the Owners stage, as six-decimal fractions keyed like
+ * the owners: the shares as entered when every partner has one and they total at most 100, or an
+ * equal split when none was entered. Half-entered shares are refused rather than guessed.
+ *
+ * @param list<array{name:string,kind:string,role:string,share:string}> $owners
+ * @return array<int,string>
+ */
+function pl_setup_partner_shares(array $owners): array
+{
+    $count = count($owners);
+    if ($count === 0) { return []; }
+    $entered = array_filter($owners, static fn (array $owner): bool => $owner['share'] !== '');
+    if ($entered === []) {
+        $base = bcdiv('1', (string) $count, 6);
+        $shares = array_fill(0, $count, $base);
+        $shares[0] = bcsub('1', bcmul($base, (string) ($count - 1), 6), 6);
+        return $shares;
+    }
+    if (count($entered) !== $count) {
+        throw new DomainException('Enter a share for every partner, or leave all of them empty for an equal split.');
+    }
+    $shares = [];
+    $total = '0';
+    foreach ($owners as $index => $owner) {
+        $shares[$index] = bcdiv($owner['share'], '100', 6);
+        $total = bcadd($total, $shares[$index], 6);
+    }
+    if (bccomp($total, '1', 6) > 0) { throw new DomainException('The partners\' shares total more than 100%.'); }
+    return $shares;
+}
+
+/**
+ * Split an amount in proportion to the shares (share over the total of the shares, so a set that
+ * totals less than 100 percent still splits the whole amount), to two decimal places; only what
+ * rounding leaves over goes to the partner with the largest share, so the portions add up to the
+ * amount exactly and no partner is charged another's silence.
+ *
+ * @param array<int,string> $shares
+ * @return array<int,string>
+ */
+function pl_setup_split_amount(string $amount, array $shares): array
+{
+    $total = '0';
+    $largest = null;
+    foreach ($shares as $index => $share) {
+        $total = bcadd($total, $share, 6);
+        if ($largest === null || bccomp($share, $shares[$largest], 6) > 0) { $largest = $index; }
+    }
+    if ($largest === null || bccomp($total, '0', 6) <= 0) { throw new DomainException('At least one partner needs a share above zero.'); }
+    $portions = [];
+    $allocated = '0';
+    foreach ($shares as $index => $share) {
+        if ($index === $largest) { continue; }
+        // Round half up to two decimals: bcdiv truncates, so add half a cent first.
+        $portion = bcdiv(bcadd(bcmul(bcmul($amount, bcdiv($share, $total, 8), 8), '100', 8), '0.5', 8), '100', 2);
+        $portions[$index] = $portion;
+        $allocated = bcadd($allocated, $portion, 4);
+    }
+    $portions[$largest] = bcsub($amount, $allocated, 4);
+    ksort($portions);
+    return $portions;
+}
+
+/**
+ * A partner's own capital or drawings account: the starter's generic leaf renamed for the first
+ * partner (its semantic key survives, as the first bank account keeps the starter's), a new leaf
+ * under the same group for every other partner.
+ */
+function pl_setup_partner_account(int $actorId, int $companyId, int $bookId, ?array $starterLeaf, string $group, string $name, bool $contra, string $reason, string $creationKey, ?string $genericName = null): int
+{
+    $name = mb_substr($name, 0, 120);
+    if ($starterLeaf !== null) {
+        $account = pl_get_account($actorId, $companyId, $bookId, (int) $starterLeaf['id']);
+        // The partner's name replaces the starter's generic one; a name the owner chose for this leaf
+        // on the Features stage, or a sample gave it, stands.
+        if ($account['name'] !== $name && ($genericName === null || $account['name'] === $genericName)) {
+            $account = pl_save_account($actorId, $companyId, $bookId, array_replace($account, ['name' => $name, 'reason' => $reason . ': partner account named by its owner']),
+                (int) $account['id'], (int) $account['revision']);
+        }
+        return (int) $account['id'];
+    }
+    $account = pl_save_account($actorId, $companyId, $bookId, [
+        'code' => pl_setup_next_account_code($companyId, $bookId, $group), 'name' => $name, 'type' => 'equity', 'role' => $contra ? null : 'owner_equity',
+        'is_active' => true, 'is_contra' => $contra, 'reason' => $reason . ': partner account named by its owner', 'creation_key' => $creationKey,
+    ]);
+    return (int) $account['id'];
+}
+
+/**
  * Apply the wizard's additions to a book that now exists, inside the setup transaction. The
  * caller has already created the company, its starter chart and any sample structure.
  */
@@ -668,15 +757,39 @@ function pl_setup_apply_extras(int $actorId, int $companyId, int $bookId, array 
         $usedIds[(int) $account['id']] = true;
     }
 
-    // 4. The owners, in the ownership register, from the start date.
+    // 4. The owners, in the ownership register, from the start date. A partnership's partners also
+    //    get a capital account and a drawings account each, tied together by a partner record:
+    //    capital introduced is personal to a partner (Partnership Act 1932 s.13), so the balance
+    //    sheet shows each partner's capital, never one pooled "Owner equity" (owner, 26 September 2026).
     $family = pl_legal_form_family($extras['legal_form']);
-    foreach ($extras['owners'] as $owner) {
+    $hasPartners = pl_legal_form_has_partners($family);
+    // A full sample brings its own partners and history; a book that already records partners keeps them.
+    $partnership = $hasPartners && ($canonical['source'] ?? 'blank') !== 'full'
+        && (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_owner_partners WHERE company_id = %i AND book_id = %i', $companyId, $bookId) === 0;
+    $partnerShares = $partnership ? pl_setup_partner_shares($extras['owners']) : [];
+    $partnerIds = [];
+    // The starter's generic leaf names ("Owner equity", "Owner drawings"): a leaf still carrying one
+    // becomes the first partner's; a name the owner or a sample gave it stands.
+    $templateNames = [];
+    foreach (pl_starter_template()['accounts'] as $templateAccount) {
+        if (($templateAccount['semantic_key'] ?? '') !== '') { $templateNames[(string) $templateAccount['semantic_key']] = (string) $templateAccount['name']; }
+    }
+    $capitalLeaf = $partnership ? DB::queryFirstRow('SELECT id, code FROM pl_accounts WHERE company_id = %i AND book_id = %i AND semantic_key = %s AND is_active = 1 FOR SHARE', $companyId, $bookId, 'core.equity.owner') : null;
+    $drawingsLeaf = $partnership ? DB::queryFirstRow('SELECT id, code FROM pl_accounts WHERE company_id = %i AND book_id = %i AND semantic_key = %s AND is_active = 1 FOR SHARE', $companyId, $bookId, 'core.equity.drawings') : null;
+    foreach ($extras['owners'] as $index => $owner) {
         $note = trim($owner['role'] . ($owner['share'] !== '' ? ' · ' . $owner['share'] . '%' : ''), ' ·');
         $party = pl_save_ownership_party($actorId, $companyId, ['kind' => $owner['kind'], 'name' => $owner['name'], 'is_active' => true,
             'note' => $note, 'reason' => $reason]);
         pl_save_ownership_member($actorId, $companyId, ['ownership_party_id' => (int) $party['id'], 'effective_from' => $canonical['start_date'],
-            'profit_share' => pl_legal_form_has_partners($family) && $owner['share'] !== '' ? bcdiv($owner['share'], '100', 6) : '',
+            'profit_share' => $partnership ? $partnerShares[$index] : ($hasPartners && $owner['share'] !== '' ? bcdiv($owner['share'], '100', 6) : ''),
             'note' => $note, 'reason' => $reason]);
+        if (!$partnership) { continue; }
+        $capitalId = pl_setup_partner_account($actorId, $companyId, $bookId, $index === 0 ? $capitalLeaf : null, '3-100', 'Partner capital - ' . $owner['name'], false, $reason, $prefix . 'pcap:' . $index, $templateNames['core.equity.owner'] ?? null);
+        $drawingsId = pl_setup_partner_account($actorId, $companyId, $bookId, $index === 0 ? $drawingsLeaf : null, '3-900', 'Partner drawings - ' . $owner['name'], true, $reason, $prefix . 'pdraw:' . $index, $templateNames['core.equity.drawings'] ?? null);
+        $partner = pl_save_owner_partner($actorId, $companyId, $bookId, ['name' => $owner['name'], 'profit_share' => $partnerShares[$index], 'is_active' => true,
+            'capital_account_id' => $capitalId, 'drawings_account_id' => $drawingsId, 'loan_account_id' => null]);
+        pl_link_ownership_partner($actorId, $companyId, $bookId, (int) $party['id'], (int) $partner['id'], $reason);
+        $partnerIds[$index] = (int) $partner['id'];
     }
 
     // 5. Features, in dependency order; a skeleton has already switched on what it needs.
@@ -689,8 +802,22 @@ function pl_setup_apply_extras(int $actorId, int $companyId, int $bookId, array 
 
     // 6. Opening money, posted on the start date through the owner-transaction service: capital
     //    introduced credits the owner's equity, an owner loan credits the owner's loan account.
+    //    In a partnership, capital introduced is split between the partners by their ratio and
+    //    posted to each partner's own capital account, so the balance sheet shows every share.
     foreach ($extras['money_accounts'] as $index => $row) {
         if ($row['opening_source'] === '' || bccomp($row['opening_amount'], '0', 4) <= 0) { continue; }
+        if ($row['opening_source'] === 'capital_introduced' && $partnerIds !== []) {
+            foreach (pl_setup_split_amount($row['opening_amount'], $partnerShares) as $ownerIndex => $portion) {
+                if (bccomp($portion, '0', 4) <= 0) { continue; }
+                pl_post_owner_transaction($actorId, $companyId, $bookId, [
+                    'kind' => 'capital_introduced', 'date' => $canonical['start_date'], 'amount' => $portion,
+                    'cash_account_id' => $moneyIds[$index], 'partner_id' => $partnerIds[$ownerIndex],
+                    'creation_key' => $prefix . 'm' . $index . ':p' . $ownerIndex,
+                    'description' => 'Opening money: capital introduced into ' . $row['name'] . ' by ' . $extras['owners'][$ownerIndex]['name'],
+                ]);
+            }
+            continue;
+        }
         $ownerKey = $row['opening_source'] === 'capital_introduced' ? 'core.equity.owner' : 'core.liability.owner_loan';
         $ownerAccount = DB::queryFirstField('SELECT id FROM pl_accounts WHERE company_id = %i AND book_id = %i AND semantic_key = %s AND is_active = 1', $companyId, $bookId, $ownerKey);
         pl_post_owner_transaction($actorId, $companyId, $bookId, [

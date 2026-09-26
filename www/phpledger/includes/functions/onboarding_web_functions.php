@@ -81,8 +81,11 @@ function pl_onboarding_reached(array $input): string
 }
 
 /**
- * The sample companies the Start stage shows as cards: the ones installed on this copy with
- * their story and what their structure brings, then the ones the signed directory offers.
+ * The sample companies the Start stage shows as cards: every company the bundled catalogue and the
+ * fetched directory know, in the catalogue's order (approved frame o1-start.html). A company this
+ * copy has, installed or bundled, carries its own story and what its structure brings and can be
+ * chosen; the others show the snapshot's story and install in one click for an installation
+ * administrator. The neutral starter is the blank start's chart, not a company, so it is not a card.
  *
  * @return list<array<string, mixed>>
  */
@@ -90,7 +93,9 @@ function pl_onboarding_gallery(bool $administers): array
 {
     $cards = [];
     $structureIds = pl_sample_structure_ids();
-    foreach (pl_demo_sample_choices() as $id => $entry) {
+    $catalogue = pl_sample_catalogue();
+    $installable = $administers && !pl_sample_packages_readonly() && extension_loaded('curl');
+    foreach (pl_demo_pack_catalog() as $id => $entry) {
         $id = (string) $id;
         try {
             $sample = pl_demo_sample($id);
@@ -98,24 +103,26 @@ function pl_onboarding_gallery(bool $administers): array
             continue;
         }
         $story = is_array($sample['learning_story'] ?? null) ? $sample['learning_story'] : [];
+        $snapshot = $catalogue[$id] ?? null;
         $structure = in_array($id, $structureIds, true) ? pl_sample_structure_read($id) : null;
         $summary = $structure === null ? null : pl_sample_structure_summary($structure);
-        $cards[] = ['id' => $id, 'name' => (string) $sample['name'], 'business' => (string) ($sample['business'] ?? ($entry['business'] ?? '')),
-            'story' => (string) ($story['origin'] ?? ''), 'logo' => is_array($story['logo'] ?? null) ? (string) ($story['logo']['path'] ?? '') : '',
+        $logo = is_array($story['logo'] ?? null) ? (string) ($story['logo']['path'] ?? '') : '';
+        $cards[$id] = ['id' => $id, 'name' => (string) $sample['name'], 'business' => (string) ($sample['business'] ?? ($entry['business'] ?? ($snapshot['business'] ?? ''))),
+            'story' => (string) ($story['origin'] ?? ($snapshot['story'] ?? '')), 'logo' => $logo !== '' ? $logo : (string) ($snapshot['logo'] ?? ''),
             'installed' => true, 'skeleton' => $structure !== null,
-            'accounts' => $summary === null ? 0 : (int) $summary['accounts'], 'parties' => $summary === null ? 0 : (int) $summary['parties'],
-            'modules' => $summary === null ? [] : $summary['modules'], 'version' => (string) ($sample['version'] ?? ''), 'slug' => '', 'description' => ''];
+            'accounts' => $summary === null ? (int) ($snapshot['accounts'] ?? 0) : (int) $summary['accounts'], 'parties' => $summary === null ? (int) ($snapshot['parties'] ?? 0) : (int) $summary['parties'],
+            'modules' => $summary === null ? [] : $summary['modules'], 'version' => (string) ($sample['version'] ?? ''), 'slug' => 'sample-' . $id, 'description' => '', 'installable' => false];
     }
-    $present = array_column($cards, 'id');
-    foreach (pl_sample_directory_cached()['packages'] as $entry) {
-        $id = substr((string) $entry['slug'], strlen('sample-'));
-        if (in_array($id, $present, true)) { continue; }
-        $cards[] = ['id' => $id, 'name' => (string) $entry['name'], 'business' => '', 'story' => (string) $entry['description'], 'logo' => '',
-            'installed' => false, 'skeleton' => false, 'accounts' => 0, 'parties' => 0, 'modules' => [],
-            'version' => (string) $entry['version'], 'slug' => (string) $entry['slug'], 'description' => (string) $entry['description'],
-            'installable' => $administers && !pl_sample_packages_readonly() && extension_loaded('curl')];
+    foreach (pl_sample_directory_offer() as $slug => $entry) {
+        $id = substr((string) $slug, strlen('sample-'));
+        if (isset($cards[$id])) { continue; }
+        $cards[$id] = ['id' => $id, 'name' => (string) $entry['name'], 'business' => (string) $entry['business'], 'story' => (string) $entry['story'], 'logo' => (string) $entry['logo'],
+            'installed' => false, 'skeleton' => false, 'accounts' => (int) $entry['accounts'], 'parties' => (int) $entry['parties'], 'modules' => [],
+            'version' => (string) $entry['version'], 'slug' => (string) $slug, 'description' => (string) $entry['description'], 'installable' => $installable];
     }
-    return $cards;
+    $order = array_flip(array_keys($catalogue));
+    uksort($cards, static fn (string $a, string $b): int => (($order[$a] ?? PHP_INT_MAX) <=> ($order[$b] ?? PHP_INT_MAX)) ?: strcmp($a, $b));
+    return array_values($cards);
 }
 
 /**
@@ -389,6 +396,10 @@ function pl_onboarding_read_stage_strict(string $stage, array $post, array $inpu
         if ($generic !== null) {
             throw new DomainException(pl_t('Give the starter\'s "{name}" account the name of a real account, for example the bank it is.', ['name' => $generic]));
         }
+        if ($owners !== [] && ($input['source'] ?? 'blank') !== 'full' && pl_legal_form_has_partners(pl_legal_form_family((string) ($input['legal_form'] ?? '')))) {
+            // A half-entered set of shares or a total above 100 percent is refused here, not at confirm.
+            pl_setup_partner_shares($owners);
+        }
         $input['owners'] = $owners;
         $input['money_accounts'] = $accounts;
         return $input;
@@ -584,6 +595,8 @@ function pl_web_onboarding(int $actorId, array $user, string $method): never
     $template = pl_starter_template();
     $stages = pl_onboarding_stages();
     $order = array_keys($stages);
+    require_once __DIR__ . '/plugin_functions.php';
+    pl_plugin_bootstrap_initial_owner($actorId);
     $administers = pl_user_can($actorId, 0, 'installation.admin');
     if ($method === 'POST') {
         $action = pl_web_text($_POST, 'action');
@@ -662,10 +675,15 @@ function pl_web_onboarding(int $actorId, array $user, string $method): never
                 );
                 $openingTotal = '0.0000';
                 $openingJournals = 0;
+                // A partnership posts capital introduced once per partner (B99), so the manifest counts what was posted.
+                $partnerSplit = ($payload['source'] ?? 'blank') !== 'full' && pl_legal_form_has_partners(pl_legal_form_family((string) ($payload['legal_form'] ?? '')))
+                    && ($payload['owners'] ?? []) !== [] ? pl_setup_partner_shares($payload['owners']) : [];
                 foreach ($payload['money_accounts'] as $row) {
                     if (($row['opening_amount'] ?? '') !== '' && bccomp((string) $row['opening_amount'], '0', 4) > 0) {
                         $openingTotal = bcadd($openingTotal, (string) $row['opening_amount'], 4);
-                        $openingJournals++;
+                        $openingJournals += ($row['opening_source'] ?? '') === 'capital_introduced' && $partnerSplit !== []
+                            ? count(array_filter(pl_setup_split_amount((string) $row['opening_amount'], $partnerSplit), static fn (string $portion): bool => bccomp($portion, '0', 4) > 0))
+                            : 1;
                     }
                 }
                 $_SESSION['company_id'] = $companyId;

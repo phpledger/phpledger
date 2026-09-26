@@ -420,6 +420,30 @@ function pl_report_depth(array $query): int
     return isset(pl_report_depth_options()[$depth]) ? $depth : 4;
 }
 
+/**
+ * Drop the lines that carry nothing: an account at zero in every measure, then a heading left with
+ * no accounts under it. A statement lists what is there (owner, 26 September 2026); the CSV export
+ * and the account pages keep every account.
+ *
+ * @param array<int,array<string,mixed>> $nodes tree from pl_report_tree()
+ * @param list<string> $measures
+ * @return array<int,array<string,mixed>>
+ */
+function pl_report_tree_prune(array $nodes, array $measures): array
+{
+    $kept = [];
+    foreach ($nodes as $node) {
+        $node['children'] = pl_report_tree_prune($node['children'] ?? [], $measures);
+        $zero = true;
+        foreach ($measures as $measure) {
+            if (bccomp((string) ($node[$measure] ?? '0'), '0', 4) !== 0) { $zero = false; break; }
+        }
+        if ($zero && $node['children'] === []) { continue; }
+        $kept[] = $node;
+    }
+    return $kept;
+}
+
 /** Flatten a tree into ordered display rows, for CSV and the print view. */
 function pl_report_tree_rows(array $nodes): array
 {

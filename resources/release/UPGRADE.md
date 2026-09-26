@@ -1,5 +1,15 @@
 # Upgrade and recovery — PHP Ledger
 
+## From 1.4.5 to 1.4.6
+
+This patch changes no schema and adds no migration; the chain installed by 1.4.5 is unchanged. Use the signed release assets from the official release channel and verify the downloaded archive and checksum before applying it.
+
+The in-app updater or the manual file replacement both apply this patch: either path only replaces files, and an installation that upgrades by hand needs no `install/migrate.php` run. The bundled sample catalogue snapshot ships inside the release archive, so the sample gallery needs no action once the files are replaced. A copy that never pinned the publisher public key pins the one inside this package the first time it installs a sample or an update (`storage/installation/publisher.pem`); a key pinned earlier, or `PL_UPDATE_PUBLIC_KEY`, is left alone. A partnership created before 1.4.6 keeps its single Owner equity and Owner drawings account; an administrator who wants a separate account for each partner adds them on the Owner screen.
+
+After this upgrade the balance sheet, profit and loss and trial balance print in the standard layout: an open group heading carries no amount, one "Total ..." line closes each group, the class row is not repeated inside a section, and an account or group at zero is not listed. Existing balances and posted history are unchanged; only the report presentation changes.
+
+Before upgrading, back up matching application files, private configuration and database together and rehearse against a restored copy. After rehearsal, open the Start stage of business setup (the sample gallery lists all eleven companies, with an install button on the ones not yet on this copy), the Packages page's Directory tab, an existing partnership's Owner screen, and the balance sheet, profit and loss and trial balance at each report depth.
+
 ## From 1.4.1 to 1.4.5
 
 The candidate source passed 708 application tests with zero failures on MySQL 8.4 and 708 on MariaDB 10.11; the exact archive's fresh installation and populated 1.4.1 upgrade proof is recorded in its gate receipt under docs/repository/. Use the signed release assets from the official release channel and verify the downloaded archive and checksum before applying it.

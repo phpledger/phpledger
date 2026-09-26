@@ -117,6 +117,28 @@ function pl_install_create_exclusive(string $path, string $contents): bool
 }
 
 /** @return array<string, mixed> */
+/**
+ * The publisher public key this copy verifies signed updates and sample packages against:
+ * PL_UPDATE_PUBLIC_KEY when the host sets it, otherwise publisher.pem in the private installation
+ * directory. A copy that has no pin yet pins the key that shipped inside the package it was
+ * installed from (trust on first install, 1.4.6, B98), so a fresh installation can install a sample
+ * or an update without an operator copying a file by hand; a key an operator pinned stays as it is.
+ */
+function pl_publisher_key_path(?string $directory = null): string
+{
+    $configured = getenv('PL_UPDATE_PUBLIC_KEY');
+    if (is_string($configured) && $configured !== '') { return $configured; }
+    $pinned = ($directory ?? pl_install_directory(true)) . '/publisher.pem';
+    if (!is_file($pinned) && !is_link($pinned)) {
+        $bundled = PL_ROOT . '/resources/release/publisher-public.pem';
+        if (is_file($bundled) && !is_link($bundled)) {
+            $key = (string) file_get_contents($bundled);
+            if (str_contains($key, '-----BEGIN PUBLIC KEY-----')) { pl_install_write_private($pinned, $key, false); }
+        }
+    }
+    return $pinned;
+}
+
 function pl_install_read_state(string $name = 'setup.json'): array
 {
     if (!in_array($name, ['setup.json', 'installed.json', 'attempts.json', 'notice.json'], true)) {

@@ -117,6 +117,7 @@ $suites[] = 'payroll_test.php';
 // other suite and no child process the sweep starts ever sees a fixture package.
 $suites[] = 'plugin_test.php';
 $suites[] = 'sample_package_test.php';
+$suites[] = 'sample_catalogue_test.php';
 $suites[] = 'secret_store_test.php';
 $suites[] = 'schedules_test.php';
 $suites[] = 'plugin_surface_test.php';
@@ -233,7 +234,7 @@ if (($argv[1] ?? '') === '--suite=i18n') {
     $suites = ['i18n_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=database-platform') { $suites = ['installer_test.php', 'database_namespace_test.php']; }
-if (($argv[1] ?? '') === '--suite=sample-packages') { $suites = ['sample_package_test.php']; }
+if (($argv[1] ?? '') === '--suite=sample-packages') { $suites = ['sample_package_test.php', 'sample_catalogue_test.php']; }
 
 if (($argv[1] ?? '') === '--suite=document-parties') { $suites = ['ledger_test.php','concurrency_test.php','document_test.php','document_party_test.php','document_party_http_test.php']; }
 if (($argv[1] ?? '') === '--suite=cash-controls') { $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'cash_control_test.php', 'cash_policy_test.php']; }

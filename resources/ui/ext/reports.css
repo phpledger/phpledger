@@ -63,6 +63,9 @@
   .report-tree-row-empty { color: var(--color-ink-muted); }
 
   .report-tree-contra-tag { color: var(--color-ink-muted); font-style: italic; }
+  /* Standard statement layout: an open heading carries no amount; its "Total ..." line does. */
+  .report-tree-branch[open] > summary .report-tree-collapsed-total { visibility: hidden; }
+  .report-tree-subtotal { font-weight: 600; border-block-start: 1px solid var(--color-border); }
   .report-tree .num { text-align: end; }
   /* A phone reads the codes under the names rather than scrolling sideways. */
   @media (max-width: 40rem) {

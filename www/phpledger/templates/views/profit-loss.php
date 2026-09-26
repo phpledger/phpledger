@@ -15,7 +15,7 @@ $columns = [['key' => 'amount', 'label' => $company['currency']]];
 <div class="flex flex-col gap-3 max-w-[60rem]">
 <?php foreach (['income'=>'Income','cost_of_sales'=>'Cost of sales','expenses'=>'Expenses'] as $key=>$label): ?>
 <section class="flex flex-col gap-2" aria-labelledby="pl-<?= pl_e($key) ?>"><h2 class="section-title" id="pl-<?= pl_e($key) ?>"><?= pl_e(pl_t($label)) ?></h2>
-<?php pl_ui_report_tree($trees[$key], $columns, ['caption' => pl_t('{section} in {currency}', ['section' => pl_t($label), 'currency' => $company['currency']]),
+<?php pl_ui_report_tree($trees[$key], $columns, ['caption' => pl_t('{section} in {currency}', ['section' => pl_t($label), 'currency' => $company['currency']]), 'sections' => true,
     'link' => static fn (int $id): string => pl_url('/reports/account', ['id'=>$id,'from'=>$from,'as_of'=>$to,'return_report'=>'profit-loss','return_preset'=>$preset]),
     'empty' => $key==='cost_of_sales' ? pl_t('No accounts classified as cost of sales. Existing expenses stay in Expenses until explicitly classified.') : pl_t('No {section} accounts carry a balance in this period.', ['section' => strtolower(pl_t($label))])]); ?>
 <table class="stmt-table"><caption class="sr-only"><?= pl_e(pl_t('Total {section}', ['section' => strtolower(pl_t($label))])) ?></caption><tbody><tr class="stmt-row stmt-subtotal"><th scope="row"><?= pl_e(pl_t('Total {section}', ['section' => strtolower(pl_t($label))])) ?></th><td class="num"><?= pl_e(pl_money($report['total_'.$key])) ?></td></tr>
