@@ -119,5 +119,81 @@
       "B99 partner capital and drawings per partner, opening capital split by ratio",
       "B100 standard statement layout"
     ]
+  },
+  "retirement_of_older_demo_generations": {
+    "checked_at_utc": "2026-09-26T16:27:39.268808+00:00",
+    "removed": {
+      "phpledger-demo": {
+        "containers": [
+          "phpledger-demo-demo-db-1",
+          "phpledger-demo-demo-proxy-1",
+          "phpledger-demo-demo-scheduler-1",
+          "phpledger-demo-demo-web-1"
+        ],
+        "networks": [
+          "phpledger-demo_default",
+          "phpledger-demo_edge",
+          "phpledger-demo_shared_install",
+          "phpledger-demo_shared_install_r2"
+        ],
+        "volumes": [
+          "phpledger-demo_demo_data",
+          "phpledger-demo_shared_demo_data",
+          "phpledger-demo_shared_demo_data_r2",
+          "phpledger-demo_shared_demo_private_r2"
+        ]
+      },
+      "phpledger-demo14": {
+        "containers": [
+          "phpledger-demo14-demo-db-1",
+          "phpledger-demo14-demo-proxy-1",
+          "phpledger-demo14-demo-scheduler-1",
+          "phpledger-demo14-demo-web-1"
+        ],
+        "networks": [
+          "phpledger-demo14_edge",
+          "phpledger-demo14_shared_install"
+        ],
+        "volumes": [
+          "phpledger-demo14_shared_demo_data",
+          "phpledger-demo14_shared_demo_private"
+        ]
+      },
+      "phpledger-demo141": {
+        "containers": [
+          "phpledger-demo141-demo-db-1",
+          "phpledger-demo141-demo-proxy-1",
+          "phpledger-demo141-demo-scheduler-1",
+          "phpledger-demo141-demo-web-1"
+        ],
+        "networks": [
+          "phpledger-demo141_edge",
+          "phpledger-demo141_shared_install"
+        ],
+        "volumes": [
+          "phpledger-demo141_shared_demo_data",
+          "phpledger-demo141_shared_demo_private"
+        ]
+      }
+    },
+    "live_project_after": [
+      "phpledger-demo146-demo-db-1",
+      "phpledger-demo146-demo-proxy-1",
+      "phpledger-demo146-demo-scheduler-1",
+      "phpledger-demo146-demo-web-1"
+    ],
+    "public_health_after": "installer-ready",
+    "kept_on_disk": {
+      "release_directories_untouched": {
+        "release-1-3-0-20260923-hosting-r2": "96K",
+        "release-1-4-0-20260923-r3-hosting": "96K",
+        "release-1-4-0-20260923-r3-website": "19M",
+        "release-1-4-1-20260924-r1-hosting": "96K",
+        "release-1-4-1-20260924-r1-website": "19M",
+        "release-1-4-5-20260926-r1-hosting": "96K",
+        "release-1-4-5-20260926-r1-samples": "3.1M",
+        "release-1-4-5-20260926-r1-website": "20M"
+      }
+    }
   }
 }
