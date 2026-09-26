@@ -102,6 +102,22 @@ test('setup shell is five Workbench stages with an explicit source choice', func
     assert_same(1, substr_count($wizard, 'pl_setup_company($actorId'), 'The wizard creates a business from more than one place.');
 });
 
+test('Packages is one page with tabs and a per-business module switch', function (): void {
+    require_once dirname(__DIR__) . '/www/phpledger/includes/functions/module_web_functions.php';
+    $packages = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/packages.php');
+    $controller = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/includes/functions/package_web_functions.php');
+    $modules = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/includes/functions/module_web_functions.php');
+    assert_true(str_contains($packages, 'class="tabs-seg"') && str_contains($packages, "'samples' =>") && str_contains($packages, "'directory' =>") && str_contains($packages, "\$tabs['upload']"),
+        'Packages is not one page with Installed, Sample companies, Directory and Upload tabs.');
+    assert_true(str_contains($packages, 'value="module_toggle"') && str_contains($packages, 'role="switch"'), 'The module card has no per-business switch.');
+    assert_true(str_contains($controller, "\$action === 'module_toggle'") && str_contains($controller, 'pl_set_company_module('), 'The switch does not call the module service.');
+    assert_true(str_contains($modules, 'function pl_web_module_states') && str_contains($modules, 'pl_web_module_states($companyId)'), 'Modules and Packages do not share the module state reader.');
+    assert_true(!str_contains($packages, 'sample-packages-title'), 'The old sample section is still a separate block.');
+    assert_true(str_contains($packages, "if (\$review !== null)") && str_contains($packages, 'confirm_upload'), 'The full-page confirmation before installing unverified code is gone.');
+    assert_same('', pl_web_module_description('no-such-module'));
+    assert_true(pl_web_module_description('inventory') !== '');
+});
+
 test('sample import has a bounded operational replay path', function (): void {
     $demo = file_get_contents(dirname(__DIR__) . '/www/phpledger/includes/functions/demo_pack_functions.php');
     assert_true(is_string($demo) && str_contains($demo, 'function pl_demo_operational_contract'), 'Operational contract validator is missing.');

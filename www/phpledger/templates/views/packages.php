@@ -23,9 +23,10 @@ $badge = static function (string $trust, string $status): void {
         <div>
             <p class="eyebrow"><?= pl_e(pl_t('Setup')) ?></p>
             <h1 class="page-title" id="packages-title"><?= pl_e(pl_t('Packages')) ?></h1>
-            <p class="muted"><?= pl_e($administers
-                ? pl_t('The modules bundled with this copy and the packages installed on it. A package runs with full access to this application, so only an installation administrator can install or activate one.')
-                : pl_t('The modules bundled with this copy and the packages installed on it. Changing what code runs here is an installation administrator\'s decision, so this page is read-only for you.')) ?></p>
+            <p class="muted"><?= pl_e($company !== null && (string) ($company['name'] ?? '') !== ''
+                ? pl_t('What runs on this copy, what is switched on for {company}, and what you can add.', ['company' => (string) $company['name']])
+                : pl_t('What runs on this copy and what you can add. Choose a business to switch modules on for it.')) ?>
+                <?= pl_e($administers ? pl_t('A package runs with full access to this application, so only an installation administrator installs or activates one.') : pl_t('Changing what code runs here is an installation administrator\'s decision.')) ?></p>
         </div>
         <div class="page-header-actions">
             <a class="btn btn-secondary" href="<?= pl_e(pl_url('/modules')) ?>"><?= pl_e(pl_t('Modules for this business')) ?></a>
@@ -45,19 +46,6 @@ $badge = static function (string $trust, string $status): void {
             <?= pl_e(pl_t('PL_PLUGINS_DISABLED is set in this installation\'s environment, so no package code is loading. Nothing recorded below has changed; remove that setting to load active packages again.')) ?></p>
         </div>
     <?php endif; ?>
-
-<section class="rounded-panel border border-border bg-surface p-4" aria-labelledby="sample-packages-title">
-<h2 class="section-title" id="sample-packages-title"><?= pl_e(pl_t('Sample companies')) ?></h2>
-<p><?= pl_e(pl_t('Optional data-only packages provide fictional practice history or a zero-balance business structure. They never execute code. Installing or removing a package does not change an existing business.')) ?></p>
-<p><a class="link" href="https://phpledger.com/directory/" target="_blank" rel="noopener"><?= pl_e(pl_t('Browse the sample directory')) ?></a></p>
-<?php if($sampleReadonly): ?><p role="status"><?= pl_e(pl_t('This host supplies verified sample packages read-only. Its operator manages installation and removal. Available samples work without network access.')) ?></p><?php endif; ?>
-<div class="grid md:grid-cols-2 gap-4 my-3">
-<?php foreach($samplePackages as $sample): $sm=$sample['manifest']; ?><article class="rounded-panel border border-border p-4"><h3 class="section-title"><?= pl_e($sm['name'].' '.$sm['version']) ?></h3><p><?= pl_e($sm['description']) ?></p><p><?= pl_e($sm['author'].' · '.$sm['licence'].' · '.$sample['trust']) ?></p><a class="link" href="<?= pl_e(pl_url('/onboarding')) ?>"><?= pl_e(pl_t('Use in business setup')) ?></a>
-<?php if($administers&&!$sampleReadonly): ?><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field().pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_remove"><input type="hidden" name="slug" value="<?= pl_e($sample['slug']) ?>"><input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(16))) ?>"><label class="field"><?= pl_e(pl_t('Reason')) ?><input class="input" name="reason" required></label><button class="btn btn-secondary"><?= pl_e(pl_t('Remove sample package')) ?></button></form><?php endif; ?></article><?php endforeach; ?>
-</div>
-<?php if($administers&&!$sampleReadonly): ?><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field().pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_refresh"><button class="btn btn-secondary"><?= pl_e(pl_t('Refresh directory')) ?></button></form><p class="muted"><?= pl_e(pl_t('Refresh and Install contact phpledger.com. Opening this page does not make a network request. Upload a sample ZIP below for an offline installation.')) ?></p>
-<?php foreach($sampleDirectory['packages'] as $entry): ?><article class="rounded-panel border border-border p-4 my-3"><h3><?= pl_e($entry['name'].' '.$entry['version']) ?></h3><p><?= pl_e($entry['description']) ?></p><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field().pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_install"><input type="hidden" name="slug" value="<?= pl_e($entry['slug']) ?>"><input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(16))) ?>"><button class="btn btn-primary"><?= pl_e(pl_t('Verify and install sample')) ?></button></form></article><?php endforeach; endif; ?>
-</section>
 
 <?php if ($review !== null): /* ----------------------------------- the full-page confirmation */ ?>
     <?php $manifest = $review['manifest']; ?>
@@ -105,8 +93,35 @@ $badge = static function (string $trust, string $status): void {
             </div>
         </form>
     </section>
-<?php else: /* ----------------------------------------------------------- the installed list */ ?>
+<?php else: /* ------------------------------------------ one page, four tabs (frame P-1, 1.4.5) */ ?>
+    <?php
+    $companyName = (string) ($company['name'] ?? '');
+    $registry = pl_module_registry();
+    $directoryEntries = [];
+    foreach ($sampleDirectory['packages'] ?? [] as $entry) { if (!isset($samplePackages[(string) ($entry['slug'] ?? '')])) { $directoryEntries[] = $entry; } }
+    $tabs = [
+        'installed' => pl_t('Installed · {count}', ['count' => count($cards)]),
+        'samples' => pl_t('Sample companies · {count}', ['count' => count($samplePackages)]),
+        'directory' => pl_t('Directory · {count} more', ['count' => count($directoryEntries)]),
+    ];
+    if ($administers) { $tabs['upload'] = pl_t('Upload'); }
+    $tabUrl = static fn (string $key): string => pl_url('/packages', ($returnTo ?? '') !== '' ? ['tab' => $key, 'return' => 'onboarding'] : ['tab' => $key]);
+    $sampleLogo = static function (string $slug): string {
+        $id = (string) preg_replace('/^sample-/', '', $slug);
+        return preg_match('/^[a-z][a-z0-9-]*$/D', $id) && is_file(dirname(__DIR__, 2) . '/public/assets/sample-companies/' . $id . '.svg') ? pl_url('/assets/sample-companies/' . $id . '.svg') : '';
+    };
+    $needsLine = static function (array $requires) use ($registry): string {
+        $names = [];
+        foreach (array_keys($requires) as $dependency) { if ($dependency === 'core') { continue; } $names[] = (string) ($registry[$dependency]['name'] ?? $dependency); }
+        return $names === [] ? '' : pl_t('Needs {list}.', ['list' => implode(', ', $names)]);
+    };
+    ?>
+    <nav class="tabs-seg" aria-label="<?= pl_e(pl_t('Packages view')) ?>">
+        <?php foreach ($tabs as $key => $label): ?><a class="tabs-seg-item" href="<?= pl_e($tabUrl($key)) ?>"<?= $tab === $key ? ' aria-current="page"' : '' ?>><?= pl_e($label) ?></a><?php endforeach; ?>
+    </nav>
 
+    <?php if ($tab === 'installed'): ?>
+    <p class="muted"><?= pl_e($companyName === '' ? pl_t('Bundled modules and installed packages. Choose a business to switch modules on for it.') : pl_t('Bundled modules and installed packages. The switch enables a module for {company}; it installs nothing and grants no user permission.', ['company' => $companyName])) ?></p>
     <?php if ($staged !== []): ?>
     <section class="rounded-panel border border-border bg-surface p-4 text-sm">
         <h2 class="section-title"><?= pl_e(pl_t('Waiting for your decision')) ?></h2>
@@ -127,34 +142,40 @@ $badge = static function (string $trust, string $status): void {
         <?php endforeach; ?>
     </section>
     <?php endif; ?>
-
-    <?php foreach ($cards as $card): $cardInput = ($packagesInput['slug'] ?? '') === $card['slug'] ? $packagesInput : []; ?>
-    <section class="rounded-panel border border-border bg-surface p-4 text-sm" aria-labelledby="package-<?= pl_e($card['slug']) ?>">
-        <div class="flex items-start justify-between gap-3">
-            <div>
-                <h2 class="section-title" id="package-<?= pl_e($card['slug']) ?>"><?= pl_e($card['name']) ?></h2>
-                <p class="muted"><?= pl_e(pl_t('Version {version}', ['version' => $card['version']])) ?><?php if ($card['author'] !== ''): ?> · <?= pl_e($card['author']) ?><?php endif; ?><?php if ($card['licence'] !== ''): ?> · <?= pl_e($card['licence']) ?><?php endif; ?></p>
-            </div>
-            <div class="flex flex-wrap gap-2"><?php $badge($card['trust'], $card['status']); ?></div>
-        </div>
-        <?php if ($card['description'] !== ''): ?><p><?= pl_e($card['description']) ?></p><?php endif; ?>
-        <?php if ($card['history'] !== ''): ?><p class="muted"><?= pl_e($card['history']) ?></p><?php endif; ?>
-        <?php if ($card['adds'] !== []): ?>
-            <p class="muted"><?= pl_e(pl_t('What it adds')) ?></p>
-            <ul><?php foreach ($card['adds'] as $adds): ?><li><?= pl_e((string) $adds) ?></li><?php endforeach; ?></ul>
-        <?php endif; ?>
-        <?php if ($card['requires'] !== []): ?>
-            <p class="muted"><?= pl_e(pl_t('Requires {list}', ['list' => implode(', ', array_map(static fn (string $name, string $version): string => $name . ' ' . $version, array_keys($card['requires']), array_values($card['requires'])))])) ?></p>
-        <?php endif; ?>
-        <?php if ($card['problem'] !== ''): ?><p class="alert alert-danger"><?= pl_e($card['problem']) ?></p><?php endif; ?>
-        <?php if ($card['last_error'] !== ''): ?><p class="alert alert-warning"><?= pl_e($card['last_error']) ?></p><?php endif; ?>
-        <?php if ($card['kind'] === 'module'): ?>
-            <p class="muted"><?= pl_e($card['status'] === 'required'
-                ? pl_t('Bundled with this copy and always available.')
-                : pl_t('Bundled with this copy. Switch it on for a business in Modules.')) ?></p>
-        <?php elseif (!$administers): ?>
-            <p class="muted"><?= pl_e(pl_t('An installation administrator decides whether this package runs.')) ?></p>
-        <?php else: ?>
+    <div class="pkg-stack">
+    <?php foreach ($cards as $card): if ($card['kind'] !== 'module' || $card['status'] !== 'required') { continue; } ?>
+        <div class="pkg-required"><strong><?= pl_e($card['name']) ?></strong><span><?= pl_e(pl_web_module_description($card['slug'])) ?></span><span class="pkg-meta"><?= pl_e($card['version']) ?> · <?= pl_e(pl_t('Required')) ?> · <?= pl_e(pl_t('Verified')) ?></span></div>
+    <?php endforeach; ?>
+    </div>
+    <div class="pkg-grid">
+    <?php foreach ($cards as $card): if ($card['kind'] === 'module' && $card['status'] === 'required') { continue; } $cardInput = ($packagesInput['slug'] ?? '') === $card['slug'] ? $packagesInput : []; $module = $card['kind'] === 'module' ? ($moduleStates[$card['slug']] ?? null) : null; $needs = $needsLine($card['requires']); ?>
+        <article class="pkg-card" aria-labelledby="package-<?= pl_e($card['slug']) ?>">
+            <div class="pkg-card-head"><h3 id="package-<?= pl_e($card['slug']) ?>"><?= pl_e($card['name']) ?></h3><span class="pkg-meta"><?= pl_e($card['version']) ?><?php if ($card['author'] !== ''): ?> · <?= pl_e($card['author']) ?><?php endif; ?></span></div>
+            <p class="pkg-desc"><?= pl_e($card['kind'] === 'module' ? pl_web_module_description($card['slug']) : $card['description']) ?><?php if ($needs !== ''): ?> <?= pl_e($needs) ?><?php endif; ?></p>
+            <?php if ($card['kind'] === 'plugin' && ($card['adds'] !== [] || $card['licence'] !== '' || $card['homepage'] !== '')): ?><details class="pkg-more"><summary class="link"><?= pl_e(pl_t('More')) ?></summary><?php if ($card['licence'] !== ''): ?><p class="muted"><?= pl_e($card['licence']) ?></p><?php endif; ?><?php if ($card['adds'] !== []): ?><ul><?php foreach ($card['adds'] as $adds): ?><li><?= pl_e((string) $adds) ?></li><?php endforeach; ?></ul><?php endif; ?></details><?php endif; ?>
+            <?php if ($card['problem'] !== ''): ?><p class="alert alert-danger"><?= pl_e($card['problem']) ?></p><?php endif; ?>
+            <?php if ($card['last_error'] !== ''): ?><p class="alert alert-warning"><?= pl_e($card['last_error']) ?></p><?php endif; ?>
+            <div class="pkg-foot">
+                <div class="pkg-badges">
+                <?php if ($card['kind'] === 'module'): ?>
+                    <?php if ($module !== null): pl_ui_badge($module['state']['enabled'] ? 'posted' : 'unpaid', $module['state']['enabled'] ? pl_t('Active') : pl_t('Inactive')); else: pl_ui_badge('info', pl_t('Bundled')); endif; pl_ui_badge('info', pl_t('Verified')); ?>
+                <?php else: $badge($card['trust'], $card['status']); endif; ?>
+                </div>
+                <?php if ($card['kind'] === 'module' && $module !== null): ?>
+                    <?php if ($canSwitch && $module['problem'] === ''): $on = (bool) $module['state']['enabled']; ?>
+                    <form method="post" action="<?= pl_e(pl_url('/packages')) ?>" class="switch-form">
+                        <?= pl_csrf_field() ?><?= pl_scope_fields($packageScope) ?>
+                        <input type="hidden" name="action" value="module_toggle"><input type="hidden" name="module_id" value="<?= pl_e($card['slug']) ?>">
+                        <input type="hidden" name="revision" value="<?= (int) $module['state']['revision'] ?>"><input type="hidden" name="digest" value="<?= pl_e((string) $module['manifest']['digest']) ?>">
+                        <input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(20))) ?>">
+                        <?php if (($returnTo ?? '') !== ''): ?><input type="hidden" name="return" value="onboarding"><?php endif; ?>
+                        <?php if ($on && !$module['current']): ?><button class="btn btn-secondary btn-sm" name="enabled" value="1"><?= pl_e(pl_t('Apply reviewed upgrade')) ?></button><?php endif; ?>
+                        <button type="submit" class="switch<?= $on ? ' is-on' : '' ?>" role="switch" aria-checked="<?= $on ? 'true' : 'false' ?>" name="enabled" value="<?= $on ? '0' : '1' ?>"><span class="switch-track" aria-hidden="true"></span><span><?= pl_e(pl_t('On for {company}', ['company' => $companyName])) ?></span></button>
+                    </form>
+                    <?php else: ?><span class="pkg-meta"><?= pl_e($module['problem'] !== '' ? pl_t('Not installed here') : pl_t('Only the business owner can switch modules')) ?></span><?php endif; ?>
+                <?php elseif ($card['kind'] === 'module'): ?><span class="pkg-meta"><?= pl_e(pl_t('Choose a business to switch it on')) ?></span>
+                <?php elseif (!$administers): ?><span class="pkg-meta"><?= pl_e(pl_t('An installation administrator decides whether this package runs.')) ?></span>
+                <?php else: ?><details class="pkg-manage"><summary class="btn btn-secondary btn-sm"><?= pl_e(pl_t('Manage')) ?></summary>
         <form class="flex flex-wrap items-end gap-3 border-t border-border pt-3" method="post" action="<?= pl_e(pl_url('/packages')) ?>">
             <?= pl_csrf_field() ?><?= pl_scope_fields($packageScope) ?>
             <input type="hidden" name="slug" value="<?= pl_e($card['slug']) ?>">
@@ -180,23 +201,12 @@ $badge = static function (string $trust, string $status): void {
                 <?php endif; ?>
             </div>
         </form>
-        <?php endif; ?>
-    </section>
+                </details><?php endif; ?>
+            </div>
+        </article>
     <?php endforeach; ?>
-
+    </div>
     <?php if ($administers): ?>
-    <section class="rounded-panel border border-border bg-surface p-4 text-sm" aria-labelledby="packages-upload-title">
-        <h2 class="section-title" id="packages-upload-title"><?= pl_e(pl_t('Upload a package')) ?></h2>
-        <p><?= pl_e(pl_t('A package you upload has not been reviewed by the project. Uploading unpacks it and shows you what it says about itself; nothing is installed and no code runs until you confirm on the next page.')) ?></p>
-        <form class="flex flex-wrap items-end gap-3" method="post" action="<?= pl_e(pl_url('/packages')) ?>" enctype="multipart/form-data">
-            <?= pl_csrf_field() ?><?= pl_scope_fields($packageScope) ?>
-            <input type="hidden" name="action" value="upload">
-            <input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(20))) ?>">
-            <label class="field"><?= pl_e(pl_t('Package ZIP')) ?><input class="input" type="file" name="package" accept=".zip,application/zip" required></label>
-            <button class="btn btn-secondary"><?= pl_e(pl_t('Unpack and review')) ?></button>
-        </form>
-    </section>
-
     <h2 class="section-title"><?= pl_e(pl_t('Recent package changes')) ?></h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="<?= pl_e(pl_t('Package changes; scroll horizontally on small screens')) ?>">
         <table class="table">
@@ -212,6 +222,55 @@ $badge = static function (string $trust, string $status): void {
             </tbody>
         </table>
     </div>
+    <?php endif; ?>
+
+    <?php elseif ($tab === 'samples'): ?>
+    <p class="muted"><?= pl_e(pl_t('Sample companies installed on this copy. Business setup offers their structure at zero balances; a full sample becomes a separate practice company. They are data only and never run code; installing or removing one does not change an existing business.')) ?></p>
+    <?php if ($sampleReadonly): ?><p role="status"><?= pl_e(pl_t('This host supplies verified sample packages read-only. Its operator manages installation and removal. Available samples work without network access.')) ?></p><?php endif; ?>
+    <?php if ($samplePackages === []): ?><p class="muted"><?= pl_e(pl_t('No sample company is installed on this copy yet. The Directory tab lists the ones phpledger.com publishes.')) ?></p><?php endif; ?>
+    <div class="pkg-grid">
+    <?php foreach ($samplePackages as $sample): $sm = $sample['manifest']; $logo = $sampleLogo((string) $sample['slug']); ?>
+        <article class="pkg-card"><div class="pkg-card-head"><h3><?php if ($logo !== ''): ?><img src="<?= pl_e($logo) ?>" alt="" width="24" height="24"><?php endif; ?><?= pl_e((string) $sm['name']) ?></h3><span class="pkg-meta"><?= pl_e((string) $sm['version'] . ' · ' . (string) $sm['author'] . ' · ' . (string) $sm['licence']) ?></span></div>
+            <p class="pkg-desc"><?= pl_e((string) $sm['description']) ?></p>
+            <div class="pkg-foot"><div class="pkg-badges"><?php pl_ui_badge('posted', pl_t('Installed')); pl_ui_badge($sample['trust'] === 'verified' ? 'info' : 'due-soon', $sample['trust'] === 'verified' ? pl_t('Verified') : pl_t('Unverified')); ?></div>
+                <div class="pkg-actions"><a class="btn btn-secondary btn-sm" href="<?= pl_e(pl_url('/onboarding')) ?>"><?= pl_e(pl_t('Use in business setup')) ?></a>
+                <?php if ($administers && !$sampleReadonly): ?><details class="pkg-manage"><summary class="link"><?= pl_e(pl_t('Remove')) ?></summary>
+                    <form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field() . pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_remove"><input type="hidden" name="slug" value="<?= pl_e((string) $sample['slug']) ?>"><input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(16))) ?>">
+                        <label class="field"><?= pl_e(pl_t('Reason')) ?><input class="input" name="reason" required maxlength="500"></label><button class="btn btn-danger btn-sm"><?= pl_e(pl_t('Remove this sample')) ?></button></form>
+                </details><?php endif; ?></div>
+            </div>
+        </article>
+    <?php endforeach; ?>
+    </div>
+
+    <?php elseif ($tab === 'directory'): ?>
+    <div class="pkg-toolbar"><p class="muted"><?= pl_e(pl_t('Refresh and Install contact phpledger.com; opening this page does not.')) ?> <a class="link" href="https://phpledger.com/directory/" target="_blank" rel="noopener"><?= pl_e(pl_t('Browse the sample directory')) ?></a></p>
+        <?php if ($administers && !$sampleReadonly): ?><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field() . pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_refresh"><?php if (($returnTo ?? '') !== ''): ?><input type="hidden" name="return" value="onboarding"><?php endif; ?><button class="btn btn-secondary btn-sm"><?= pl_icon('refresh') ?> <?= pl_e(pl_t('Refresh directory')) ?></button></form><?php endif; ?></div>
+    <?php if ($directoryEntries === []): ?><p class="muted"><?= pl_e(($sampleDirectory['packages'] ?? []) === [] ? pl_t('The directory has not been fetched on this copy yet. Refresh it to list the sample companies phpledger.com publishes.') : pl_t('Every sample the directory lists is already installed.')) ?></p><?php endif; ?>
+    <div class="pkg-grid">
+    <?php foreach ($directoryEntries as $entry): $logo = $sampleLogo((string) ($entry['slug'] ?? '')); ?>
+        <article class="pkg-card"><div class="pkg-card-head"><h3><?php if ($logo !== ''): ?><img src="<?= pl_e($logo) ?>" alt="" width="24" height="24"><?php endif; ?><?= pl_e((string) $entry['name']) ?></h3><span class="pkg-meta"><?= pl_e((string) $entry['version'] . ' · phpledger.com' . ((string) ($entry['licence'] ?? '') !== '' ? ' · ' . (string) $entry['licence'] : '')) ?></span></div>
+            <p class="pkg-desc"><?= pl_e((string) $entry['description']) ?></p>
+            <div class="pkg-foot"><div class="pkg-badges"><?php pl_ui_badge('unpaid', pl_t('Not installed')); pl_ui_badge('info', pl_t('Signed')); ?></div>
+                <?php if ($administers && !$sampleReadonly): ?><form method="post" action="<?= pl_e(pl_url('/packages')) ?>"><?= pl_csrf_field() . pl_scope_fields($packageScope) ?><input type="hidden" name="action" value="sample_install"><input type="hidden" name="slug" value="<?= pl_e((string) $entry['slug']) ?>"><input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(16))) ?>"><?php if (($returnTo ?? '') !== ''): ?><input type="hidden" name="return" value="onboarding"><?php endif; ?><button class="btn btn-secondary btn-sm"><?= pl_icon('download') ?> <?= pl_e(pl_t('Install')) ?></button></form>
+                <?php else: ?><span class="pkg-meta"><?= pl_e(pl_t('An installation administrator installs samples')) ?></span><?php endif; ?>
+            </div>
+        </article>
+    <?php endforeach; ?>
+    </div>
+
+    <?php elseif ($tab === 'upload' && $administers): ?>
+    <section class="rounded-panel border border-border bg-surface p-4 text-sm" aria-labelledby="packages-upload-title">
+        <h2 class="section-title" id="packages-upload-title"><?= pl_e(pl_t('Upload a package')) ?></h2>
+        <p><?= pl_e(pl_t('A package you upload has not been reviewed by the project. Uploading unpacks it and shows you what it says about itself; nothing is installed and no code runs until you confirm on the next page.')) ?></p>
+        <form class="flex flex-wrap items-end gap-3" method="post" action="<?= pl_e(pl_url('/packages')) ?>" enctype="multipart/form-data">
+            <?= pl_csrf_field() ?><?= pl_scope_fields($packageScope) ?>
+            <input type="hidden" name="action" value="upload">
+            <input type="hidden" name="request_key" value="<?= pl_e(bin2hex(random_bytes(20))) ?>">
+            <label class="field"><?= pl_e(pl_t('Package ZIP')) ?><input class="input" type="file" name="package" accept=".zip,application/zip" required></label>
+            <button class="btn btn-secondary"><?= pl_e(pl_t('Unpack and review')) ?></button>
+        </form>
+    </section>
     <?php endif; ?>
 <?php endif; ?>
 </section>

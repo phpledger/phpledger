@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+// The module switch on a package card shares the Modules screen's state reader and service glue.
+require_once __DIR__ . '/module_web_functions.php';
+
 /**
  * Admin > Packages (release plan 1.2 M8; frames `packages-installed.html` and
  * `packages-upload-confirm.html`; decisions B44, B51, B52 and onboarding decision 10).
@@ -42,9 +45,15 @@ function pl_web_packages(int $actorId, int $companyId, int $bookId, array $user,
             pl_redirect('/packages');
         }
     }
+    // One page, four tabs (frame P-1, 1.4.5): the tab is part of the address so a link from
+    // business setup, a redirect after an action and the back button all land on the right one.
+    $tab = pl_web_text($_GET, 'tab');
+    if (!in_array($tab, ['installed', 'samples', 'directory', 'upload'], true) || ($tab === 'upload' && !$administers)) { $tab = 'installed'; }
     pl_render('packages', [
         'title' => pl_t('Packages'), 'user' => $user, 'company' => $company, 'packageScope'=>$company ?? ['id'=>0,'book_id'=>0],
-        'administers' => $administers,
+        'administers' => $administers, 'tab' => $tab,
+        'moduleStates' => $company !== null && (int) ($company['id'] ?? 0) > 0 ? pl_web_module_states((int) $company['id']) : [],
+        'canSwitch' => $company !== null && (int) ($company['id'] ?? 0) > 0 && ($company['role'] ?? '') === 'owner' && !pl_demo_enabled(),
         'cards' => pl_plugin_cards(),
         'samplePackages' => pl_sample_installed_packages(), 'sampleDirectory'=>pl_sample_directory_cached(), 'sampleReadonly'=>pl_sample_packages_readonly(),
         'staged' => $administers ? pl_web_packages_staged() : [],
@@ -119,9 +128,23 @@ function pl_web_packages_post(int $actorId, array $company): void
         $slug = pl_web_text($_POST, 'slug');
         $reason = pl_web_text($_POST, 'reason');
         $key = pl_web_text($_POST, 'request_key');
-        if ($action === 'sample_refresh') { pl_sample_directory_refresh($actorId); pl_notice(pl_t('Sample directory refreshed.')); pl_redirect($return); }
-        if ($action === 'sample_install') { pl_sample_directory_install($actorId,$slug,$key); pl_notice(pl_t('Sample installed. It is available in business setup.')); pl_redirect($return); }
-        if ($action === 'sample_remove') { pl_sample_package_remove($actorId,$slug,$reason,$key); pl_notice(pl_t('Sample package removed. Existing businesses and their history are unchanged.')); pl_redirect($return); }
+        $tabbed = static fn (string $tab): string => $return === pl_url('/packages') ? pl_url('/packages', ['tab' => $tab]) : $return;
+        if ($action === 'module_toggle') {
+            // The switch on a module card (frame P-1): the same service, revision and digest as
+            // Modules, with a standard reason so the audit row still says who and when.
+            if ((int) ($company['id'] ?? 0) < 1) { throw new DomainException(pl_t('Choose a business before switching a module on or off.')); }
+            $enable = pl_web_text($_POST, 'enabled');
+            if (!in_array($enable, ['0', '1'], true)) { throw new DomainException(pl_t('Choose enable or disable.')); }
+            $moduleId = pl_web_text($_POST, 'module_id');
+            $why = $reason !== '' ? $reason : ($enable === '1' ? pl_t('Switched on from Packages') : pl_t('Switched off from Packages'));
+            $result = pl_set_company_module($actorId, (int) $company['id'], $moduleId, $enable === '1', pl_web_id($_POST, 'revision'), pl_web_text($_POST, 'digest'), $why, $key);
+            pl_notice($result['enabled'] ? pl_t('{module} is on for {company}.', ['module' => (string) (pl_module_registry()[$moduleId]['name'] ?? $moduleId), 'company' => (string) $company['name']])
+                : pl_t('{module} is off for {company}. Posted history remains available.', ['module' => (string) (pl_module_registry()[$moduleId]['name'] ?? $moduleId), 'company' => (string) $company['name']]));
+            pl_redirect($tabbed('installed'));
+        }
+        if ($action === 'sample_refresh') { pl_sample_directory_refresh($actorId); pl_notice(pl_t('Sample directory refreshed.')); pl_redirect($tabbed('directory')); }
+        if ($action === 'sample_install') { pl_sample_directory_install($actorId,$slug,$key); pl_notice(pl_t('Sample installed. It is available in business setup.')); pl_redirect($tabbed('samples')); }
+        if ($action === 'sample_remove') { pl_sample_package_remove($actorId,$slug,$reason,$key); pl_notice(pl_t('Sample package removed. Existing businesses and their history are unchanged.')); pl_redirect($tabbed('samples')); }
         if ($action === 'upload') {
             $key = pl_request_key($key);
             $staged = pl_web_packages_upload($actorId);
