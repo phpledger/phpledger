@@ -9,7 +9,7 @@
   <!-- Application version this package installs. Bump alongside every
        release per resources/distribution/README.md's release-protocol
        pattern; candidate version, publication is confirmed by the release receipt. -->
-  <version>1.4.1</version>
+  <version>1.4.5</version>
 
   <!-- Minimum Softaculous engine version the package was written against.
        4.0.6 is the value the docs page itself uses as its example; we could
@@ -18,12 +18,12 @@
        placeholder - see NOTES.md. -->
   <softversion>4.0.6</softversion>
 
-  <!-- Measured from the accepted phpledger-1.4.1.zip: 1697 files,
-       9,148,297 bytes uncompressed; SHA256
-       3758aa71704f0c605949ae91422acd6842cebbff38368a40425b74a9beeea37b.
-       Application footprint plus 25 percent, rounded up to a whole MiB (11 MiB).
+  <!-- Measured from the published phpledger-1.4.5.zip: 1728 files,
+       9,347,977 bytes uncompressed; SHA256
+       fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c.
+       Application footprint plus 25 percent, rounded up to a whole MiB (12 MiB).
        This initial allowance does not estimate growing records or backups. -->
-  <space>11534336</space>
+  <space>12582912</space>
 
   <support>https://github.com/phpledger/phpledger/issues</support>
   <demo>https://phpledger.com/demo/</demo>

@@ -18,7 +18,7 @@ Create a new, empty folder called **PHP Ledger** in Documents.
 
 Open [the setup file](https://github.com/phpledger/phpledger/blob/master/compose.desktop.yaml), then click **Download raw file** near the top of the file. Save it in your new folder as **compose.desktop.yaml**. If your browser saves it in Downloads, move it into the PHP Ledger folder.
 
-This recipe installs release **1.4.1**. Its version stays fixed when you restart. It downloads PHP Ledger from GitHub Container Registry and MySQL from Docker Hub automatically.
+This recipe installs release **1.4.5**. Its version stays fixed when you restart. It downloads PHP Ledger from GitHub Container Registry and MySQL from Docker Hub automatically.
 
 **Ready to continue:** the folder contains `compose.desktop.yaml`. In File Explorer, turn on **View → Show → File name extensions** if needed; the name must not end in `.txt`.
 
