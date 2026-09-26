@@ -262,7 +262,6 @@ a {
 
   body { margin: 0; background: var(--canvas); color: var(--ink); font-family: var(--font-sans); font-size: 14px; line-height: 20px; }
   [hidden] { display: none !important; }
-  .btn-primary > img.icon { filter: brightness(0) invert(1); }
   .auth-panel .page-header { position: static; background: transparent; padding-block: 0 .75rem; }
   .grid > .panel { margin-block: 0; }
   .view-home .empty-state { padding-block: 1.25rem; }
@@ -1624,8 +1623,10 @@ a {
   details[open] > .nav-group-summary .icon { transform: rotate(180deg); }
   .nav-group-body { display: flex; flex-direction: column; gap: 1px; }
 
-  .shell-sidebar-footer { flex: none; padding: .625rem; border-block-start: 1px solid var(--border); }
-  .shell-version { font-size: .6875rem; color: var(--ink-faint); padding: .5rem .625rem 0; }
+  /* The version sits in the user menu (owner review of 25 September 2026): the sidebar has no
+     pinned footer, so the navigation keeps its height and scrolls only when it must. */
+  .shell-version { font-size: .6875rem; color: var(--ink-faint); }
+  .menu-panel .shell-version { padding: .25rem .75rem .5rem; }
 
   /* Rail (collapsed) mode: icons only, tooltips via title="". Scoped to .company-switcher-trigger
      (not the bare .company-switcher-info/-caret classes) because the dropdown panel reuses the

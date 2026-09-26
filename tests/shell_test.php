@@ -36,6 +36,19 @@ test('shared shell exposes the candidate version and grouped navigation contract
     assert_true(is_string($layout) && !str_contains($layout, '<nav class="accounting-nav"'), 'The shell still renders a second administration navigation strip.');
     assert_true(is_string($layout) && str_contains($layout, 'pl_module_available'), 'Navigation lost server-side module checks.');
     assert_true(is_string($styles) && str_contains($styles, '.shell-version'), 'Brand version treatment is missing.');
+    // 1.4.5 (owner review of 25 September 2026): no pinned sidebar footer; Help is a labelled
+    // topbar button; the version is in the user menu; icons are inline SVG in the current colour.
+    $shell = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/partials/ui/shell.php');
+    assert_true(!str_contains($shell, 'shell-sidebar-footer'), 'The sidebar still pins a footer.');
+    assert_true(str_contains($shell, "pl_ui_page_help(\$view, 'end', pl_t('Help'))"), 'Help is not the labelled topbar button.');
+    assert_true(str_contains($shell, 'menu-item-static shell-version'), 'The version is not in the user menu.');
+    $icon = pl_icon('users');
+    assert_true(str_starts_with($icon, '<svg class="icon"') && str_contains($icon, 'stroke="currentColor"') && str_contains($icon, 'aria-hidden="true"'), 'Icons are not inline SVG in the current colour.');
+    assert_true(str_contains(pl_icon('chevron-left'), 'icon icon-directional'), 'A directional icon lost its mirror class.');
+    assert_same('', pl_icon('not-an-icon'));
+    foreach (['receipt', 'receipt-2', 'book-2', 'file-invoice', 'users', 'file-dollar', 'truck', 'building-bank', 'report', 'chart-line', 'scale', 'list-details'] as $glyph) {
+        assert_true(str_contains($shell, "'" . $glyph . "'"), 'Navigation lost the distinct glyph ' . $glyph . '.');
+    }
     assert_true(is_string($styles) && str_contains($styles, '.menu-panel'), 'Responsive navigation panel treatment is missing.');
     assert_true(is_string($styles) && str_contains($styles, '.shell-sidebar'), 'Desktop workspace rail styling is missing.');
     assert_true(is_string($app) && str_contains($app, '[data-fiscal-year-end-choice]') && str_contains($app, 'customGroup.hidden = !isCustom'), 'Fiscal year-end progressive disclosure behavior is missing.');

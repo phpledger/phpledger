@@ -130,6 +130,15 @@
   .context-help-header { display: flex; justify-content: flex-end; margin-block-end: .25rem; }
   .page-help { display: inline-flex; align-items: center; }
   .page-help .help > summary { inline-size: 2rem; block-size: 2rem; }
+  /* The topbar's Help is a labelled button, not a bare question mark (owner review, 25 September 2026). */
+  .page-help .help > summary.topbar-help, .help > summary.topbar-help {
+    inline-size: auto; block-size: 1.75rem; display: inline-flex; align-items: center; gap: .375rem;
+    padding-inline: .625rem; border-radius: var(--radius-control); font-size: .75rem; font-weight: 600;
+    color: var(--ink-muted); border: 1px solid transparent; background: transparent;
+  }
+  .help > summary.topbar-help .icon { width: 14px; height: 14px; }
+  .help > summary.topbar-help:hover { color: var(--ink); background: var(--surface-subtle); border-color: transparent; }
+  .help[open] > summary.topbar-help { color: var(--brand-navy); background: var(--brand-selected); }
   .report-tree-wrapper { position: relative; }
   .report-tree-heading-help { position: absolute; inset-block-start: .4rem; inset-inline-start: calc(max(6rem, 14%) + 1.125rem); z-index: 2; }
   .report-tree-heading-help:has(> details[open]) { z-index: 80; }

@@ -174,13 +174,18 @@ function pl_ui_sheet(string $title,callable $body,bool $open=false,string $butto
  * <details> is flow content: place the call beside a heading, a cell or a label, never inside a
  * <p>, a <label> or an <h1>-<h6>, which accept phrasing content only.
  */
-function pl_ui_help(string $concept, string $placement = 'start'): void
+function pl_ui_help(string $concept, string $placement = 'start', ?string $label = null): void
 {
     $entry = pl_guidance_entry($concept);
     $placement = in_array($placement, ['start', 'end', 'sheet'], true) ? $placement : 'start';
     $title = pl_t($entry['title']);
-    echo '<details class="help" data-help><summary><span aria-hidden="true">?</span><span class="sr-only">'
-        . pl_e(pl_t('Explain {concept}', ['concept' => $title])) . '</span></summary>'
+    // A labelled trigger is the topbar's "Help" button (owner review of 25 September 2026); the
+    // bare question mark stays beside a field or a heading.
+    $summary = $label === null
+        ? '<summary><span aria-hidden="true">?</span><span class="sr-only">' . pl_e(pl_t('Explain {concept}', ['concept' => $title])) . '</span></summary>'
+        : '<summary class="topbar-help">' . pl_icon('help-circle') . '<span>' . pl_e($label) . '</span><span class="sr-only"> · '
+            . pl_e(pl_t('Explain {concept}', ['concept' => $title])) . '</span></summary>';
+    echo '<details class="help" data-help>' . $summary
         . '<div class="help-bubble help-bubble-' . $placement . '" role="note">'
         . '<p class="help-title">' . pl_e($title) . '</p>'
         . '<p class="help-text">' . pl_e(pl_t($entry['explanation'])) . '</p>';
@@ -282,10 +287,10 @@ require_once __DIR__ . '/report-tree.php';
  * 'start', so the bubble hangs from the question mark beside the title; the application shell
  * still uses 'sheet' until its own header is reworked.
  */
-function pl_ui_page_help(string $view, string $placement = 'sheet'): void
+function pl_ui_page_help(string $view, string $placement = 'sheet', ?string $label = null): void
 {
     if (!function_exists('pl_guidance_page')) { require_once dirname(__DIR__, 3) . '/includes/functions/guidance_functions.php'; }
     echo '<div class="page-help" data-page-help="' . pl_e($view) . '">';
-    pl_ui_help(pl_guidance_page($view), $placement);
+    pl_ui_help(pl_guidance_page($view), $placement, $label);
     echo '</div>';
 }

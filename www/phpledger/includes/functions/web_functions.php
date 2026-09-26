@@ -593,7 +593,21 @@ function pl_icon(string $name): string
     $directional = ['chevron-left', 'chevron-right', 'arrow-left', 'arrow-right', 'arrow-back-up',
         'logout', 'external-link', 'layout-sidebar-left-collapse', 'receipt-refund'];
     $class = in_array($name, $directional, true) ? 'icon icon-directional' : 'icon';
-    return '<img class="' . $class . '" src="' . pl_e(pl_url('/assets/icons/' . $name . '.svg')) . '" alt="" width="20" height="20">';
+    // Inline SVG rather than <img> (owner review of 25 September 2026): an image never takes the
+    // text colour, so every icon was the same grey whatever its state. The drawing comes from
+    // includes/icons.php, generated from the Tabler files by tools/build-icons.py; the wrapper
+    // carries no size, the stylesheet does, and `stroke="currentColor"` is what makes an active
+    // navigation item, a primary button and a muted hint colour their icon themselves.
+    static $icons = null;
+    if ($icons === null) {
+        $map = require dirname(__DIR__) . '/icons.php';
+        $icons = is_array($map) ? $map : [];
+    }
+    if (!isset($icons[$name])) {
+        return '';
+    }
+    return '<svg class="' . $class . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
+        . $icons[$name] . '</svg>';
 }
 
 function pl_csrf_field(): string
