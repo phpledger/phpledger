@@ -269,7 +269,7 @@ compose file is a strong check, and it is not the same thing.
 
 ## 1.4.5 release metadata
 
-The production Compose default and active catalogue source versions target 1.4.5, published 26 September 2026. The published application archive is `phpledger-1.4.5.zip`, 3,635,906 bytes, SHA-256 `fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c`, 1,728 files and 9,347,977 uncompressed bytes; signed update metadata `phpledger-1.4.5.update.json` SHA-256 `96d957d9368914c4e2b2e18c4feb02ffc6f6619a34968dfb2f03c1fdacd9d90d`. Umbrel pairs 1.4.5 with the immutable official image `ghcr.io/phpledger/phpledger@sha256:e262c75e6786c3b2239eaeadc08e7d7178fca2d8bec7064cd8303493fb88f768`. Softaculous' allowance is 12 MiB (footprint plus 25 percent). Opening the catalogue requests remains a separate step.
+The production Compose default and active catalogue source versions target 1.4.5, published 26 September 2026. The published application archive is `phpledger-1.4.5.zip`, 3,635,906 bytes, SHA-256 `fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c`, 1,728 files and 9,347,977 uncompressed bytes; signed update metadata `phpledger-1.4.5.update.json` SHA-256 `96d957d9368914c4e2b2e18c4feb02ffc6f6619a34968dfb2f03c1fdacd9d90d`. Umbrel pairs 1.4.5 with the immutable official image `ghcr.io/phpledger/phpledger@sha256:6bb559aff0e09aab908355d885e1b6dbf87b27c5067d8e807dcca1f7290089de`. Softaculous' allowance is 12 MiB (footprint plus 25 percent). Opening the catalogue requests remains a separate step.
 
 ## Historical 1.4.1 release metadata
 
