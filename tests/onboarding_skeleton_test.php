@@ -346,40 +346,52 @@ test('all five wizard stages answer over HTTP, and walking them creates the busi
         [$status] = $request('/login', ['email' => $email, 'password' => $password, 'csrf' => $token($body)]);
         assert_true(in_array($status, [200, 302, 303], true), 'Sign-in did not complete: status ' . $status);
 
-        // Stage 1: the three starting points.
+        // Stage 1: what are you starting from. The four cards and the sample gallery.
         [$status, $body] = $request('/onboarding');
         assert_same(200, $status, 'The wizard did not render: ' . substr((string) file_get_contents($log), -400));
-        assert_true(str_contains($body, 'name="start_mode"'), 'The Start stage offers no starting point.');
-        assert_true(str_contains($body, 'Skeleton') || str_contains($body, 'skeleton'), 'The Start stage never mentions the skeleton.');
-        [$status, , $location] = $request('/onboarding', ['csrf' => $token($body), 'action' => 'next', 'stage' => 'start', 'start_mode' => 'fresh']);
+        assert_true(str_contains($body, 'name="start"') && str_contains($body, 'value="structure"'), 'The Start stage offers no sample structure.');
+        assert_true(str_contains($body, 'Willow Corner Shop'), 'The Start stage does not show the sample gallery.');
+        assert_true(!str_contains($body, 'zero_balances_confirmed'), 'The confirmation checkbox is back.');
+        [$status, , $location] = $request('/onboarding', ['csrf' => $token($body), 'action' => 'next', 'stage' => 'start', 'start' => 'structure', 'sample_pack' => 'retail-shop']);
         assert_same(303, $status, 'The Start stage did not advance.');
         assert_true(str_ends_with($location, '/onboarding?stage=business'), 'The Start stage advanced to ' . $location);
 
-        // Stage 2: identity and the financial year.
+        // Stage 2: the business, in its country's own words.
         [$status, $body] = $request('/onboarding?stage=business');
         assert_same(200, $status);
+        assert_true(str_contains($body, 'name="country_code"') && str_contains($body, 'name="legal_form"') && str_contains($body, 'legal-forms-data'), 'The Business stage has no country-aware legal form.');
         assert_true(str_contains($body, 'name="fiscal_year_end_choice"'), 'The Business stage has no financial year end.');
         [$status, , $location] = $request('/onboarding', ['csrf' => $token($body), 'action' => 'next', 'stage' => 'business',
-            'name' => $business, 'currency' => 'USD', 'start_date' => '2026-04-01',
-            'entity_type' => 'company', 'fiscal_year_end_choice' => '06-30']);
-        assert_same(303, $status);
-        assert_true(str_ends_with($location, '/onboarding?stage=source'), 'The Business stage advanced to ' . $location);
+            'name' => $business, 'country_code' => 'PK', 'legal_form' => 'pk.pvt_ltd', 'currency' => 'USD', 'start_date' => '2026-04-01',
+            'fiscal_year_end_choice' => '06-30', 'legal_name' => $business . ' (Private) Limited', 'registration_number' => '0123456', 'registration_authority' => 'SECP', 'tax1' => '1234567-8']);
+        assert_same(303, $status, 'The Business stage did not advance.');
+        assert_true(str_ends_with($location, '/onboarding?stage=owners'), 'The Business stage advanced to ' . $location);
 
-        // Stage 3: the new decision. A blank business, or a sample company's skeleton.
-        [$status, $body] = $request('/onboarding?stage=source');
+        // Stage 3: owners, and the named bank and cash accounts under the group.
+        [$status, $body] = $request('/onboarding?stage=owners');
         assert_same(200, $status);
-        assert_true(str_contains($body, 'value="skeleton"'), 'The Source stage does not offer a skeleton.');
-        assert_true(str_contains($body, 'name="sample_pack"'), 'The Source stage does not offer a sample company.');
-        assert_true(!str_contains($body, 'value="full"'), 'A new business was offered a full fictional history.');
-        [$status, , $location] = $request('/onboarding', ['csrf' => $token($body), 'action' => 'next', 'stage' => 'source',
-            'source' => 'skeleton', 'sample_pack' => 'retail-shop', 'zero_balances_confirmed' => '1']);
-        assert_same(303, $status);
-        assert_true(str_ends_with($location, '/onboarding?stage=review'), 'The Source stage advanced to ' . $location);
+        assert_true(str_contains($body, 'name="money_name[]"') && str_contains($body, 'Reserve bank'), 'The Owners stage does not offer the skeleton\'s own money accounts.');
+        [$status, , $location] = $request('/onboarding', ['csrf' => $token($body), 'action' => 'next', 'stage' => 'owners',
+            'owner_name' => ['Wizard Owner', ''], 'owner_kind' => ['person', 'person'], 'owner_role' => ['Director & shareholder', ''], 'owner_share' => ['100', ''],
+            'money_kind' => ['bank', 'petty'], 'money_code' => ['1-100-21010-00', ''], 'money_name' => ['Sample Bank current 0001', 'Petty cash'],
+            'money_custodian' => ['', 'Ali Khan'], 'money_amount' => ['1,000', ''], 'money_source' => ['capital_introduced', '']]);
+        assert_same(303, $status, 'The Owners stage did not advance.');
+        assert_true(str_ends_with($location, '/onboarding?stage=features'), 'The Owners stage advanced to ' . $location);
 
-        // Stage 4: what is about to be created, and nothing created yet.
+        // Stage 4: features, and the account names.
+        [$status, $body] = $request('/onboarding?stage=features');
+        assert_same(200, $status);
+        assert_true(str_contains($body, 'name="features[]"') && str_contains($body, 'name="account_name['), 'The Features stage offers nothing to choose.');
+        [$status, , $location] = $request('/onboarding', ['csrf' => $token($body), 'action' => 'next', 'stage' => 'features',
+            'features' => ['inventory'], 'account_name' => ['5-100-10001-00' => 'Office expenses']]);
+        assert_same(303, $status, 'The Features stage did not advance.');
+        assert_true(str_ends_with($location, '/onboarding?stage=review'), 'The Features stage advanced to ' . $location);
+
+        // Stage 5: what is about to be created, and nothing created yet.
         [$status, $body] = $request('/onboarding?stage=review');
         assert_same(200, $status);
         assert_true(str_contains($body, 'Willow Corner Shop'), 'The Review stage does not name the sample it will use.');
+        assert_true(str_contains($body, 'Petty cash') && str_contains($body, 'Ali Khan'), 'The Review stage does not list the money accounts.');
         assert_true(str_contains($body, 'action" value="confirm"'), 'The Review stage has no confirmation.');
         assert_same(0, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_companies WHERE name = %s', $business),
             'The wizard created the business before it was confirmed.');
@@ -388,11 +400,11 @@ test('all five wizard stages answer over HTTP, and walking them creates the busi
         assert_same(303, $status, 'Confirming did not complete.');
         assert_true(str_ends_with($location, '/onboarding?stage=ready'), 'Confirming went to ' . $location);
 
-        // Stage 5: the manifest of what now exists.
+        // Ready: the manifest of what now exists.
         [$status, $body] = $request('/onboarding?stage=ready');
         assert_same(200, $status);
         assert_true(str_contains($body, $business), 'The Ready stage does not name the business.');
-        assert_true(str_contains($body, 'Zero transactions'), 'The Ready stage does not state that the books are empty.');
+        assert_true(str_contains($body, 'opening money posted'), 'The Ready stage does not mention the opening money.');
     } finally {
         proc_terminate($server);
         proc_close($server);
@@ -406,9 +418,25 @@ test('all five wizard stages answer over HTTP, and walking them creates the busi
     assert_same(false, $created['is_sample']);
     assert_same('06-30', (string) $created['fiscal_year_end'], 'The wizard lost the financial year end it was given.');
     assert_same('2026-04-01', (string) $created['start_date'], 'The wizard lost the accounting start it was given.');
-    skeleton_assert_zero($ownerId, $created, 'The wizard walk');
     $receipt = pl_company_sample_import($ownerId, $companyId, (int) $created['book_id']);
     assert_true($receipt !== null && $receipt['sample_id'] === 'retail-shop', 'The wizard walk recorded no skeleton receipt.');
+    // The skeleton itself came in at zero; the only postings are the opening money the owner asked for.
+    $accounts = array_column($created['accounts'], null, 'code');
+    assert_same('Sample Bank current 0001', (string) $accounts['1-100-21010-00']['name'], 'The skeleton\'s bank account was not renamed in place.');
+    assert_same('Office expenses', (string) $accounts['5-100-10001-00']['name'], 'The account name chosen on the Features stage was lost.');
+    // The second row named no code, so it took the starter's generic leaf: nothing is left called "Cash and bank".
+    assert_same('Petty cash — Ali Khan', (string) $accounts['1-100-10001-00']['name'], 'The custodian is not part of the petty cash name, or the generic leaf survived.');
+    assert_same('core.cash_bank', (string) $accounts['1-100-10001-00']['semantic_key'], 'The renamed leaf lost its semantic key.');
+    assert_same('Petty cash', (string) $accounts['1-100-21030-00']['name'], 'The skeleton\'s own petty cash was touched.');
+    assert_same(1, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_journals WHERE company_id = %i AND book_id = %i', $companyId, (int) $created['book_id']), 'Exactly one opening journal was expected.');
+    $trial = pl_trial_balance($ownerId, $companyId, (int) $created['book_id']);
+    assert_true($trial['balanced'], 'The opening money unbalanced the books.');
+    $balances = array_column($trial['accounts'], 'balance', 'code');
+    assert_same('1000.0000', $balances['1-100-21010-00'], 'The opening capital did not reach the named bank account.');
+    assert_same(1, (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_ownership_parties WHERE company_id = %i', $companyId), 'The owner was not registered.');
+    assert_same('pk.pvt_ltd', (string) pl_company_profile($ownerId, $companyId)['legal_form'], 'The legal form was not saved in its country\'s words.');
+    assert_true(pl_module_state($companyId, 'inventory')['enabled'], 'The chosen feature was not switched on.');
+    assert_same('strict', pl_cash_balance_policy($companyId, (int) $created['book_id']), 'A wizard-created business does not get the strict cash policy.');
 });
 
 

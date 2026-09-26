@@ -16,6 +16,7 @@ $visibilityInput=($v['action']??'')==='visibility'?$v:[];
         <?php if ($visibilityInput): ?><a class="btn btn-secondary" href="<?= pl_e(pl_url('/modules')) ?>"><?= pl_e(pl_t('Reload saved navigation')) ?></a><?php endif; ?>
     </form><?php else: ?><p><?= pl_e(pl_t('Only the company owner can change navigation.')) ?></p><?php endif; ?>
     <p><a href="<?= pl_e(pl_url('/ar')) ?>"><?= pl_e(pl_t('Open receivables')) ?></a> · <a href="<?= pl_e(pl_url('/ap')) ?>"><?= pl_e(pl_t('Open payables')) ?></a></p></section>
+    <?php if (($returnTo ?? '') !== ''): ?><div class="alert alert-info" role="status"><p><?= pl_e(pl_t('You came here from business setup; what you had typed there is kept.')) ?> <a class="link" href="<?= pl_e($returnTo) ?>"><?= pl_e(pl_t('Back to business setup')) ?></a></p></div><?php endif; ?>
     <?php if ($form['message'] !== ''): ?><div class="alert alert-danger" role="alert" tabindex="-1" data-form-error><?= pl_e($form['message']) ?></div><?php endif; ?>
     <?php foreach ($modules as $module): $manifest = $module['manifest']; $state = $module['state']; $moduleInput=($v['module_id']??'')===$manifest['id']&&!$visibilityInput?$v:[]; ?>
     <section class="rounded-panel border border-border bg-surface p-4 text-sm" aria-labelledby="module-<?= pl_e($manifest['id']) ?>">

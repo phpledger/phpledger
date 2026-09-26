@@ -55,18 +55,26 @@ test('setup shell is five Workbench stages with an explicit source choice', func
     $controller = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/public/index.php');
     $wizard = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/includes/functions/onboarding_web_functions.php');
     $chooser = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/sample-chooser.php');
-    assert_same(['start' => 'Start', 'business' => 'Business', 'source' => 'Source', 'review' => 'Review', 'ready' => 'Ready'],
-        pl_onboarding_stages(), 'The wizard is not the five named stages B50 asked for.');
+    // 1.4.5 (owner review of 25-26 September 2026, B94): five stages before Ready, and the
+    // starting point is one choice that decides both the mode and the source, so the duplicate
+    // "how much structure" question B50 introduced is gone.
+    assert_same(['start' => 'Start', 'business' => 'Business', 'owners' => 'Owners & money', 'features' => 'Features & accounts', 'review' => 'Review', 'ready' => 'Ready'],
+        pl_onboarding_stages(), 'The wizard is not the five named stages plus Ready that the 1.4.5 review asked for.');
+    $choices = pl_onboarding_start_choices();
+    assert_same(['fresh', 'structure', 'existing', 'sample'], array_keys($choices), 'The Start stage does not offer the four starting points.');
+    assert_same(['blank', 'skeleton', 'blank', 'full'], array_values(array_column($choices, 'source')), 'A starting point does not decide its source.');
+    assert_same(['fresh', 'fresh', 'existing', 'sample'], array_values(array_column($choices, 'start_mode')), 'A starting point does not decide its mode.');
     // The same tray, slot states and manifest card the installer uses, not a second vocabulary.
     foreach (['bench-tray', 'tray-slot', 'is-current', 'is-done', 'is-pending', 'bench-head', 'bench-body', 'bench-actions', 'manifest-card'] as $shared) {
         assert_true(str_contains($onboarding, $shared), 'The wizard does not use the installer component ' . $shared . '.');
     }
     assert_true(str_contains($styles, '.tray-slot') && str_contains($styles, '.bench-tray.is-labelled'),
         'The labelled tray the wizard needs is not in the stylesheet.');
-    assert_true(str_contains($onboarding, 'name="source"') && str_contains($onboarding, 'value="skeleton"') && str_contains($onboarding, 'value="full"'),
-        'The Source stage does not offer blank, skeleton and full.');
-    assert_true(str_contains($onboarding, 'name="sample_pack"'), 'The Source stage cannot choose a sample company.');
-    assert_true(str_contains($onboarding, 'name="chart_choice"'), 'Neutral/bring-your-own chart choice is missing.');
+    assert_true(str_contains($onboarding, 'name="start"') && str_contains($onboarding, 'data-start-choice'),
+        'The Start stage does not offer the starting points as one choice.');
+    assert_true(str_contains($onboarding, 'name="sample_pack"') && str_contains($onboarding, 'data-gallery'), 'The Start stage cannot choose a sample company from the gallery.');
+    assert_true(str_contains($onboarding, 'name="money_name[]"') && str_contains($onboarding, 'name="owner_name[]"'), 'The Owners stage has no owners or money accounts.');
+    assert_true(str_contains($onboarding, 'name="features[]"') && str_contains($onboarding, 'name="account_name['), 'The Features stage offers nothing to switch on or rename.');
     assert_true(str_contains($onboarding, 'data-fiscal-year-end-choice') && str_contains($onboarding, 'data-fiscal-custom-group'),
         'Fiscal year-end choices do not provide the progressive disclosure hooks.');
     assert_true(str_contains($wizard, "if (\$action === 'next')"), 'Onboarding stage transitions are not server handled.');
@@ -76,8 +84,9 @@ test('setup shell is five Workbench stages with an explicit source choice', func
     assert_true(str_contains($chooser, 'name="sample_pack"') && str_contains($chooser, 'pl_demo_sample_choices()'),
         'Sample chooser does not expose the bundled selection contract.');
     // Nothing is created before the Review stage is confirmed, and the Review stage says so.
-    assert_true(str_contains($onboarding, 'Not created yet') && str_contains($onboarding, 'value="confirm"'),
+    assert_true(str_contains($onboarding, 'created yet') && str_contains($onboarding, 'value="confirm"'),
         'The Review stage does not hold the single point of creation.');
+    assert_same(1, substr_count($wizard, 'pl_setup_company($actorId'), 'The wizard creates a business from more than one place.');
 });
 
 test('sample import has a bounded operational replay path', function (): void {

@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/legal_form_functions.php';
+
 /*
  * Trading documents (release plan 1.2 M3).
  *
@@ -200,7 +202,7 @@ function pl_company_profile(int $actorId, int $companyId): array
     $profile['financial_year_end_month'] = $row && $row['financial_year_end_month'] !== null ? (int) $row['financial_year_end_month'] : null;
     $profile['financial_year_end_day'] = $row && $row['financial_year_end_day'] !== null ? (int) $row['financial_year_end_day'] : null;
     $profile['financial_year_end'] = pl_financial_year_end_label($profile['financial_year_end_month'], $profile['financial_year_end_day']);
-    $profile['legal_form_label'] = pl_legal_forms()[$profile['legal_form']] ?? '';
+    $profile['legal_form_label'] = pl_legal_form_label($profile['legal_form']);
     $profile['is_empty'] = $profile['is_empty'] && $profile['incorporation_date'] === null && $profile['financial_year_end_month'] === null;
     return $profile;
 }
@@ -221,7 +223,7 @@ function pl_save_company_profile(int $actorId, int $companyId, array $input): ar
         throw new DomainException('Enter a valid email address for the company profile, or leave it empty.');
     }
     // The registration profile (B63). Every part of it is optional, like the rest of B64.
-    if ($data['legal_form'] !== '' && !isset(pl_legal_forms()[$data['legal_form']])) {
+    if ($data['legal_form'] !== '' && !pl_legal_form_known($data['legal_form'])) {
         throw new DomainException('Choose a legal form from the list, or leave it empty.');
     }
     $incorporation = pl_ledger_text($input['incorporation_date'] ?? '', 'Incorporation date', 10, false);

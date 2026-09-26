@@ -105,6 +105,8 @@ $suites[] = 'users_test.php';
 // module and inventory suites because a skeleton turns real modules on, and its last test
 // starts its own HTTP server to walk the five wizard stages.
 $suites[] = 'onboarding_skeleton_test.php';
+// 1.4.5: legal forms in each country's words, and the wizard's additions to pl_setup_company().
+$suites[] = 'setup_wizard_test.php';
 // 1.2.1 M8a: the ownership register. After the Users suite, because every write in it is behind
 // a capability and the fixture grants them through the same role machinery.
 $suites[] = 'ownership_test.php';
@@ -218,7 +220,7 @@ if (($argv[1] ?? '') === '--suite=modules') {
 if (($argv[1] ?? '') === '--suite=onboarding') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'document_test.php', 'pos_test.php',
         'module_test.php', 'ar_ap_test.php', 'inventory_test.php', 'purchasing_test.php', 'tax_test.php', 'document_series_test.php',
-        'onboarding_skeleton_test.php'];
+        'onboarding_skeleton_test.php', 'setup_wizard_test.php'];
 }
 if (($argv[1] ?? '') === '--suite=owner') {
     $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'account_code_test.php', 'report_tree_test.php', 'owner_test.php'];
@@ -235,6 +237,7 @@ if (($argv[1] ?? '') === '--suite=sample-packages') { $suites = ['sample_package
 
 if (($argv[1] ?? '') === '--suite=document-parties') { $suites = ['ledger_test.php','concurrency_test.php','document_test.php','document_party_test.php','document_party_http_test.php']; }
 if (($argv[1] ?? '') === '--suite=cash-controls') { $suites = ['ledger_test.php', 'concurrency_test.php', 'core_test.php', 'cash_control_test.php', 'cash_policy_test.php']; }
+if (($argv[1] ?? '') === '--suite=setup-wizard') { $suites = ['ledger_test.php', 'setup_wizard_test.php']; }
 if (($argv[1] ?? '') === '--suite=guidance') { $suites = ['guidance_test.php']; }
 if (($argv[1] ?? '') === '--suite=context-help') { $suites = ['ledger_test.php', 'guidance_test.php', 'report_tree_test.php']; }
 foreach ($suites as $suite) {

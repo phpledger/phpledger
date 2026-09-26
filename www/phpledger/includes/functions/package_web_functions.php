@@ -25,6 +25,8 @@ function pl_web_packages(int $actorId, int $companyId, int $bookId, array $user,
         pl_web_packages_post($actorId, $company ?? ['id'=>0,'book_id'=>0]);
     }
     $form = pl_form_state(pl_url('/packages'));
+    // Arrived from business setup: say so, and offer the way back (owner note, 25 September 2026).
+    $returnTo = pl_web_text($_GET, 'return') === 'onboarding' ? pl_url('/onboarding', ['stage' => 'start']) : '';
     // The full-page confirmation (onboarding decision 9): installing code that can change what a
     // posting does is a heavier decision than a modal invites, so it is its own reloadable page.
     $confirm = pl_web_text($_GET, 'confirm');
@@ -50,7 +52,7 @@ function pl_web_packages(int $actorId, int $companyId, int $bookId, array $user,
         'acknowledgements' => pl_plugin_acknowledgements(),
         'safe_mode' => pl_plugins_safe_mode(),
         'history' => $administers ? pl_plugin_history($actorId) : [],
-        'form' => $form, 'input' => $form['input'],
+        'form' => $form, 'input' => $form['input'], 'returnTo' => $returnTo,
     ]);
 }
 
@@ -110,7 +112,7 @@ function pl_web_package_requirements(array $manifest): array
 
 function pl_web_packages_post(int $actorId, array $company): void
 {
-    $return = pl_url('/packages');
+    $return = pl_web_text($_POST, 'return') === 'onboarding' ? pl_url('/onboarding', ['stage' => 'start']) : pl_url('/packages');
     try {
         pl_web_assert_scope($company, $_POST);
         $action = pl_web_text($_POST, 'action');

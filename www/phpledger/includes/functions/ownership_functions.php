@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/legal_form_functions.php';
+
 /**
  * The ownership register (1.2 M8a, issue #92; owner decisions B63, B64, B71, B72, B74, B76).
  *
@@ -96,13 +98,14 @@ function pl_legal_forms(): array
 /** Does this legal form issue shares? Decides which half of the register a screen offers. */
 function pl_legal_form_has_shares(string $form): bool
 {
-    return in_array($form, ['private_limited', 'single_member_company', 'public_limited', 'corporation'], true);
+    // A country-prefixed key ('pk.pvt_ltd') answers through its family (legal_form_functions.php).
+    return in_array(pl_legal_form_family($form) ?: $form, ['private_limited', 'single_member_company', 'public_limited', 'corporation'], true);
 }
 
 /** Is this a form whose owners are partners with profit-sharing ratios rather than shares? */
 function pl_legal_form_has_partners(string $form): bool
 {
-    return in_array($form, ['partnership', 'llp'], true);
+    return in_array(pl_legal_form_family($form) ?: $form, ['partnership', 'llp'], true);
 }
 
 /**

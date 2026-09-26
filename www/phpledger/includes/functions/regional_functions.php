@@ -106,6 +106,31 @@ function pl_country_defaults(?string $countryCode): array
         'currency' => $supported ? $single : null, 'country_currency' => $single, 'country_currencies' => $currencies, 'currency_supported' => $supported];
 }
 
+/**
+ * Every country the CLDR registry names, code => name, sorted by name, for a select: the wizard
+ * asks for the country of registration rather than a two-letter code (owner review, 26 September
+ * 2026). Suggestions only; choosing a country enables no tax rule.
+ *
+ * @return array<string, string>
+ */
+function pl_country_options(): array
+{
+    static $options = null;
+    if ($options !== null) {
+        return $options;
+    }
+    $source = file_get_contents(dirname(__DIR__, 4) . '/resources/locale/country-defaults-cldr48.json');
+    $registry = $source === false ? [] : json_decode($source, true, 512, JSON_THROW_ON_ERROR);
+    $options = [];
+    foreach ($registry['countries'] ?? [] as $code => $country) {
+        if (preg_match('/^[A-Z]{2}$/D', (string) $code) && is_string($country['name'] ?? null) && $country['name'] !== '') {
+            $options[(string) $code] = (string) $country['name'];
+        }
+    }
+    asort($options, SORT_NATURAL | SORT_FLAG_CASE);
+    return $options;
+}
+
 /** One bounded HTTPS lookup. No credentials, city/GPS fields, redirects, or raw-IP logging. */
 function pl_fetch_country_code(string $publicIp): ?string
 {

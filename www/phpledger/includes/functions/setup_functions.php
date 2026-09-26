@@ -361,6 +361,13 @@ function pl_setup_company(int $actorId, array $input, string $requestKey): array
         $canonical['sample_pack'] = $pack['id'];
         $canonical['sample_digest'] = $pack['digest'];
     }
+    // The 1.4.5 wizard's additions (owner review of 25-26 September 2026): the registration
+    // profile, the owners, the named bank and cash accounts with optional opening money, the
+    // features to switch on, the account names to change and the cash policy. Every part is
+    // optional to a caller, so the sample chooser and the demo keep their old contract; each is
+    // checked here and applied after the book exists, inside the same transaction, so a refused
+    // row rolls the whole setup back.
+    $canonical['setup'] = pl_setup_extras($input, $canonical);
     $hash = hash('sha256', json_encode($canonical, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
     return pl_ledger_transaction(function () use ($actorId, $canonical, $requestKey, $hash): array {
         // Serialize setup requests by actor, including simultaneous first submissions.
@@ -389,8 +396,319 @@ function pl_setup_company(int $actorId, array $input, string $requestKey): array
             elseif (isset($canonical['sample_pack'])) { pl_seed_demo_pack($actorId, $created['company_id'], $created['book_id'], $canonical['sample_pack']); }
             else { pl_seed_core_sample($actorId, $created['company_id'], $created['book_id']); }
         }
+        pl_setup_apply_extras($actorId, (int) $created['company_id'], (int) $created['book_id'], $canonical, $requestKey);
         return pl_company_context($actorId, $created['company_id']);
     });
+}
+
+/**
+ * Check the wizard's additions before anything is created. Blank rows are skipped; a row that
+ * says something is held to it.
+ *
+ * @return array<string, mixed>
+ */
+function pl_setup_extras(array $input, array $canonical): array
+{
+    require_once __DIR__ . '/legal_form_functions.php';
+    $extras = ['country_code' => '', 'legal_form' => '', 'profile' => [], 'owners' => [], 'money_accounts' => [],
+        'features' => [], 'account_names' => [], 'cash_policy' => 'warning'];
+    $country = strtoupper(pl_ledger_text($input['country_code'] ?? '', 'Country', 2, false));
+    if ($country !== '' && !preg_match('/^[A-Z]{2}$/D', $country)) {
+        throw new DomainException('Choose a country from the list, or leave it empty.');
+    }
+    $form = pl_ledger_text($input['legal_form'] ?? '', 'Legal form', 40, false);
+    if ($form !== '' && !pl_legal_form_known($form)) {
+        throw new DomainException('Choose a legal form from the list, or leave it empty.');
+    }
+    $extras['country_code'] = $country;
+    $extras['legal_form'] = $form;
+    $profile = is_array($input['profile'] ?? null) ? $input['profile'] : [];
+    $profileFields = ['legal_name' => ['Legal name', 200], 'registration_number' => ['Registration number', 80], 'registration_authority' => ['Registration authority', 160],
+        'address_line1' => ['Address line 1', 200], 'address_line2' => ['Address line 2', 200], 'address_line3' => ['Address line 3', 200], 'phone' => ['Phone', 80],
+        'email' => ['Email', 190], 'tax_registrations' => ['Tax registrations', 300], 'footer_terms' => ['Footer terms', 2000]];
+    foreach ($profileFields as $field => [$label, $limit]) {
+        $value = pl_ledger_text($profile[$field] ?? '', $label, $limit, false);
+        if ($value !== '') { $extras['profile'][$field] = $value; }
+    }
+    $owners = $input['owners'] ?? [];
+    if (!is_array($owners) || count($owners) > 20) {
+        throw new DomainException('Register up to twenty owners during setup; more can be added later.');
+    }
+    foreach ($owners as $owner) {
+        if (!is_array($owner)) { throw new DomainException('Review the owners before continuing.'); }
+        $name = pl_ledger_text($owner['name'] ?? '', 'Owner name', 160, false);
+        if ($name === '') { continue; }
+        $share = pl_ledger_text($owner['share'] ?? '', 'Ownership share', 12, false);
+        if ($share !== '' && !preg_match('/^(?:100(?:\.0+)?|[0-9]{1,2}(?:\.[0-9]{1,4})?)$/D', $share)) {
+            throw new DomainException('Enter an ownership share between 0 and 100 for ' . $name . ', or leave it empty.');
+        }
+        $extras['owners'][] = ['name' => $name, 'kind' => ($owner['kind'] ?? 'person') === 'entity' ? 'entity' : 'person',
+            'role' => pl_ledger_text($owner['role'] ?? '', 'Owner role', 80, false), 'share' => $share];
+    }
+    $rows = $input['money_accounts'] ?? [];
+    if (!is_array($rows) || count($rows) > 20) {
+        throw new DomainException('Name up to twenty bank and cash accounts during setup; more can be added later.');
+    }
+    if ($rows !== [] && $canonical['source'] === 'full') {
+        throw new DomainException('A full sample brings its own bank and cash accounts.');
+    }
+    foreach ($rows as $row) {
+        if (!is_array($row)) { throw new DomainException('Review the bank and cash accounts before continuing.'); }
+        $name = pl_ledger_text($row['name'] ?? '', 'Account name', 120, false);
+        $code = pl_ledger_text($row['code'] ?? '', 'Account code', 20, false);
+        if ($name === '' && $code === '') { continue; }
+        if ($name === '') { throw new DomainException('Give every bank or cash account a name.'); }
+        $kind = $row['kind'] ?? 'bank';
+        if (!in_array($kind, ['bank', 'till', 'petty'], true)) {
+            throw new DomainException('Say whether each money account is a bank account, a till or petty cash.');
+        }
+        // A petty cash float belongs to a person, and a till to a place; the custodian is part of
+        // the name, because the name is what every screen and report shows.
+        $custodian = pl_ledger_text($row['custodian'] ?? '', 'Custodian', 80, false);
+        if ($custodian !== '' && mb_stripos($name, $custodian, 0, 'UTF-8') === false) {
+            $name = $name . ' — ' . $custodian;
+        }
+        if (mb_strlen($name, 'UTF-8') > 120) { throw new DomainException('The account name ' . $name . ' is too long.'); }
+        $amountRaw = str_replace([',', ' '], '', pl_ledger_text($row['opening_amount'] ?? '', 'Opening amount', 30, false));
+        $amount = $amountRaw === '' ? '0.0000' : pl_amount($amountRaw);
+        $source = pl_ledger_text($row['opening_source'] ?? '', 'Opening source', 40, false);
+        if (bccomp($amount, '0', 4) > 0) {
+            if (!in_array($source, ['capital_introduced', 'owner_loan_received'], true)) {
+                throw new DomainException('Say where the opening money in ' . $name . ' comes from: capital introduced, or an owner loan.');
+            }
+            if ($canonical['start_mode'] === 'existing') {
+                throw new DomainException('Past records bring their balances through the opening cutover, so setup does not post opening money.');
+            }
+        } else {
+            $source = '';
+        }
+        $extras['money_accounts'][] = ['kind' => $kind, 'code' => $code, 'name' => $name, 'opening_amount' => $amount, 'opening_source' => $source];
+    }
+    $codes = array_filter(array_column($extras['money_accounts'], 'code'));
+    if (count($codes) !== count(array_unique($codes))) {
+        throw new DomainException('Two bank or cash rows name the same account; keep one of them.');
+    }
+    // The starter's generic leaf is never left as a posting target under its generic name (owner
+    // decision, 26 September 2026): the row that becomes it, whether by its code or as the first
+    // row without one, must give it the name of a real account.
+    $generic = pl_setup_generic_money_row($extras['money_accounts']);
+    if ($generic !== null) {
+        throw new DomainException('Give the starter\'s "' . $generic . '" account the name of a real account, for example the bank it is.');
+    }
+    $features = $input['features'] ?? [];
+    if (!is_array($features) || !array_is_list($features)) { throw new DomainException('Choose valid features.'); }
+    $registry = pl_module_registry();
+    foreach ($features as $id) {
+        if (!is_string($id) || !isset($registry[$id]) || !$registry[$id]['optional']) {
+            throw new DomainException('Choose a known optional feature.');
+        }
+    }
+    $extras['features'] = pl_setup_feature_closure($features, $registry);
+    $names = $input['account_names'] ?? [];
+    if (!is_array($names) || count($names) > 500) { throw new DomainException('Review the account names before creating this business.'); }
+    foreach ($names as $code => $name) {
+        if (!is_string($code) || !preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,19}$/D', $code) || !is_string($name)) {
+            throw new DomainException('An account name is incomplete.');
+        }
+        if (trim($name) === '') { continue; }
+        $extras['account_names'][$code] = pl_ledger_text($name, 'Account name', 120);
+    }
+    ksort($extras['account_names']);
+    $policy = $input['cash_policy'] ?? 'warning';
+    if (!in_array($policy, ['warning', 'strict'], true)) {
+        throw new DomainException('Choose warning only or strict cash and bank balance controls.');
+    }
+    $extras['cash_policy'] = $canonical['start_mode'] === 'sample' ? 'warning' : $policy;
+    return $extras;
+}
+
+/**
+ * The generic name of the starter's cash-and-bank leaf when a money row would keep it, else null.
+ * Which row becomes the leaf follows pl_setup_apply_extras(): the row carrying its code, or
+ * failing that the first row without a code.
+ *
+ * @param list<array{code:string, name:string}> $rows
+ */
+function pl_setup_generic_money_row(array $rows): ?string
+{
+    if ($rows === []) { return null; }
+    $leaf = null;
+    foreach (pl_starter_template()['accounts'] as $account) {
+        if (($account['semantic_key'] ?? '') === 'core.cash_bank') { $leaf = $account; break; }
+    }
+    if ($leaf === null) { return null; }
+    $claimant = null;
+    foreach ($rows as $row) {
+        if ($row['code'] === (string) $leaf['code']) { $claimant = $row; break; }
+    }
+    if ($claimant === null) {
+        foreach ($rows as $row) {
+            if ($row['code'] === '') { $claimant = $row; break; }
+        }
+    }
+    if ($claimant !== null && mb_strtolower(trim($claimant['name']), 'UTF-8') === mb_strtolower((string) $leaf['name'], 'UTF-8')) {
+        return (string) $leaf['name'];
+    }
+    return null;
+}
+
+/**
+ * The chosen features plus every optional module they depend on, in registry order, which is
+ * dependency order: enabling a module whose dependency is still off is refused by the service.
+ *
+ * @param list<string> $ids
+ * @return list<string>
+ */
+function pl_setup_feature_closure(array $ids, array $registry): array
+{
+    $wanted = array_fill_keys($ids, true);
+    do {
+        $added = false;
+        foreach (array_keys($wanted) as $id) {
+            foreach (array_keys($registry[$id]['requires'] ?? []) as $dependency) {
+                if (isset($registry[$dependency]) && $registry[$dependency]['optional'] && !isset($wanted[$dependency])) {
+                    $wanted[$dependency] = true;
+                    $added = true;
+                }
+            }
+        }
+    } while ($added);
+    return array_values(array_filter(array_keys($registry), static fn (string $id): bool => isset($wanted[$id])));
+}
+
+/** The next free postable code under a group, so a named bank account lands beside the others. */
+function pl_setup_next_account_code(int $companyId, int $bookId, string $group): string
+{
+    $codes = DB::queryFirstColumn('SELECT code FROM pl_accounts WHERE company_id = %i AND book_id = %i AND code LIKE %s', $companyId, $bookId, $group . '-%');
+    $highest = 10000;
+    foreach ($codes as $code) {
+        if (preg_match('/^' . preg_quote($group, '/') . '-([0-9]{5})-00$/D', (string) $code, $match)) {
+            $highest = max($highest, (int) $match[1]);
+        }
+    }
+    if ($highest >= 99999) { throw new DomainException('The ' . $group . ' group has no free account number left.'); }
+    return sprintf('%s-%05d-00', $group, $highest + 1);
+}
+
+/**
+ * Apply the wizard's additions to a book that now exists, inside the setup transaction. The
+ * caller has already created the company, its starter chart and any sample structure.
+ */
+function pl_setup_apply_extras(int $actorId, int $companyId, int $bookId, array $canonical, string $requestKey): void
+{
+    require_once __DIR__ . '/owner_functions.php';
+    require_once __DIR__ . '/ownership_functions.php';
+    require_once __DIR__ . '/trading_functions.php';
+    require_once __DIR__ . '/module_functions.php';
+    $extras = $canonical['setup'] ?? null;
+    if (!is_array($extras)) { return; }
+    // The actor's memberships may have been read (and cached) before this company existed.
+    pl_capability_cache_reset();
+    $reason = 'Business setup';
+    $prefix = 'st:' . $requestKey . ':';
+
+    // 1. The registration profile: what invoices and receipts print.
+    if ($extras['legal_form'] !== '' || $extras['profile'] !== []) {
+        $before = pl_company_profile($actorId, $companyId);
+        pl_save_company_profile($actorId, $companyId, $extras['profile'] + ['legal_form' => $extras['legal_form'],
+            'revision' => (int) $before['revision'], 'reason' => $reason, 'idempotency_key' => $prefix . 'profile']);
+    }
+
+    // 2. Account names the owner changed on the Features stage. Codes and classifications stay.
+    foreach ($extras['account_names'] as $code => $name) {
+        $row = DB::queryFirstRow('SELECT id, name FROM pl_accounts WHERE company_id = %i AND book_id = %i AND code = %s FOR SHARE', $companyId, $bookId, $code);
+        if (!$row) { throw new DomainException('The starting chart changed: account ' . $code . ' is not in it. Review the accounts before confirming.'); }
+        if ((string) $row['name'] === $name) { continue; }
+        $account = pl_get_account($actorId, $companyId, $bookId, (int) $row['id']);
+        pl_save_account($actorId, $companyId, $bookId, array_replace($account, ['name' => $name, 'reason' => $reason . ': account named by its owner']),
+            (int) $account['id'], (int) $account['revision']);
+    }
+
+    // 3. The named bank, till and petty-cash accounts. Postings go to these, never to the group
+    //    above them (owner decision, 26 September 2026). The starter's generic leaf is renamed
+    //    into the first account that names no existing code, so its semantic key survives; a
+    //    skeleton's own money accounts are renamed in place; anything else is a new leaf under
+    //    the same group with the next free number.
+    $moneyIds = [];
+    $usedIds = [];
+    $starter = DB::queryFirstRow('SELECT id, name FROM pl_accounts WHERE company_id = %i AND book_id = %i AND semantic_key = %s AND is_active = 1 FOR SHARE', $companyId, $bookId, 'core.cash_bank');
+    $starterClaimed = false;
+    foreach ($extras['money_accounts'] as $index => $row) {
+        $moneyKind = $row['kind'] === 'bank' ? 'bank' : 'physical';
+        $existingId = null;
+        if ($row['code'] !== '') {
+            $existingId = DB::queryFirstField('SELECT id FROM pl_accounts WHERE company_id = %i AND book_id = %i AND code = %s AND role = %s FOR SHARE', $companyId, $bookId, $row['code'], 'cash_bank');
+            if ($existingId === null) { throw new DomainException('The starting chart changed: ' . $row['code'] . ' is not a bank or cash account in it.'); }
+        } elseif ($starter && !$starterClaimed) {
+            $existingId = $starter['id'];
+            $starterClaimed = true;
+        }
+        if ($existingId !== null) {
+            // A row that names the starter leaf by its code claims it too, so the next row without
+            // a code cannot take the same account (review finding, 26 September 2026).
+            if ($starter && (int) $existingId === (int) $starter['id']) { $starterClaimed = true; }
+            if (isset($usedIds[(int) $existingId])) {
+                throw new DomainException('Two bank or cash rows resolve to the same account (' . $row['name'] . '); keep one of them.');
+            }
+            $usedIds[(int) $existingId] = true;
+            $account = pl_get_account($actorId, $companyId, $bookId, (int) $existingId);
+            if ($account['name'] !== $row['name'] || ($account['money_kind'] ?? null) !== $moneyKind) {
+                $account = pl_save_account($actorId, $companyId, $bookId, array_replace($account, ['name' => $row['name'], 'money_kind' => $moneyKind,
+                    'reason' => $reason . ': bank or cash account named by its owner']), (int) $account['id'], (int) $account['revision']);
+            }
+            $moneyIds[$index] = (int) $account['id'];
+            continue;
+        }
+        $account = pl_save_account($actorId, $companyId, $bookId, [
+            'code' => pl_setup_next_account_code($companyId, $bookId, '1-100'), 'name' => $row['name'], 'type' => 'asset', 'role' => 'cash_bank',
+            'money_kind' => $moneyKind, 'is_active' => true, 'is_contra' => false,
+            'reason' => $reason . ': bank or cash account named by its owner', 'creation_key' => $prefix . 'money:' . $index,
+        ]);
+        $moneyIds[$index] = (int) $account['id'];
+        $usedIds[(int) $account['id']] = true;
+    }
+
+    // 4. The owners, in the ownership register, from the start date.
+    $family = pl_legal_form_family($extras['legal_form']);
+    foreach ($extras['owners'] as $owner) {
+        $note = trim($owner['role'] . ($owner['share'] !== '' ? ' · ' . $owner['share'] . '%' : ''), ' ·');
+        $party = pl_save_ownership_party($actorId, $companyId, ['kind' => $owner['kind'], 'name' => $owner['name'], 'is_active' => true,
+            'note' => $note, 'reason' => $reason]);
+        pl_save_ownership_member($actorId, $companyId, ['ownership_party_id' => (int) $party['id'], 'effective_from' => $canonical['start_date'],
+            'profit_share' => pl_legal_form_has_partners($family) && $owner['share'] !== '' ? bcdiv($owner['share'], '100', 6) : '',
+            'note' => $note, 'reason' => $reason]);
+    }
+
+    // 5. Features, in dependency order; a skeleton has already switched on what it needs.
+    $registry = pl_module_registry();
+    foreach ($extras['features'] as $id) {
+        $state = pl_module_state($companyId, $id);
+        if ($state['enabled']) { continue; }
+        pl_set_company_module($actorId, $companyId, $id, true, (int) $state['revision'], (string) $registry[$id]['digest'], $reason . ': feature chosen', $prefix . 'module:' . $id);
+    }
+
+    // 6. Opening money, posted on the start date through the owner-transaction service: capital
+    //    introduced credits the owner's equity, an owner loan credits the owner's loan account.
+    foreach ($extras['money_accounts'] as $index => $row) {
+        if ($row['opening_source'] === '' || bccomp($row['opening_amount'], '0', 4) <= 0) { continue; }
+        $ownerKey = $row['opening_source'] === 'capital_introduced' ? 'core.equity.owner' : 'core.liability.owner_loan';
+        $ownerAccount = DB::queryFirstField('SELECT id FROM pl_accounts WHERE company_id = %i AND book_id = %i AND semantic_key = %s AND is_active = 1', $companyId, $bookId, $ownerKey);
+        pl_post_owner_transaction($actorId, $companyId, $bookId, [
+            'kind' => $row['opening_source'], 'date' => $canonical['start_date'], 'amount' => $row['opening_amount'],
+            'cash_account_id' => $moneyIds[$index], 'owner_account_id' => $ownerAccount === null ? null : (int) $ownerAccount,
+            'creation_key' => $prefix . 'm' . $index,
+            'description' => 'Opening money: ' . pl_owner_transaction_kinds()[$row['opening_source']]['label'] . ' into ' . $row['name'],
+        ]);
+    }
+
+    // 7. Money leaves a bank or cash account only when it is there (owner decision, 26 September 2026).
+    if ($canonical['start_mode'] !== 'sample') {
+        $policies = pl_trading_policies($actorId, $companyId, $bookId);
+        if ($policies['cash_shortfall_policy'] !== $extras['cash_policy']) {
+            pl_save_trading_policies($actorId, $companyId, $bookId, ['cash_shortfall_policy' => $extras['cash_policy'], 'revision' => (int) $policies['revision'],
+                'reason' => $reason . ': cash policy', 'idempotency_key' => $prefix . 'policy'] + array_intersect_key($policies, pl_trading_policy_defaults()));
+        }
+    }
 }
 
 /** Prior proof records retain IDs, names and posted entries; only explicit role bindings are added. */

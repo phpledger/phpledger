@@ -37,6 +37,7 @@ function pl_web_modules(int $actorId, int $companyId, int $bookId, array $user, 
             'current' => $state['enabled'] && $state['version'] === $manifest['version'] && $state['manifest_hash'] === $manifest['digest']];
     }
     pl_render('modules', ['title' => 'Modules', 'user' => $user, 'company' => $company, 'modules' => $modules,
+        'returnTo' => pl_web_text($_GET, 'return') === 'onboarding' ? pl_url('/onboarding', ['stage' => 'features']) : '',
         'form' => pl_form_state(pl_url('/modules')), 'history' => pl_module_history($actorId, $companyId),
         'visibility' => pl_company_visibility($actorId,$companyId)]);
 }

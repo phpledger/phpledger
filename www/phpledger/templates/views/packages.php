@@ -35,6 +35,9 @@ $badge = static function (string $trust, string $status): void {
     <?php if ($form['message'] !== ''): ?>
         <div class="alert alert-danger" role="alert" tabindex="-1" data-form-error><?= pl_e($form['message']) ?></div>
     <?php endif; ?>
+    <?php if (($returnTo ?? '') !== ''): ?>
+        <div class="alert alert-info" role="status"><p><?= pl_e(pl_t('You came here from business setup; what you had typed there is kept.')) ?> <a class="link" href="<?= pl_e($returnTo) ?>"><?= pl_e(pl_t('Back to business setup')) ?></a></p></div>
+    <?php endif; ?>
 
     <?php if ($safe_mode): ?>
         <div class="alert alert-warning" role="status">

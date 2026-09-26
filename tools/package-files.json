@@ -1507,6 +1507,70 @@
       "destination": "www/phpledger/includes/functions/sample_structure_functions.php"
     },
     {
+      "source": "www/phpledger/includes/functions/legal_form_functions.php",
+      "destination": "www/phpledger/includes/functions/legal_form_functions.php"
+    },
+    {
+      "source": "resources/locale/legal-forms.json",
+      "destination": "resources/locale/legal-forms.json"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-business-name.php",
+      "destination": "resources/guidance/concepts/onboarding-business-name.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-business.php",
+      "destination": "resources/guidance/concepts/onboarding-business.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-country.php",
+      "destination": "resources/guidance/concepts/onboarding-country.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-currency.php",
+      "destination": "resources/guidance/concepts/onboarding-currency.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-features.php",
+      "destination": "resources/guidance/concepts/onboarding-features.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-legal-form.php",
+      "destination": "resources/guidance/concepts/onboarding-legal-form.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-money-accounts.php",
+      "destination": "resources/guidance/concepts/onboarding-money-accounts.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-owner-list.php",
+      "destination": "resources/guidance/concepts/onboarding-owner-list.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-owners.php",
+      "destination": "resources/guidance/concepts/onboarding-owners.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-review.php",
+      "destination": "resources/guidance/concepts/onboarding-review.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-start-date.php",
+      "destination": "resources/guidance/concepts/onboarding-start-date.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-start.php",
+      "destination": "resources/guidance/concepts/onboarding-start.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-tax-numbers.php",
+      "destination": "resources/guidance/concepts/onboarding-tax-numbers.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-year-end.php",
+      "destination": "resources/guidance/concepts/onboarding-year-end.php"
+    },
+    {
       "source": "www/phpledger/includes/functions/onboarding_web_functions.php",
       "destination": "www/phpledger/includes/functions/onboarding_web_functions.php"
     },
