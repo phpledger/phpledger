@@ -1,4 +1,4 @@
-# PHP Ledger 1.4.6 local candidate gates — 27 September 2026
+# PHP Ledger 1.4.6 local candidate gates — 26 September 2026
 
 This is a **local candidate receipt**, not a publication, deployment or independent accounting/security assurance receipt. It identifies the tested source and archive rather than the mutable branch tip. The published 1.4.5 archive is the upgrade baseline (SHA-256 `fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c`, verified against the 1.4.5 publication receipt before use).
 
