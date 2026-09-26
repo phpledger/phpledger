@@ -42,7 +42,7 @@ caproverOneClickApp:
     variables:
         - id: $$cap_phpledger_version
           label: PHP Ledger Version
-          defaultValue: "1.4.5"
+          defaultValue: "1.4.6"
           description: The image tag to deploy. Pinned to a specific release; see https://github.com/phpledger/phpledger/pkgs/container/phpledger for available tags. Bumped on each release per docs/RELEASE-PROTOCOL.md step 10.
         - id: $$cap_db_password
           label: Database Password

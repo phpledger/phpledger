@@ -8,7 +8,7 @@ services:
       APP_PORT: 8080
 
   web:
-    image: ghcr.io/phpledger/phpledger:1.4.5@sha256:6bb559aff0e09aab908355d885e1b6dbf87b27c5067d8e807dcca1f7290089de
+    image: ghcr.io/phpledger/phpledger:1.4.6@sha256:04665423f4865ba4b03c93bb98b101f9be7a02624ab4d34c53e9c2d16ad3910f
     restart: on-failure
     depends_on:
       - db

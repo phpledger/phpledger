@@ -1,13 +1,13 @@
 {
   "name": "PHP Ledger",
   "description": "PHP Ledger is open-source, self-hosted double-entry accounting software for small businesses. It brings invoices, bills, payments, stock, reconciliation and reports together with reviewed payroll accruals, loan schedules and period/year-end workflows. Run it on PHP 8.2+ with MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+. Use the browser installer, your own hosting and publisher-verified releases. Independent review and real-business acceptance remain separate gates.",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "releaseDate": "2026-09-26",
   "license": "New project-owned code: AGPL-3.0-or-later; commercial licensing available. Pre-adoption 0.1.0 through 0.1.5 previews retain MIT; dependencies and archived code keep their own terms.",
   "requirements": "PHP 8.2+ (8.3 recommended), MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+ (InnoDB), HTTPS; upload the phpledger folder and open it in a browser, no terminal required for setup; PHP zip extension for automatic updates",
   "repository": "https://github.com/phpledger/phpledger",
-  "release": "https://github.com/phpledger/phpledger/releases/tag/v1.4.5",
-  "packageSha256": "fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c",
+  "release": "https://github.com/phpledger/phpledger/releases/tag/v1.4.6",
+  "packageSha256": "dadc2758d9c50fff109e79f8448c4cb8010d4a9d51a458ce190d4512cf7765f1",
   "demo": {
     "url": "https://phpledger.com/demo/",
     "warning": "Fictional sample data only; private sample companies reset hourly."

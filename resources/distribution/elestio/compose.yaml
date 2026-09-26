@@ -17,7 +17,7 @@
 name: phpledger
 services:
   web:
-    image: ghcr.io/phpledger/phpledger:1.4.5
+    image: ghcr.io/phpledger/phpledger:1.4.6
     restart: unless-stopped
     ports:
       - "${PL_WEB_PORT:-8080}:8080"

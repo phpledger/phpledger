@@ -58,7 +58,7 @@
     docs - only that prose description. Rather than invent a <branch>/
     <version> element schema with made-up attribute names, this file omits
     it; the actual version content lives, per Installatron's own documented
-    directory convention, in phpledger/1.4.5/init.xml alongside this file; older version directories remain historical.
+    directory convention, in phpledger/1.4.6/init.xml alongside this file; older version directories remain historical.
     Confirm the exact top-level "Versions" wiring against the Installer
     Editor (or direct contact with Installatron) before submission.
   -->

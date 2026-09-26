@@ -3,7 +3,7 @@
 name: phpledger-desktop
 services:
   web:
-    image: ghcr.io/phpledger/phpledger:1.4.5
+    image: ghcr.io/phpledger/phpledger:1.4.6
     restart: unless-stopped
     ports:
       - "127.0.0.1:${PL_WEB_PORT:-18080}:8080"
