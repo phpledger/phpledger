@@ -3,7 +3,7 @@
 name: phpledger
 services:
   web:
-    image: ${PL_IMAGE:-ghcr.io/phpledger/phpledger}:${PL_VERSION:-1.4.5}
+    image: ${PL_IMAGE:-ghcr.io/phpledger/phpledger}:${PL_VERSION:-1.4.6}
     restart: unless-stopped
     ports:
       - "${PL_WEB_PORT:-8080}:8080"
