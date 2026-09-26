@@ -1,0 +1,77 @@
+{
+  "status": "local_candidate_gates_complete",
+  "baseline": "1.4.5 (published archive fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c)",
+  "application_source": "334cc78f8582982fb1ff3e400d1b2deab925bc22",
+  "archive": {
+    "path": ".cache/release-1.4.6/phpledger-1.4.6.zip",
+    "sha256": "dadc2758d9c50fff109e79f8448c4cb8010d4a9d51a458ce190d4512cf7765f1",
+    "bytes": 3643443,
+    "members": 1729
+  },
+  "migrations_added": [],
+  "schema_changed": false,
+  "secrets_exposed": false,
+  "production_changed": false,
+  "publication_authorized": true,
+  "full_checks": {
+    "mysql": {
+      "tests": 713,
+      "failures": 0,
+      "phpstan": "pass"
+    },
+    "maria": {
+      "tests": 713,
+      "failures": 0,
+      "phpstan": "pass",
+      "php_lint_files": 421,
+      "php_lint_failures": 0
+    },
+    "samples": "valid"
+  },
+  "website_check": {
+    "pages": 102,
+    "errors": 0,
+    "warnings": 0
+  },
+  "exact_package_gates": {
+    "baseline_version": "1.4.5",
+    "candidate_version": "1.4.6",
+    "baseline_sha256": "fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c",
+    "candidate_sha256": "dadc2758d9c50fff109e79f8448c4cb8010d4a9d51a458ce190d4512cf7765f1",
+    "candidate_source_commit": "334cc78f8582982fb1ff3e400d1b2deab925bc22",
+    "migration_files": 62,
+    "migrations_added": [],
+    "candidate_members": 1729,
+    "results": [
+      {
+        "engine": "mysql",
+        "host": "pl146-mysql",
+        "steps": [
+          "fresh_62_migrations_first_post",
+          "populated_1_4_5_seed",
+          "packaged_upgrade_1_no_op",
+          "packaged_upgrade_2_no_op",
+          "historical_rows_and_balances_unchanged"
+        ]
+      },
+      {
+        "engine": "maria",
+        "host": "pl146-maria",
+        "steps": [
+          "fresh_62_migrations_first_post",
+          "populated_1_4_5_seed",
+          "packaged_upgrade_1_no_op",
+          "packaged_upgrade_2_no_op",
+          "historical_rows_and_balances_unchanged"
+        ]
+      }
+    ],
+    "production_changed": false
+  },
+  "reproduction": "bytes",
+  "corrections": [
+    "B98 sample gallery from the bundled catalogue with one-click install",
+    "B99 partner capital and drawings per partner, opening capital split by ratio",
+    "B100 standard statement layout"
+  ]
+}
