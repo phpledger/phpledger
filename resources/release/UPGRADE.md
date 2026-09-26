@@ -1,5 +1,15 @@
 # Upgrade and recovery — PHP Ledger
 
+## From 1.4.1 to 1.4.5
+
+The candidate source passed 708 application tests with zero failures on MySQL 8.4 and 708 on MariaDB 10.11; the exact archive's fresh installation and populated 1.4.1 upgrade proof is recorded in its gate receipt under docs/repository/. Use the signed release assets from the official release channel and verify the downloaded archive and checksum before applying it.
+
+The patch adds **migration 061**, one `ALTER TABLE` that gives `pl_company_profile` a `country_code` column with an empty default; it rewrites no row and touches no accounting table. The signed updater and `www/phpledger/install/upgrade.php` apply it in the ordinary migrate phase; an installation that replaces files by hand must run `install/migrate.php` once. Every legal form saved by an earlier release stays valid.
+
+After this upgrade every installation sends its anonymous installation notice (decision B16 as amended); the former off switch is gone and the name and email registration under Updates and privacy stays opt-in. Existing businesses keep their cash policy; only businesses created by the new wizard start strict. Existing help bubbles, icons and the Packages page change appearance but no route, permission or service contract changes.
+
+Before upgrading, back up matching application files, private configuration, keys and database together and rehearse against a restored copy. After rehearsal, open Company profile (the country and legal form show in the country's words), Home (the getting-started guide appears only while its steps are open), Packages (four tabs, and the module switch for the business in view) and, on a fresh copy, walk the installer and business setup at the intended screen widths.
+
 ## From 1.4.0 to 1.4.1
 
 The exact 1.4.1 archive passed fresh installation and populated 1.4.0 upgrade on MySQL and MariaDB, with all 61 migration receipts and historical records unchanged. Use the signed release assets from the official release channel and verify the downloaded archive and checksum before applying it.

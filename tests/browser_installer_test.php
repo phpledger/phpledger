@@ -176,7 +176,8 @@ try {
     installer_assert((int) DB::queryFirstField("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'unrelated_fixture'") === 1, 'Existing table was changed.');
     DB::query('DROP TABLE pl_unrecognized');
     $response = installer_http($url, $input, $cookie);
-    installer_assert($response['status'] === 200 && str_contains($response['body'], 'Database connected.'), 'Empty target namespace was not accepted for review.');
+    installer_assert($response['status'] === 200 && str_contains($response['body'], 'Preparing your database') && str_contains($response['body'], 'Connected'), 'Empty target namespace did not go straight into the build with its target shown.');
+    installer_assert(!str_contains($response['body'], 'Install database'), 'The separate Install database click is back.');
     installer_assert((int) DB::queryFirstField('SELECT id FROM unrelated_fixture') === 42, 'Neighbor table changed during namespace installation.');
     $state = pl_install_read_state();
     $prefixTamper = $input; $prefixTamper['db_prefix'] = 'different_';
@@ -211,11 +212,16 @@ try {
             // Only the deliberately corrupted random fixture receipt is restored here.
             DB::update('pl_schema_migrations', ['status' => $firstReceipt['status'], 'statements_done' => $firstReceipt['statements_done']], 'version=%s', $firstReceipt['version']);
         }
-        if (str_contains($response['body'], 'Save private configuration')) {
+        if (str_contains($response['body'], 'Create your sign-in account')) {
             break;
         }
     }
     installer_assert($batch < 40, 'Fresh installation did not finish the complete migration chain.');
+    // On a host that lets PHP write it, the private settings file is published without a click.
+    installer_assert(is_file(pl_install_config_path()), 'The private configuration was not published automatically after the build.');
+    installer_assert(str_contains($response['body'], 'Private settings saved'), 'The account step does not say the settings were saved.');
+    installer_assert(!str_contains($response['body'], 'name="installation_notice"') && !str_contains($response['body'], 'name="register_installation"'), 'Telemetry checkboxes are back on the account form.');
+    installer_assert(!str_contains($response['body'], 'help-bubble-sheet') && str_contains($response['body'], 'help-bubble-start'), 'Setup help bubbles are pinned to the viewport corner instead of their trigger.');
     pl_install_connect($config);
     installer_assert(pl_install_database_check()['status'] === 'current', 'Browser schema is not current.');
     $receipts = DB::query('SELECT * FROM pl_schema_migrations ORDER BY version');
@@ -251,6 +257,7 @@ try {
     installer_assert($denied['status'] === 400 && str_contains($denied['body'], 'username') && (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_users') === 0, 'Invalid username created a user.');
     $response = installer_http($url, $owner, $cookie);
     installer_assert($response['status'] === 200 && str_contains($response['body'], 'Your installation is complete.'), 'Valid account did not finish setup.');
+    installer_assert(str_contains($response['body'], 'https://books.example.invalid/login') && str_contains($response['body'], 'installer.owner') && str_contains($response['body'], 'installer@example.invalid'), 'The completion page does not show the sign-in details.');
     installer_assert(DB::queryFirstField('SELECT username FROM pl_users') === 'installer.owner', 'The chosen username was not saved in lowercase.');
     installer_assert(pl_authenticate('installer.owner', $ownerPassword, 'installer-fixture')['email'] === 'installer@example.invalid'
         && pl_authenticate('INSTALLER@example.invalid', $ownerPassword, 'installer-fixture')['email'] === 'installer@example.invalid', 'The owner cannot sign in with both the username and the email.');

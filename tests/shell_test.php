@@ -36,6 +36,19 @@ test('shared shell exposes the candidate version and grouped navigation contract
     assert_true(is_string($layout) && !str_contains($layout, '<nav class="accounting-nav"'), 'The shell still renders a second administration navigation strip.');
     assert_true(is_string($layout) && str_contains($layout, 'pl_module_available'), 'Navigation lost server-side module checks.');
     assert_true(is_string($styles) && str_contains($styles, '.shell-version'), 'Brand version treatment is missing.');
+    // 1.4.5 (owner review of 25 September 2026): no pinned sidebar footer; Help is a labelled
+    // topbar button; the version is in the user menu; icons are inline SVG in the current colour.
+    $shell = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/partials/ui/shell.php');
+    assert_true(!str_contains($shell, 'shell-sidebar-footer'), 'The sidebar still pins a footer.');
+    assert_true(str_contains($shell, "pl_ui_page_help(\$view, 'end', pl_t('Help'))"), 'Help is not the labelled topbar button.');
+    assert_true(str_contains($shell, 'menu-item-static shell-version'), 'The version is not in the user menu.');
+    $icon = pl_icon('users');
+    assert_true(str_starts_with($icon, '<svg class="icon"') && str_contains($icon, 'stroke="currentColor"') && str_contains($icon, 'aria-hidden="true"'), 'Icons are not inline SVG in the current colour.');
+    assert_true(str_contains(pl_icon('chevron-left'), 'icon icon-directional'), 'A directional icon lost its mirror class.');
+    assert_same('', pl_icon('not-an-icon'));
+    foreach (['receipt', 'receipt-2', 'book-2', 'file-invoice', 'users', 'file-dollar', 'truck', 'building-bank', 'report', 'chart-line', 'scale', 'list-details'] as $glyph) {
+        assert_true(str_contains($shell, "'" . $glyph . "'"), 'Navigation lost the distinct glyph ' . $glyph . '.');
+    }
     assert_true(is_string($styles) && str_contains($styles, '.menu-panel'), 'Responsive navigation panel treatment is missing.');
     assert_true(is_string($styles) && str_contains($styles, '.shell-sidebar'), 'Desktop workspace rail styling is missing.');
     assert_true(is_string($app) && str_contains($app, '[data-fiscal-year-end-choice]') && str_contains($app, 'customGroup.hidden = !isCustom'), 'Fiscal year-end progressive disclosure behavior is missing.');
@@ -55,18 +68,26 @@ test('setup shell is five Workbench stages with an explicit source choice', func
     $controller = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/public/index.php');
     $wizard = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/includes/functions/onboarding_web_functions.php');
     $chooser = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/sample-chooser.php');
-    assert_same(['start' => 'Start', 'business' => 'Business', 'source' => 'Source', 'review' => 'Review', 'ready' => 'Ready'],
-        pl_onboarding_stages(), 'The wizard is not the five named stages B50 asked for.');
+    // 1.4.5 (owner review of 25-26 September 2026, B94): five stages before Ready, and the
+    // starting point is one choice that decides both the mode and the source, so the duplicate
+    // "how much structure" question B50 introduced is gone.
+    assert_same(['start' => 'Start', 'business' => 'Business', 'owners' => 'Owners & money', 'features' => 'Features & accounts', 'review' => 'Review', 'ready' => 'Ready'],
+        pl_onboarding_stages(), 'The wizard is not the five named stages plus Ready that the 1.4.5 review asked for.');
+    $choices = pl_onboarding_start_choices();
+    assert_same(['fresh', 'structure', 'existing', 'sample'], array_keys($choices), 'The Start stage does not offer the four starting points.');
+    assert_same(['blank', 'skeleton', 'blank', 'full'], array_values(array_column($choices, 'source')), 'A starting point does not decide its source.');
+    assert_same(['fresh', 'fresh', 'existing', 'sample'], array_values(array_column($choices, 'start_mode')), 'A starting point does not decide its mode.');
     // The same tray, slot states and manifest card the installer uses, not a second vocabulary.
     foreach (['bench-tray', 'tray-slot', 'is-current', 'is-done', 'is-pending', 'bench-head', 'bench-body', 'bench-actions', 'manifest-card'] as $shared) {
         assert_true(str_contains($onboarding, $shared), 'The wizard does not use the installer component ' . $shared . '.');
     }
     assert_true(str_contains($styles, '.tray-slot') && str_contains($styles, '.bench-tray.is-labelled'),
         'The labelled tray the wizard needs is not in the stylesheet.');
-    assert_true(str_contains($onboarding, 'name="source"') && str_contains($onboarding, 'value="skeleton"') && str_contains($onboarding, 'value="full"'),
-        'The Source stage does not offer blank, skeleton and full.');
-    assert_true(str_contains($onboarding, 'name="sample_pack"'), 'The Source stage cannot choose a sample company.');
-    assert_true(str_contains($onboarding, 'name="chart_choice"'), 'Neutral/bring-your-own chart choice is missing.');
+    assert_true(str_contains($onboarding, 'name="start"') && str_contains($onboarding, 'data-start-choice'),
+        'The Start stage does not offer the starting points as one choice.');
+    assert_true(str_contains($onboarding, 'name="sample_pack"') && str_contains($onboarding, 'data-gallery'), 'The Start stage cannot choose a sample company from the gallery.');
+    assert_true(str_contains($onboarding, 'name="money_name[]"') && str_contains($onboarding, 'name="owner_name[]"'), 'The Owners stage has no owners or money accounts.');
+    assert_true(str_contains($onboarding, 'name="features[]"') && str_contains($onboarding, 'name="account_name['), 'The Features stage offers nothing to switch on or rename.');
     assert_true(str_contains($onboarding, 'data-fiscal-year-end-choice') && str_contains($onboarding, 'data-fiscal-custom-group'),
         'Fiscal year-end choices do not provide the progressive disclosure hooks.');
     assert_true(str_contains($wizard, "if (\$action === 'next')"), 'Onboarding stage transitions are not server handled.');
@@ -76,8 +97,25 @@ test('setup shell is five Workbench stages with an explicit source choice', func
     assert_true(str_contains($chooser, 'name="sample_pack"') && str_contains($chooser, 'pl_demo_sample_choices()'),
         'Sample chooser does not expose the bundled selection contract.');
     // Nothing is created before the Review stage is confirmed, and the Review stage says so.
-    assert_true(str_contains($onboarding, 'Not created yet') && str_contains($onboarding, 'value="confirm"'),
+    assert_true(str_contains($onboarding, 'created yet') && str_contains($onboarding, 'value="confirm"'),
         'The Review stage does not hold the single point of creation.');
+    assert_same(1, substr_count($wizard, 'pl_setup_company($actorId'), 'The wizard creates a business from more than one place.');
+});
+
+test('Packages is one page with tabs and a per-business module switch', function (): void {
+    require_once dirname(__DIR__) . '/www/phpledger/includes/functions/module_web_functions.php';
+    $packages = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/templates/views/packages.php');
+    $controller = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/includes/functions/package_web_functions.php');
+    $modules = (string) file_get_contents(dirname(__DIR__) . '/www/phpledger/includes/functions/module_web_functions.php');
+    assert_true(str_contains($packages, 'class="tabs-seg"') && str_contains($packages, "'samples' =>") && str_contains($packages, "'directory' =>") && str_contains($packages, "\$tabs['upload']"),
+        'Packages is not one page with Installed, Sample companies, Directory and Upload tabs.');
+    assert_true(str_contains($packages, 'value="module_toggle"') && str_contains($packages, 'role="switch"'), 'The module card has no per-business switch.');
+    assert_true(str_contains($controller, "\$action === 'module_toggle'") && str_contains($controller, 'pl_set_company_module('), 'The switch does not call the module service.');
+    assert_true(str_contains($modules, 'function pl_web_module_states') && str_contains($modules, 'pl_web_module_states($companyId)'), 'Modules and Packages do not share the module state reader.');
+    assert_true(!str_contains($packages, 'sample-packages-title'), 'The old sample section is still a separate block.');
+    assert_true(str_contains($packages, "if (\$review !== null)") && str_contains($packages, 'confirm_upload'), 'The full-page confirmation before installing unverified code is gone.');
+    assert_same('', pl_web_module_description('no-such-module'));
+    assert_true(pl_web_module_description('inventory') !== '');
 });
 
 test('sample import has a bounded operational replay path', function (): void {

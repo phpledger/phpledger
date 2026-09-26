@@ -3,7 +3,7 @@
 name: phpledger
 services:
   web:
-    image: ${PL_IMAGE:-ghcr.io/phpledger/phpledger}:${PL_VERSION:-1.4.1}
+    image: ${PL_IMAGE:-ghcr.io/phpledger/phpledger}:${PL_VERSION:-1.4.5}
     restart: unless-stopped
     ports:
       - "${PL_WEB_PORT:-8080}:8080"
@@ -14,8 +14,6 @@ services:
       PL_DB_USER: phpledger
       PL_DB_PASSWORD: ${PL_DB_PASSWORD:?Set PL_DB_PASSWORD in .env}
       PL_PUBLIC_URL: ${PL_PUBLIC_URL:-http://127.0.0.1:8080}
-      # Optional anonymous installation notice; never sends named registration automatically.
-      PL_INSTALL_NOTICE: ${PL_INSTALL_NOTICE:-1}
       # Set once and reviewed, not left on for every ordinary restart: applies pending
       # migrations on start, for the run after a newer image tag is pulled.
       PL_AUTO_MIGRATE: ${PL_AUTO_MIGRATE:-0}

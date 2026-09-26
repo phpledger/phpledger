@@ -140,9 +140,9 @@ function keyless_install(bool $localDatabase, bool $localAccount = false): void
             $database['setup_code'] = $code;
         }
         $response = keyless_http($url, $database, $cookie);
-        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Database connected.'), 'The owner could not connect the empty database.');
+        keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Preparing your database') && str_contains($response['body'], 'Connected'), 'The owner could not connect the empty database.');
         if ($localAccount) {
-            keyless_assert(str_contains($response['body'], 'Created just now'), 'Setup did not create the missing database on this server.');
+            keyless_assert(str_contains($response['body'], 'created just now'), 'Setup did not create the missing database on this server.');
             keyless_assert(str_contains($response['body'], 'with no password'), 'Setup did not name the database account without a password.');
         }
         $csrf = keyless_token($response);
@@ -154,11 +154,11 @@ function keyless_install(bool $localDatabase, bool $localAccount = false): void
         $denied = keyless_http($url, $attempt, $visitor);
         keyless_assert($denied['status'] === 400 && str_contains($denied['body'], 'already bound'), 'A second visitor switched the bound database.');
 
-        for ($batch = 0; $batch < 45 && !str_contains($response['body'], 'Save private configuration'); $batch++) {
+        for ($batch = 0; $batch < 45 && !str_contains($response['body'], 'Create your sign-in account'); $batch++) {
             $response = keyless_http($url, ['action' => 'migrate', 'csrf_token' => $csrf], $cookie);
             keyless_assert($response['status'] === 200, 'A migration batch failed.');
         }
-        keyless_assert(str_contains($response['body'], 'Save private configuration'), 'The migration chain did not finish.');
+        keyless_assert(str_contains($response['body'], 'Create your sign-in account'), 'The migration chain did not finish, or the private settings were not published automatically.');
         $response = keyless_http($url, ['action' => 'save_config', 'csrf_token' => $csrf, 'public_url' => $origin], $cookie);
         keyless_assert($response['status'] === 200 && str_contains($response['body'], 'Create your sign-in account'), 'Configuration could not be saved.');
         $owner = ['action' => 'finish', 'csrf_token' => $csrf, 'name' => 'Keyless Owner', 'username' => 'keyless-owner',

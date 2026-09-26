@@ -6,18 +6,34 @@ declare(strict_types=1);
 $host = (string) getenv('PL_DB_HOST');
 $databaseName = (string) getenv('PL_DB_NAME');
 $runId = (string) getenv('PL_PATCH_RUN_ID');
+// The harness names the release pair, the migration counts and the service prefix; this fixture
+// assumes nothing about a version (1.4.5 generalised the 1.4.0 -> 1.4.1 constants).
+$prefix = (string) getenv('PL_PATCH_PREFIX');
+$baselineVersion = (string) getenv('PL_PATCH_BASELINE_VERSION');
+$candidateVersion = (string) getenv('PL_PATCH_CANDIDATE_VERSION');
+$baselineMigrations = (int) getenv('PL_PATCH_BASELINE_MIGRATIONS');
+$candidateMigrations = (int) getenv('PL_PATCH_CANDIDATE_MIGRATIONS');
+$lastBaselineMigration = (string) getenv('PL_PATCH_LAST_BASELINE_MIGRATION');
+$addedMigrations = array_values(array_filter(explode(',', (string) getenv('PL_PATCH_ADDED_MIGRATIONS'))));
 if (PHP_SAPI !== 'cli' || getenv('PL_ENV') !== 'test' || getenv('PL_DB_USER') !== 'root'
-    || !preg_match('/^pl141-[a-z0-9-]+$/D', $host)
+    || !preg_match('/^pl[0-9]{3}[a-z0-9]{0,8}$/D', $prefix)
+    || !preg_match('/^' . $prefix . '-[a-z0-9-]+$/D', $host)
     || !preg_match('/^[a-f0-9]{8}$/D', $runId)
+    || !preg_match('/^[0-9]+\.[0-9]+\.[0-9]+$/D', $baselineVersion) || !preg_match('/^[0-9]+\.[0-9]+\.[0-9]+$/D', $candidateVersion)
+    || $baselineMigrations < 1 || $candidateMigrations !== $baselineMigrations + count($addedMigrations)
+    || !preg_match('/^[0-9]{3}_[a-z0-9_]+$/D', $lastBaselineMigration)
     || !in_array($mode, ['seed', 'verify', 'fresh', 'cleanup'], true)
     || !is_file($package . '/PACKAGE-MANIFEST.json') || $receiptPath === '') {
-    throw new RuntimeException('Use an explicit pl141 test service, extracted archive and private receipt.');
+    throw new RuntimeException('Use an explicit test service, release pair, migration counts, extracted archive and private receipt.');
+}
+foreach ($addedMigrations as $added) {
+    if (!preg_match('/^[0-9]{3}_[a-z0-9_]+$/D', $added)) { throw new RuntimeException('Invalid added migration name.'); }
 }
 if ($mode !== 'verify' && $databaseName !== 'phpledger_test') {
     throw new RuntimeException('Seed, fresh and cleanup start from the isolated test database.');
 }
 $version = trim((string) file_get_contents($package . '/www/phpledger/VERSION'));
-if ($version !== (in_array($mode, ['seed', 'cleanup'], true) ? '1.4.0' : '1.4.1')) {
+if ($version !== (in_array($mode, ['seed', 'cleanup'], true) ? $baselineVersion : $candidateVersion)) {
     throw new RuntimeException('The selected mode received the wrong exact release package.');
 }
 require $package . '/www/phpledger/includes/bootstrap.php';
@@ -33,25 +49,25 @@ function patch_require(bool $condition, string $message): void
 
 function patch_database_name(): string
 {
-    global $runId;
-    return 'pl141_patch_' . $runId . '_' . bin2hex(random_bytes(8));
+    global $runId, $prefix;
+    return $prefix . '_patch_' . $runId . '_' . bin2hex(random_bytes(8));
 }
 
 function patch_receipt_database(string $path): string
 {
-    global $runId;
+    global $runId, $prefix;
     $receipt = json_decode((string) file_get_contents($path), true, 64, JSON_THROW_ON_ERROR);
     $name = $receipt['database'] ?? '';
-    patch_require(is_string($name) && (bool) preg_match('/^pl141_patch_' . $runId . '_[a-f0-9]{16}$/D', $name), 'Invalid disposable schema receipt.');
+    patch_require(is_string($name) && (bool) preg_match('/^' . $prefix . '_patch_' . $runId . '_[a-f0-9]{16}$/D', $name), 'Invalid disposable schema receipt.');
     return $name;
 }
 
 function patch_cleanup_owned(): void
 {
-    global $runId;
+    global $runId, $prefix;
     $owned = [];
     foreach (DB::queryFirstColumn('SHOW DATABASES') as $name) {
-        if (is_string($name) && preg_match('/^pl141_patch_' . $runId . '_[a-f0-9]{16}$/D', $name)) {
+        if (is_string($name) && preg_match('/^' . $prefix . '_patch_' . $runId . '_[a-f0-9]{16}$/D', $name)) {
             $owned[] = $name;
         }
     }
@@ -64,10 +80,13 @@ function patch_cleanup_owned(): void
 function patch_snapshot(): array
 {
     // The schema is dedicated to this fixture, so whole-table hashes are scoped to its records.
+    // The migration receipts are compared explicitly in patch_verify() (historical rows identical,
+    // the declared additions after them), so the snapshot holds the accounting and register tables
+    // only; hashing pl_schema_migrations here would refuse every patch that adds a migration.
     $tables = ['pl_users', 'pl_companies', 'pl_company_members', 'pl_books', 'pl_accounts', 'pl_periods',
         'pl_journals', 'pl_journal_lines', 'pl_parties', 'pl_documents', 'pl_ar_documents',
         'pl_ar_document_lines', 'pl_ar_document_actions', 'pl_ar_document_events',
-        'pl_open_items', 'pl_open_item_entries', 'pl_employees', 'pl_employee_audit', 'pl_schema_migrations'];
+        'pl_open_items', 'pl_open_item_entries', 'pl_employees', 'pl_employee_audit'];
     $snapshot = [];
     foreach ($tables as $table) {
         $rows = array_map(static fn(array $row): string => json_encode($row, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
@@ -80,14 +99,14 @@ function patch_snapshot(): array
 
 function patch_seed(): void
 {
-    global $receiptPath;
+    global $receiptPath, $baselineVersion, $baselineMigrations, $lastBaselineMigration;
     patch_require(!file_exists($receiptPath), 'A prior receipt exists; inspect it before running again.');
     $database = patch_database_name();
     DB::query('CREATE DATABASE %b CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci', $database);
     DB::useDB($database);
     try {
         $migrations = pl_migrate();
-        patch_require(count($migrations['applied']) === 61 && in_array('060_cash_balance_policy', $migrations['applied'], true), 'Published 1.4.0 migration chain differs.');
+        patch_require(count($migrations['applied']) === $baselineMigrations && in_array($lastBaselineMigration, $migrations['applied'], true), 'Published ' . $baselineVersion . ' migration chain differs.');
         $actor = pl_create_user('patch-' . bin2hex(random_bytes(6)) . '@example.test', 'Sample patch owner', bin2hex(random_bytes(24)));
         $fixture = pl_create_company($actor, 'Sample patch upgrade company', 'USD', '2026-01-01');
         $company = $fixture['company_id']; $book = $fixture['book_id']; $accounts = $fixture['accounts'];
@@ -126,11 +145,11 @@ function patch_seed(): void
             'employee' => $employee['id'], 'journal' => $journal['id'], 'reversal' => $reversal['id']],
             'migration_rows' => $migrationRows, 'snapshot' => patch_snapshot(),
             'trial' => ['debit' => $trial['total_debit'], 'credit' => $trial['total_credit']]];
-        patch_require(count($migrationRows) === 61, 'Baseline migration receipts are incomplete.');
+        patch_require(count($migrationRows) === $baselineMigrations, 'Baseline migration receipts are incomplete.');
         $oldMask = umask(0077);
         try { patch_require(file_put_contents($receiptPath, json_encode($payload, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT)) !== false, 'Could not save fixture receipt.'); }
         finally { umask($oldMask); }
-        echo "PASS exact 1.4.0 archive seeded receipt, expense draft, party, employee, partial invoice and linked reversal; 61 migrations.\n";
+        echo 'PASS exact ' . $baselineVersion . ' archive seeded receipt, expense draft, party, employee, partial invoice and linked reversal; ' . $baselineMigrations . " migrations.\n";
     } catch (Throwable $error) {
         DB::useDB('phpledger_test');
         DB::query('DROP DATABASE %b', $database);
@@ -140,11 +159,13 @@ function patch_seed(): void
 
 function patch_verify(): void
 {
-    global $receiptPath, $databaseName;
+    global $receiptPath, $databaseName, $baselineMigrations, $candidateMigrations, $addedMigrations;
     $receipt = json_decode((string) file_get_contents($receiptPath), true, 64, JSON_THROW_ON_ERROR);
     patch_require($databaseName === patch_receipt_database($receiptPath), 'Verification database differs from receipt.');
     $rows = DB::query('SELECT * FROM pl_schema_migrations ORDER BY version');
-    patch_require($rows === $receipt['migration_rows'] && count($rows) === 61, 'Migration receipts changed or a migration was added.');
+    // The historical receipts are untouched, and the only new receipts are the declared migrations.
+    patch_require(array_slice($rows, 0, $baselineMigrations) === $receipt['migration_rows'] && count($rows) === $candidateMigrations, 'Historical migration receipts changed or an undeclared migration was added.');
+    patch_require(array_map(static fn (array $row): string => (string) $row['version'], array_slice($rows, $baselineMigrations)) === $addedMigrations, 'The packaged upgrade did not apply exactly the declared migrations.');
     patch_require(patch_snapshot() === $receipt['snapshot'], 'An historical fixture row changed during upgrade.');
     $ids = $receipt['ids'];
     $trial = pl_trial_balance($ids['actor'], $ids['company'], $ids['book']);
@@ -157,17 +178,18 @@ function patch_verify(): void
     $draft = pl_get_document($ids['actor'], $ids['company'], $ids['book'], $ids['draft']);
     patch_require($draft['journal_id'] === null, 'Expense draft was posted during upgrade.');
     patch_require((int) DB::queryFirstField('SELECT reversal_of_id FROM pl_journals WHERE id=%i', $ids['reversal']) === (int) $ids['journal'], 'Linked reversal changed.');
-    echo "PASS packaged upgrade twice; 61 identical migration receipts, historical row hashes, partial invoice, draft, reversal and balanced totals.\n";
+    echo 'PASS packaged upgrade twice; ' . $baselineMigrations . ' identical historical migration receipts plus ' . count($addedMigrations) . ' declared, historical row hashes, partial invoice, draft, reversal and balanced totals.' . "\n";
 }
 
 function patch_fresh(): void
 {
+    global $candidateVersion, $candidateMigrations;
     $database = patch_database_name();
     DB::query('CREATE DATABASE %b CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci', $database);
     DB::useDB($database);
     try {
         $migrations = pl_migrate();
-        patch_require(count($migrations['applied']) === 61 && count(DB::query('SELECT * FROM pl_schema_migrations')) === 61, 'Candidate fresh migration count differs from 61.');
+        patch_require(count($migrations['applied']) === $candidateMigrations && count(DB::query('SELECT * FROM pl_schema_migrations')) === $candidateMigrations, 'Candidate fresh migration count differs from ' . $candidateMigrations . '.');
         $actor = pl_create_user('fresh-' . bin2hex(random_bytes(6)) . '@example.test', 'Sample fresh owner', bin2hex(random_bytes(24)));
         $fixture = pl_create_company($actor, 'Sample fresh patch company', 'USD', '2026-01-01');
         pl_post_journal($actor, $fixture['company_id'], $fixture['book_id'], ['date' => '2026-01-05', 'currency' => 'USD',
@@ -177,7 +199,7 @@ function patch_fresh(): void
                 ['account_id' => $fixture['accounts']['3000'], 'debit' => '0', 'credit' => '1.2500']]]);
         $trial = pl_trial_balance($actor, $fixture['company_id'], $fixture['book_id']);
         patch_require($trial['balanced'] && $trial['total_debit'] === '1.2500' && pl_migrate()['applied'] === [], 'Fresh first posting or replay failed.');
-        echo "PASS exact 1.4.1 candidate fresh install: 61 migrations, first balanced posting and no-op replay.\n";
+        echo 'PASS exact ' . $candidateVersion . ' candidate fresh install: ' . $candidateMigrations . " migrations, first balanced posting and no-op replay.\n";
     } finally {
         DB::useDB('phpledger_test');
         DB::query('DROP DATABASE %b', $database);

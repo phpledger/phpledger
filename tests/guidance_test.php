@@ -264,10 +264,12 @@ test('every application view has useful page guidance including signed-out setup
         assert_true(pl_guidance_concept(pl_guidance_page($view)) !== null);
     }
     require_once dirname(__DIR__) . '/www/phpledger/templates/partials/ui/components.php';
-    foreach (['install', 'login', 'editor', 'transactions', 'reports'] as $view) {
-        ob_start(); pl_ui_page_help($view); $html = (string) ob_get_clean();
+    // The installer hangs the bubble from the question mark beside its title (owner review,
+    // 25 September 2026); the application shell keeps the viewport sheet for now.
+    foreach (['install' => 'start', 'login' => 'sheet', 'editor' => 'sheet', 'transactions' => 'sheet', 'reports' => 'sheet'] as $view => $placement) {
+        ob_start(); pl_ui_page_help($view, $placement); $html = (string) ob_get_clean();
         assert_same(1, substr_count($html, 'data-page-help='));
-        assert_true(str_contains($html, 'help-bubble-sheet'));
+        assert_true(str_contains($html, 'help-bubble-' . $placement));
         assert_true(!str_contains($html, '<details class="help" data-help open'));
     }
 });

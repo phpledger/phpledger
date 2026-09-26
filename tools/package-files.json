@@ -1507,6 +1507,74 @@
       "destination": "www/phpledger/includes/functions/sample_structure_functions.php"
     },
     {
+      "source": "www/phpledger/includes/icons.php",
+      "destination": "www/phpledger/includes/icons.php"
+    },
+    {
+      "source": "www/phpledger/includes/functions/legal_form_functions.php",
+      "destination": "www/phpledger/includes/functions/legal_form_functions.php"
+    },
+    {
+      "source": "resources/locale/legal-forms.json",
+      "destination": "resources/locale/legal-forms.json"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-business-name.php",
+      "destination": "resources/guidance/concepts/onboarding-business-name.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-business.php",
+      "destination": "resources/guidance/concepts/onboarding-business.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-country.php",
+      "destination": "resources/guidance/concepts/onboarding-country.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-currency.php",
+      "destination": "resources/guidance/concepts/onboarding-currency.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-features.php",
+      "destination": "resources/guidance/concepts/onboarding-features.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-legal-form.php",
+      "destination": "resources/guidance/concepts/onboarding-legal-form.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-money-accounts.php",
+      "destination": "resources/guidance/concepts/onboarding-money-accounts.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-owner-list.php",
+      "destination": "resources/guidance/concepts/onboarding-owner-list.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-owners.php",
+      "destination": "resources/guidance/concepts/onboarding-owners.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-review.php",
+      "destination": "resources/guidance/concepts/onboarding-review.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-start-date.php",
+      "destination": "resources/guidance/concepts/onboarding-start-date.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-start.php",
+      "destination": "resources/guidance/concepts/onboarding-start.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-tax-numbers.php",
+      "destination": "resources/guidance/concepts/onboarding-tax-numbers.php"
+    },
+    {
+      "source": "resources/guidance/concepts/onboarding-year-end.php",
+      "destination": "resources/guidance/concepts/onboarding-year-end.php"
+    },
+    {
       "source": "www/phpledger/includes/functions/onboarding_web_functions.php",
       "destination": "www/phpledger/includes/functions/onboarding_web_functions.php"
     },
@@ -1871,6 +1939,58 @@
       "destination": "resources/guidance/concepts/transaction-party.php"
     },
     {
+      "source": "resources/guidance/concepts/install-db-host.php",
+      "destination": "resources/guidance/concepts/install-db-host.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-name.php",
+      "destination": "resources/guidance/concepts/install-db-name.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-password.php",
+      "destination": "resources/guidance/concepts/install-db-password.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-port.php",
+      "destination": "resources/guidance/concepts/install-db-port.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-prefix.php",
+      "destination": "resources/guidance/concepts/install-db-prefix.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-tls.php",
+      "destination": "resources/guidance/concepts/install-db-tls.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-db-user.php",
+      "destination": "resources/guidance/concepts/install-db-user.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-email.php",
+      "destination": "resources/guidance/concepts/install-email.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-logo.php",
+      "destination": "resources/guidance/concepts/install-logo.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-password.php",
+      "destination": "resources/guidance/concepts/install-password.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-settings-file.php",
+      "destination": "resources/guidance/concepts/install-settings-file.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-site-address.php",
+      "destination": "resources/guidance/concepts/install-site-address.php"
+    },
+    {
+      "source": "resources/guidance/concepts/install-username.php",
+      "destination": "resources/guidance/concepts/install-username.php"
+    },
+    {
       "source": "resources/sample-structures/accounting-starter-1.1.0.json",
       "destination": "resources/sample-structures/accounting-starter-1.1.0.json"
     },
@@ -1929,6 +2049,10 @@
     {
       "source": "www/phpledger/install/migrations/060_cash_balance_policy.php",
       "destination": "www/phpledger/install/migrations/060_cash_balance_policy.php"
+    },
+    {
+      "source": "www/phpledger/install/migrations/061_company_country.php",
+      "destination": "www/phpledger/install/migrations/061_company_country.php"
     },
     {
       "source": "www/phpledger/public/assets/date-picker.js",

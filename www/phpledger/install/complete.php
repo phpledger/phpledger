@@ -64,9 +64,9 @@ try {
     ];
     pl_install_save_state($receipt, 'installed.json');
     require_once dirname(__DIR__).'/includes/functions/installation_notice_functions.php';
-    // Scripted hosts can opt out with PL_INSTALL_NOTICE=0. Named registration is
-    // never inferred from the owner account or environment.
-    pl_install_notice_after_setup(['installation_notice'=>getenv('PL_INSTALL_NOTICE')==='0'?'0':'1']);
+    // The anonymous notice is sent for every installation (owner decision, 26 September 2026);
+    // named registration is never inferred from the owner account or environment.
+    pl_install_notice_after_setup();
     fwrite(STDOUT, "Installation marked complete (owner user {$ownerId}).\n");
 } catch (InvalidArgumentException | DomainException $error) {
     fwrite(STDERR, $error->getMessage() . "\n");

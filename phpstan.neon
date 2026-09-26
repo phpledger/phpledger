@@ -1,5 +1,11 @@
 parameters:
     level: 5
+    # PHPStan starts one worker per CPU. On the release machine that is 22 workers at the
+    # 512 MB memory limit inside an 8 GB Docker VM, which took the engine down twice during
+    # the 1.4.5 gates; two workers analyse this codebase in a few minutes (owner, 26 September 2026).
+    parallel:
+        maximumNumberOfProcesses: 2
+        processTimeout: 900.0
     paths:
         - www/phpledger/includes
         - www/phpledger/install

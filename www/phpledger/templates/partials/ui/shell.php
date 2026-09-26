@@ -6,44 +6,44 @@ $transactionWorkspace = $transactionWorkspace ?? ($_GET['kind'] ?? '');
 $navGroups = [
     'Daily work' => [
         ['/transactions?kind=receipt', pl_t('Receipts'), 'receipt', $transactionWorkspace === 'receipt' ? ['transactions','editor'] : [], true],
-        ['/transactions?kind=expense', pl_t('Expenses'), 'receipt', $transactionWorkspace === 'expense' ? ['transactions','editor'] : [], true],
+        ['/transactions?kind=expense', pl_t('Expenses'), 'receipt-2', $transactionWorkspace === 'expense' ? ['transactions','editor'] : [], true],
         ['/counter', pl_t('Counter sale'), 'cash-register', ['counter','counter-receipt'], $visibility['show_ar'] && $moduleVisible('inventory')],
-        ['/pos', pl_t('Point of sale (sample)'), 'receipt', ['pos'], $moduleVisible('pos-showcase')],
-        ['/general-journals', pl_t('Journals'), 'book', ['general-journals','general-editor','general-detail'], true],
+        ['/pos', pl_t('Point of sale (sample)'), 'shopping-bag', ['pos'], $moduleVisible('pos-showcase')],
+        ['/general-journals', pl_t('Journals'), 'book-2', ['general-journals','general-editor','general-detail'], true],
     ],
     'Sales' => [
-        ['/ar', pl_t('Invoices'), 'file-text', ['ar'], $visibility['show_ar']],
-        ['/parties?role=customer', pl_t('Customers'), 'building', ['parties'], $visibility['show_ar']],
+        ['/ar', pl_t('Invoices'), 'file-invoice', ['ar'], $visibility['show_ar']],
+        ['/parties?role=customer', pl_t('Customers'), 'users', ['parties'], $visibility['show_ar']],
     ],
     'Purchases' => [
-        ['/ap', pl_t('Bills'), 'file-text', ['ap'], $visibility['show_ap']],
-        ['/purchasing', pl_t('Purchase orders'), 'list', ['purchasing','goods-receipt'], $moduleVisible('purchasing')],
-        ['/parties?role=vendor', pl_t('Suppliers'), 'building', [], $visibility['show_ap']],
+        ['/ap', pl_t('Bills'), 'file-dollar', ['ap'], $visibility['show_ap']],
+        ['/purchasing', pl_t('Purchase orders'), 'clipboard-list', ['purchasing','goods-receipt'], $moduleVisible('purchasing')],
+        ['/parties?role=vendor', pl_t('Suppliers'), 'truck', [], $visibility['show_ap']],
     ],
     'Inventory' => [
-        ['/inventory', pl_t('Products & stock'), 'list', ['inventory','stock-count'], $moduleVisible('inventory')],
-        ['/stock-documents', pl_t('Stock issues & returns'), 'file-text', ['stock-documents','stock-document'], $moduleVisible('inventory-locations')],
-        ['/stock-documents/settlement', pl_t('Van settlement'), 'calendar', ['van-settlement'], $moduleVisible('inventory-locations')],
-        ['/reports/stock-by-location', pl_t('Stock by location'), 'book', ['stock-by-location'], $moduleVisible('inventory')],
+        ['/inventory', pl_t('Products & stock'), 'package', ['inventory','stock-count'], $moduleVisible('inventory')],
+        ['/stock-documents', pl_t('Stock issues & returns'), 'arrows-shuffle', ['stock-documents','stock-document'], $moduleVisible('inventory-locations')],
+        ['/stock-documents/settlement', pl_t('Van settlement'), 'truck-delivery', ['van-settlement'], $moduleVisible('inventory-locations')],
+        ['/reports/stock-by-location', pl_t('Stock by location'), 'list-details', ['stock-by-location'], $moduleVisible('inventory')],
     ],
     'Fixed assets' => [
         ['/fixed-assets', pl_t('Asset register'), 'list', ['assets','asset-detail'], $moduleVisible('fixed-assets')],
         ['/fixed-assets/depreciation', pl_t('Depreciation run'), 'calendar', ['asset-depreciation'], $moduleVisible('fixed-assets')],
         ['/reports/asset-register', pl_t('Fixed-asset register'), 'book', ['asset-register'], $moduleVisible('fixed-assets')],
     ],
-    'Banking' => [['/bank-reconciliation', pl_t('Bank reconciliation'), 'building', ['bank-reconciliation'], !pl_demo_enabled()]],
+    'Banking' => [['/bank-reconciliation', pl_t('Bank reconciliation'), 'building-bank', ['bank-reconciliation'], !pl_demo_enabled()]],
     'Reports' => [
-        ['/reports', pl_t('All reports'), 'book', ['reports'], true],
-        ['/reports/profit-loss', pl_t('Profit & loss'), 'file-text', ['profit-loss'], true],
-        ['/reports/ageing', pl_t('Receivables & payables ageing'), 'calendar', ['ageing'], true],
-        ['/reports/balance-sheet', pl_t('Balance sheet'), 'file-text', ['balance-sheet'], true],
-        ['/reports/trial-balance', pl_t('Trial balance'), 'list', ['trial-balance'], true],
+        ['/reports', pl_t('All reports'), 'report', ['reports'], true],
+        ['/reports/profit-loss', pl_t('Profit & loss'), 'chart-line', ['profit-loss'], true],
+        ['/reports/ageing', pl_t('Receivables & payables ageing'), 'history', ['ageing'], true],
+        ['/reports/balance-sheet', pl_t('Balance sheet'), 'scale', ['balance-sheet'], true],
+        ['/reports/trial-balance', pl_t('Trial balance'), 'list-details', ['trial-balance'], true],
         ['/reports/account', pl_t('Account statement'), 'file-text', ['account'], true],
-        ['/reports/cash-forecast', pl_t('Cash forecast'), 'file-text', ['cash-forecast'], true],
+        ['/reports/cash-forecast', pl_t('Cash forecast'), 'trending-up', ['cash-forecast'], true],
     ],
     'Setup' => [
-        ['/accounts', pl_t('Chart of accounts'), 'list', ['accounts'], true],
-        ['/owner', pl_t('Owner and partners'), 'building', ['owner'], true],
+        ['/accounts', pl_t('Chart of accounts'), 'list-details', ['accounts'], true],
+        ['/owner', pl_t('Owner and partners'), 'users', ['owner'], true],
         // 1.3 M17: the employee master (issue #98's blocker). The nav is a hint, never the
         // gate: the screen repeats its own employee.view check.
         ['/payroll', pl_t('Payroll accounting'), 'book', ['payroll'], pl_user_can((int)$user['id'], (int)$company['id'], 'payroll.view')],
@@ -51,25 +51,25 @@ $navGroups = [
         ['/recurring', pl_t('Recurring documents'), 'calendar', ['scheduling'], pl_user_can((int)$user['id'], (int)$company['id'], 'schedules.view')],
         ['/schedules', pl_t('Release schedules'), 'calendar', ['scheduling'], pl_user_can((int)$user['id'], (int)$company['id'], 'schedules.view')],
         ['/loans', pl_t('Loans'), 'briefcase', ['scheduling'], pl_user_can((int)$user['id'], (int)$company['id'], 'loans.view')],
-        ['/tax', pl_t('Tax codes'), 'receipt', ['tax'], true],
+        ['/tax', pl_t('Tax codes'), 'receipt-tax', ['tax'], true],
         ['/opening-balances', pl_t('Opening balances'), 'book', ['opening-balances'], !pl_demo_enabled()],
         ['/opening-conversion', pl_t('Opening documents'), 'file-text', ['opening-conversion'], !pl_demo_enabled()],
         ['/year-end', pl_t('Year-end close'), 'book', ['year-end'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'cost.view')],
         ['/periods', pl_t('Periods'), 'book', ['periods'], !pl_demo_enabled()],
-        ['/numbering', pl_t('Document numbering'), 'list', ['numbering'], !pl_demo_enabled()],
+        ['/numbering', pl_t('Document numbering'), 'list-check', ['numbering'], !pl_demo_enabled()],
         ['/accounting-policies', pl_t('Accounting policies'), 'adjustments-horizontal', ['accounting-policies'], !pl_demo_enabled()],
         ['/company-profile', pl_t('Company profile'), 'building', ['company-profile'], !pl_demo_enabled()],
         ['/modules', pl_t('Modules'), 'adjustments-horizontal', ['modules'], !pl_demo_enabled()],
         // 1.2 M7. The nav is a hint, never the gate: each screen repeats its own capability check.
-        ['/users', pl_t('Users'), 'users', ['users'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'users.manage')],
+        ['/users', pl_t('Users'), 'user-plus', ['users'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'users.manage')],
         ['/roles', pl_t('Roles'), 'key', ['roles'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'roles.manage')],
         ['/cost-visibility', pl_t('Cost visibility'), 'lock', ['cost-visibility'], !pl_demo_enabled() && pl_user_can((int)$user['id'], (int)$company['id'], 'reports.cost_settings.manage')],
         // 1.2 M8. Packages is read-only for a business owner without `installation.admin`
         // (B44, onboarding decision 10), so the item is shown and the controls are what the
         // capability gates on the screen itself.
-        ['/packages', pl_t('Packages'), 'adjustments-horizontal', ['packages'], !pl_demo_enabled()],
-        ['/updates', pl_t('Updates and privacy'), 'adjustments-horizontal', ['updates'], pl_user_can((int)$user['id'],0,'installation.admin')],
-        ['/connections', pl_t('Connections & API'), 'external-link', ['connections'], true],
+        ['/packages', pl_t('Packages'), 'package', ['packages'], !pl_demo_enabled()],
+        ['/updates', pl_t('Updates and privacy'), 'refresh', ['updates'], pl_user_can((int)$user['id'],0,'installation.admin')],
+        ['/connections', pl_t('Connections & API'), 'link', ['connections'], true],
     ],
 ];
 // 1.2 M8: an active package adds its own screens to the sidebar here. The nav is a hint, never
@@ -115,7 +115,6 @@ $quickCreate = [
             <?php if ($group === 'Setup'): ?></div></details><?php endif; ?>
         <?php endforeach; ?>
     </nav>
-    <div class="shell-sidebar-footer"><a class="nav-item" href="<?= pl_e(pl_url('/help')) ?>" title="<?= pl_e(pl_t('Help')) ?>"<?= $view === 'help' ? ' aria-current="page"' : '' ?>><?= pl_icon('info-circle') ?><span><?= pl_e(pl_t('Help')) ?></span></a><p class="shell-version"><?= pl_e(pl_app_version()) ?></p></div>
 </aside>
 <button class="shell-overlay" data-drawer-overlay aria-label="<?= pl_e(pl_t('Close navigation')) ?>" type="button" tabindex="-1"></button>
 <div class="shell-body">
@@ -124,9 +123,9 @@ $quickCreate = [
         <ol class="crumbs" aria-label="<?= pl_e(pl_t('Breadcrumb')) ?>"><li class="crumb"><a href="<?= pl_e(pl_url('/companies')) ?>"><?= pl_e(pl_t('Workspace')) ?></a></li><li class="crumb"><span aria-current="page"><?= pl_e($title) ?></span></li></ol>
         <div class="topbar-search"><button type="button" class="search-trigger" data-command-open aria-haspopup="dialog" hidden><?= pl_icon('search') ?><span><?= pl_e(pl_t('Search or jump to…')) ?></span><span class="kbd ms-auto"><?= pl_e(pl_t('Ctrl K')) ?></span></button></div>
         <div class="topbar-actions">
-            <?php pl_ui_page_help($view); ?>
+            <?php pl_ui_page_help($view, 'end', pl_t('Help')); ?>
             <?php if (pl_can_write($company)): ?><details class="menu"><summary class="btn btn-primary btn-sm"><?= pl_icon('plus') ?> <?= pl_e(pl_t('New')) ?></summary><div class="menu-panel menu-panel-end"><p class="menu-label"><?= pl_e(pl_t('Quick create')) ?></p><?php foreach ($quickCreate as [$href, $label, $visible]): if (!$visible) { continue; } ?><a class="menu-item" href="<?= pl_e(pl_url($href)) ?>"><?= pl_icon((str_starts_with($href,'/transactions') || str_starts_with($href,'/receipts') || str_starts_with($href,'/expenses')) ? 'receipt' : (str_starts_with($href,'/parties') ? 'building' : 'file-text')) ?> <?= pl_e($label) ?></a><?php endforeach; ?></div></details><?php endif; ?>
             <?php if ($company['is_sample'] && pl_company_demo_pack((int)$user['id'], (int)$company['id'], (int)$company['book_id']) !== null): ?><a class="sample-guide-link max-lg:hidden" href="<?= pl_e(pl_url('/sample-guide')) ?>"><?= pl_e(pl_t('Sample guide')) ?> <?= pl_icon('arrow-right') ?></a><?php endif; ?>
-            <details class="menu"><summary class="user-menu-trigger" aria-label="<?= pl_e(pl_t('User menu')) ?>"><span class="avatar"><?= pl_e(mb_strtoupper(mb_substr($user['display_name'], 0, 1))) ?></span><?= pl_icon('chevron-down') ?></summary><div class="menu-panel menu-panel-end"><p class="menu-label"><?= pl_e($user['display_name']) ?></p><?php if (!pl_demo_enabled()): ?><p class="menu-item-static"><?= pl_e($user['email']) ?></p><a class="menu-item" href="<?= pl_e(pl_url('/profile')) ?>"><?= pl_e(pl_t('Your profile')) ?></a><a class="menu-item" href="<?= pl_e(pl_url('/companies')) ?>"><?= pl_e(pl_t('Switch business')) ?></a><?php endif; ?><?php $localeSwitchId = 'topbar'; $localeSwitchClass = 'locale-switch-menu'; require __DIR__ . '/locale-switch.php'; ?><form action="<?= pl_e(pl_url('/logout')) ?>" method="post"><?= pl_csrf_field() ?><button type="submit" class="menu-item"><?= pl_icon('logout') ?> <?= pl_e(pl_demo_enabled() ? pl_t('Leave demo') : pl_t('Sign out')) ?></button></form></div></details>
+            <details class="menu"><summary class="user-menu-trigger" aria-label="<?= pl_e(pl_t('User menu')) ?>"><span class="avatar"><?= pl_e(mb_strtoupper(mb_substr($user['display_name'], 0, 1))) ?></span><?= pl_icon('chevron-down') ?></summary><div class="menu-panel menu-panel-end"><p class="menu-label"><?= pl_e($user['display_name']) ?></p><?php if (!pl_demo_enabled()): ?><p class="menu-item-static"><?= pl_e($user['email']) ?></p><a class="menu-item" href="<?= pl_e(pl_url('/profile')) ?>"><?= pl_e(pl_t('Your profile')) ?></a><a class="menu-item" href="<?= pl_e(pl_url('/companies')) ?>"><?= pl_e(pl_t('Switch business')) ?></a><?php endif; ?><?php $localeSwitchId = 'topbar'; $localeSwitchClass = 'locale-switch-menu'; require __DIR__ . '/locale-switch.php'; ?><p class="menu-item-static shell-version"><?= pl_e(pl_t('PHP Ledger {version}', ['version' => pl_app_version()])) ?></p><form action="<?= pl_e(pl_url('/logout')) ?>" method="post"><?= pl_csrf_field() ?><button type="submit" class="menu-item"><?= pl_icon('logout') ?> <?= pl_e(pl_demo_enabled() ? pl_t('Leave demo') : pl_t('Sign out')) ?></button></form></div></details>
         </div>
     </header>

@@ -837,3 +837,83 @@ document.querySelectorAll('[data-settlement-form]').forEach(form => {
     });
     update();
 });
+
+// Business setup (owner review of 25-26 September 2026). Everything below is comfort on top of
+// plain forms: without it the gallery is always shown, rows are what the server rendered, a
+// change of country is a round trip and the primary button is simply navy.
+document.querySelectorAll('[data-start-choice]').forEach(radio => {
+    const gallery = document.querySelector('[data-gallery]');
+    if (!gallery) return;
+    const sync = () => { const chosen = document.querySelector('[data-start-choice]:checked'); gallery.hidden = !(chosen && chosen.getAttribute('data-start-choice') === '1'); };
+    radio.addEventListener('change', sync);
+    sync();
+});
+document.querySelectorAll('[data-add-row]').forEach(button => {
+    button.addEventListener('click', () => {
+        const body = document.querySelector('[data-rows="' + button.getAttribute('data-add-row') + '"]');
+        const last = body && body.querySelector('tr:last-child');
+        if (!last) return;
+        const row = last.cloneNode(true);
+        row.querySelectorAll('input').forEach(input => { if (input.type === 'hidden' && input.name !== 'owner_kind[]') { input.value = ''; } else if (input.type !== 'hidden') { input.value = ''; input.removeAttribute('placeholder'); } });
+        row.querySelectorAll('select').forEach(select => { select.selectedIndex = 0; });
+        body.appendChild(row);
+        const first = row.querySelector('input:not([type="hidden"])');
+        if (first) first.focus();
+    });
+});
+document.querySelectorAll('form[data-ready-button]').forEach(form => {
+    const button = document.querySelector(form.getAttribute('data-ready-button') || '');
+    if (!(button instanceof HTMLButtonElement)) return;
+    const update = () => button.classList.toggle('is-ready', form.checkValidity());
+    form.addEventListener('input', update);
+    form.addEventListener('change', update);
+    update();
+});
+// The legal-form list, its guide and the invoice-number labels follow the country. The same
+// catalogue renders server-side (resources/locale/legal-forms.json); this only saves the round trip.
+document.querySelectorAll('form[data-legal-forms]').forEach(form => {
+    const source = document.getElementById('legal-forms-data');
+    if (!source) return;
+    let data;
+    try { data = JSON.parse(source.textContent || '{}'); } catch (error) { return; }
+    const country = form.querySelector('#country-code');
+    const legal = form.querySelector('#legal-form');
+    const guide = form.querySelector('[data-form-guide]');
+    const registrarChip = form.querySelector('[data-country-registrar]');
+    const authority = form.querySelector('[data-country-authority]');
+    if (!country || !legal) return;
+    // A country outside the catalogue uses the neutral list, whose keys are the canonical family
+    // keys; the country itself is saved on the profile.
+    const profileFor = () => data[country.value] || data.ZZ;
+    const currentForms = () => profileFor().forms;
+    const familyOf = key => { const entry = Object.values(data).flatMap(p => p.forms).find(f => f.key === key); return entry ? entry.family : null; };
+    const showGuide = () => {
+        const entry = currentForms().find(f => f.key === legal.value);
+        if (guide) guide.textContent = entry ? entry.guide : guide.getAttribute('data-empty') || '';
+    };
+    const applyCountry = () => {
+        const c = profileFor();
+        const forms = currentForms();
+        const previousFamily = familyOf(legal.value);
+        const keep = legal.querySelector('option[value=""]');
+        legal.replaceChildren(...(keep ? [keep] : []), ...forms.map(f => { const o = document.createElement('option'); o.value = f.key; o.textContent = f.name; return o; }));
+        const match = (legal.dataset.touched && previousFamily && forms.find(f => f.family === previousFamily)) || (c.default ? forms.find(f => f.key === c.default) : null);
+        legal.value = match ? match.key : '';
+        if (registrarChip && c.chip) registrarChip.textContent = c.chip;
+        // The registrar is a hint, never a value: only what the owner types is saved and printed.
+        if (authority) authority.placeholder = c.registrar.replace(/^the /, '');
+        Object.entries(c.labels).forEach(([key, text]) => { form.querySelectorAll('[data-country-label="' + key + '"]').forEach(el => { el.textContent = text; }); });
+        form.querySelectorAll('[data-country-field]').forEach(el => el.toggleAttribute('hidden', !c.labels[el.getAttribute('data-country-field')]));
+        form.querySelectorAll('[data-country-placeholder]').forEach(el => { el.placeholder = c.placeholders[el.getAttribute('data-country-placeholder')] || ''; });
+        const currency = form.querySelector('#base-currency');
+        if (currency && !currency.dataset.touched && [...currency.options].some(o => o.value === c.currency)) currency.value = c.currency;
+        const fye = form.querySelector('#fiscal-year-end-choice');
+        if (fye && !fye.dataset.touched && [...fye.options].some(o => o.value === c.fiscal_year_end)) { fye.value = c.fiscal_year_end; fye.dispatchEvent(new Event('change')); }
+        showGuide();
+    };
+    if (guide) guide.setAttribute('data-empty', guide.textContent || '');
+    country.addEventListener('change', applyCountry);
+    // Only the owner's own edits count as "touched"; the script's own change events do not.
+    legal.addEventListener('change', event => { if (event.isTrusted) legal.dataset.touched = '1'; showGuide(); });
+    ['#base-currency', '#fiscal-year-end-choice'].forEach(sel => { const el = form.querySelector(sel); if (el) el.addEventListener('change', event => { if (event.isTrusted) el.dataset.touched = '1'; }); });
+});

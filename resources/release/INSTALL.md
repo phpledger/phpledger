@@ -136,7 +136,7 @@ Keep **every supplied migration**, including earlier applied versions. The runne
 
 ## 5. Alternate CLI path: create the initial user
 
-Choose a unique password between **12 and 72 bytes**. The command accepts it through stdin, not a password argument. This Bash example prompts without echoing the password or putting it in shell history; turn off shell tracing before using it:
+Choose a unique password between **6 and 72 bytes** (longer is safer). The command accepts it through stdin, not a password argument. This Bash example prompts without echoing the password or putting it in shell history; turn off shell tracing before using it:
 
 ```bash
 set +x
@@ -185,9 +185,9 @@ Forwarded IP headers are accepted only from explicitly configured trusted proxie
 
 The `pl_` stem is reserved: use exactly `pl_` or a distinct prefix that does not start with it.
 
-## Optional installation notice
+## Installation notice
 
-The browser installer explains its default anonymous notice and offers a separate unchecked named registration. Neither is required to use the software. Updates and privacy shows the last accepted payload and lets an installation administrator disable either choice. Scripted/container installation sends only the anonymous notice; set `PL_INSTALL_NOTICE=0` before completing setup to opt out. Local/test/shared-demo environments never send notices. Only explicit installation/settings/update-check actions contact the project, never a page view. A service failure leaves installation usable. See https://phpledger.com/privacy/ for the exact fields, retention and removal route.
+Every installation sends an anonymous notice when setup completes, when an administrator checks for updates and when registration details change (owner decision, 26 September 2026). The installer says so in one sentence; there is no switch for it. Named registration is a separate choice under Updates and privacy, which also shows the last accepted payload and removes a registration on request. Local/test/shared-demo environments never send notices. Only explicit installation/settings/update-check actions contact the project, never a page view. A service failure leaves installation usable. See https://phpledger.com/privacy/ for the exact fields, retention and removal route.
 
 ### Namespace configuration
 

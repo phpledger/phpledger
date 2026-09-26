@@ -68,7 +68,7 @@ $value = static function (string $field) use ($profileInput, $profile): string {
         <form class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2" method="post" action="<?= pl_e(pl_url('/profile')) ?>">
             <?= pl_csrf_field() ?><input type="hidden" name="action" value="password">
             <div class="field sm:col-span-2"><label for="profile-current-password"><?= pl_e(pl_t('Current password')) ?></label><input class="input" id="profile-current-password" name="current_password" type="password" autocomplete="current-password" required></div>
-            <div class="field"><label for="profile-new-password"><?= pl_e(pl_t('New password')) ?></label><input class="input" id="profile-new-password" name="new_password" type="password" autocomplete="new-password" required><p class="field-hint"><?= pl_e(pl_t('Between 12 and 72 characters.')) ?></p></div>
+            <div class="field"><label for="profile-new-password"><?= pl_e(pl_t('New password')) ?></label><input class="input" id="profile-new-password" name="new_password" type="password" autocomplete="new-password" required><p class="field-hint"><?= pl_e(pl_t('Between 6 and 72 characters; longer is safer.')) ?></p></div>
             <div class="sm:col-span-2"><button class="btn btn-primary" type="submit"><?= pl_e(pl_t('Save password')) ?></button></div>
         </form>
     </div>

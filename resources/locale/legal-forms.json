@@ -1,0 +1,720 @@
+{
+  "source": "PHP Ledger 1.4.5, owner review of 26 September 2026 (docs/design/setup-1.4.5/legal_forms.py)",
+  "note": "Wording and guidance only. Every form maps to a canonical family that pl_legal_forms() knows; nothing here activates a tax rule. ZZ is the neutral list for any other country.",
+  "families": {
+    "sole_proprietor": {
+      "owners": "you alone",
+      "money_out": "drawings; what you put in is your capital"
+    },
+    "partnership": {
+      "owners": "partners with a profit-sharing ratio",
+      "money_out": "partner drawings and the year-end profit split"
+    },
+    "llp": {
+      "owners": "members (partners) with limited liability",
+      "money_out": "partner drawings by the agreed ratio"
+    },
+    "llc": {
+      "owners": "members",
+      "money_out": "member distributions"
+    },
+    "single_member_company": {
+      "owners": "one shareholder; directors run it",
+      "money_out": "salary or dividends, tracked in the share ledger"
+    },
+    "private_limited": {
+      "owners": "shareholders; directors run it",
+      "money_out": "salary or dividends, tracked in the share ledger"
+    },
+    "public_limited": {
+      "owners": "shareholders; a board runs it",
+      "money_out": "dividends, tracked in the share ledger"
+    },
+    "corporation": {
+      "owners": "shareholders; a board runs it",
+      "money_out": "salary or dividends, tracked in the share ledger"
+    },
+    "non_profit": {
+      "owners": "members or trustees, nobody owns it",
+      "money_out": "nothing: surplus stays in the organisation"
+    },
+    "other": {
+      "owners": "set once you choose a form",
+      "money_out": "set once you choose a form"
+    }
+  },
+  "countries": {
+    "PK": {
+      "name": "Pakistan",
+      "registrar": "SECP",
+      "default": "pvt_ltd",
+      "currency": "PKR",
+      "fiscal_year_end": "06-30",
+      "labels": {
+        "reg_number": "SECP registration number (CUIN)",
+        "reg_authority": "Registered with",
+        "tax1": "NTN",
+        "tax2": "STRN"
+      },
+      "placeholders": {
+        "reg_number": "0123456",
+        "tax1": "1234567-8",
+        "tax2": "12-34-5678-901-23"
+      },
+      "forms": [
+        {
+          "key": "sole_proprietor",
+          "family": "sole_proprietor",
+          "name": "Sole proprietorship",
+          "short": "One owner and no separate company. Registered with FBR for an NTN; nothing is filed with SECP.",
+          "registrar": "FBR",
+          "numbers": "NTN, and STRN if registered for sales tax"
+        },
+        {
+          "key": "partnership",
+          "family": "partnership",
+          "name": "Partnership firm (AOP)",
+          "short": "2 to 20 partners under the Partnership Act 1932; taxed as an association of persons.",
+          "registrar": "the Registrar of Firms",
+          "numbers": "the firm's NTN, and STRN if registered"
+        },
+        {
+          "key": "llp",
+          "family": "llp",
+          "name": "Limited liability partnership (LLP)",
+          "short": "Partners with limited liability under the LLP Act 2017.",
+          "registrar": "SECP",
+          "numbers": "LLP number, NTN"
+        },
+        {
+          "key": "smc",
+          "family": "single_member_company",
+          "name": "Single member company — (SMC-Private) Limited",
+          "short": "A private company with one shareholder under the Companies Act 2017.",
+          "registrar": "SECP",
+          "numbers": "CUIN, NTN, STRN"
+        },
+        {
+          "key": "pvt_ltd",
+          "family": "private_limited",
+          "name": "Private limited company — (Private) Limited",
+          "short": "2 to 50 shareholders; shares are never offered to the public. The usual company.",
+          "registrar": "SECP",
+          "numbers": "CUIN, NTN, STRN"
+        },
+        {
+          "key": "public_ltd",
+          "family": "public_limited",
+          "name": "Public limited company — Limited (listed or unlisted)",
+          "short": "Shares may be offered to the public; a listed company also answers to the PSX.",
+          "registrar": "SECP",
+          "numbers": "CUIN, NTN, STRN"
+        },
+        {
+          "key": "section_42",
+          "family": "non_profit",
+          "name": "Section 42 company, trust or society",
+          "short": "Not for profit. Section 42 companies are licensed by SECP; trusts and societies by the provincial registrar.",
+          "registrar": "SECP or the provincial registrar",
+          "numbers": "NTN"
+        },
+        {
+          "key": "other",
+          "family": "other",
+          "name": "Other or not sure",
+          "short": "Pick the closest form; your registration papers or your accountant will say. It can be changed later in Company profile.",
+          "registrar": "your registrar",
+          "numbers": "the numbers on your registration"
+        }
+      ]
+    },
+    "GB": {
+      "name": "United Kingdom",
+      "registrar": "Companies House",
+      "default": "ltd",
+      "currency": "GBP",
+      "fiscal_year_end": "12-31",
+      "labels": {
+        "reg_number": "Company number",
+        "reg_authority": "Registered with",
+        "tax1": "UTR",
+        "tax2": "VAT registration number"
+      },
+      "placeholders": {
+        "reg_number": "12345678",
+        "tax1": "1234567890",
+        "tax2": "GB123456789"
+      },
+      "forms": [
+        {
+          "key": "sole_trader",
+          "family": "sole_proprietor",
+          "name": "Sole trader",
+          "short": "One person trading. Registered with HMRC for Self Assessment, not at Companies House.",
+          "registrar": "HMRC",
+          "numbers": "UTR, and VAT number if registered"
+        },
+        {
+          "key": "partnership",
+          "family": "partnership",
+          "name": "Partnership",
+          "short": "Two or more people trading together; the partnership and each partner register with HMRC.",
+          "registrar": "HMRC",
+          "numbers": "the partnership UTR, and VAT number if registered"
+        },
+        {
+          "key": "llp",
+          "family": "llp",
+          "name": "Limited liability partnership (LLP)",
+          "short": "Members with limited liability; incorporated at Companies House.",
+          "registrar": "Companies House",
+          "numbers": "company number, UTR, VAT number"
+        },
+        {
+          "key": "ltd",
+          "family": "private_limited",
+          "name": "Private company limited by shares (Ltd)",
+          "short": "The usual small company: shareholders own it, directors run it. One shareholder is fine.",
+          "registrar": "Companies House",
+          "numbers": "company number, UTR, VAT number"
+        },
+        {
+          "key": "plc",
+          "family": "public_limited",
+          "name": "Public limited company (PLC)",
+          "short": "Shares may be offered to the public; at least £50,000 of share capital.",
+          "registrar": "Companies House",
+          "numbers": "company number, UTR, VAT number"
+        },
+        {
+          "key": "cic",
+          "family": "private_limited",
+          "name": "Community interest company limited by shares (CIC)",
+          "short": "A limited company for a social purpose: shareholders, an asset lock and a dividend cap. The CIC Regulator sits alongside Companies House.",
+          "registrar": "Companies House and the CIC Regulator",
+          "numbers": "company number, UTR, VAT number if registered"
+        },
+        {
+          "key": "clg",
+          "family": "non_profit",
+          "name": "Company limited by guarantee, CIC limited by guarantee, or charity (CIO)",
+          "short": "No shareholders; members guarantee a nominal sum. CICs and charities have their own regulator too.",
+          "registrar": "Companies House or the Charity Commission",
+          "numbers": "company or charity number, VAT number if registered"
+        },
+        {
+          "key": "other",
+          "family": "other",
+          "name": "Other or not sure",
+          "short": "Pick the closest form; your registration papers or your accountant will say. It can be changed later in Company profile.",
+          "registrar": "your registrar",
+          "numbers": "the numbers on your registration"
+        }
+      ]
+    },
+    "US": {
+      "name": "United States",
+      "registrar": "the Secretary of State of the state of formation",
+      "default": "llc",
+      "currency": "USD",
+      "fiscal_year_end": "12-31",
+      "labels": {
+        "reg_number": "State entity number",
+        "reg_authority": "State of formation",
+        "tax1": "EIN",
+        "tax2": "State sales tax permit"
+      },
+      "placeholders": {
+        "reg_number": "e.g. 20261234567",
+        "tax1": "12-3456789",
+        "tax2": ""
+      },
+      "forms": [
+        {
+          "key": "sole_proprietorship",
+          "family": "sole_proprietor",
+          "name": "Sole proprietorship",
+          "short": "You and the business are one for tax. A DBA name may be filed with the state or county.",
+          "registrar": "no registrar; the IRS issues an EIN if you need one",
+          "numbers": "EIN or SSN"
+        },
+        {
+          "key": "general_partnership",
+          "family": "partnership",
+          "name": "General partnership",
+          "short": "Two or more owners. The partnership files a return; the partners pay the tax.",
+          "registrar": "the state, if it requires it",
+          "numbers": "EIN"
+        },
+        {
+          "key": "llp",
+          "family": "llp",
+          "name": "Limited liability partnership (LLP)",
+          "short": "A partnership registered with the state whose partners have limited liability; common for professional firms.",
+          "registrar": "the Secretary of State",
+          "numbers": "state entity number, EIN"
+        },
+        {
+          "key": "llc",
+          "family": "llc",
+          "name": "Limited liability company (LLC)",
+          "short": "The usual small-business form; owners are members. Taxed as a sole proprietorship, partnership or corporation by election.",
+          "registrar": "the Secretary of State",
+          "numbers": "state entity number, EIN"
+        },
+        {
+          "key": "corporation",
+          "family": "corporation",
+          "name": "Corporation (C corp or S corp)",
+          "short": "Shareholders own it and a board runs it. S corp is a tax election, not a different registration.",
+          "registrar": "the Secretary of State",
+          "numbers": "state entity number, EIN"
+        },
+        {
+          "key": "nonprofit",
+          "family": "non_profit",
+          "name": "Nonprofit corporation (501(c)(3))",
+          "short": "A state nonprofit corporation; the IRS tax exemption is applied for separately.",
+          "registrar": "the Secretary of State",
+          "numbers": "state entity number, EIN"
+        },
+        {
+          "key": "other",
+          "family": "other",
+          "name": "Other or not sure",
+          "short": "Pick the closest form; your formation papers or your CPA will say. It can be changed later in Company profile.",
+          "registrar": "your state",
+          "numbers": "the numbers on your registration"
+        }
+      ]
+    },
+    "AE": {
+      "name": "United Arab Emirates",
+      "registrar": "the economic department of the emirate (in Dubai, the Department of Economy and Tourism) or the free zone authority",
+      "default": "llc",
+      "currency": "AED",
+      "fiscal_year_end": "12-31",
+      "labels": {
+        "reg_number": "Trade licence number",
+        "reg_authority": "Licensing authority",
+        "tax1": "TRN (FTA)",
+        "tax2": ""
+      },
+      "placeholders": {
+        "reg_number": "e.g. 1234567",
+        "tax1": "100123456700003",
+        "tax2": ""
+      },
+      "forms": [
+        {
+          "key": "sole_establishment",
+          "family": "sole_proprietor",
+          "name": "Sole establishment",
+          "short": "Owned by one person who is fully liable; licensed by the economic department of the emirate.",
+          "registrar": "the economic department of your emirate (DET in Dubai)",
+          "numbers": "trade licence number, and TRN if registered"
+        },
+        {
+          "key": "civil_company",
+          "family": "partnership",
+          "name": "Civil company (professional partnership)",
+          "short": "Partners practising a profession together, with unlimited liability.",
+          "registrar": "the economic department of your emirate (DET in Dubai)",
+          "numbers": "trade licence number, TRN"
+        },
+        {
+          "key": "llc",
+          "family": "llc",
+          "name": "Limited liability company (LLC, mainland)",
+          "short": "The usual mainland company; one or more shareholders with limited liability.",
+          "registrar": "the economic department of your emirate (DET in Dubai)",
+          "numbers": "trade licence number, TRN"
+        },
+        {
+          "key": "fze",
+          "family": "single_member_company",
+          "name": "Free zone establishment (FZE)",
+          "short": "A free zone company with a single shareholder.",
+          "registrar": "the free zone authority (DMCC, JAFZA, DIFC, ADGM…)",
+          "numbers": "licence number, TRN"
+        },
+        {
+          "key": "fzco",
+          "family": "llc",
+          "name": "Free zone company (FZCO or FZ-LLC)",
+          "short": "A free zone company with one or more shareholders; the name depends on the free zone.",
+          "registrar": "the free zone authority",
+          "numbers": "licence number, TRN"
+        },
+        {
+          "key": "prjsc",
+          "family": "private_limited",
+          "name": "Private joint stock company (PrJSC)",
+          "short": "Shares held privately; two or more founders and higher capital than an LLC.",
+          "registrar": "the Ministry of Economy and the economic department of the emirate",
+          "numbers": "licence number, TRN"
+        },
+        {
+          "key": "pjsc",
+          "family": "public_limited",
+          "name": "Public joint stock company (PJSC)",
+          "short": "Shares offered to the public and usually listed.",
+          "registrar": "the Securities and Commodities Authority",
+          "numbers": "licence number, TRN"
+        },
+        {
+          "key": "association",
+          "family": "non_profit",
+          "name": "Association or non-profit",
+          "short": "Licensed by the Ministry of Community Development or the emirate; no owners.",
+          "registrar": "the Ministry of Community Development",
+          "numbers": "licence number"
+        },
+        {
+          "key": "other",
+          "family": "other",
+          "name": "Other, branch of a foreign company, or not sure",
+          "short": "Pick the closest form; your licence will say. It can be changed later in Company profile.",
+          "registrar": "your licensing authority",
+          "numbers": "the numbers on your licence"
+        }
+      ]
+    },
+    "IN": {
+      "name": "India",
+      "registrar": "the Ministry of Corporate Affairs (Registrar of Companies)",
+      "default": "pvt_ltd",
+      "currency": "INR",
+      "fiscal_year_end": "03-31",
+      "labels": {
+        "reg_number": "CIN / LLPIN",
+        "reg_authority": "Registered with",
+        "tax1": "PAN",
+        "tax2": "GSTIN"
+      },
+      "placeholders": {
+        "reg_number": "U12345MH2026PTC123456",
+        "tax1": "ABCDE1234F",
+        "tax2": "27ABCDE1234F1Z5"
+      },
+      "forms": [
+        {
+          "key": "sole_proprietorship",
+          "family": "sole_proprietor",
+          "name": "Sole proprietorship",
+          "short": "No separate registration; the owner's PAN is the business PAN. GST and Udyam registration as needed.",
+          "registrar": "no registrar",
+          "numbers": "PAN, and GSTIN if registered"
+        },
+        {
+          "key": "partnership_firm",
+          "family": "partnership",
+          "name": "Partnership firm",
+          "short": "Under the Indian Partnership Act 1932; registered with the state Registrar of Firms.",
+          "registrar": "the state Registrar of Firms",
+          "numbers": "the firm's PAN, GSTIN"
+        },
+        {
+          "key": "llp",
+          "family": "llp",
+          "name": "Limited liability partnership (LLP)",
+          "short": "Under the LLP Act 2008; incorporated with the MCA.",
+          "registrar": "the MCA",
+          "numbers": "LLPIN, PAN, GSTIN"
+        },
+        {
+          "key": "opc",
+          "family": "single_member_company",
+          "name": "One person company (OPC)",
+          "short": "A private company with a single member under the Companies Act 2013.",
+          "registrar": "the MCA",
+          "numbers": "CIN, PAN, GSTIN"
+        },
+        {
+          "key": "pvt_ltd",
+          "family": "private_limited",
+          "name": "Private limited company (Pvt Ltd)",
+          "short": "2 to 200 members; the usual company for a startup or family business.",
+          "registrar": "the MCA",
+          "numbers": "CIN, PAN, GSTIN"
+        },
+        {
+          "key": "public_ltd",
+          "family": "public_limited",
+          "name": "Public limited company (Ltd)",
+          "short": "Shares may be offered to the public; seven or more members.",
+          "registrar": "the MCA",
+          "numbers": "CIN, PAN, GSTIN"
+        },
+        {
+          "key": "section_8",
+          "family": "non_profit",
+          "name": "Section 8 company, trust or society",
+          "short": "Not for profit. Section 8 companies are licensed by the MCA; trusts and societies by the state.",
+          "registrar": "the MCA or the state registrar",
+          "numbers": "PAN, and GSTIN if registered"
+        },
+        {
+          "key": "other",
+          "family": "other",
+          "name": "Other or not sure",
+          "short": "Pick the closest form; your registration papers or your CA will say. It can be changed later in Company profile.",
+          "registrar": "your registrar",
+          "numbers": "the numbers on your registration"
+        }
+      ]
+    },
+    "SG": {
+      "name": "Singapore",
+      "registrar": "ACRA",
+      "default": "pte_ltd",
+      "currency": "SGD",
+      "fiscal_year_end": "12-31",
+      "labels": {
+        "reg_number": "UEN",
+        "reg_authority": "Registered with",
+        "tax1": "GST registration number",
+        "tax2": ""
+      },
+      "placeholders": {
+        "reg_number": "202612345K",
+        "tax1": "202612345K",
+        "tax2": ""
+      },
+      "forms": [
+        {
+          "key": "sole_proprietorship",
+          "family": "sole_proprietor",
+          "name": "Sole proprietorship",
+          "short": "One owner registered with ACRA; the registration is renewed for one or three years.",
+          "registrar": "ACRA",
+          "numbers": "UEN, and GST number if registered"
+        },
+        {
+          "key": "partnership",
+          "family": "partnership",
+          "name": "Partnership or limited partnership (LP)",
+          "short": "A general partnership has 2 to 20 partners; a limited partnership has no cap. Both register with ACRA.",
+          "registrar": "ACRA",
+          "numbers": "UEN, and GST number if registered"
+        },
+        {
+          "key": "llp",
+          "family": "llp",
+          "name": "Limited liability partnership (LLP)",
+          "short": "Partners with limited liability; a separate legal entity.",
+          "registrar": "ACRA",
+          "numbers": "UEN, GST number"
+        },
+        {
+          "key": "pte_ltd",
+          "family": "private_limited",
+          "name": "Private company limited by shares (Pte. Ltd.)",
+          "short": "The usual company, up to 50 shareholders. With 20 or fewer, none corporate, it is an exempt private company.",
+          "registrar": "ACRA",
+          "numbers": "UEN, GST number"
+        },
+        {
+          "key": "ltd",
+          "family": "public_limited",
+          "name": "Public company limited by shares (Ltd.)",
+          "short": "Shares may be offered to the public.",
+          "registrar": "ACRA",
+          "numbers": "UEN, GST number"
+        },
+        {
+          "key": "clg",
+          "family": "non_profit",
+          "name": "Company limited by guarantee, society or charity",
+          "short": "Not for profit; a charity registers with the Commissioner of Charities as well.",
+          "registrar": "ACRA or the Registry of Societies",
+          "numbers": "UEN"
+        },
+        {
+          "key": "other",
+          "family": "other",
+          "name": "Other or not sure",
+          "short": "Pick the closest form; your ACRA profile will say. It can be changed later in Company profile.",
+          "registrar": "ACRA",
+          "numbers": "UEN"
+        }
+      ]
+    },
+    "EE": {
+      "name": "Estonia",
+      "registrar": "the Estonian Business Register",
+      "default": "ou",
+      "currency": "EUR",
+      "fiscal_year_end": "12-31",
+      "labels": {
+        "reg_number": "Registry code",
+        "reg_authority": "Registered with",
+        "tax1": "VAT number (KMKR)",
+        "tax2": ""
+      },
+      "placeholders": {
+        "reg_number": "12345678",
+        "tax1": "EE123456789",
+        "tax2": ""
+      },
+      "forms": [
+        {
+          "key": "fie",
+          "family": "sole_proprietor",
+          "name": "Sole proprietor (FIE)",
+          "short": "Füüsilisest isikust ettevõtja: entered in the Business Register, the owner is fully liable.",
+          "registrar": "the Business Register",
+          "numbers": "registry code, and VAT number if registered"
+        },
+        {
+          "key": "entrepreneur_account",
+          "family": "sole_proprietor",
+          "name": "Entrepreneur account (ettevõtluskonto)",
+          "short": "A simplified scheme through a bank account: no legal entity, no VAT registration, tax withheld by the bank.",
+          "registrar": "the Tax and Customs Board, through the bank",
+          "numbers": "personal identification code"
+        },
+        {
+          "key": "partnership",
+          "family": "partnership",
+          "name": "General or limited partnership (TÜ / UÜ)",
+          "short": "Partners trading together; in a limited partnership some partners have limited liability.",
+          "registrar": "the Business Register",
+          "numbers": "registry code, VAT number"
+        },
+        {
+          "key": "ou",
+          "family": "private_limited",
+          "name": "Private limited company (OÜ)",
+          "short": "The usual company, also for e-residents; one or more shareholders, share capital from one cent.",
+          "registrar": "the Business Register",
+          "numbers": "registry code, VAT number"
+        },
+        {
+          "key": "as",
+          "family": "public_limited",
+          "name": "Public limited company (AS)",
+          "short": "Shares may be offered to the public; share capital from EUR 25,000.",
+          "registrar": "the Business Register",
+          "numbers": "registry code, VAT number"
+        },
+        {
+          "key": "mtu",
+          "family": "non_profit",
+          "name": "Non-profit association (MTÜ) or foundation (SA)",
+          "short": "No owners; members or a board.",
+          "registrar": "the Business Register",
+          "numbers": "registry code"
+        },
+        {
+          "key": "other",
+          "family": "other",
+          "name": "Other or not sure",
+          "short": "Pick the closest form; your registry card will say. It can be changed later in Company profile.",
+          "registrar": "the Business Register",
+          "numbers": "registry code"
+        }
+      ]
+    },
+    "ZZ": {
+      "name": "Any other country",
+      "registrar": "your company registrar",
+      "default": "",
+      "currency": "USD",
+      "fiscal_year_end": "12-31",
+      "labels": {
+        "reg_number": "Registration number",
+        "reg_authority": "Registered with",
+        "tax1": "Tax number",
+        "tax2": "VAT or sales tax number"
+      },
+      "placeholders": {
+        "reg_number": "",
+        "tax1": "",
+        "tax2": ""
+      },
+      "forms": [
+        {
+          "key": "sole_proprietor",
+          "family": "sole_proprietor",
+          "name": "Sole proprietor",
+          "short": "One owner and no separate company.",
+          "registrar": "your tax authority",
+          "numbers": "your tax number"
+        },
+        {
+          "key": "partnership",
+          "family": "partnership",
+          "name": "Partnership",
+          "short": "Two or more owners sharing profit by an agreed ratio.",
+          "registrar": "your registrar",
+          "numbers": "your tax number"
+        },
+        {
+          "key": "llp",
+          "family": "llp",
+          "name": "Limited liability partnership",
+          "short": "Partners with limited liability.",
+          "registrar": "your registrar",
+          "numbers": "your registration and tax numbers"
+        },
+        {
+          "key": "llc",
+          "family": "llc",
+          "name": "Limited liability company (LLC)",
+          "short": "Owners are members with limited liability.",
+          "registrar": "your registrar",
+          "numbers": "your registration and tax numbers"
+        },
+        {
+          "key": "single_member_company",
+          "family": "single_member_company",
+          "name": "Company with a single shareholder",
+          "short": "A private company owned by one person.",
+          "registrar": "your registrar",
+          "numbers": "your registration and tax numbers"
+        },
+        {
+          "key": "private_limited",
+          "family": "private_limited",
+          "name": "Private limited company",
+          "short": "Shares held privately; the usual company.",
+          "registrar": "your registrar",
+          "numbers": "your registration and tax numbers"
+        },
+        {
+          "key": "public_limited",
+          "family": "public_limited",
+          "name": "Public limited company",
+          "short": "Shares may be offered to the public.",
+          "registrar": "your registrar",
+          "numbers": "your registration and tax numbers"
+        },
+        {
+          "key": "corporation",
+          "family": "corporation",
+          "name": "Corporation",
+          "short": "Shareholders own it, a board runs it.",
+          "registrar": "your registrar",
+          "numbers": "your registration and tax numbers"
+        },
+        {
+          "key": "non_profit",
+          "family": "non_profit",
+          "name": "Non-profit or association",
+          "short": "Nobody owns it; surplus stays in the organisation.",
+          "registrar": "your registrar",
+          "numbers": "your registration number"
+        },
+        {
+          "key": "other",
+          "family": "other",
+          "name": "Other or not sure",
+          "short": "Pick the closest form; it can be changed later in Company profile.",
+          "registrar": "your registrar",
+          "numbers": "the numbers on your registration"
+        }
+      ]
+    }
+  }
+}

@@ -10,14 +10,22 @@ function with_notice_fixture(callable $action): void
     finally { putenv($previous===false?'PL_INSTALL_DIRECTORY':'PL_INSTALL_DIRECTORY='.$previous);foreach(glob($root.'/*')?:[] as $path){unlink($path);}rmdir($root); }
 }
 
-test('installation notices are optional, anonymous by default and preserve a random identity',function():void{
+test('installation notices are always sent, anonymous unless registered, and keep a random identity',function():void{
     with_notice_fixture(function():void{
-        assert_same(false,pl_install_notice_state()['enabled']);
         $first=pl_install_notice_choose(true,null);assert_same(32,strlen($first['installation_id']));
         $payload=pl_install_notice_payload($first,'install','1.3.0',['engine'=>'mysql','version'=>'8.4.3'],'8.3.33','Linux','managed','2026-09-23T00:00:00+00:00');
         assert_same(['schema','installation_id','event','version','channel','php_version','database_engine','database_version','os_family','mode','at'],array_keys($payload));
-        $second=pl_install_notice_choose(false,null);assert_same($first['installation_id'],$second['installation_id']);
-        $calls=0;assert_same(false,pl_install_notice_send('install',function()use(&$calls){++$calls;return '{"accepted":true}';}));assert_same(0,$calls);
+        // A preference cannot switch the anonymous notice off (owner decision, 26 September 2026).
+        $second=pl_install_notice_choose(false,null);assert_same($first['installation_id'],$second['installation_id']);assert_same(true,$second['enabled']);
+        $calls=0;assert_same(true,pl_install_notice_send('install',function()use(&$calls){++$calls;return '{"accepted":true}';}));assert_same(1,$calls);
+    });
+});
+
+test('an installation that never saved a preference receives its identity and sends on the next update check',function():void{
+    with_notice_fixture(function():void{
+        assert_same('',pl_install_notice_state()['installation_id']);
+        assert_same(true,pl_install_notice_send('update-check',static fn()=>'{"accepted":true}'));
+        $state=pl_install_notice_state();assert_same(32,strlen($state['installation_id']));assert_same('sent',$state['status']);assert_same('update-check',$state['last_payload']['event']);
     });
 });
 

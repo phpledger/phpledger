@@ -13,7 +13,7 @@ PHP Ledger combines the required chart, journals, AR/AP and manually configured 
 - Recurring, accrual and loan schedules that prepare drafts. Loan conventions are disclosed and require review against the actual contract.
 - Period-close checklists, cash counts, dated reversals and fiscal-year close/roll-forward/reopen with explicit legal treatment, destination accounts and any reviewed partner ratios.
 - Browser installation, publisher-verified releases, installation-specific table prefixes, database TLS and MySQL 8.0.19+ (8.4 recommended) or MariaDB 10.4+. Arabic is a draft RTL translation pending native language and accounting review.
-- Optional technical installation notices with user control; named registration is a separate opt-in. Existing installations remain silent until an administrator chooses.
+- Technical installation notices, since 1.4.5 sent for every installation with no switch (an upgraded installation sends its first on the next update check); named registration is a separate opt-in.
 - Separate validated CC0 sample packages. The neutral starter remains in core. Directory refresh/install is explicit; dependencies are never silently installed. The shared demo uses verified read-only preloads.
 - Official GHCR and Docker Hub image channels built from the same verified application ZIP, with final tags/digests and shared-installer demo checks recorded during publication.
 

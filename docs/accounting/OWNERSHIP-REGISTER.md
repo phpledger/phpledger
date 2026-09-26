@@ -25,7 +25,7 @@ Migration **044** (042 and 043 were already taken when this branch rebased; numb
 
 | Table | What it holds |
 |---|---|
-| `pl_company_profile` *(altered)* | The B64 profile gains `legal_form`, `registration_number`, `registration_authority`, `incorporation_date` and the financial year end as a month/day pair |
+| `pl_company_profile` *(altered)* | The B64 profile gains `legal_form`, `registration_number`, `registration_authority`, `incorporation_date` and the financial year end as a month/day pair; 1.4.5 (migration 061) adds `country_code`, the country of registration, beside the legal form |
 | `pl_ownership_parties` | The person or entity records the two registers share |
 | `pl_ownership_party_accounts` | One person's B61 partner record in one book |
 | `pl_ownership_members` | The members register, effective dated |

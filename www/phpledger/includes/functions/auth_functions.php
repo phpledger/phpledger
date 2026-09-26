@@ -1,11 +1,14 @@
 <?php
 declare(strict_types=1);
 
-/** PASSWORD_DEFAULT currently uses bcrypt, whose input limit is 72 bytes. */
+/**
+ * PASSWORD_DEFAULT currently uses bcrypt, whose input limit is 72 bytes. The minimum is six
+ * characters (owner decision, 26 September 2026); the sign-in screens advise longer.
+ */
 function pl_hash_password(string $password): string
 {
-    if (strlen($password) < 12 || strlen($password) > 72 || str_contains($password, "\0")) {
-        throw new InvalidArgumentException('Use a password between 12 and 72 bytes.');
+    if (strlen($password) < 6 || strlen($password) > 72 || str_contains($password, "\0")) {
+        throw new InvalidArgumentException('Use a password between 6 and 72 bytes.');
     }
     return password_hash($password, PASSWORD_DEFAULT);
 }

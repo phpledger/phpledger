@@ -172,4 +172,34 @@
      perforated paper edge without switching the whole app's type to monospace. */
   .receipt-paper { width: 100%; }
   .receipt-rule { border-block-start: 1px dashed var(--border-strong); margin-block: .75rem; }
+
+  /* The first Home (owner review of 25 September 2026, frame H-1 in docs/design/setup-1.4.5):
+     the getting-started guide, the quick actions that wait for money in, and the per-account
+     balances under the cash total. */
+  .getting-started { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: .875rem 1.125rem; display: flex; flex-direction: column; gap: .625rem; }
+  .gs-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .gs-head h2 { margin: 0; font-size: 14px; font-weight: 650; }
+  .gs-head p { margin: 0; font-size: 11.5px; color: var(--ink-muted); }
+  .gs-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .875rem; }
+  .gs-step { display: flex; gap: .625rem; align-items: flex-start; padding: .5rem .625rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+  .gs-step.is-done { border-color: transparent; background: var(--surface-subtle); }
+  .gs-step.is-current { border-color: var(--brand-blue); background: var(--brand-selected); }
+  .gs-num { flex: none; inline-size: 20px; block-size: 20px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; border: 1px solid var(--border-strong); color: var(--ink-muted); background: var(--surface); }
+  .gs-step.is-done .gs-num { background: var(--success); border-color: var(--success); color: #fff; }
+  .gs-step.is-done .gs-num .icon { width: 11px; height: 11px; }
+  .gs-step.is-current .gs-num { background: var(--brand-navy); border-color: var(--brand-navy); color: #fff; }
+  .gs-body { min-inline-size: 0; display: flex; flex-direction: column; gap: 2px; }
+  .gs-title { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+  .gs-step.is-done .gs-title { color: var(--ink-muted); font-weight: 500; }
+  .gs-detail { font-size: 11px; color: var(--ink-muted); line-height: 1.4; }
+  .gs-detail .link { font-size: 11px; }
+  .gs-actions { display: flex; gap: .5rem; align-items: center; margin-block-start: .25rem; flex-wrap: wrap; }
+  .quick-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+  .quick-actions .btn.is-waiting { opacity: .5; }
+  .quick-note { font-size: 11px; color: var(--ink-faint); }
+  .balance-accounts { list-style: none; margin: .5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .125rem; font-size: 12px; }
+  .balance-accounts li { display: flex; justify-content: space-between; gap: .75rem; }
+  .balance-accounts .num { font-variant-numeric: tabular-nums; color: var(--ink-muted); }
+  @media (max-width: 70rem) { .gs-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 40rem) { .gs-steps { grid-template-columns: minmax(0, 1fr); } }
 }

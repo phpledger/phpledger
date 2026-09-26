@@ -1,0 +1,130 @@
+{
+  "release": "1.4.5",
+  "channel": "stable",
+  "tag": "v1.4.5",
+  "published_at": "2026-09-26T04:49:06Z",
+  "source_commit": "c5b4662748e35db7f0aa0f063dedb1531a675ccb",
+  "branch": "claude/setup-1.4.5",
+  "release_url": "https://github.com/phpledger/phpledger/releases/tag/v1.4.5",
+  "assets": {
+    "phpledger-1.4.5.zip": {
+      "sha256": "fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c",
+      "bytes": 3635906,
+      "members": 1728,
+      "anonymous_download_verified": true,
+      "ci_build_sha256_member_identical": "20f0ec2404e71e6334e8c07efdc1eb3343f4e7988ecb5e3043b2c7cd9009f59e"
+    },
+    "phpledger-1.4.5.zip.sha256": {
+      "matches_archive": true
+    },
+    "phpledger-1.4.5.update.json": {
+      "sha256": "96d957d9368914c4e2b2e18c4feb02ffc6f6619a34968dfb2f03c1fdacd9d90d",
+      "bytes": 358083,
+      "anonymous_download_verified": true
+    }
+  },
+  "ci": {
+    "release_run": 36218047246,
+    "container_image_run": 36218954109
+  },
+  "signing": {
+    "signed": "phpledger-1.4.5.update.json",
+    "bytes": 358083,
+    "sha256": "96d957d9368914c4e2b2e18c4feb02ffc6f6619a34968dfb2f03c1fdacd9d90d",
+    "source_commit": "c5b4662748e35db7f0aa0f063dedb1531a675ccb",
+    "archive_sha256": "fa90a69cacd084621958ea44b53a8e596ac2b64b6af351d40726c52d92ead96c",
+    "verified_as_upgrade_from": [
+      "1.1.0",
+      "1.1.1",
+      "1.1.2",
+      "1.1.3",
+      "1.2.0",
+      "1.2.1",
+      "1.3.0",
+      "1.4.0",
+      "1.4.1"
+    ],
+    "rejected_for": "1.4.5",
+    "files_in_signed_inventory": 1728,
+    "publisher_spki_sha256": "4e58a5f46b0538c9b37aaadbfced9a2d8ad2f7d413bc168a67b1b94feaa78e78",
+    "published": true
+  },
+  "image": {
+    "ghcr": "ghcr.io/phpledger/phpledger@sha256:6bb559aff0e09aab908355d885e1b6dbf87b27c5067d8e807dcca1f7290089de",
+    "tags": [
+      "1.4.5",
+      "1.4",
+      "1",
+      "latest"
+    ],
+    "docker_hub": "pushed: docker.io/phpledger/phpledger@sha256:6bb559aff0e09aab908355d885e1b6dbf87b27c5067d8e807dcca1f7290089de (same index as GHCR)"
+  },
+  "feed": {
+    "source": "www/website/src/releases.json + site.json + src/static/releases/1.4.5.update.json",
+    "website_publication": "pending",
+    "feed_live_at_phpledger_com": "no"
+  },
+  "catalogues": "resources/distribution/* moved to 1.4.5 in source; no catalogue request opened",
+  "upgrade_proofs": {
+    "packaged_upgrade_php_from_1_4_1": "passed in the exact-package gates on MySQL and MariaDB (applied 061 once, no-op second run)",
+    "signed_metadata_accepted_from": [
+      "1.1.0",
+      "1.1.1",
+      "1.1.2",
+      "1.1.3",
+      "1.2.0",
+      "1.2.1",
+      "1.3.0",
+      "1.4.0",
+      "1.4.1"
+    ],
+    "container_tag_pull": "see receipt markdown",
+    "in_app_update_through_feed": "pending the website feed going live"
+  },
+  "local_gates": {
+    "full_checks": {
+      "mysql": {
+        "tests": 708,
+        "failures": 0,
+        "phpstan": "pass"
+      },
+      "maria": {
+        "tests": 708,
+        "failures": 0,
+        "phpstan": "pass",
+        "php_lint_files": 420,
+        "php_lint_failures": 0
+      },
+      "samples": "valid"
+    },
+    "exact_package_gates": [
+      {
+        "engine": "mysql",
+        "host": "pl145-mysql",
+        "steps": [
+          "fresh_62_migrations_first_post",
+          "populated_1_4_1_seed",
+          "packaged_upgrade_1_applied_061_company_country",
+          "packaged_upgrade_2_no_op",
+          "historical_rows_and_balances_unchanged"
+        ]
+      },
+      {
+        "engine": "maria",
+        "host": "pl145-maria",
+        "steps": [
+          "fresh_62_migrations_first_post",
+          "populated_1_4_1_seed",
+          "packaged_upgrade_1_applied_061_company_country",
+          "packaged_upgrade_2_no_op",
+          "historical_rows_and_balances_unchanged"
+        ]
+      }
+    ]
+  },
+  "not_done": [
+    "demo/host cutover",
+    "customer databases, messages, campaigns, payments",
+    "catalogue submissions"
+  ]
+}

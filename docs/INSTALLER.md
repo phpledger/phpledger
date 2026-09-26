@@ -66,6 +66,12 @@ The owner asked for the WordPress experience after installing 1.0.0 on XAMPP pro
 
 The package keeps runtime files, legal notices and recovery tools only. Guides moved online, and the ZIP carries a one-page `README.txt`. See `tools/package-files.json`, `tools/build-package.py` and [Validation](VALIDATION.md) for the tests and what remains unverified.
 
+15. **One centred column, anchored help, no idle clicks** (owner review of 25-26 September 2026, frames in `docs/design/setup-1.4.5`). Four named stages: Database, Build, Account, Done. Every field carries a question mark whose bubble opens beside it (`pl_ui_help(..., 'start')`; concepts `install-*` in `resources/guidance/concepts`), required fields carry an asterisk, the TLS certificate path sits under an Advanced disclosure, and the primary button turns green once the form is valid (`install.js`).
+   - The "Database connected / Install database" screen is gone: `pl_install_http()` renders the build screen for the `review` phase and the auto-continue form starts the first batch; the state phase names are unchanged.
+   - After the last batch, `pl_install_config_writable()` decides between `pl_install_publish_configuration()` (silent) and the `configuration` view, which now explains how to place the file by hand for a Windows stack, a container or a hosting panel (`pl_install_environment_kind()`). "I have placed it, check again" is the old `save_config` action.
+   - `db_ssl_verify` is no longer read from the form; server identity verification is always on.
+   - The password minimum is six characters (`pl_hash_password()`); the sign-in screens advise longer.
+
 ## Local implementation contract (1.0.0)
 
 `GET/POST /install` runs before the configured application bootstrap. It requires HTTPS except explicit local/test loopback use, and is disabled for the hosted demo. The host provisions a random setup key of at least 32 characters in private `www/phpledger/storage/installation/setup.key`, or `PL_SETUP_KEY`. `PL_INSTALL_DIRECTORY` may point to a private directory outside the application; `PL_INSTALL_CONFIG_PATH` optionally selects a private configuration path. Neither may resolve into the public document root. Setup credentials never belong in a URL.
@@ -82,8 +88,8 @@ An operator downloads the complete release ZIP, unpacks it and points the HTTPS 
 |---|---|
 | 1. Welcome and host checks | Explain the supported package profile, confirm explicit installation ownership/enablement, and check PHP/extensions, HTTPS, private sessions, routing, configuration access and database requirements. Show actionable failures. |
 | 2. Database connection | Enter a dedicated empty database's host, port, name and credentials. Test connectivity, MySQL version/collation and required privileges. Reject an existing/unrecognized database. Explain how to create the database/user in a hosting panel. |
-| 3. Install | Show the target and package version for review, then run the existing versioned migrations through a guarded installer service. Display progress and safe error messages. Preserve complete filenames, checksums, locks and migration receipts. |
-| 4. Owner account | Create the initial sign-in account through the existing auth service. Use its current password rules; this is not a new global administrator role. |
+| 3. Build | A passed check goes straight into the build: the reviewed target (database, host, account) heads the progress screen and the versioned migrations run through the guarded installer service with progress and safe error messages. Complete filenames, checksums, locks and migration receipts are preserved. Where PHP may write it, the private settings file is published without a click; a host that refuses gets its own step with instructions for that kind of host and a download. |
+| 4. Owner account | Create the initial sign-in account through the existing auth service: name, username, email, a password of at least six characters with a show toggle and a generator, an optional logo with a preview. No telemetry choices: the anonymous installation notice is always sent (owner decision, 26 September 2026, amending B16). The completion page shows the sign-in address, username and email to note down, never the password. |
 | 5. First business | Continue into existing onboarding: new business, reviewed existing-business opening/cutover, or a separate sample. Reuse currency, date, account-template and membership rules. Optional modules retain their existing defaults. |
 | 6. Finish | Verify schema/current identity, write the private installation completion state, disable installation access and open the application. Give backup and next-step guidance. Do not post a transaction into a real company as a test. |
 

@@ -66,4 +66,42 @@
     .table-wrap, .split-view-detail { overflow: visible; max-block-size: none; }
     .panel { border: 0; box-shadow: none; }
   }
+
+  /* Packages as one page with tabs and compact cards (frame P-1, 1.4.5). The switch is a real
+     submit button styled as a toggle, so it needs no script and every change is one audited POST. */
+  .pkg-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .625rem; }
+  .pkg-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: .75rem .875rem; display: flex; flex-direction: column; gap: .375rem; min-inline-size: 0; }
+  .pkg-card-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+  .pkg-card-head h3 { margin: 0; font-size: 13px; font-weight: 650; display: flex; align-items: center; gap: .5rem; }
+  .pkg-card-head h3 img { inline-size: 24px; block-size: 24px; border-radius: 5px; }
+  .pkg-meta { font-size: 11px; color: var(--ink-faint); }
+  .pkg-desc { margin: 0; font-size: 12px; line-height: 1.45; color: var(--ink-muted); }
+  .pkg-more summary, .pkg-manage summary { cursor: pointer; list-style: none; }
+  .pkg-more summary::-webkit-details-marker, .pkg-manage summary::-webkit-details-marker { display: none; }
+  .pkg-more { font-size: 12px; }
+  .pkg-more ul { margin: .25rem 0 0; padding-inline-start: 1.125rem; color: var(--ink-muted); }
+  .pkg-foot { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; margin-block-start: auto; padding-block-start: .25rem; }
+  .pkg-badges { display: flex; gap: .25rem; flex-wrap: wrap; }
+  .pkg-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+  .pkg-manage { position: relative; }
+  .pkg-manage[open] { inline-size: 100%; }
+  .pkg-manage[open] > form, .pkg-manage[open] > .confirmation { margin-block-start: .5rem; }
+  .pkg-required { display: flex; align-items: center; gap: .75rem; padding: .5rem .875rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-subtle); font-size: 12px; flex-wrap: wrap; }
+  .pkg-required strong { font-weight: 600; }
+  .pkg-required .pkg-meta { margin-inline-start: auto; }
+  .pkg-stack { display: flex; flex-direction: column; gap: .5rem; }
+  .pkg-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .pkg-toolbar .muted { font-size: 11.5px; margin: 0; }
+  .switch-form { display: inline-flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+  .switch { display: inline-flex; align-items: center; gap: .5rem; font: inherit; font-size: 11.5px; color: var(--ink-muted); cursor: pointer; background: none; border: 0; padding: 0; }
+  .switch-track { inline-size: 30px; block-size: 18px; border-radius: 999px; background: var(--border-strong); position: relative; flex: none; transition: background .12s ease; }
+  .switch-track::after { content: ""; position: absolute; inset-block-start: 2px; inset-inline-start: 2px; inline-size: 14px; block-size: 14px; border-radius: 999px; background: #fff; transition: transform .12s ease; }
+  .switch.is-on .switch-track { background: var(--success); }
+  .switch.is-on .switch-track::after { transform: translateX(12px); }
+  [dir="rtl"] .switch.is-on .switch-track::after { transform: translateX(-12px); }
+  .switch:hover { color: var(--ink); }
+  .switch:focus-visible { outline: 2px solid var(--brand-blue); outline-offset: 2px; border-radius: 999px; }
+  @media (max-width: 70rem) { .pkg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 40rem) { .pkg-grid { grid-template-columns: minmax(0, 1fr); } }
 }
+

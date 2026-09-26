@@ -1,6 +1,6 @@
 # Container image
 
-**Installing on your Windows computer?** Follow the [Docker Desktop walkthrough](wiki/Install-with-Docker-Desktop.md) with the ready-made [desktop setup file](../compose.desktop.yaml). It takes you through the first account without Git, Node, Composer or a source build. The recipe selects the 1.4.1 image; its first-install check is recorded separately after image publication.
+**Installing on your Windows computer?** Follow the [Docker Desktop walkthrough](wiki/Install-with-Docker-Desktop.md) with the ready-made [desktop setup file](../compose.desktop.yaml). It takes you through the first account without Git, Node, Composer or a source build. The recipe selects the 1.4.5 image; its first-install check is recorded separately after image publication.
 
 | Setup file | Use |
 |---|---|

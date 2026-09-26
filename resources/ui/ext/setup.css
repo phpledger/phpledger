@@ -274,3 +274,177 @@
     .bench-tray.is-labelled .tray-slot span { display: none; }
   }
 }
+
+/* Setup as one centred column (owner review of 25-26 September 2026, docs/design/setup-1.4.5).
+   The installer keeps the Workbench pieces it still uses (tray, tiles, rail, progress, manifest)
+   and gains a card, a twelve-column field grid, anchored help, a password eye, a drop zone, the
+   step that places the settings file by hand and the sign-in card. Tokens only; no new colours. */
+@layer components {
+  /* .install-frame.wp-frame beats the foundation's .install-frame rules, which come later in the same layer. */
+  .install-frame.wp-frame { padding: 1rem 1.5rem .875rem; gap: 0; align-items: center; }
+  .wp-shell { inline-size: 100%; max-inline-size: 820px; display: flex; flex-direction: column; gap: .75rem; }
+  .wp-shell.is-wide { max-inline-size: 1120px; }
+  .wp-chrome { min-block-size: 30px; }
+  .wp-chrome .bench-logo { height: 24px; }
+  .wp-step { font-size: 11.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .wp-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: 1rem 1.375rem .9375rem; display: flex; flex-direction: column; gap: .8125rem; }
+  .wp-title-row { display: flex; align-items: center; gap: .375rem; }
+  .wp-title-row .bench-heading { margin: 0; }
+  .wp-head .bench-sub { margin-block-start: .2rem; }
+  .wp-frame .bench-body { gap: .625rem; }
+  .wp-frame .bench-actions { border-block-start: 1px solid var(--border); padding-block-start: .75rem; }
+  .wp-frame .bench-tray.is-labelled .tray-slot { min-inline-size: 5rem; block-size: 22px; }
+  .wp-frame .bench-tray.is-labelled .tray-slot .icon { width: 10px; height: 10px; margin-inline-end: 2px; }
+  .install-frame.wp-frame .field-label::before { content: none; }
+  .wp-frame .field-label .required-marker { margin-inline-start: 1px; }
+  .install-frame.wp-frame .field-hint { font-size: 11.5px; }
+  .wp-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: .625rem .75rem; }
+  .span-12 { grid-column: span 12; } .span-8 { grid-column: span 8; } .span-6 { grid-column: span 6; }
+  .span-4 { grid-column: span 4; } .span-3 { grid-column: span 3; } .span-2 { grid-column: span 2; }
+  .wp-frame .field > .inline-heading { margin-block-end: .25rem; }
+  .wp-frame .help > summary { inline-size: 1.125rem; block-size: 1.125rem; font-size: .625rem; margin-inline-start: .125rem; }
+  .wp-title-row .help > summary, .wp-title-row .page-help .help > summary { inline-size: 1.5rem; block-size: 1.5rem; font-size: .75rem; }
+  .help-bubble .link { font-size: .75rem; }
+  .wp-note { display: flex; align-items: flex-start; gap: .5rem; font-size: 12px; line-height: 1.5; color: var(--brand-navy); background: var(--brand-selected); border: 1px solid color-mix(in oklab, var(--brand-blue) 25%, transparent); border-radius: 8px; padding: .5rem .75rem; margin: 0; }
+  .wp-note .icon { width: 14px; height: 14px; flex: none; margin-block-start: 2px; }
+  .wp-note.is-plain { background: var(--surface-subtle); border-color: var(--border); color: var(--ink-muted); }
+  .wp-note .link { font-size: 12px; }
+  .affix-btn { position: absolute; inset-inline-end: .3125rem; inset-block-start: 50%; transform: translateY(-50%); inline-size: 26px; block-size: 26px; border: 0; background: none; color: var(--ink-faint); cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+  .affix-btn:hover { color: var(--ink); background: var(--surface-subtle); }
+  .affix-btn .icon { width: 16px; height: 16px; }
+  .affix-btn span { display: contents; }
+  .affix-btn [hidden] { display: none; }
+  .pw-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-block-start: .375rem; }
+  .pw-strength { display: inline-flex; align-items: center; gap: .375rem; font-size: 11.5px; color: var(--ink-muted); }
+  .pw-strength .meter { inline-size: 64px; block-size: 5px; border-radius: 999px; background: var(--surface-subtle); border: 1px solid var(--border); overflow: hidden; }
+  .pw-strength .meter-fill { display: block; block-size: 100%; inline-size: 25%; background: var(--danger); }
+  .pw-strength.is-fair .meter-fill { inline-size: 55%; background: var(--warning); }
+  .pw-strength.is-strong .meter-fill { inline-size: 100%; background: var(--success); }
+  .btn-primary.is-ready { background: var(--success); }
+  .btn-primary.is-ready:hover { background: color-mix(in oklab, var(--success) 88%, black); }
+  .wp-details { border: 1px solid var(--border); border-radius: 8px; background: var(--surface-subtle); }
+  .wp-details > summary { cursor: pointer; padding: .5rem .75rem; font-size: 12px; font-weight: 600; color: var(--ink); list-style: none; display: flex; align-items: center; gap: .5rem; }
+  .wp-details > summary::-webkit-details-marker { display: none; }
+  .wp-details > summary .icon { width: 14px; height: 14px; color: var(--ink-faint); transition: transform .12s ease; }
+  .wp-details[open] > summary .icon { transform: rotate(180deg); }
+  .wp-details > summary .optional { margin-inline-start: auto; font-weight: 400; }
+  .wp-details-body { padding: 0 .75rem .625rem; display: flex; flex-direction: column; gap: .5rem; }
+  .wp-details-body .wp-grid { gap: .375rem .75rem; }
+  .dropzone { display: flex; align-items: center; gap: .75rem; border: 1.5px dashed var(--border-strong); border-radius: 8px; padding: .5rem .75rem; background: var(--surface); }
+  .dropzone.is-over { border-color: var(--brand-blue); background: var(--brand-selected); }
+  .dropzone-preview { inline-size: 44px; block-size: 44px; border-radius: 6px; background: var(--surface-subtle); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--ink-faint); flex: none; overflow: hidden; }
+  .dropzone-preview img { max-inline-size: 100%; max-block-size: 100%; }
+  .dropzone-preview .icon { width: 18px; height: 18px; }
+  .dropzone-text { font-size: 12px; color: var(--ink-muted); line-height: 1.45; }
+  .dropzone-text strong { color: var(--ink); font-weight: 600; }
+  .dropzone .btn { margin-inline-start: auto; flex: none; }
+  .build-fact { display: flex; align-items: center; gap: .625rem; font-size: 13px; color: var(--ink); flex-wrap: wrap; }
+  .build-fact .reward-badge { margin: 0; }
+  .build-fact .snip { font-size: 12px; }
+  .build-fact .muted { color: var(--ink-muted); }
+  .wp-frame .progress-wrap { max-inline-size: none; gap: 1rem; flex: none; }
+  .env-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .875rem; margin: 0; }
+  .env-facts div { display: flex; flex-direction: column; gap: 2px; }
+  .env-facts dt { font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); font-weight: 600; }
+  .env-facts dd { margin: 0; font-size: 12.5px; color: var(--ink); overflow-wrap: anywhere; }
+  .env-facts dd .snip { font-size: 11px; }
+  .wp-frame .fix-item { font-size: 12.5px; }
+  .done-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 1rem; align-items: start; }
+  .done-split .manifest-card { inline-size: auto; }
+  .signin-card { background: var(--brand-selected); border: 1px solid color-mix(in oklab, var(--brand-blue) 25%, transparent); border-radius: 12px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: .5rem; }
+  .signin-card h2 { margin: 0; font-size: 13px; color: var(--brand-navy); }
+  .signin-grid { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .3125rem .75rem; margin: 0; font-size: 12.5px; }
+  .signin-grid dt { color: var(--ink-muted); }
+  .signin-grid dd { margin: 0; color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
+  .signin-actions { display: flex; gap: .5rem; flex-wrap: wrap; padding-block-start: .25rem; }
+  .keep-safe { font-size: 11.5px; color: var(--ink-muted); line-height: 1.5; margin: 0; }
+  @media (max-width: 60rem) {
+    .wp-grid > [class*="span-"] { grid-column: span 12; }
+    .done-split, .env-facts { grid-template-columns: minmax(0, 1fr); }
+  }
+}
+
+/* Business onboarding in the installer's column (owner review of 25-26 September 2026, frames in
+   docs/design/setup-1.4.5): the four starting points, the sample gallery, the country-aware
+   business details, the owners and money-accounts tables, the features grid and the chart editor. */
+@layer components {
+  html[data-screen="onboarding"] .auth-card { max-width: 72rem; }
+  .bench-stage.wp-card { gap: .625rem; }
+  .bench-stage .wp-chrome { justify-content: space-between; }
+  .bench-stage .bench-tray.is-labelled .tray-slot { min-inline-size: 5rem; block-size: 22px; }
+  .choice-grid.is-four { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
+  .choice-grid.is-four .choice-card { padding: .5rem .6875rem; }
+  .choice-grid.is-four .choice-body { gap: .25rem; }
+  .choice-grid.is-four .choice-title { font-size: 13px; }
+  .choice-grid.is-four .choice-detail { font-size: 11px; }
+  .choice-card.is-quiet { opacity: .85; }
+  .gallery-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .gallery-head h2 { margin: 0; font-size: 13px; font-weight: 650; color: var(--ink); }
+  .gallery-head p { margin: 0; font-size: 11.5px; color: var(--ink-muted); }
+  .sample-gallery { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .4375rem; border: 0; margin: 0; padding: 0; }
+  .sample-card { position: relative; display: flex; flex-direction: column; gap: .25rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: .5rem .625rem; cursor: pointer; min-block-size: 0; }
+  .sample-card:hover { border-color: var(--border-strong); }
+  .sample-card:has(input:checked) { border-color: var(--brand-blue); background: var(--brand-selected); }
+  .sample-card:has(input:focus-visible) { outline: 2px solid var(--brand-blue); outline-offset: 2px; }
+  .sample-card.is-quiet { cursor: default; }
+  .sample-card input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+  .sample-card-top { display: flex; align-items: center; gap: .5rem; }
+  .sample-card-top img { inline-size: 26px; block-size: 26px; border-radius: 6px; flex: none; }
+  .sample-card-name { font-size: 12px; font-weight: 650; color: var(--ink); line-height: 1.2; }
+  .sample-card-kind { font-size: 10.5px; color: var(--ink-faint); }
+  .sample-card-story { margin: 0; font-size: 10.5px; line-height: 1.35; color: var(--ink-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .sample-card-brings { margin: 0; font-size: 10.5px; color: var(--ink-faint); }
+  .sample-card-state { margin-block-start: auto; display: flex; align-items: center; justify-content: space-between; gap: .375rem; padding-block-start: .125rem; }
+  .sample-card-state .badge { font-size: 10px; }
+  .sample-card-state .btn { height: 22px; font-size: 10.5px; padding-inline: .4rem; }
+  .field-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: var(--brand-navy); background: var(--brand-selected); border-radius: 999px; padding: 1px 7px; margin-inline-start: auto; white-space: nowrap; }
+  .o2-columns { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+  .o2-main .wp-grid { gap: .5rem .75rem; }
+  .form-guide { margin: .3rem 0 0; font-size: 11.5px; line-height: 1.5; color: var(--ink-muted); background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 8px; padding: .5rem .75rem; }
+  .side-panel { border: 1px solid var(--border); border-radius: 8px; background: var(--surface-subtle); padding: .625rem .75rem .75rem; }
+  .side-panel .wp-grid { gap: .375rem .75rem; }
+  .side-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin-block-end: .5rem; flex-wrap: wrap; }
+  .side-panel-head h2 { margin: 0; font-size: 12px; font-weight: 600; color: var(--ink); }
+  .side-panel-head .optional { font-size: 11px; }
+  .two-up { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.75fr); gap: 1.25rem; align-items: start; }
+  .mini-table { inline-size: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; table-layout: fixed; }
+  .mini-table th { text-align: start; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); font-weight: 600; padding: 0 .375rem .375rem 0; }
+  .mini-table td { padding: .1875rem .375rem .1875rem 0; vertical-align: middle; }
+  .mini-table .input, .mini-table .select { height: 32px; font-size: 12.5px; inline-size: 100%; }
+  .mini-table td.is-amount .input { text-align: end; font-variant-numeric: tabular-nums; }
+  .mini-table.owners td:nth-child(1) { inline-size: 50%; } .mini-table.owners td:nth-child(2) { inline-size: 32%; }
+  .mini-table.money td:nth-child(1) { inline-size: 15%; } .mini-table.money td:nth-child(2) { inline-size: 31%; } .mini-table.money td:nth-child(3) { inline-size: 17%; } .mini-table.money td:nth-child(4) { inline-size: 15%; } .mini-table.money td:nth-child(5) { inline-size: 22%; }
+  .sub-panel { display: flex; flex-direction: column; gap: .5rem; }
+  .sub-panel h2 { margin: 0; font-size: 13px; font-weight: 650; color: var(--ink); display: flex; align-items: center; gap: .375rem; }
+  .sub-panel .field-hint { margin: 0; }
+  .tree-note { font-family: var(--font-mono); font-size: 12px; line-height: 1.55; color: var(--ink-muted); background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 8px; padding: .5rem .75rem; margin: 0; white-space: pre; overflow-x: auto; }
+  .tree-note strong { color: var(--ink); font-weight: 600; }
+  .tree-note .is-group { color: var(--ink-faint); }
+  .feature-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .5rem; border: 0; margin: 0; padding: 0; }
+  .feature-grid .choice-card { padding: .5625rem .6875rem; }
+  .feature-grid .choice-title { font-size: 12px; padding-inline-end: 1.125rem; }
+  .feature-grid .choice-detail { font-size: 10.5px; }
+  .feature-grid .choice-card input[type="checkbox"] { position: absolute; inset-block-start: .625rem; inset-inline-end: .625rem; margin: 0; }
+  .feature-grid .choice-card:has(input:checked) { border-color: var(--brand-blue); background: var(--brand-selected); }
+  .feature-grid .choice-card:has(input:disabled) { cursor: default; }
+  .chart-edit { max-block-size: 200px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+  .chart-edit .table th, .chart-edit .table td { padding: .25rem .5rem; font-size: 12px; }
+  .chart-edit .table thead th { position: sticky; inset-block-start: 0; background: var(--surface-subtle); z-index: 1; }
+  .chart-edit .input { height: 28px; font-size: 12px; }
+  .chart-edit tr.is-group td { color: var(--ink-faint); font-weight: 600; background: var(--surface-subtle); }
+  .bench-stage .review-split { gap: 1rem; }
+  .bench-stage .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; }
+  .will-do { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .3125rem; font-size: 12px; color: var(--ink); }
+  .will-do li { display: flex; gap: .5rem; align-items: flex-start; line-height: 1.4; }
+  .will-do .icon { width: 13px; height: 13px; color: var(--success); flex: none; margin-block-start: 2px; }
+  .bench-stage .btn.link { background: none; border: 0; padding: 0; font: inherit; color: var(--brand-blue); cursor: pointer; }
+  @media (max-width: 70rem) {
+    .sample-gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 60rem) {
+    .sample-gallery, .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .two-up, .o2-columns { grid-template-columns: minmax(0, 1fr); }
+    .choice-grid.is-four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+}

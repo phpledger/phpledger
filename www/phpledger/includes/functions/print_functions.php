@@ -170,7 +170,7 @@ function pl_print_letterhead(array $company, ?array $profile = null): array
         . ($number === '' ? '' : ($authority === '' ? 'Registration number ' : ', number ') . $number));
     return [
         'name' => $named !== '' ? $named : (string) $company['name'],
-        'legal_form' => (string) ($profile['legal_form_label'] ?? (pl_legal_forms()[(string) ($profile['legal_form'] ?? '')] ?? '')),
+        'legal_form' => (string) ($profile['legal_form_label'] ?? pl_legal_form_label((string) ($profile['legal_form'] ?? ''))),
         'incorporation' => $incorporation,
         'book' => (string) ($company['book_name'] ?? ''),
         'currency' => (string) $company['currency'],

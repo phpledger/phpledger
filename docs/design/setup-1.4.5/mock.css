@@ -1,0 +1,281 @@
+/* 1.4.5 setup redesign mockup — additions on top of the real compiled app.css.
+   Everything here is what the implementation would port into resources/ui/ext/setup.css
+   and app.css. Tokens only; no new colours; logical properties; no inline styles (CSP). */
+
+/* ---------- Setup pages: one centred column, WordPress-like ---------- */
+.wp-frame { padding: 1rem 1.5rem .875rem; gap: 0; align-items: center; }
+.wp-shell { inline-size: 100%; max-inline-size: 820px; display: flex; flex-direction: column; gap: .75rem; }
+.wp-shell.is-wide { max-inline-size: 1120px; }
+.wp-chrome { min-block-size: 30px; }
+.wp-chrome .bench-logo { height: 24px; }
+.wp-step { font-size: 11.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wp-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: 1rem 1.375rem .9375rem; display: flex; flex-direction: column; gap: .8125rem; }
+.wp-title-row { display: flex; align-items: center; gap: .375rem; }
+.wp-title-row .bench-heading { margin: 0; }
+.wp-head .bench-sub { margin-block-start: .2rem; }
+.wp-frame .bench-body { gap: .625rem; }
+.wp-frame .bench-actions { border-block-start: 1px solid var(--border); padding-block-start: .75rem; }
+/* The tray keeps its slots but names them; the installer no longer hides the names. */
+.wp-frame .bench-tray.is-labelled .tray-slot { min-inline-size: 5rem; block-size: 22px; }
+.wp-frame .bench-tray.is-labelled .tray-slot .icon { width: 10px; height: 10px; margin-inline-end: 2px; }
+/* Required fields use the ordinary asterisk, not a blue square. */
+.install-frame .field-label::before { content: none; }
+.install-frame .field-label .required-marker { margin-inline-start: 1px; }
+.install-frame .field-hint { font-size: 11.5px; }
+/* Field grid: twelve columns so a row can hold host + port + prefix. */
+.wp-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: .625rem .75rem; }
+.span-12 { grid-column: span 12; } .span-8 { grid-column: span 8; } .span-6 { grid-column: span 6; }
+.span-4 { grid-column: span 4; } .span-3 { grid-column: span 3; } .span-2 { grid-column: span 2; }
+/* Label + "?" on one line, bubble anchored under the trigger (placement start/end, never sheet). */
+.install-frame .field > .inline-heading { margin-block-end: .25rem; }
+.install-frame .help > summary { inline-size: 1.125rem; block-size: 1.125rem; font-size: .625rem; margin-inline-start: .125rem; }
+.wp-title-row .help > summary { inline-size: 1.5rem; block-size: 1.5rem; font-size: .75rem; }
+.help-bubble .link { font-size: .75rem; }
+/* A slim note where the tip module used to be. */
+.wp-note { display: flex; align-items: flex-start; gap: .5rem; font-size: 12px; line-height: 1.5; color: var(--brand-navy); background: var(--brand-selected); border: 1px solid color-mix(in oklab, var(--brand-blue) 25%, transparent); border-radius: 8px; padding: .5rem .75rem; margin: 0; }
+.wp-note .icon { width: 14px; height: 14px; flex: none; margin-block-start: 2px; }
+.wp-note.is-plain { background: var(--surface-subtle); border-color: var(--border); color: var(--ink-muted); }
+.wp-note .link { font-size: 12px; }
+/* Password eye and generator. */
+.affix-btn { position: absolute; inset-inline-end: .3125rem; inset-block-start: 50%; transform: translateY(-50%); inline-size: 26px; block-size: 26px; border: 0; background: none; color: var(--ink-faint); cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; }
+.affix-btn:hover { color: var(--ink); background: var(--surface-subtle); }
+.affix-btn .icon { width: 16px; height: 16px; }
+.pw-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+.pw-row .field-hint { margin: 0; }
+.pw-strength { display: inline-flex; align-items: center; gap: .375rem; font-size: 11.5px; color: var(--ink-muted); }
+.pw-strength .meter { inline-size: 64px; block-size: 5px; border-radius: 999px; background: var(--surface-subtle); border: 1px solid var(--border); overflow: hidden; }
+.pw-strength .meter-fill { block-size: 100%; inline-size: 25%; background: var(--danger); }
+.pw-strength.is-fair .meter-fill { inline-size: 55%; background: var(--warning); }
+.pw-strength.is-strong .meter-fill { inline-size: 100%; background: var(--success); }
+/* The primary button says "ready" when the form validates. */
+.btn-primary.is-ready { background: var(--success); }
+.btn-primary.is-ready:hover { background: color-mix(in oklab, var(--success) 88%, black); }
+/* Advanced options fold away. */
+.wp-details { border: 1px solid var(--border); border-radius: 8px; background: var(--surface-subtle); }
+.wp-details > summary { cursor: pointer; padding: .5rem .75rem; font-size: 12px; font-weight: 600; color: var(--ink); list-style: none; display: flex; align-items: center; gap: .5rem; }
+.wp-details > summary::-webkit-details-marker { display: none; }
+.wp-details > summary .icon { width: 14px; height: 14px; color: var(--ink-faint); transition: transform .12s ease; }
+.wp-details[open] > summary .icon { transform: rotate(180deg); }
+.wp-details > summary .optional { margin-inline-start: auto; font-weight: 400; }
+.wp-details-body { padding: 0 .75rem .625rem; display: flex; flex-direction: column; gap: .5rem; }
+.wp-details-body .wp-grid { gap: .375rem .75rem; }
+/* Logo drop zone. */
+.dropzone { display: flex; align-items: center; gap: .75rem; border: 1.5px dashed var(--border-strong); border-radius: 8px; padding: .5rem .75rem; background: var(--surface); }
+.dropzone-preview { inline-size: 44px; block-size: 44px; border-radius: 6px; background: var(--surface-subtle); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--ink-faint); flex: none; overflow: hidden; }
+.dropzone-preview img { max-inline-size: 100%; max-block-size: 100%; }
+.dropzone-preview .icon { width: 18px; height: 18px; }
+.dropzone-text { font-size: 12px; color: var(--ink-muted); line-height: 1.45; }
+.dropzone-text strong { color: var(--ink); font-weight: 600; }
+.dropzone .btn { margin-inline-start: auto; flex: none; }
+/* Build screen: the connection fact sits above the bar. */
+.build-fact { display: flex; align-items: center; gap: .625rem; font-size: 13px; color: var(--ink); flex-wrap: wrap; }
+.build-fact .reward-badge { margin: 0; }
+.build-fact .snip { font-size: 12px; }
+.build-fact .muted { color: var(--ink-muted); }
+.wp-frame .progress-wrap { max-inline-size: none; gap: 1rem; flex: none; }
+/* Not-writable step: environment facts and numbered instructions. */
+.env-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .875rem; margin: 0; }
+.env-facts div { display: flex; flex-direction: column; gap: 2px; }
+.env-facts dt { font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); font-weight: 600; }
+.env-facts dd { margin: 0; font-size: 12.5px; color: var(--ink); overflow-wrap: anywhere; }
+.env-facts dd .snip { font-size: 11px; }
+.env-pick { display: flex; align-items: center; gap: .625rem; font-size: 11.5px; color: var(--ink-faint); }
+.env-pick .tabs-seg { margin: 0; }
+[data-env-panel] { display: none; }
+[data-env-panel].is-active { display: flex; flex-direction: column; gap: .625rem; }
+.wp-frame .fix-item { font-size: 12.5px; }
+.wp-frame .fix-item .snip { font-size: 11px; }
+/* Completion: manifest beside the sign-in details. */
+.done-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 1rem; align-items: start; }
+.done-split .manifest-card { inline-size: auto; }
+.signin-card { background: var(--brand-selected); border: 1px solid color-mix(in oklab, var(--brand-blue) 25%, transparent); border-radius: 12px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: .5rem; }
+.signin-card h2 { margin: 0; font-size: 13px; color: var(--brand-navy); }
+.signin-grid { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .3125rem .75rem; margin: 0; font-size: 12.5px; }
+.signin-grid dt { color: var(--ink-muted); }
+.signin-grid dd { margin: 0; color: var(--ink); font-weight: 500; display: flex; align-items: center; gap: .5rem; overflow-wrap: anywhere; }
+.signin-grid dd .btn { flex: none; }
+.signin-actions { display: flex; gap: .5rem; flex-wrap: wrap; padding-block-start: .25rem; }
+.keep-safe { font-size: 11.5px; color: var(--ink-muted); line-height: 1.5; margin: 0; }
+.wp-frame .done-body { gap: .875rem; align-items: stretch; text-align: start; }
+.wp-frame .done-body > .bench-head { text-align: center; }
+.wp-frame .done-body .bench-sub { margin-inline: auto; }
+.wp-frame .done-body .wp-title-row { justify-content: center; }
+
+/* ---------- Business onboarding ---------- */
+.wp-frame .bench-stage { gap: .625rem; }
+.wp-frame .bench-stage .bench-heading { font-size: 20px; line-height: 26px; }
+.choice-grid.is-four { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
+.choice-grid.is-four .choice-card { padding: .5rem .6875rem; }
+.choice-grid.is-four .choice-body { gap: .25rem; }
+.choice-grid.is-four .choice-title { font-size: 13px; }
+.choice-grid.is-four .choice-detail { font-size: 11px; }
+/* Sample gallery: one card per company, chosen like a radio. */
+.gallery-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.gallery-head h2 { margin: 0; font-size: 13px; font-weight: 650; color: var(--ink); }
+.gallery-head p { margin: 0; font-size: 11.5px; color: var(--ink-muted); }
+.sample-gallery { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .4375rem; border: 0; margin: 0; padding: 0; }
+.sample-card { position: relative; display: flex; flex-direction: column; gap: .25rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: .5rem .625rem; cursor: pointer; min-block-size: 0; }
+.sample-card:hover { border-color: var(--border-strong); }
+.sample-card:has(input:checked) { border-color: var(--brand-blue); background: var(--brand-selected); }
+.sample-card input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+.sample-card-top { display: flex; align-items: center; gap: .5rem; }
+.sample-card-top img { inline-size: 26px; block-size: 26px; border-radius: 6px; flex: none; }
+.sample-card-name { font-size: 12px; font-weight: 650; color: var(--ink); line-height: 1.2; }
+.sample-card-kind { font-size: 10.5px; color: var(--ink-faint); }
+.sample-card-story { margin: 0; font-size: 10.5px; line-height: 1.35; color: var(--ink-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sample-card-brings { margin: 0; font-size: 10.5px; color: var(--ink-faint); }
+.sample-card-state { margin-block-start: auto; display: flex; align-items: center; justify-content: space-between; gap: .375rem; padding-block-start: .125rem; }
+.sample-card-state .badge { font-size: 10px; }
+.sample-card-state .btn { height: 22px; font-size: 10.5px; padding-inline: .4rem; }
+.choice-card.is-quiet { opacity: .85; }
+/* Business details: a "Suggested" chip beside an editable control. */
+.field-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: var(--brand-navy); background: var(--brand-selected); border-radius: 999px; padding: 1px 7px; margin-inline-start: auto; white-space: nowrap; }
+/* Owners and money accounts: two editable tables side by side. */
+.two-up { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.75fr); gap: 1.25rem; align-items: start; }
+.mini-table .input, .mini-table .select { inline-size: 100%; }
+.mini-table.owners td:nth-child(1) { inline-size: 50%; } .mini-table.owners td:nth-child(2) { inline-size: 32%; }
+.mini-table.money td:nth-child(1) { inline-size: 15%; } .mini-table.money td:nth-child(2) { inline-size: 31%; } .mini-table.money td:nth-child(3) { inline-size: 17%; } .mini-table.money td:nth-child(4) { inline-size: 15%; } .mini-table.money td:nth-child(5) { inline-size: 18%; }
+.mini-table { inline-size: 100%; border-collapse: separate; border-spacing: 0; font-size: 12.5px; table-layout: fixed; }
+.mini-table th { text-align: start; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); font-weight: 600; padding: 0 .375rem .375rem 0; }
+.mini-table td { padding: .1875rem .375rem .1875rem 0; vertical-align: middle; }
+.mini-table .input, .mini-table .select { height: 32px; font-size: 12.5px; }
+.mini-table td.is-amount .input { text-align: end; font-variant-numeric: tabular-nums; }
+.mini-table .btn-icon { height: 26px; width: 26px; padding: 0; }
+.sub-panel { display: flex; flex-direction: column; gap: .5rem; }
+.sub-panel h2 { margin: 0; font-size: 13px; font-weight: 650; color: var(--ink); display: flex; align-items: center; gap: .375rem; }
+.sub-panel .field-hint { margin: 0; }
+.tree-note { font-family: var(--font-mono); font-size: 12px; line-height: 1.55; color: var(--ink-muted); background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 8px; padding: .5rem .75rem; margin: 0; white-space: pre; overflow-x: auto; }
+.tree-note strong { color: var(--ink); font-weight: 600; }
+.tree-note .is-group { color: var(--ink-faint); }
+/* Features and accounts. */
+.feature-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .5rem; border: 0; margin: 0; padding: 0; }
+.feature-grid .choice-card { padding: .5625rem .6875rem; }
+.feature-grid .choice-title { font-size: 12px; padding-inline-end: 1.125rem; }
+.feature-grid .choice-detail { font-size: 10.5px; }
+.feature-grid .choice-card input[type="checkbox"] { position: absolute; inset-block-start: .625rem; inset-inline-end: .625rem; margin: 0; }
+.feature-grid .choice-card:has(input:checked) { border-color: var(--brand-blue); background: var(--brand-selected); }
+.feature-grid .choice-card:has(input:disabled) { cursor: default; }
+.chart-edit { max-block-size: 200px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+.chart-edit .table th, .chart-edit .table td { padding: .25rem .5rem; font-size: 12px; }
+.chart-edit .table thead th { position: sticky; inset-block-start: 0; background: var(--surface-subtle); z-index: 1; }
+.chart-edit .input { height: 28px; font-size: 12px; }
+.chart-edit tr.is-group td { color: var(--ink-faint); font-weight: 600; background: var(--surface-subtle); }
+/* Review. */
+.wp-frame .review-split { gap: 1rem; }
+.wp-frame .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; }
+.will-do { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .3125rem; font-size: 12px; color: var(--ink); }
+.will-do li { display: flex; gap: .5rem; align-items: flex-start; line-height: 1.4; }
+.will-do .icon { width: 13px; height: 13px; color: var(--success); flex: none; margin-block-start: 2px; }
+.will-do .num { font-variant-numeric: tabular-nums; }
+
+/* ---------- App shell and Home ---------- */
+/* Icons are inline SVG that take the text colour; the active item is navy. */
+.nav-item .icon { color: var(--ink-faint); }
+.nav-item[aria-current="page"] .icon { color: var(--brand-navy); }
+.topbar-help { display: inline-flex; align-items: center; gap: .375rem; height: 1.75rem; padding-inline: .625rem; border-radius: var(--radius-control); font-size: .75rem; font-weight: 600; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border-strong); background: var(--surface); cursor: pointer; list-style: none; }
+.topbar-help::-webkit-details-marker { display: none; }
+.topbar-actions .help > summary.topbar-help, .topbar-actions .page-help .help > summary.topbar-help { inline-size: auto; block-size: 1.75rem; border-radius: var(--radius-control); margin: 0; font-size: .75rem; }
+.topbar-help .icon { width: 14px; height: 14px; }
+.topbar-help:hover { color: var(--ink); background: var(--surface-subtle); }
+.mock-shell .shell-main { flex: 1; min-inline-size: 0; }
+.mock-shell .shell-main-inner { max-inline-size: 1200px; margin: 0 auto; padding: 0 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.home-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem 0; }
+.home-head h1 { margin: 0; font-size: 20px; font-weight: 650; }
+.home-head p { margin: 0; font-size: 12.5px; color: var(--ink-muted); }
+.getting-started { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: .875rem 1.125rem; display: flex; flex-direction: column; gap: .625rem; }
+.gs-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.gs-head h2 { margin: 0; font-size: 14px; font-weight: 650; }
+.gs-head p { margin: 0; font-size: 11.5px; color: var(--ink-muted); }
+.gs-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .875rem; }
+.gs-step { display: flex; gap: .625rem; align-items: flex-start; padding: .5rem .625rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+.gs-step.is-done { border-color: transparent; background: var(--surface-subtle); }
+.gs-step.is-current { border-color: var(--brand-blue); background: var(--brand-selected); }
+.gs-num { flex: none; inline-size: 20px; block-size: 20px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; border: 1px solid var(--border-strong); color: var(--ink-muted); background: var(--surface); }
+.gs-step.is-done .gs-num { background: var(--success); border-color: var(--success); color: #fff; }
+.gs-step.is-done .gs-num .icon { width: 11px; height: 11px; }
+.gs-step.is-current .gs-num { background: var(--brand-navy); border-color: var(--brand-navy); color: #fff; }
+.gs-body { min-inline-size: 0; display: flex; flex-direction: column; gap: 2px; }
+.gs-title { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.gs-step.is-done .gs-title { color: var(--ink-muted); font-weight: 500; }
+.gs-detail { font-size: 11px; color: var(--ink-muted); line-height: 1.4; }
+.gs-detail .link { font-size: 11px; }
+.gs-actions { display: flex; gap: .5rem; align-items: center; margin-block-start: .25rem; flex-wrap: wrap; }
+.quick-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.quick-actions .btn.is-waiting { opacity: .5; cursor: not-allowed; }
+.quick-note { font-size: 11px; color: var(--ink-faint); }
+.home-section-title { display: flex; align-items: center; gap: .5rem; margin: 0 0 .5rem; font-size: 14px; font-weight: 650; }
+.home-section-title .badge { font-size: 10px; }
+.empty-line { display: flex; align-items: center; gap: .5rem; font-size: 12.5px; color: var(--ink-muted); padding: .5rem .75rem; border: 1px dashed var(--border-strong); border-radius: 8px; }
+.empty-line .icon { width: 14px; height: 14px; color: var(--ink-faint); }
+.balance-accounts { list-style: none; margin: .25rem 0 0; padding: 0; font-size: 11.5px; color: var(--ink-muted); display: flex; flex-direction: column; gap: 1px; }
+.balance-accounts li { display: flex; justify-content: space-between; gap: .5rem; }
+.balance-accounts .num { font-variant-numeric: tabular-nums; }
+.mock-shell .panel { padding: .75rem .9375rem; }
+.mock-shell .amount-lg { font-size: 22px; line-height: 28px; }
+.mock-shell .page-header { padding-block: 1rem 0; }
+
+/* ---------- Packages ---------- */
+.pkg-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .625rem; }
+.pkg-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: .75rem .875rem; display: flex; flex-direction: column; gap: .375rem; }
+.pkg-card-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.pkg-card-head h3 { margin: 0; font-size: 13px; font-weight: 650; display: flex; align-items: center; gap: .5rem; }
+.pkg-card-head h3 img { inline-size: 24px; block-size: 24px; border-radius: 5px; }
+.pkg-meta { font-size: 11px; color: var(--ink-faint); }
+.pkg-desc { margin: 0; font-size: 12px; line-height: 1.45; color: var(--ink-muted); }
+.pkg-desc .link { font-size: 12px; }
+.pkg-foot { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-block-start: auto; padding-block-start: .25rem; }
+.pkg-badges { display: flex; gap: .25rem; flex-wrap: wrap; }
+.pkg-required { display: flex; align-items: center; gap: .75rem; padding: .5rem .875rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-subtle); font-size: 12px; }
+.pkg-required strong { font-weight: 600; }
+.pkg-required .pkg-meta { margin-inline-start: auto; }
+.pkg-stack { display: flex; flex-direction: column; gap: .5rem; }
+.switch { display: inline-flex; align-items: center; gap: .5rem; font-size: 11.5px; color: var(--ink-muted); cursor: pointer; }
+.switch input { appearance: none; inline-size: 30px; block-size: 18px; border-radius: 999px; background: var(--border-strong); position: relative; margin: 0; cursor: pointer; transition: background .12s ease; }
+.switch input::after { content: ""; position: absolute; inset-block-start: 2px; inset-inline-start: 2px; inline-size: 14px; block-size: 14px; border-radius: 999px; background: #fff; transition: transform .12s ease; }
+.switch input:checked { background: var(--success); }
+.switch input:checked::after { transform: translateX(12px); }
+.switch input:disabled { opacity: .45; cursor: not-allowed; }
+[data-tab-panel] { display: none; }
+[data-tab-panel].is-active { display: flex; flex-direction: column; gap: .75rem; }
+.mock-shell .tabs-seg { margin-block-end: 0; }
+.pkg-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.pkg-toolbar .muted { font-size: 11.5px; }
+
+/* ---------- Narrower laptops and tablets ---------- */
+@media (max-width: 70rem) {
+  .sample-gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .gs-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pkg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 60rem) {
+  .wp-grid > [class*="span-"] { grid-column: span 12; }
+  .sample-gallery, .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .two-up, .done-split, .env-facts { grid-template-columns: minmax(0, 1fr); }
+  .gs-steps, .pkg-grid { grid-template-columns: minmax(0, 1fr); }
+  .choice-grid.is-four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---------- Mockup furniture (never shipped) ---------- */
+.mock-note { position: fixed; inset-block-end: .5rem; inset-inline-start: .5rem; z-index: 90; font-size: 10.5px; color: var(--ink-faint); background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 3px 9px; font-family: var(--font-mono); }
+.mock-note a { color: inherit; text-decoration: none; }
+.mock-index { max-inline-size: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem; display: flex; flex-direction: column; gap: 1.25rem; font-size: 13.5px; line-height: 1.55; }
+.mock-index h1 { font-size: 22px; margin: 0; }
+.mock-index h2 { font-size: 15px; margin: 1rem 0 .25rem; }
+.mock-index p { margin: 0; color: var(--ink-muted); }
+.mock-index .table td, .mock-index .table th { vertical-align: top; }
+.mock-index .table td:first-child { white-space: nowrap; }
+.mock-index ul { margin: 0; padding-inline-start: 1.25rem; color: var(--ink-muted); }
+
+/* ---------- O-2: guided legal form, country-aware ---------- */
+.o2-columns { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.o2-main .wp-grid { gap: .5rem .75rem; }
+.form-guide { margin: .3rem 0 0; font-size: 11.5px; line-height: 1.5; color: var(--ink-muted); background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 8px; padding: .5rem .75rem; }
+.side-panel { border: 1px solid var(--border); border-radius: 8px; background: var(--surface-subtle); padding: .625rem .75rem .75rem; }
+.side-panel .wp-grid { gap: .375rem .75rem; }
+.side-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin-block-end: .5rem; flex-wrap: wrap; }
+.side-panel-head h2 { margin: 0; font-size: 12px; font-weight: 600; color: var(--ink); }
+.side-panel-head .optional { font-size: 11px; }
+.side-panel .dropzone { padding: .375rem .625rem; }
+.side-panel .dropzone-preview { inline-size: 32px; block-size: 32px; }
+@media (max-width: 60rem) { .o2-columns { grid-template-columns: minmax(0, 1fr); } }

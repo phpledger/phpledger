@@ -27,9 +27,12 @@ function pl_home_overview(int $actorId, int $companyId, int $bookId, string $asO
         $activity[] = ['id'=>$row['id'], 'date'=>$row['date'], 'number'=>$row['number'], 'description'=>$row['party']['legal_name'], 'kind'=>ucfirst(str_replace('_',' ',$row['kind'])), 'amount'=>$row['total'], 'currency'=>$row['currency'], 'status'=>$row['reversal_journal_id'] !== null ? 'reversed' : $row['status'], 'path'=>$sales ? '/ar' : '/ap'];
     }
     usort($activity, static fn (array $a, array $b): int => [$b['date'],$b['number']] <=> [$a['date'],$a['number']]);
+    $cashAccounts = pl_cash_account_balances($actorId, $companyId, $bookId, $asOf);
     return [
         'as_of' => $asOf, 'currency' => $book['currency'],
         'cash' => pl_cash_balance($actorId, $companyId, $bookId, $asOf),
+        'cash_accounts' => $cashAccounts,
+        'getting_started' => pl_home_getting_started($actorId, $companyId, $bookId, $cashAccounts),
         'drafts' => $drafts, 'journal_drafts' => $journals['total'], 'ar_drafts'=>$arDrafts, 'ap_drafts'=>$apDrafts,
         'receivables' => $receivables, 'payables' => $payables,
         'overdue_invoices' => array_values(array_filter($receivables['items'], static fn (array $item): bool => $item['age_days'] > 0)),
@@ -137,6 +140,85 @@ function pl_cash_balance(int $actorId, int $companyId, int $bookId, string $asOf
         LEFT JOIN pl_journals j ON j.id = l.journal_id AND j.company_id = a.company_id AND j.book_id = a.book_id AND j.journal_date <= %s
         WHERE a.company_id = %i AND a.book_id = %i AND a.type = 'asset' AND a.role = 'cash_bank'", $asOf, $companyId, $bookId);
     return bcsub((string) $row['debit'], (string) $row['credit'], 4);
+}
+
+/**
+ * Every active bank, till and petty-cash account with its balance at a date. Home lists them
+ * under the total (owner review, 25 September 2026), and "money in" is true when any one of
+ * them holds money; the total alone cannot say which account an expense could come from.
+ *
+ * @return list<array{id:int, code:string, name:string, money_kind:?string, semantic_key:string, balance:string}>
+ */
+function pl_cash_account_balances(int $actorId, int $companyId, int $bookId, string $asOf): array
+{
+    pl_require_company_access($actorId, $companyId);
+    pl_ledger_book($companyId, $bookId);
+    pl_ledger_date($asOf);
+    $rows = DB::query("SELECT a.id, a.code, a.name, a.money_kind, a.semantic_key,
+        COALESCE(SUM(CASE WHEN j.id IS NOT NULL THEN l.debit ELSE 0 END), 0) AS debit,
+        COALESCE(SUM(CASE WHEN j.id IS NOT NULL THEN l.credit ELSE 0 END), 0) AS credit
+        FROM pl_accounts a LEFT JOIN pl_journal_lines l ON l.account_id = a.id AND l.company_id = a.company_id AND l.book_id = a.book_id
+        LEFT JOIN pl_journals j ON j.id = l.journal_id AND j.company_id = a.company_id AND j.book_id = a.book_id AND j.journal_date <= %s
+        WHERE a.company_id = %i AND a.book_id = %i AND a.type = 'asset' AND a.role = 'cash_bank' AND a.is_active = 1
+        GROUP BY a.id, a.code, a.name, a.money_kind, a.semantic_key ORDER BY a.code", $asOf, $companyId, $bookId);
+    $accounts = [];
+    foreach ($rows as $row) {
+        $accounts[] = ['id' => (int) $row['id'], 'code' => (string) $row['code'], 'name' => (string) $row['name'],
+            'money_kind' => $row['money_kind'] === null ? null : (string) $row['money_kind'],
+            'semantic_key' => (string) ($row['semantic_key'] ?? ''),
+            'balance' => bcsub((string) $row['debit'], (string) $row['credit'], 4)];
+    }
+    return $accounts;
+}
+
+/**
+ * The first Home's guide (owner review of 25 September 2026, frame H-1 in
+ * docs/design/setup-1.4.5): six steps read from data that already exists, so the guide needs no
+ * storage and goes away by itself once the last step is done. It states facts and offers links;
+ * it enforces nothing. An empty profile posts fine, and what refuses an expense from an empty
+ * account is the book's strict cash policy, not this list.
+ *
+ * @param list<array{name:string, semantic_key:string, balance:string}> $cashAccounts from pl_cash_account_balances()
+ * @return array{steps: list<array{id:string, done:bool, facts:array<string,mixed>}>, done:int, total:int, complete:bool, current:?string, money_in:bool, legal_form:string, legal_form_label:string, country:string}
+ */
+function pl_home_getting_started(int $actorId, int $companyId, int $bookId, array $cashAccounts): array
+{
+    pl_require_company_access($actorId, $companyId);
+    pl_ledger_book($companyId, $bookId);
+    $profile = pl_company_profile($actorId, $companyId);
+    $profileDone = implode('', [$profile['legal_name'], $profile['registration_number'], $profile['tax_registrations'], $profile['address_line1']]) !== '';
+    $owners = array_column(pl_list_ownership_parties($actorId, $companyId, true), 'name');
+    // The starter's generic leaf is not a named account: the step asks for the real places money sits.
+    $named = array_values(array_filter($cashAccounts, static fn (array $account): bool => !($account['semantic_key'] === 'core.cash_bank' && $account['name'] === 'Cash and bank')));
+    $moneyIn = false;
+    foreach ($cashAccounts as $account) {
+        if (bccomp($account['balance'], '0', 4) > 0) { $moneyIn = true; break; }
+    }
+    $customers = (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_parties WHERE company_id = %i AND is_customer = 1', $companyId);
+    $suppliers = (int) DB::queryFirstField('SELECT COUNT(*) FROM pl_parties WHERE company_id = %i AND is_vendor = 1', $companyId);
+    // Setup postings are not activity: capital and loans in, opening balances, share events.
+    $activity = (int) DB::queryFirstField("SELECT COUNT(*) FROM pl_journals WHERE company_id = %i AND book_id = %i
+        AND source_type NOT IN ('owner_transaction', 'opening_balance', 'opening_conversion', 'share_event', 'reversal')", $companyId, $bookId);
+    $legalForm = (string) $profile['legal_form'];
+    $family = pl_legal_form_family($legalForm);
+    $country = (string) $profile['country_code'] !== '' ? (string) $profile['country_code'] : pl_legal_form_country($legalForm);
+    $steps = [
+        ['id' => 'profile', 'done' => $profileDone, 'facts' => ['legal_name' => (string) $profile['legal_name'], 'registration_number' => (string) $profile['registration_number'],
+            'tax_registrations' => (string) $profile['tax_registrations'], 'labels' => pl_legal_form_country_profile($country)['labels']]],
+        ['id' => 'owners', 'done' => $owners !== [], 'facts' => ['names' => array_slice($owners, 0, 3), 'count' => count($owners), 'family' => $family]],
+        ['id' => 'money_accounts', 'done' => $named !== [], 'facts' => ['names' => array_column(array_slice($named, 0, 3), 'name'), 'count' => count($named)]],
+        ['id' => 'money_in', 'done' => $moneyIn, 'facts' => ['family' => $family]],
+        ['id' => 'parties', 'done' => $customers + $suppliers > 0, 'facts' => ['customers' => $customers, 'suppliers' => $suppliers]],
+        ['id' => 'first_activity', 'done' => $activity > 0, 'facts' => ['count' => $activity]],
+    ];
+    $done = count(array_filter($steps, static fn (array $step): bool => $step['done']));
+    $current = null;
+    foreach ($steps as $step) {
+        if (!$step['done']) { $current = $step['id']; break; }
+    }
+    return ['steps' => $steps, 'done' => $done, 'total' => count($steps), 'complete' => $done === count($steps), 'current' => $current, 'money_in' => $moneyIn,
+        'legal_form' => $legalForm, 'legal_form_label' => (string) $profile['legal_form_label'],
+        'country' => $country === null ? '' : (pl_country_options()[$country] ?? $country)];
 }
 
 /** An explicit scenario, never an inferred forecast or a ledger write. */
